@@ -43,7 +43,7 @@ FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );
 
 #tabela relatorio
-create table relatorio(
+create table apontamentos(
 id INT AUTO_INCREMENT PRIMARY KEY,
 chamado_id INT,
 tecnico_id INT,
@@ -67,4 +67,4 @@ FOREIGN KEY (id_tecnico) REFERENCES usuarios(id)
 
 CREATE INDEX idx_usuarios_email ON usuarios(email);
 CREATE INDEX idx_chamados_status ON chamados(status);
-CREATE INDEX idx_relatorio_comeco_fim ON relatorio(comeco, fim);
+CREATE INDEX idx_apontamentos_comeco_fim ON apontamentos(comeco, fim);
