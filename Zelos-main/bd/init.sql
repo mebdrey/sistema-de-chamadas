@@ -1,4 +1,6 @@
     -- Criação da tabela `usuarios`
+    create database zelo;
+    use zelo;
     CREATE TABLE usuarios (
         id INT AUTO_INCREMENT PRIMARY KEY,
         nome VARCHAR(255) NOT NULL,
@@ -32,6 +34,7 @@
         tipo_id INT,
         tecnico_id INT,
         usuario_id INT,
+        prioridade ENUM ('none','baixa', 'média', 'alta') DEFAULT 'none',
         status_chamado ENUM('pendente', 'em andamento', 'concluído') DEFAULT 'pendente',
         criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -65,5 +68,5 @@
 
     -- Índices adicionais para otimização
     CREATE INDEX idx_usuarios_email ON usuarios(email);
-    CREATE INDEX idx_chamados_status ON chamados(status);
+    CREATE INDEX idx_chamados_status ON chamados(status_chamado);
     CREATE INDEX idx_apontamentos_comeco_fim ON apontamentos(comeco, fim);
