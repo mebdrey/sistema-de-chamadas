@@ -5,7 +5,7 @@
         senha VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL UNIQUE,
         funcao VARCHAR(100) NOT NULL,
-        status ENUM('ativo', 'inativo') DEFAULT 'ativo',
+        status_usuarios ENUM('ativo', 'inativo') DEFAULT 'ativo',
         criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
@@ -15,7 +15,7 @@
         id INT AUTO_INCREMENT PRIMARY KEY,
         titulo ENUM('externo', 'manutencao', 'apoio_tecnico', 'limpeza') NOT NULL,
         descricao TEXT,
-        status ENUM('ativo', 'inativo') DEFAULT 'ativo',
+        status_pool ENUM('ativo', 'inativo') DEFAULT 'ativo',
         criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         created_by INT,
@@ -32,7 +32,7 @@
         tipo_id INT,
         tecnico_id INT,
         usuario_id INT,
-        status ENUM('pendente', 'em andamento', 'concluído') DEFAULT 'pendente',
+        status_chamado ENUM('pendente', 'em andamento', 'concluído') DEFAULT 'pendente',
         criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (tipo_id) REFERENCES pool(id),
