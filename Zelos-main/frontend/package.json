@@ -12,10 +12,9 @@
     "@tailwindcss/postcss": "^4.1.11",
     "next": "15.4.1",
     "postcss": "^8.5.6",
+    "preline": "^3.2.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "tailwindcss": "^4.1.11",
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "tailwindcss": "^4.1.11"
   }
 }
