@@ -1,5 +1,7 @@
-import { criarChamado, criarPrioridade, criarRelatorio } from "../models/Chamado.js";
+import { criarChamado, criarPrioridade, criarRelatorio, verChamados,verRelatorios } from "../models/Chamado.js";
 
+
+// criar chamado
 const criarChamadoController = async(req,res)=>{
     try{
      await criarChamado(req.body);
@@ -10,6 +12,7 @@ const criarChamadoController = async(req,res)=>{
     }
 };
 
+//dar prioridade ao chamado
 const criarPrioridadeController = async(req,res)=>{
     try{
         await criarPrioridade(req.body);
@@ -19,6 +22,7 @@ const criarPrioridadeController = async(req,res)=>{
     }
 };
 
+//criar relatorio
 const criarRelatorioController= async(req,res)=>{
     try{
         await criarRelatorio(req.body);
@@ -28,4 +32,26 @@ const criarRelatorioController= async(req,res)=>{
     }
 };
 
-export {criarChamadoController, criarPrioridadeController, criarRelatorioController};
+//ver chamados
+const verChamadosController = async(req,res)=>{
+    try{
+        const chamados = await verChamados(req.body);
+        res.json(chamados);
+    }catch(erro){
+        console.error(erro);
+        res.status(500).json({erro: "Erro ao buscar chamados!!!"})
+    }
+}
+
+//ver relatorios/apontamentos
+const verRelatoriosController = async(req,res)=>{
+    try{
+        const relatorios = await verRelatorios(req.body);
+        res.json(relatorios);
+    }catch(erro){
+        console.error(erro);
+        res.status(500).json({erro:'Erro ao buscar relatórios!!!'})
+    }
+}
+
+export {criarChamadoController, criarPrioridadeController, criarRelatorioController, verChamadosController, verRelatoriosController};
