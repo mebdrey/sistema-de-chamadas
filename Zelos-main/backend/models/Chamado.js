@@ -1,5 +1,5 @@
-import { create, readAll, read, readQuery } from '../config/database.js';
 
+import { create, readAll, read, readQuery, update } from '../config/database.js';
 //criar chamado usuário
 const criarChamado = async (dados) => {
     try {
@@ -13,7 +13,7 @@ const criarChamado = async (dados) => {
 //prioridade do chamado - técnico
 const criarPrioridade = async (dados) => {
     try {
-        return await create('chamados', dados)
+        return await update('chamados', 'prioridade = ?', 'id = ?')
     } catch (err) {
         console.error('erro ao inserir prioridade no chamado!', err);
         throw err;
@@ -36,6 +36,15 @@ const listarUsuarios = async (dados) => {
         return await readAll('usuarios', dados)
     } catch (err) {
         console.error('Erro ao listar usuarios!!!', err);
+    }}
+//Ver as informações----------------------------------------------------------------------
+
+//ver chamados 
+const verChamados = async (table, where) => {
+    try {
+        return await readAll('chamados', 'tecnico_id = ?', 'usuario_id = ?' )
+    } catch (err) {
+        console.error('Erro ao visualizar chamados!!!', err);
         throw err;
     }
 };
@@ -63,3 +72,12 @@ const verClientes = async (dados) => {
 };
 
 export { criarChamado, criarPrioridade, criarRelatorio, listarUsuarios, verTecnicos, verClientes };
+//ver relatórios do técnico
+const verRelatorios = async(table, where) =>{
+    try{return await readAll('apontamentos', 'tecnico_id = ?')
+    }catch(err){
+        console.error('Erro ao listar relatórios!!!', err);
+        throw err;
+    }
+}
+export { criarChamado, criarPrioridade, criarRelatorio, verChamados, verRelatorios };

@@ -43,6 +43,10 @@
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
     );
 
+insert chamados (titulo, descricao) value 
+('teste1', 'primeiro teste de insert');
+
+
     -- Criação da tabela `apontamentos`
     CREATE TABLE apontamentos (
         id INT AUTO_INCREMENT PRIMARY KEY,
