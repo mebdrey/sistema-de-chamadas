@@ -33,8 +33,10 @@ const criarRelatorioController= async(req,res)=>{
 
 const listarUsuariosController = async(req,res) =>{
     try{
-        await listarUsuarios(req.body);
-        res.status(201).json({mensagem:'Usuários listados com sucesso!!!'})
+        // await listarUsuarios(req.body); 
+        const usuarios = await listarUsuarios(req.body);
+        res.status(201).json({mensagem:'Usuários listados com sucesso!!!', usuarios})
+       
        }
     catch(err){
         res.status(500).json({erro: err.message});

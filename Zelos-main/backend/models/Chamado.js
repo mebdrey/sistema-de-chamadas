@@ -73,7 +73,7 @@ const verClientes = async (dados) => {
 
 //ver relatórios do técnico
 const verRelatorios = async(table, where) =>{
-    try{return await readAll('apontamentos', 'tecnico_id = ?')
+    try{return await readAll('apontamentos', 'usuario_id = ?')
     }catch(err){
         console.error('Erro ao listar relatórios!!!', err);
         throw err;
