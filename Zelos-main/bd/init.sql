@@ -54,9 +54,7 @@ insert chamados (titulo, descricao) value
 
 select * from chamados;
 
-update chamados
-set usuario_id = 1
-where titulo = 'teste';
+select * from chamados where usuario_id= 1 ;
 
     -- Criação da tabela `apontamentos`
     CREATE TABLE apontamentos (
