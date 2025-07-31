@@ -12,8 +12,14 @@
         atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
 
+insert usuarios (nome, senha, email, funcao) value
+("teste", "teste1", "teste@gmail.com", "técnico");
+
+select * from usuarios;
     -- Criação da tabela `pool`
-    CREATE TABLE pool (
+    
+-- a Pool é a tabela dos diversos serviços oferecidos pelos técnicos
+CREATE TABLE pool (
         id INT AUTO_INCREMENT PRIMARY KEY,
         titulo ENUM('externo', 'manutencao', 'apoio_tecnico', 'limpeza') NOT NULL,
         descricao TEXT,
@@ -46,6 +52,9 @@
 insert chamados (titulo, descricao) value 
 ('teste1', 'primeiro teste de insert');
 
+select * from chamados;
+
+select * from chamados where usuario_id= 1 ;
 
     -- Criação da tabela `apontamentos`
     CREATE TABLE apontamentos (
@@ -54,7 +63,7 @@ insert chamados (titulo, descricao) value
         tecnico_id INT,
         descricao TEXT,
         comeco TIMESTAMP NOT NULL,
-        fim TIMESTAMP NOT NULL,
+        fim TIMESTAMP NULL,
         duracao INT AS (TIMESTAMPDIFF(SECOND, comeco, fim)) STORED, -- Calcula a duração em segundos
         criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (chamado_id) REFERENCES chamados(id),

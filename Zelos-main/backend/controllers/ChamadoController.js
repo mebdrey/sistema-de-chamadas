@@ -33,8 +33,9 @@ const criarRelatorioController= async(req,res)=>{
 
 const listarUsuariosController = async(req,res) =>{
     try{
-        await listarUsuarios(req.body);
-        res.status(201).json({mensagem:'Usuários listados com sucesso!!!'})
+        // await listarUsuarios(req.body); 
+        const usuarios = await listarUsuarios(req.body);
+        res.status(201).json({mensagem:'Usuários listados com sucesso!!!', usuarios})
        }
     catch(err){
         res.status(500).json({erro: err.message});
@@ -43,8 +44,10 @@ const listarUsuariosController = async(req,res) =>{
 
 const listarTecnicosController = async(req,res)=>{
     try{
-        await verTecnicos(req.body);
-        res.status(201).json({mensagem:'Técnicos listados com sucesso!!!'})
+        // await verTecnicos(req.body);
+        // const tecnicos = await verTecnicos(req.body);
+        const tecnicos = await verTecnicos();
+        res.status(201).json({mensagem:'Técnicos listados com sucesso!!!', tecnicos})
        }
     catch(err){
         res.status(500).json({erro: err.message});
