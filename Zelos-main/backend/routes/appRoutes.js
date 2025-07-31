@@ -6,7 +6,7 @@ const router = express.Router();
 router.post('/chamado', criarChamadoController);
 router.post ('/prioridade', criarPrioridadeController);
 router.post('/relatorio', criarRelatorioController);
-router.post('/verRelatorio', verRelatoriosController);
-router.post('/verChamados', verChamadosController);
+router.get('/verRelatorio', verRelatoriosController);
+router.get('/verChamados', verChamadosController);
 
 export default router;
