@@ -25,7 +25,6 @@ async function readAll(table, where = null) {
         if (where) {
             sql += ` WHERE ${where}`;
         }
-
         const [rows] = await connection.execute(sql);
         return rows;
     } finally {
@@ -41,7 +40,6 @@ async function read(table, where) {
         if (where) {
             sql += ` WHERE ${where}`;
         }
-
         const [rows] = await connection.execute(sql);
         return rows[0] || null;
     } finally {

@@ -13,7 +13,7 @@
     );
 
 insert usuarios (nome, senha, email, funcao) value
-("teste", "teste1", "teste@gmail.com", "técnico");
+("teste3", "teste3", "teste3@gmail.com", "técnico");
 
 select * from usuarios;
     -- Criação da tabela `pool`
@@ -69,6 +69,7 @@ select * from chamados where usuario_id= 1 ;
         FOREIGN KEY (chamado_id) REFERENCES chamados(id),
         FOREIGN KEY (tecnico_id) REFERENCES usuarios(id)
     );
+select * from apontamentos; 
 
     -- Criação da tabela `pool_tecnico`
     CREATE TABLE pool_tecnico (

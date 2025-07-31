@@ -1,6 +1,7 @@
 
 import { create, readAll, read, readQuery, update } from '../config/database.js';
-//criar chamado usuário
+
+//criar chamado usuário -- funcionando
 const criarChamado = async (dados) => {
     try {
         return await create('chamados', dados)
@@ -10,17 +11,18 @@ const criarChamado = async (dados) => {
     }
 };
 
-//prioridade do chamado - técnico
-const criarPrioridade = async (dados) => {
+//prioridade do chamado - técnico -- não esta funcionando, não esta recebendo as informaçoes do id(quando tento enviar o id pelo body ele junta no set)
+const criarPrioridade = async (dados, id) => {
     try {
-        return await update('chamados', 'prioridade = ?', 'id = ?')
+        return await update('chamados',dados,`id = 1` )
+        // return await update('chamados',dados,`id = ${id}` ) --  seria o funcional com o id de login(eu acho)
     } catch (err) {
         console.error('erro ao inserir prioridade no chamado!', err);
         throw err;
     }
 };
 
-//criar relatório - técnico
+//criar relatório - técnico -- funcionando
 const criarRelatorio = async (dados) => {
     try {
         return await create('apontamentos', dados)
@@ -30,7 +32,7 @@ const criarRelatorio = async (dados) => {
     }
 };
 
-// ver usuarios - adm
+// ver usuarios - adm -- funcionando
 const listarUsuarios = async (dados) => {
     try {
         return await readAll('usuarios', dados)
@@ -39,17 +41,18 @@ const listarUsuarios = async (dados) => {
     }}
 //Ver as informações----------------------------------------------------------------------
 
-//ver chamados 
-const verChamados = async (table, where) => {
+//ver chamados -- não ta funcionando, não pega o where do req.body
+const verChamados = async (where) => {
     try {
-        return await readAll('chamados', 'tecnico_id = ?', 'usuario_id = ?' )
+        return await readAll('chamados',where) 
+        //return await readAll('chamados', `id= ${id}`) -- teoricamente seria o funcional
     } catch (err) {
         console.error('Erro ao visualizar chamados!!!', err);
         throw err;
     }
 };
 
-// ver tecnicos - adm
+// ver tecnicos - adm -- funcionando
 const verTecnicos = async (dados) => {
     const consulta = 'SELECT * FROM usuarios WHERE funcao = "técnico" ';
     // const values = [ id, nome, email, funcao, status_usuarios];
@@ -62,9 +65,9 @@ const verTecnicos = async (dados) => {
     }
 };
 
-// ver clientes - adm
+// ver clientes - adm -- funcionando
 const verClientes = async (dados) => {
-    const consulta = 'SELECT * FROM usuarios WHERE funcao = cliente';
+    const consulta = 'SELECT * FROM usuarios WHERE funcao = "cliente" ';
     try {
       return await readQuery(consulta);
     } catch (err) {
