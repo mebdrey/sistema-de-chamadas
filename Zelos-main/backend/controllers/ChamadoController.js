@@ -1,4 +1,4 @@
-import { criarChamado, criarPrioridade, criarRelatorio } from "../models/Chamado.js";
+import { criarChamado, criarPrioridade, criarRelatorio,listarUsuarios, verTecnicos, verClientes } from "../models/Chamado.js";
 
 const criarChamadoController = async(req,res)=>{
     try{
@@ -28,4 +28,34 @@ const criarRelatorioController= async(req,res)=>{
     }
 };
 
-export {criarChamadoController, criarPrioridadeController, criarRelatorioController};
+const listarUsuariosController = async(req,res) =>{
+    try{
+        await listarUsuarios(req.body);
+        res.status(201).json({mensagem:'Usuários listados com sucesso!!!'})
+       }
+    catch(err){
+        res.status(500).json({erro: err.message});
+    }
+};
+
+const listarTecnicosController = async(req,res)=>{
+    try{
+        await verTecnicos(req.body);
+        res.status(201).json({mensagem:'Técnicos listados com sucesso!!!'})
+       }
+    catch(err){
+        res.status(500).json({erro: err.message});
+    }
+}
+
+const listarClientesController = async(req,res)=>{
+    try{
+        await verClientes(req.body);
+        res.status(201).json({mensagem:'Clientes listados com sucesso!!!'})
+       }
+    catch(err){
+        res.status(500).json({erro: err.message});
+    }
+};
+
+export {criarChamadoController, criarPrioridadeController, criarRelatorioController, listarUsuariosController, listarTecnicosController, listarClientesController};
