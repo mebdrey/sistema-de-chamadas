@@ -3,8 +3,8 @@ import { criarChamadoController, criarPrioridadeController, criarRelatorioContro
 
 const router = express.Router();
 
-router.post('/criarChamado', criarChamadoController);
-router.post ('/chamados', criarPrioridadeController);
+router.post('/chamado', criarChamadoController);
+router.post ('/prioridade', criarPrioridadeController);
 router.post('/relatorio', criarRelatorioController);
 router.post('/verRelatorio', verRelatoriosController);
 router.post('/verChamados', verChamadosController);
