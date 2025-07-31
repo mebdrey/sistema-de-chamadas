@@ -51,11 +51,12 @@ const verChamados = async (table, where) => {
 
 // ver tecnicos - adm
 const verTecnicos = async (dados) => {
-    const consulta = 'SELECT * FROM usuarios WHERE funcao = tecnicos';
+    const consulta = 'SELECT * FROM usuarios WHERE funcao = "técnico" ';
     // const values = [ id, nome, email, funcao, status_usuarios];
     // console.log('Valores para consulta:', values);
     try {
-      return await readQuery(consulta, values);
+    //   return await readQuery(consulta, values);
+      return await readQuery(consulta);
     } catch (err) {
       throw err;
     }
