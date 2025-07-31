@@ -71,7 +71,6 @@ const verClientes = async (dados) => {
     }
 };
 
-export { criarChamado, criarPrioridade, criarRelatorio, listarUsuarios, verTecnicos, verClientes };
 //ver relatórios do técnico
 const verRelatorios = async(table, where) =>{
     try{return await readAll('apontamentos', 'tecnico_id = ?')
@@ -80,4 +79,4 @@ const verRelatorios = async(table, where) =>{
         throw err;
     }
 }
-export { criarChamado, criarPrioridade, criarRelatorio, verChamados, verRelatorios };
+export { criarChamado, criarPrioridade, criarRelatorio, verChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos };
