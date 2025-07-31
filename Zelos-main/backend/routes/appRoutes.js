@@ -1,5 +1,5 @@
 import express from "express";
-import { criarChamadoController, criarPrioridadeController, criarRelatorioController, verChamadosController, verRelatoriosController } from "../controllers/ChamadoController";
+import { criarChamadoController, criarPrioridadeController, criarRelatorioController, verChamadosController, verRelatoriosController } from "../controllers/ChamadoController.js";
 
 const router = express.Router();
 

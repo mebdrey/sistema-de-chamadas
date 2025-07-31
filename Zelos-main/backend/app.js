@@ -3,6 +3,7 @@ import cors from 'cors';
 import session from 'express-session';
 import dotenv from 'dotenv';
 import authRotas from './routes/authRotas.js';
+import appRoutes from './routes/appRoutes.js';
 import passport from './config/ldap.js';
 
 // 1. Carrega variáveis de ambiente PRIMEIRO
@@ -41,6 +42,7 @@ try {
 
 // 5. Rotas
 app.use('/auth', authRotas);
+app.use('/', appRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'online' });

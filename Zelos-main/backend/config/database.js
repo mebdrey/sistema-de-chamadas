@@ -118,4 +118,18 @@ async function compare(senha, hash) {
     }
 }
 
-export { create, readAll, read, update, deleteRecord, compare };
+// funcao para executar qualquer consulta SQL 
+async function readQuery(query, values = []) {
+    const connection = await getConnection();
+    try {
+        const [rows] = await connection.execute(query, values);
+        return rows;
+    } catch (err) {
+        console.error('Erro ao executar query: ', err);
+        throw err;
+    } finally {
+        connection.release();
+    }
+}
+
+export { create, readAll, read, update, deleteRecord, compare, readQuery };

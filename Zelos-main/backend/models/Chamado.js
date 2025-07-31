@@ -1,5 +1,5 @@
-import { create, read, readAll, update } from '../config/database.js';
 
+import { create, readAll, read, readQuery, update } from '../config/database.js';
 //criar chamado usuário
 const criarChamado = async (dados) => {
     try {
@@ -10,9 +10,7 @@ const criarChamado = async (dados) => {
     }
 };
 
-
 //prioridade do chamado - técnico
-
 const criarPrioridade = async (dados) => {
     try {
         return await update('chamados', 'prioridade = ?', 'id = ?')
@@ -23,7 +21,6 @@ const criarPrioridade = async (dados) => {
 };
 
 //criar relatório - técnico
-
 const criarRelatorio = async (dados) => {
     try {
         return await create('apontamentos', dados)
@@ -33,7 +30,13 @@ const criarRelatorio = async (dados) => {
     }
 };
 
-
+// ver usuarios - adm
+const listarUsuarios = async (dados) => {
+    try {
+        return await readAll('usuarios', dados)
+    } catch (err) {
+        console.error('Erro ao listar usuarios!!!', err);
+    }}
 //Ver as informações----------------------------------------------------------------------
 
 //ver chamados 
@@ -46,6 +49,28 @@ const verChamados = async (table, where) => {
     }
 };
 
+// ver tecnicos - adm
+const verTecnicos = async (dados) => {
+    const consulta = 'SELECT * FROM usuarios WHERE funcao = tecnicos';
+    // const values = [ id, nome, email, funcao, status_usuarios];
+    // console.log('Valores para consulta:', values);
+    try {
+      return await readQuery(consulta, values);
+    } catch (err) {
+      throw err;
+    }
+};
+
+// ver clientes - adm
+const verClientes = async (dados) => {
+    const consulta = 'SELECT * FROM usuarios WHERE funcao = cliente';
+    try {
+      return await readQuery(consulta);
+    } catch (err) {
+      throw err;
+    }
+};
+
 //ver relatórios do técnico
 const verRelatorios = async(table, where) =>{
     try{return await readAll('apontamentos', 'tecnico_id = ?')
@@ -54,4 +79,4 @@ const verRelatorios = async(table, where) =>{
         throw err;
     }
 }
-export { criarChamado, criarPrioridade, criarRelatorio, verChamados, verRelatorios };
+export { criarChamado, criarPrioridade, criarRelatorio, verChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos };
