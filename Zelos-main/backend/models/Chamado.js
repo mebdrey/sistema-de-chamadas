@@ -1,6 +1,6 @@
 import {create} from '../config/database.js';
 
-
+//criar chamado usuário
 const criarChamado = async (dados)=>{
     try{
         return await create('chamados', dados)
@@ -22,4 +22,15 @@ const criarPrioridade = async(dados)=>{
     }
 };
 
-export {criarChamado, criarPrioridade};
+//criar relatório - técnico
+
+const criarRelatorio = async(dados)=>{
+    try{
+        return await create('apontamentos', dados)
+    }catch(err){
+console.error('Erro ao criar relatório!!!', err);
+throw err;
+    }
+};
+
+export {criarChamado, criarPrioridade, criarRelatorio};

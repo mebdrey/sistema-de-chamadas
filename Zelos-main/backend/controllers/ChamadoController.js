@@ -1,4 +1,4 @@
-import { criarChamado, criarPrioridade } from "../models/Chamado.js";
+import { criarChamado, criarPrioridade, criarRelatorio } from "../models/Chamado.js";
 
 const criarChamadoController = async(req,res)=>{
     try{
@@ -19,4 +19,13 @@ const criarPrioridadeController = async(req,res)=>{
     }
 };
 
-export {criarChamadoController, criarPrioridadeController};
+const criarRelatorioController= async(req,res)=>{
+    try{
+        await criarRelatorio(req.body);
+        res.status(201).json({mensagem:'relatório criado com sucesso!!!'})
+    }catch(err){
+        res.status(500).json({erro:err.message})
+    }
+};
+
+export {criarChamadoController, criarPrioridadeController, criarRelatorioController};
