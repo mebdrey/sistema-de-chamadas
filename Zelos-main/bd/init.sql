@@ -46,6 +46,9 @@
 insert chamados (titulo, descricao) value 
 ('teste1', 'primeiro teste de insert');
 
+update chamados
+set tecnico_id = '1'
+where titulo = 'teste1';
 
     -- Criação da tabela `apontamentos`
     CREATE TABLE apontamentos (
