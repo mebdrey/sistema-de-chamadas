@@ -1,0 +1,53 @@
+/* responsividade */
+
+@media screen and (max-width: 950px) {
+    .cont-img {
+    display: none;
+    }
+
+    .principal-container{
+     justify-content: center;   
+    }
+}
+
+@media screen and (max-width: 550px){
+    .principal-container{
+     
+    background-color: #8a2be2; 
+    }
+
+    .form-login{
+        width: 100%;
+        background-color: #fff;
+        border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+    height: 85vh;
+    }
+
+    .form-login-container{
+       width: 75%;
+        justify-content: center;
+    }
+
+    nav{
+        height: 15vh;
+        background-color: blueviolet;
+        align-content: center;
+    }
+
+    .zelos-name{
+        color: #fff;
+        font-size: 2rem;
+    }
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  box-shadow: 0 0 0px 1000px #fff inset !important;
+  -webkit-text-fill-color: #000 !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+
