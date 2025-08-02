@@ -11,10 +11,11 @@ const criarChamado = async (dados) => {
     }
 };
 
+
 //prioridade do chamado - técnico -- não esta funcionando, não esta recebendo as informaçoes do id(quando tento enviar o id pelo body ele junta no set)
 const criarPrioridade = async (dados, id) => {
     try {
-        return await update('chamados',dados,`id = 1` )
+        return await update('chamados', dados, `id = 1`)
         // return await update('chamados',dados,`id = ${id}` ) --  seria o funcional com o id de login(eu acho)
     } catch (err) {
         console.error('erro ao inserir prioridade no chamado!', err);
@@ -38,19 +39,30 @@ const listarUsuarios = async (dados) => {
         return await readAll('usuarios', dados)
     } catch (err) {
         console.error('Erro ao listar usuarios!!!', err);
-    }}
+    }
+}
 //Ver as informações----------------------------------------------------------------------
 
 //ver chamados -- não ta funcionando, não pega o where do req.body
-const verChamados = async (where) => {
+// const verChamados = async (where) => {
+//     try {
+//         return await readAll('chamados',where) 
+//         //return await readAll('chamados', `id= ${id}`) -- teoricamente seria o funcional
+//     } catch (err) {
+//         console.error('Erro ao visualizar chamados!!!', err);
+//         throw err;
+//     }
+// };
+
+const listarChamados = async (usuarioId) => {
     try {
-        return await readAll('chamados',where) 
-        //return await readAll('chamados', `id= ${id}`) -- teoricamente seria o funcional
-    } catch (err) {
-        console.error('Erro ao visualizar chamados!!!', err);
+        return await readAll('chamados', `usuario_id= ${usuarioId}`)
+    }
+    catch (err) {
+        console.error("Erro ao listar chamados!", err);
         throw err;
     }
-};
+}
 
 // ver tecnicos - adm -- funcionando
 const verTecnicos = async (dados) => {
@@ -58,10 +70,10 @@ const verTecnicos = async (dados) => {
     // const values = [ id, nome, email, funcao, status_usuarios];
     // console.log('Valores para consulta:', values);
     try {
-    //   return await readQuery(consulta, values);
-      return await readQuery(consulta);
+        //   return await readQuery(consulta, values);
+        return await readQuery(consulta);
     } catch (err) {
-      throw err;
+        throw err;
     }
 };
 
@@ -69,18 +81,19 @@ const verTecnicos = async (dados) => {
 const verClientes = async (dados) => {
     const consulta = 'SELECT * FROM usuarios WHERE funcao = "cliente" ';
     try {
-      return await readQuery(consulta);
+        return await readQuery(consulta);
     } catch (err) {
-      throw err;
+        throw err;
     }
 };
 
 //ver relatórios do técnico
-const verRelatorios = async(table, where) =>{
-    try{return await readAll('apontamentos', 'usuario_id = ?')
-    }catch(err){
+const verRelatorios = async (table, where) => {
+    try {
+        return await readAll('apontamentos', 'usuario_id = ?')
+    } catch (err) {
         console.error('Erro ao listar relatórios!!!', err);
         throw err;
     }
 }
-export { criarChamado, criarPrioridade, criarRelatorio, verChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos };
+export { criarChamado, criarPrioridade, criarRelatorio, listarChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos };
