@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Image from 'next/image';
 import Link from 'next/link';
+import { useGoogleLogin } from '@react-oauth/google';
 import "./login.css";
 
 export default function Login() {
@@ -25,37 +26,47 @@ export default function Login() {
   const [erro, setErro] = useState('');
 
   const login = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    const email = document.getElementById('floating_email').value;
-    const senha = document.getElementById('floating_password').value;
+  const email = document.getElementById('floating_email').value;
+  const senha = document.getElementById('floating_password').value;
 
-    try {
-      const response = await fetch('http://localhost:8080/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ email, senha })
-      });
+  try {
+    const response = await fetch('http://localhost:8080/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({ username: email, password: senha })
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        setErro(data?.error || data?.mensagem || 'Falha no login');
-      } else {
-        setErro('');
-        alert('Login realizado com sucesso');
-        // redirecionamento ou ação
-      }
-    } catch (error) {
-      console.error('Erro ao tentar login:', error);
-      setErro('Erro de rede ao tentar fazer login');
+    if (!response.ok) {
+      setErro(data?.error || data?.mensagem || 'Falha no login');
+    } else {
+      setErro('');
+      alert('Login realizado com sucesso');
+      // redirecionamento
     }
-    setLoading(false);
-  };
+  } catch (error) {
+    console.error('Erro ao tentar login:', error);
+    setErro('Erro de rede ao tentar fazer login');
+  }
+  setLoading(false);
+};
+
+  // login com o google
+    const loginGoogle = useGoogleLogin({
+    onSuccess: credentialResponse => {
+      console.log('Sucesso:', credentialResponse);
+    },
+    onError: () => {
+      console.log('Login falhou');
+    },
+  });
 
   return (
     <main className="overflow-hidden w-screen h-screen">
@@ -121,7 +132,7 @@ export default function Login() {
 
               <div>
                 <div className="py-3 flex items-center text-xs text-gray-400 uppercase before:flex-1 before:border-t before:border-gray-200 before:me-6 after:flex-1 after:border-t after:border-gray-200 after:ms-6 my-8">Ou</div>
-                <button type="button" className="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-xl border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none poppins-regular">
+                <button  onClick={() => loginGoogle()} type="button" className="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-xl border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none poppins-regular">
                   <svg className="w-4 h-auto" width="46" height="47" viewBox="0 0 46 47" fill="none">
                     <path d="M46 24.0287C46 22.09 45.8533 20.68 45.5013 19.2112H23.4694V27.9356H36.4069C36.1429 30.1094 34.7347 33.37 31.5957 35.5731L31.5663 35.8669L38.5191 41.2719L38.9885 41.3306C43.4477 37.2181 46 31.1669 46 24.0287Z" fill="#4285F4" />
                     <path d="M23.4694 47C29.8061 47 35.1161 44.9144 39.0179 41.3012L31.625 35.5437C29.6301 36.9244 26.9898 37.8937 23.4987 37.8937C17.2793 37.8937 12.0281 33.7812 10.1505 28.1412L9.88649 28.1706L2.61097 33.7812L2.52296 34.0456C6.36608 41.7125 14.287 47 23.4694 47Z" fill="#34A853" />
@@ -151,3 +162,20 @@ export default function Login() {
     </main>
   );
 }
+
+// export default function LoginPage() {
+//   return (
+//     <div>
+//       <h1>Login</h1>
+//       <GoogleLogin
+//         onSuccess={credentialResponse => {
+//           console.log('Sucesso:', credentialResponse);
+//           // aqui você pode enviar o token para seu backend para autenticar
+//         }}
+//         onError={() => {
+//           console.log('Login falhou');
+//         }}
+//       />
+//     </div>
+//   );
+// }
