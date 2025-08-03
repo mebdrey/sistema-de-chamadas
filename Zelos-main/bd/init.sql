@@ -1,4 +1,5 @@
     -- Criação da tabela `usuarios`
+    -- drop database zelo;
     create database zelo;
     use zelo;
     CREATE TABLE usuarios (
@@ -13,7 +14,8 @@
     );
 
 insert usuarios (nome, senha, email, funcao) value
-("teste3", "teste3", "juliadeoliveiraec@gmail.com", "técnico");
+("teste3", "teste3", "juliadeoliveiraec@gmail.com", "técnico"),
+("Elias Coca Velloso", "eliasabc", "eliascocavp@gmail.com", "técnico");
 
 select * from usuarios;
     -- Criação da tabela `pool`
