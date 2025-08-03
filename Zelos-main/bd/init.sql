@@ -13,7 +13,7 @@
     );
 
 insert usuarios (nome, senha, email, funcao) value
-("teste3", "teste3", "teste3@gmail.com", "técnico");
+("teste3", "teste3", "juliadeoliveiraec@gmail.com", "técnico");
 
 select * from usuarios;
     -- Criação da tabela `pool`
@@ -79,6 +79,13 @@ select * from apontamentos;
         FOREIGN KEY (id_pool) REFERENCES pool(id),
         FOREIGN KEY (id_tecnico) REFERENCES usuarios(id)
     );
+
+    CREATE TABLE redefinir_tokens (
+  email TEXT NOT NULL,
+  token TEXT NOT NULL,
+  criacao DATETIME NOT NULL
+);
+
 
     -- Índices adicionais para otimização
     CREATE INDEX idx_usuarios_email ON usuarios(email);
