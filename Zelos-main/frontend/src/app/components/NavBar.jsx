@@ -1,8 +1,9 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
+const SideBar = ({ userType, navFechada, setNavFechada }) => {
 
-const SideBar = ({ userType }) => {
-
+    // links da sidebar
     let links = [];
 
     if (userType === 'admin') {
@@ -28,6 +29,13 @@ const SideBar = ({ userType }) => {
             { label: 'Configurações', href: '/usuario/configuracoes' },
         ];
     }
+
+    // pra sidebar "abrir" e "fechar"
+    // const [navFechada, setNavFechada] = useState(false);
+
+    const sidebar = () => {
+        setNavFechada(prev => !prev);
+    };
 
     return (
         <>
@@ -158,14 +166,45 @@ const SideBar = ({ userType }) => {
             </nav>
 
             {/* itens da sidebar */}
-            <aside id="logo-sidebar" className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700" aria-label="Sidebar">
+            <aside
+                id="logo-sidebar"
+                className={`fixed top-0 left-0 z-40 h-screen pt-20 transition-all bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 ${navFechada ? 'w-16' : 'w-64'}`} aria-label="Sidebar">
+                <div className={`flex px-2 mb-5 ${navFechada ? 'justify-center' : 'justify-end'}`}>
+                    <button
+                        onClick={sidebar}
+                        className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors"
+                    >
+                        {navFechada ? (
+                            <svg className="hs-overlay-minified:block shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect width="18" height="18" x="3" y="3" rx="2" />
+                                <path d="M15 3v18" />
+                                <path d="m8 9 3 3-3 3" />
+                            </svg>
+                        ) : (
+                            <svg className="hs-overlay-minified:hidden shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect width="18" height="18" x="3" y="3" rx="2" />
+                                <path d="M15 3v18" />
+                                <path d="m10 15-3-3 3-3" />
+                            </svg>
+                        )}
+                    </button>
+                </div>
+
+                {/* links */}
                 <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
                     <ul className="space-y-2 font-medium">
                         {links.map((link) => (
                             <li key={link.href}>
                                 <a href={link.href} className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                     {link.icon}
-                                    <span className="ms-3">{link.label}</span>
+                                    <span
+                                        className={
+                                            "ml-3 transition-all duration-200 " +
+                                            (navFechada ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto")
+                                        }
+                                    >
+                                        {link.label}
+                                    </span>
                                 </a>
                             </li>
                         ))}

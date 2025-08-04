@@ -90,9 +90,9 @@ export default function admDashboard() {
 
   return (
     <>
-      <SideBar userType="admin" />
+      {/* <SideBar userType="admin" /> */}
       {/* conteudo da pagina */}
-      <div className="p-4 sm:ml-64">
+      <div className="p-4 w-full">
         <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
 
         { /* aqui serão card com alguns numeros */}
