@@ -1,5 +1,5 @@
 
-import { criarChamado, criarPrioridade, criarRelatorio, listarUsuarios, verTecnicos, verClientes, listarChamados, verRelatorios } from "../models/Chamado.js";
+import { criarChamado, criarPrioridade, criarRelatorio, listarUsuarios, verTecnicos, verClientes, listarChamados, verRelatorios, criarUsuarioMensagem } from "../models/Chamado.js";
 
 // criar chamado -- funcionando
 const criarChamadoController = async (req, res) => {
@@ -86,5 +86,7 @@ const verRelatoriosController = async (req, res) => {
         res.status(500).json({ erro: 'Erro ao buscar relatórios!!!' })
     }
 }
+
+
 
 export { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarUsuariosController, listarTecnicosController, listarClientesController, listarChamadosController, verRelatoriosController };
