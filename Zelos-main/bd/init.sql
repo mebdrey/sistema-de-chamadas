@@ -1,7 +1,7 @@
-    -- Criação da tabela `usuarios`
-    -- drop database zelo;
-    create database zelo;
-    use zelo;
+-- drop database zelo;
+    create database zelos;
+    use zelos;
+     -- Criação da tabela `usuarios`
     CREATE TABLE usuarios (
         id INT AUTO_INCREMENT PRIMARY KEY,
         nome VARCHAR(255) NOT NULL,

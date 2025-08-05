@@ -5,7 +5,7 @@ const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: '', 
-    database: 'zelo', 
+    database: 'zelos', 
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0

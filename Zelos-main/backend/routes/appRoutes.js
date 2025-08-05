@@ -1,6 +1,7 @@
 import express from "express";
 import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosController, listarTecnicosController, listarClientesController } from "../controllers/ChamadoController.js";
 import { enviarLinkRedefinicao, redefinirSenha } from '../controllers/RedefinirSenhaController.js';
+import { obterPerfilUsuarioController, editarPerfilController } from "../controllers/PerfilController.js";
 
 const router = express.Router();
 
@@ -20,4 +21,7 @@ router.post('/esqueci-senha', enviarLinkRedefinicao);
 // rota p/ redefinir a senha (token + nova senha)
 router.post('/redefinir-senha', redefinirSenha);
 
+//relacionados a perfil
+router.get('/perfil', obterPerfilUsuarioController);
+router.patch('/editarPerfil', editarPerfilController);
 export default router;
