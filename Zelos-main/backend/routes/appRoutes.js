@@ -1,5 +1,5 @@
 import express from "express";
-import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosController, listarTecnicosController, listarClientesController } from "../controllers/ChamadoController.js";
+import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosController, listarTecnicosController, listarClientesController, msgUsuarioTecnico } from "../controllers/ChamadoController.js";
 import { enviarLinkRedefinicao, redefinirSenha } from '../controllers/RedefinirSenhaController.js';
 import { obterPerfilUsuarioController, editarPerfilController } from "../controllers/PerfilController.js";
 
@@ -24,4 +24,7 @@ router.post('/redefinir-senha', redefinirSenha);
 //relacionados a perfil
 router.get('/perfil', obterPerfilUsuarioController);
 router.patch('/editarPerfil', editarPerfilController);
+
+//para o chat de usuario para tecnico
+router.post('/chat', msgUsuarioTecnico);
 export default router;

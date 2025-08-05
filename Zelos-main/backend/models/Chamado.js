@@ -115,4 +115,10 @@ const criarUsuarioMensagem = async(dados) =>{
     }
 }
 
+//técnico receber a mensagem
+const receberMensagensDoUsuario = async(id_usuario) =>{
+    const sql = `
+    `
+}
+
 export { criarUsuarioMensagem, criarChamado, criarPrioridade, criarRelatorio, listarChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos };

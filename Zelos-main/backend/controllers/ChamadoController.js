@@ -87,6 +87,26 @@ const verRelatoriosController = async (req, res) => {
     }
 }
 
+//funções de chat
 
+//msg usuario para técnico - ta funcionando mas é preciso resolver a autenticação (usar o user logado), automatizar o id do chamado e o id do destinatário, para que puxe os valores do técnico e do chamado relacionado ao técnico.
+const msgUsuarioTecnico = async (req, res) => {
+    try {
+        //coisas da autenticacao idUsuario
+        const { idUsuario, idDestinatario, conteudoMsg, idChamado } = req.body;
+        await criarUsuarioMensagem({
+            id_usuario: idUsuario,
+            id_destinatario: idDestinatario, //o id destinatário seria  o técnico que respondeu o chamado
+            conteudo: conteudoMsg,
+            id_chamado: idChamado
+        })
+        res.status(201).json({ mensagem: 'Mensagem enviada com sucesso!' });
 
-export { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarUsuariosController, listarTecnicosController, listarClientesController, listarChamadosController, verRelatoriosController };
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ erro: 'Erro ao enviar mensagem!!' });
+    }
+};
+
+export { msgUsuarioTecnico, criarChamadoController, criarPrioridadeController, criarRelatorioController, listarUsuariosController, listarTecnicosController, listarClientesController, listarChamadosController, verRelatoriosController };

@@ -88,6 +88,24 @@ select * from apontamentos;
   criacao DATETIME NOT NULL
 );
 
+create table mensagens_usuario_tecnico (
+id int auto_increment primary key,
+id_usuario int,
+id_destinatario int,
+conteudo text,
+id_chamado int,
+data_envio datetime default current_timestamp,
+lida boolean default false,
+foreign key (id_destinatario) references usuarios(id),
+foreign key (id_usuario) references usuarios(id),
+foreign key (id_chamado) references chamados(id)
+);
+
+select *from mensagens_usuario_tecnico;
+
+insert into mensagens_usuario_tecnico (id_usuario, id_destinatario, conteudo, id_chamado) values 
+(3, 1, "Não consigo atualizar o google", 2 );
+
 
     -- Índices adicionais para otimização
     CREATE INDEX idx_usuarios_email ON usuarios(email);
