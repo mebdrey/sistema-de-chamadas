@@ -41,7 +41,7 @@ export default function MeuPerfil() {
 
     //info perfil 
     useEffect(() => {
-        fetch("http://localhost:3001/perfil", {
+        fetch("http://localhost:8080/perfil", {
             method: "GET",
             credentials: "include",
         })
