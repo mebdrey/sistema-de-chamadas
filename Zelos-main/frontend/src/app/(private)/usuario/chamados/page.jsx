@@ -1,8 +1,44 @@
 "use client"
 import SideBar from '../../../components/NavBar.jsx';
-import { useState } from 'react'
+import { useEffect, useState } from "react";
 
 export default function chamadosCliente() {
+    {/* nome d guia */}
+    useEffect(() => {
+      document.title = 'Meus chamados';
+    }, []);
+    
+    const [cliente, setCliente] = useState([]);
+    const [abaAtiva, setAbaAtiva] = useState('todos');
+    
+  
+    useEffect(() => {
+      fetch('http://localhost:8082/historico-chamados', { credentials: 'include' })
+        .then(res => {
+          if (!res.ok) throw new Error('Erro ao buscar dados');
+          return res.json();
+        })
+        .then(data => setCliente(data.infoCliente || []))
+        .catch(err => {
+          console.error('Erro ao carregar chamados do usuário:', err);
+          setCliente([]);
+        });
+    }, []);
+  
+    function primeiraLetraMaiuscula(str) {
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    }
+  
+    function filtrarChamadosPorAba(chamados, aba) {
+      if (aba === 'todos') return chamados;
+      if (aba === 'em aberto') return chamados.filter(v => v.status.toLowerCase() === 'em aberto');
+      if (aba === 'em andamento') return chamados.filter(v => v.status.toLowerCase() === 'em andamento');
+      if (aba === 'encerrado') return chamados.filter(v => v.status.toLowerCase() === 'encerrado');
+      return chamados;
+    }
+
+    {/*select de periodo */}
     const [selecionarPeriodo, setSelecionarPeriodo] = useState('mes') // "mes" = esse mês
     return (
         <>
@@ -69,20 +105,20 @@ export default function chamadosCliente() {
                         <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700">
                             <ul className="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist">
                                 <li className="me-2" role="presentation">
-                                    <button className="inline-block p-4 border-b-2 rounded-t-lg" id="todos-tab" data-tabs-target="#todos" type="button" role="tab" aria-controls="todos" aria-selected="false">Todos</button>
+                                    <button className={`inline-block p-4 border-b-2 rounded-t-lg ${abaAtiva === 'todos' ? 'active' : ''}`} onClick={() => setAbaAtiva('todos')} id="todos-tab" data-tabs-target="#todos" type="button" role="tab" aria-controls="todos" aria-selected="false">Todos</button>
                                 </li>
                                 <li className="me-2" role="presentation">
-                                    <button className="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="aberto-tab" data-tabs-target="#aberto" type="button" role="tab" aria-controls="aberto" aria-selected="false">Em aberto</button>
+                                    <button className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === 'em aberto' ? 'active' : ''}`} onClick={() => setAbaAtiva('em aberto')} id="aberto-tab" data-tabs-target="#aberto" type="button" role="tab" aria-controls="aberto" aria-selected="false">Em aberto</button>
                                 </li>
                                 <li className="me-2" role="presentation">
-                                    <button className="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="andamento-tab" data-tabs-target="#andamento" type="button" role="tab" aria-controls="andamento" aria-selected="false">Em andamento</button>
+                                    <button className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300${abaAtiva === 'em andamento' ? 'active' : ''}`} onClick={() => setAbaAtiva('em andamento')} id="andamento-tab" data-tabs-target="#andamento" type="button" role="tab" aria-controls="andamento" aria-selected="false">Em andamento</button>
                                 </li>
                                 <li role="presentation">
-                                    <button className="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="encerrados-tab" data-tabs-target="#encerrados" type="button" role="tab" aria-controls="encerrados" aria-selected="false">Encerrados</button>
+                                    <button className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === 'encerrados' ? 'active' : ''}`} onClick={() => setAbaAtiva('encerrados')} id="encerrados-tab" data-tabs-target="#encerrados" type="button" role="tab" aria-controls="encerrados" aria-selected="false">Encerrados</button>
                                 </li>
                             </ul>
                             {/* modal */}
-                            <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 h-fit text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Novo chamado</button>
+                            <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" className="flex flex-row items-center block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 h-fit text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button"><svg className="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>Novo chamado</button>
 
                             <div id="crud-modal" tabIndex="-1" aria-hidden="true" className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
                                 <div className="relative p-4 w-full max-w-md max-h-full">
@@ -90,7 +126,7 @@ export default function chamadosCliente() {
                                     <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
 
                                         <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
-                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Criar novo chamado</h3>
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Novo chamado</h3>
                                             <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal">
                                                 <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
@@ -117,69 +153,66 @@ export default function chamadosCliente() {
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="local" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Local</label>
-                                                     <div className="flex">
-      <button id="states-button" data-dropdown-toggle="dropdown-states" className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-500 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600" type="button">Selecionar bloco <svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4"/>
-    </svg>
-      </button>
-      <div id="dropdown-states" className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700">
-          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="states-button">
-              <li>
-                  <button type="button" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">
-                      <div className="inline-flex items-center">Bloco A</div>
-                  </button>
-              </li>
-              <li>
-                  <button type="button" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">
-                      <div className="inline-flex items-center">Bloco B</div>
-                  </button>
-              </li>
-              <li>
-                  <button type="button" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">
-                      <div className="inline-flex items-center">Bloco C</div>
-                  </button>
-              </li>
-              <li>
-                  <button type="button" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">
-                      <div className="inline-flex items-center">Bloco D</div>
-                  </button>
-              </li>
-          </ul>
-      </div>
-      <label htmlFor="states" className="sr-only">Escolha a sala</label>
-      <select id="states" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-lg border-s-gray-100 dark:border-s-gray-700 border-s-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-          <option selected>Escola a sala</option>
-          <option value="CA">California</option>
-          <option value="TX">Texas</option>
-          <option value="WH">Washinghton</option>
-          <option value="FL">Florida</option>
-          <option value="VG">Virginia</option>
-          <option value="GE">Georgia</option>
-          <option value="MI">Michigan</option>
-      </select>
-  </div>
+                                                    <div className="flex">
+                                                        <button id="states-button" data-dropdown-toggle="dropdown-states" className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-500 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600" type="button">Selecionar bloco <svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                                        </svg>
+                                                        </button>
+                                                        <div id="dropdown-states" className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700">
+                                                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="states-button">
+                                                                <li>
+                                                                    <button type="button" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                                        <div className="inline-flex items-center">Bloco A</div>
+                                                                    </button>
+                                                                </li>
+                                                                <li>
+                                                                    <button type="button" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                                        <div className="inline-flex items-center">Bloco B</div>
+                                                                    </button>
+                                                                </li>
+                                                                <li>
+                                                                    <button type="button" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                                        <div className="inline-flex items-center">Bloco C</div>
+                                                                    </button>
+                                                                </li>
+                                                                <li>
+                                                                    <button type="button" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                                        <div className="inline-flex items-center">Bloco D</div>
+                                                                    </button>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <label htmlFor="states" className="sr-only">Escolha a sala</label>
+                                                        <select id="states" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-lg border-s-gray-100 dark:border-s-gray-700 border-s-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                            <option selected>Escola a sala</option>
+                                                            <option value="CA">California</option>
+                                                            <option value="TX">Texas</option>
+                                                            <option value="WH">Washinghton</option>
+                                                            <option value="FL">Florida</option>
+                                                            <option value="VG">Virginia</option>
+                                                            <option value="GE">Georgia</option>
+                                                            <option value="MI">Michigan</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descrição</label>
                                                     <textarea id="description" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Escreva a descrição do chamado"></textarea>
                                                 </div>
-                                                 <div className="col-span-2">
-                                                    <label htmlFor="file" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descrição</label>
+                                                <div className="col-span-2">
+                                                    <label htmlFor="file" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enviar imagem</label>
                                                     {/* <textarea id="file" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Escreva a descrição do chamado"></textarea> */}
-                                                    <div className="flex items-center justify-center w-full">
-    <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-        <div className="flex flex-col items-center justify-center pt-5 pb-6">
- <svg className="me-1 -ms-1 w-8 h-8 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>
-        </div>
-        <input id="dropzone-file" type="file" className="hidden" />
-    </label>
-</div> 
+                                                    <div className="flex items-center justify-center w-1/2 h-20">
+                                                        <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                                <svg className="me-1 -ms-1 w-8 h-8 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>
+                                                            </div>
+                                                            <input id="dropzone-file" type="file" className="hidden" />
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <button type="submit" className="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                                <svg className="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>
-                                                Add new product
-                                            </button>
+                                            <button type="submit" className="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Criar chamado</button>
                                         </form>
                                     </div>
                                 </div>
@@ -191,6 +224,7 @@ export default function chamadosCliente() {
                             {/* <div className="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="todos" role="tabpanel" aria-labelledby="todos-tab">
                                 <p className="text-sm text-gray-500 dark:text-gray-400">This is some placeholder content the <strong className="font-medium text-gray-800 dark:text-white">todos tab's associated content</strong>. Clicking another tab will toggle the visibility of this one htmlFor the next. The tab JavaScript swaps classes to control the content visibility and styling.</p>
                             </div> */}
+                            
 
                             <div className="hidden flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70" id="todos" role="tabpanel" aria-labelledby="todos-tab">
                                 <div className="p-4 md:p-5">
@@ -241,9 +275,7 @@ export default function chamadosCliente() {
                                 </div>
                                 <div className="flex flex-row justify-between items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 md:py-4 md:px-5 dark:bg-neutral-900 dark:border-neutral-700">
                                     <p className="text-sm text-gray-500 dark:text-neutral-500">Posted at 12:45 AM</p>
-                                    <a className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600" href="#">
-                                        Card link
-                                        <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <a className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600" href="#">Ver relatório<svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="m9 18 6-6-6-6"></path>
                                         </svg>
                                     </a>
@@ -273,17 +305,7 @@ export default function chamadosCliente() {
 
 
 
-<div className="flex items-center justify-center w-full">
-    <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-        <div className="flex flex-col items-center justify-center pt-5 pb-6">
- <svg className="me-1 -ms-1 w-8 h-8 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>
-        </div>
-        <input id="dropzone-file" type="file" className="hidden" />
-    </label>
-</div> 
-
-
-                    </section>
+                       </section>
                 </div>
             </div>
         </>
