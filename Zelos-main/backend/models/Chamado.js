@@ -96,4 +96,23 @@ const verRelatorios = async (table, where) => {
         throw err;
     }
 }
-export { criarChamado, criarPrioridade, criarRelatorio, listarChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos };
+
+//funções para o chat 
+
+//chat usuário -> técnico
+const criarUsuarioMensagem = async(dados) =>{
+    try{
+        return await create('mensagens_usuario_tecnico', {
+            id_usuario: dados.id_usuario,
+            id_destinatario: dados.id_destinatario,
+            conteudo: dados.conteudo,
+            id_chamado: dados.id_chamado
+        });
+    }
+    catch (err){
+        console.error('Erro ao enviar mensagem! - models' , err);
+        throw err;
+    }
+}
+
+export { criarUsuarioMensagem, criarChamado, criarPrioridade, criarRelatorio, listarChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos };
