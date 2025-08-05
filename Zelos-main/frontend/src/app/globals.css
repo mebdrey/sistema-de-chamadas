@@ -32,3 +32,55 @@
   font-weight: 800;
   font-style: normal;
 }
+
+/* fontes */
+@font-face {
+  font-family: 'Plus Jakarta Sans Bold';
+  /* src: url('../components/Fonts/PlusJakartaSans-Bold.ttf') format('truetype'); */
+  src: url('../components/Fonts/PlusJakartaSans-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans SemiBold';
+  src: url('../components/Fonts/PlusJakartaSans-SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans Medium';
+  src: url('../components/Fonts/PlusJakartaSans-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans Regular';
+  /* src: url('../components/Fonts/PlusJakartaSans-Regular.ttf') format('truetype'); */
+  src: url('../components/Fonts/PlusJakartaSans-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans Light';
+  src: url('../components/Fonts/PlusJakartaSans-Light.ttf') format('truetype');
+}
+/* corpo do site */
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body{
+  height: fit-content;
+  width: 100%;
+  align-items: center;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+}
+
+html{
+  align-items: center;
+}

@@ -1,0 +1,123 @@
+@layer base {
+    button:not(:disabled),
+    [role="button"]:not(:disabled) {
+      cursor: pointer;
+    }}
+    @import "tailwindcss";
+    
+  /* Defaults hover styles on all devices */
+  @custom-variant hover (&:hover);
+section h1{
+    font-family: "Plus Jakarta Sans SemiBold";
+    font-size: 2rem;
+    width: max-content;
+    height: fit-content;
+}
+
+.page-indicador, .sec-indicador{
+    width: min-content;
+    white-space: nowrap;
+}
+
+.perfil-img-nome div{
+    height: fit-content;
+}
+
+.perfil-img-nome div p{
+    margin: 0;
+}
+
+.ft-up{
+    width: 100px;
+}
+
+.user{
+    padding-bottom: 4vh;
+}
+
+.user h3{
+    font-size: 1.1rem;
+    font-family: "Plus Jakarta Sans Regular";
+}
+
+.user p{
+    font-size: 0.9rem;
+    color: #384D6C;
+    font-family: "Plus Jakarta Sans SemiBold";
+}
+
+.sec-indicador h4{
+    font-family: "Plus Jakarta Sans SemiBold";
+    font-size: 1.4rem;
+    width: max-content;
+    height: fit-content;
+}
+
+.sec-campos{
+    height: fit-content;
+}
+
+.sec-campos h6{
+    font-family: "Plus Jakarta Sans Regular";
+}
+
+.sec-campos p{
+    font-family: "Plus Jakarta Sans SemiBold";
+    margin: 0;
+}
+
+.btn-add{
+    padding: 1vh 2vw;
+    background-color: #013FF6;
+    color: #fff;
+    border-radius: 40px;
+    font-family: "Plus Jakarta Sans Medium";
+}
+
+.btn-edit{
+    color: #596780;
+    font-family: "Plus Jakarta Sans Medium";
+}
+
+.sec{
+    margin-top: 5vh;
+}
+
+.btn-perfil{
+    margin-top: 4vh;
+}
+.botaoModal {
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 30px;
+    color: #fff;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.modal .label{
+    width: 40%;
+}
+.modal-content {
+    background: white;
+    padding: 20px;
+    margin: 15% auto;
+    width: 50%;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.fecharModal{
+    width: 2%;
+    margin-left: 97%;
+    float: center;
+    font-size: 40px;
+    cursor: pointer;
+    color: red;
+}
