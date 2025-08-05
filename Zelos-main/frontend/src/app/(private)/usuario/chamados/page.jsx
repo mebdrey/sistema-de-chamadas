@@ -1,5 +1,6 @@
 "use client"
-import SideBar from '../../../components/NavBar.jsx';
+// import SideBar from '../../../components/NavBar.jsx';
+import SideBar from '../../../../components/navBar/NavBar.jsx';
 import { useEffect, useState } from "react";
 
 export default function chamadosCliente() {
@@ -10,10 +11,10 @@ export default function chamadosCliente() {
     
     const [cliente, setCliente] = useState([]);
     const [abaAtiva, setAbaAtiva] = useState('todos');
-    
   
     useEffect(() => {
-      fetch('http://localhost:8082/historico-chamados', { credentials: 'include' })
+    //   fetch('http://localhost:8080/historico-chamados', { credentials: 'include' })
+    fetch('http://localhost:8080/verChamados', { credentials: 'include' })
         .then(res => {
           if (!res.ok) throw new Error('Erro ao buscar dados');
           return res.json();
@@ -22,8 +23,7 @@ export default function chamadosCliente() {
         .catch(err => {
           console.error('Erro ao carregar chamados do usuário:', err);
           setCliente([]);
-        });
-    }, []);
+        });}, []);
   
     function primeiraLetraMaiuscula(str) {
       if (!str) return '';
@@ -47,13 +47,11 @@ export default function chamadosCliente() {
             <div className="p-4 w-full">
                 <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
 
-
                     <div className='flex flex-row w-full justify-between mb-15'>
                         {/* select */}
                         <button id="dropdownRadioBgHoverButton" data-dropdown-toggle="dropdownRadioBgHover" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Período <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                        </svg>
-                        </button>
+                        </svg></button>
 
                         <div id="dropdownRadioBgHover" className="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
                             <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownRadioBgHoverButton">
@@ -77,7 +75,6 @@ export default function chamadosCliente() {
                                 </li>
                             </ul>
                         </div>
-
                         {/* barra de pesquisa */}
 
                         <form className="flex items-center">
@@ -98,10 +95,7 @@ export default function chamadosCliente() {
                             </button>
                         </form>
                     </div>
-
                     <section>
-
-                        {/* */}
                         <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700">
                             <ul className="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist">
                                 <li className="me-2" role="presentation">
@@ -217,14 +211,12 @@ export default function chamadosCliente() {
                                     </div>
                                 </div>
                             </div>
-
                         </div>
 
                         <div id="default-tab-content">
                             {/* <div className="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="todos" role="tabpanel" aria-labelledby="todos-tab">
                                 <p className="text-sm text-gray-500 dark:text-gray-400">This is some placeholder content the <strong className="font-medium text-gray-800 dark:text-white">todos tab's associated content</strong>. Clicking another tab will toggle the visibility of this one htmlFor the next. The tab JavaScript swaps classes to control the content visibility and styling.</p>
                             </div> */}
-                            
 
                             <div className="hidden flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70" id="todos" role="tabpanel" aria-labelledby="todos-tab">
                                 <div className="p-4 md:p-5">
@@ -289,7 +281,6 @@ export default function chamadosCliente() {
                                     <h3 className="text-lg font-bold text-gray-800 dark:text-white">Ticket# 2023-CS123</h3>
                                     <h6 className="text-base font-bold text-gray-800 dark:text-white">How to deposit money to my portal?</h6>
                                     <p className="mt-2 text-gray-500 dark:text-neutral-400">Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-
                                 </div>
                                 <div className="flex flex-row justify-between items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 md:py-4 md:px-5 dark:bg-neutral-900 dark:border-neutral-700">
                                     <p className="text-sm text-gray-500 dark:text-neutral-500">Posted at 12:45 AM</p>
@@ -302,12 +293,8 @@ export default function chamadosCliente() {
                                 </div>
                             </div>
                         </div>
-
-
-
                        </section>
                 </div>
             </div>
         </>
-    )
-}
+    )}

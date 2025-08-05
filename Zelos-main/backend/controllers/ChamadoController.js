@@ -64,18 +64,6 @@ const listarClientesController = async (req, res) => {
     }
 };
 
-//ver chamados
-// const verChamadosController = async(req,res)=>{
-//     try{
-//         const chamadoId = req.query.tecnico_id
-//         const chamados = await verChamados(chamadoId);
-//         res.json(chamados);
-//     }catch(erro){
-//         console.error(erro);
-//         res.status(500).json({erro: "Erro ao buscar chamados!!!"})
-//     }
-// };
-
 const listarChamadosController = async (req, res) => {
     try {
         const usuarioId = req.usuarioId; // vindo do token JWT
