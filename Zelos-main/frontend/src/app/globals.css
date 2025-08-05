@@ -63,27 +63,3 @@
   font-family: 'Plus Jakarta Sans Light';
   src: url('../components/Fonts/PlusJakartaSans-Light.ttf') format('truetype');
 }
-/* corpo do site */
-*{
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body{
-  height: fit-content;
-  width: 100%;
-  align-items: center;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-  height: fit-content;
-  display: flex;
-  flex-direction: column;
-}
-
-html{
-  align-items: center;
-}
