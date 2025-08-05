@@ -27,8 +27,7 @@ const SideBar = ({ userType, navFechada, setNavFechada }) => {
             { label: 'Chamados', href: '/usuario/chamados' },
             { label: 'Notificações', href: '/usuario/notificacoes' },
             { label: 'Configurações', href: '/usuario/configuracoes' },
-        ];
-    }
+        ];}
 
     // pra sidebar "abrir" e "fechar"
     // const [navFechada, setNavFechada] = useState(false);
@@ -119,20 +118,16 @@ const SideBar = ({ userType, navFechada, setNavFechada }) => {
                                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign out</a>
                             </div>
                         </div> */}
-
-
                         {/* O CODIGO DE BAIXO N ESTA FUNCIONAL - NAO EAQUECER DE ARRUMAR */}
  {/* <button
         type="button"
         className="flex items-center text-sm pe-1 font-medium text-gray-900 rounded-full hover:text-blue-600 dark:hover:text-blue-500 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-white"
-        onClick={() => setOpen(!open)}
-      >
+        onClick={() => setOpen(!open)}>
         <span className="sr-only">Open user menu</span>
         <img
           className="w-8 h-8 me-2 rounded-full"
           src={user?.image || '/default.jpg'}
-          alt="user photo"
-        />
+          alt="user photo"/>
         {user?.name || 'Usuário'}
         <svg className="w-2.5 h-2.5 ms-3" viewBox="0 0 10 6">
           <path
@@ -140,27 +135,21 @@ const SideBar = ({ userType, navFechada, setNavFechada }) => {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
-            d="m1 1 4 4 4-4"
-          />
+            d="m1 1 4 4 4-4"/>
         </svg>
       </button>
-
       {open && (
         <div className="absolute right-0 mt-2 z-10 bg-white dark:bg-gray-700 divide-y divide-gray-100 dark:divide-gray-600 rounded-lg shadow-sm w-44">
           <div className="px-4 py-3 text-sm text-gray-900 dark:text-white">
             <div className="font-medium">{user?.role || 'Pro User'}</div>
-            <div className="truncate">{user?.email || 'email@dominio.com'}</div>
-          </div>
+            <div className="truncate">{user?.email || 'email@dominio.com'}</div></div>
           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
             <li><a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</a></li>
             <li><a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a></li>
             <li><a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Earnings</a></li>
-          </ul>
-          <div className="py-2">
+          </ul><div className="py-2">
             <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign out</a>
-          </div>
-        </div>
-      )} */}
+          </div> </div>)} */}
                     </div>
                 </div>
             </nav>
@@ -172,8 +161,7 @@ const SideBar = ({ userType, navFechada, setNavFechada }) => {
                 <div className={`flex px-2 mb-5 ${navFechada ? 'justify-center' : 'justify-end'}`}>
                     <button
                         onClick={sidebar}
-                        className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors"
-                    >
+                        className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors">
                         {navFechada ? (
                             <svg className="hs-overlay-minified:block shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <rect width="18" height="18" x="3" y="3" rx="2" />
@@ -198,11 +186,7 @@ const SideBar = ({ userType, navFechada, setNavFechada }) => {
                                 <a href={link.href} className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                     {link.icon}
                                     <span
-                                        className={
-                                            "ml-3 transition-all duration-200 " +
-                                            (navFechada ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto")
-                                        }
-                                    >
+                                        className={"ml-3 transition-all duration-200 " + (navFechada ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto") }>
                                         {link.label}
                                     </span>
                                 </a>
@@ -211,8 +195,6 @@ const SideBar = ({ userType, navFechada, setNavFechada }) => {
                     </ul>
                 </div>
             </aside>
-        </>
-    )
-}
+        </>)}
 
 export default SideBar;
