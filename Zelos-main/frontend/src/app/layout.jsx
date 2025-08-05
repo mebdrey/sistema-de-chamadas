@@ -1,4 +1,5 @@
 import "./globals.css";
+import Head from 'next/head'
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 export const metadata = {
@@ -9,9 +10,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="pt-br">
-      <head>
+      <Head>
         <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
-      </head>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <body>
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
           {children}
