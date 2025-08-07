@@ -1,5 +1,9 @@
 
+
 import { buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, listarUsuarios, verTecnicos, verClientes, listarChamados, verRelatorios, criarUsuarioMensagem, listarSalasPorBloco, listarBlocos } from "../models/Chamado.js";
+
+// import { criarChamado, criarPrioridade, criarRelatorio, listarUsuarios, verTecnicos, verClientes, listarChamados, verRelatorios, escreverMensagem,   lerMsg } from "../models/Chamado.js";
+
 
 // criar chamado -- funcionando
 // const criarChamadoController = async (req, res) => {
@@ -104,16 +108,45 @@ const verRelatoriosController = async (req, res) => {
     }
 }
 
+//técnico ler as mensagens dos usuários (enviadas para ele
+// const receberMensagensController = async (req, res) => {
+//     try {
+//         //const usuarioId = req.usuarioId; //vindo do token JWT
+//         const usuarioId = 2; //só até a autenticação estar funcionando
+//         const mensagens = await receberMensagensDoUsuario(usuarioId);
+//         res.status(200).json({ mensagem: 'Mensagens listadas com sucesso!', mensagens });
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ erro: 'Erro ao listar mensagens !', err });
+//     }
+// }
+
+
+//ler as mensagens (especificadas pelo id do chamado) por ordem de envio
+const lerMensagensController = async (req, res) =>{
+    try{
+
+        const {idChamado}  = req.body;
+        const mensagens = await lerMsg(idChamado);
+        res.status(200).json({mensagem: 'Mensagens listadas com sucesso!', mensagens})
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).json({erro: 'Erro ao ler mensagens :( ', err});
+    };
+};
+
 //funções de chat
 
 //msg usuario para técnico - ta funcionando mas é preciso resolver a autenticação (usar o user logado), automatizar o id do chamado e o id do destinatário, para que puxe os valores do técnico e do chamado relacionado ao técnico.
-const msgUsuarioTecnico = async (req, res) => {
+const UsuarioEnviarMensagemController = async (req, res) => {
     try {
         //coisas da autenticacao idUsuario
-        const { idUsuario, idDestinatario, conteudoMsg, idChamado } = req.body;
-        await criarUsuarioMensagem({
+        // const idUsuario = req.idUsuario; // vindo do token JWT
+        const { idUsuario, idTecnico, conteudoMsg, idChamado } = req.body;
+        await escreverMensagem({
             id_usuario: idUsuario,
-            id_destinatario: idDestinatario, //o id destinatário seria  o técnico que respondeu o chamado
+            id_tecnico: idTecnico, //o id do tecnico seria  o técnico que respondeu o chamado
             conteudo: conteudoMsg,
             id_chamado: idChamado
         })
@@ -122,7 +155,7 @@ const msgUsuarioTecnico = async (req, res) => {
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ erro: 'Erro ao enviar mensagem!!' });
+        res.status(500).json({ erro: 'Erro ao usuário enviar mensagem!!' });
     }
 };
 
@@ -163,3 +196,24 @@ export const buscarSalasPorBlocoController = async (req, res) => {
 };
 
 export { msgUsuarioTecnico, criarPrioridadeController, criarRelatorioController, listarUsuariosController, listarTecnicosController, listarClientesController, listarChamadosController, verRelatoriosController };
+
+const TecnicoEnviarMensagemController = async (req, res) => {
+    try {
+        //coisas da autenticacao idTecnico
+        //const idTecnico = req.idTecnico
+        const { idUsuario, idTecnico, conteudoMsg, idChamado } = req.body;
+        await escreverMensagem({
+            id_tecnico: idTecnico, //o id do tecnico seria  o técnico que respondeu o chamado
+            id_usuario: idUsuario,
+            conteudo: conteudoMsg,
+            id_chamado: idChamado
+        })
+        res.status(201).json({ mensagem: 'Mensagem enviada com sucesso!' });
+    } catch(error){
+        console.error(error);
+        res.status(500).json({mensagem: 'Erro ao técnico enviar mensagem!!'});
+    }
+}
+
+export {lerMensagensController,  UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarChamadoController, criarPrioridadeController, criarRelatorioController, listarUsuariosController, listarTecnicosController, listarClientesController, listarChamadosController, verRelatoriosController };
+

@@ -1,5 +1,8 @@
 import express from "express";
+
 import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosController, listarTecnicosController, listarClientesController, msgUsuarioTecnico, listarTiposServicoController, buscarBlocosController, buscarSalasPorBlocoController } from "../controllers/ChamadoController.js";
+
+// import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosController, listarTecnicosController, listarClientesController,  UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController } from "../controllers/ChamadoController.js";
 import { enviarLinkRedefinicao, redefinirSenha } from '../controllers/RedefinirSenhaController.js';
 import { obterPerfilUsuarioController, editarPerfilController } from "../controllers/PerfilController.js";
 
@@ -30,6 +33,15 @@ router.post('/chat', msgUsuarioTecnico);
 
 // listar tipos de serviço
 router.get('/servicos', listarTiposServicoController);
+
+router.post('/enviar-msg', UsuarioEnviarMensagemController);
+
+//para o chat de técnico para usuario
+router.post('/tecnico-enviar-msg', TecnicoEnviarMensagemController);
+
+//tecnico receber essas mensagens enviadas para ele
+//router.get('/chat', receberMensagensController);
+router.get('/chat', lerMensagensController);
 
 // listar blocos e salas
 router.get('/blocos', buscarBlocosController);
