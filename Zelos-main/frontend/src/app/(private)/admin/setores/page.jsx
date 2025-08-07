@@ -13,34 +13,34 @@ export default function setores() {
                             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                 <thead className="text-xs text-purple-700 uppercase bg-purple-50 dark:bg-gray-700 dark:text-gray-400">
                                     <tr>
-                                        <th scope="col" className="px-6 py-3"> Nome</th>
-                                        <th scope="col" className="px-6 py-3">Setor</th>
-                                        <th scope="col" className="px-6 py-3">Email</th>
-                                        <th scope="col" className="px-6 py-3">Status</th>
+                                        <th scope="col" className="col px-6 py-3"> Nome</th>
+                                        <th scope=" col" className="col px-6 py-3"></th>
+                                        <th scope="col" className="col px-6 py-3">Email</th>
+                                        <th scope=" col" className="col px-6 py-3">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                 <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste</th>
-                                        <td className="px-6 py-4">técnico</td>
+                                        <th scope="row" className="th px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste</th>
+                                        <td className="px-6 py-4"></td>
                                         <td className="px-6 py-4"> teste@gmail.com</td>
                                         <td className="px-6 py-4">ativo</td>
                                     </tr>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste2 </th>
-                                        <td className="px-6 py-4">técnico</td>
+                                        <td className="px-6 py-4"></td>
                                         <td className="px-6 py-4">teste2@gmail.com</td>
                                         <td className="px-6 py-4">inativo</td>
                                     </tr>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste3 </th>
-                                        <td className="px-6 py-4"> usuário </td>
+                                        <td className="px-6 py-4">  </td>
                                         <td className="px-6 py-4"> teste3@gmail.com </td>
                                         <td className="px-6 py-4"> ativo</td>
                                     </tr>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste4 </th>
-                                        <td className="px-6 py-4">usuário</td>
+                                        <th scope="row" className="row px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste4 </th>
+                                        <td className="px-6 py-4"></td>
                                         <td className="px-6 py-4">teste4@gmail.com</td>
                                          <td className="px-6 py-4">
                                             inativo</td>
@@ -59,33 +59,32 @@ export default function setores() {
                                 <thead className="text-xs text-purple-700 uppercase bg-purple-50 dark:bg-gray-700 dark:text-gray-400">
                                     <tr>
                                         <th scope="col" className="px-6 py-3"> Nome</th>
-                                        <th scope="col" className="px-6 py-3">Setor</th>
+                                        <th scope="col" className="px-6 py-3"></th>
                                         <th scope="col" className="px-6 py-3">Email </th>
                                         <th scope="col" className="px-6 py-3">Status</th>
-                                    </tr>
-                                </thead>
+                                    </tr></thead>
                                 <tbody>
                                 <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste</th>
-                                        <td className="px-6 py-4">técnico</td>
+                                        <td className="px-6 py-4"></td>
                                         <td className="px-6 py-4"> teste@gmail.com</td>
                                         <td className="px-6 py-4">ativo</td>
                                     </tr>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste2 </th>
-                                        <td className="px-6 py-4">técnico</td>
+                                        <td className="px-6 py-4"></td>
                                         <td className="px-6 py-4">teste2@gmail.com</td>
                                         <td className="px-6 py-4">inativo</td>
                                     </tr>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste3 </th>
-                                        <td className="px-6 py-4"> usuário </td>
+                                        <td className="px-6 py-4">  </td>
                                         <td className="px-6 py-4"> teste3@gmail.com </td>
                                         <td className="px-6 py-4"> ativo</td>
                                     </tr>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste4 </th>
-                                        <td className="px-6 py-4">usuário</td>
+                                        <th scope="row" className="row px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste4 </th>
+                                        <td className="px-6 py-4"></td>
                                         <td className="px-6 py-4">teste4@gmail.com</td>
                                          <td className="px-6 py-4">inativo</td>
                                     </tr>
@@ -102,34 +101,34 @@ export default function setores() {
                             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                 <thead className="text-xs text-purple-700 uppercase bg-purple-50 dark:bg-gray-700 dark:text-gray-400">
                                     <tr>
-                                        <th scope="col" className="px-6 py-3">Nome</th>
-                                        <th scope="col" className="px-6 py-3">Setor</th>
-                                        <th scope="col" className="px-6 py-3">Email</th>
-                                        <th scope="col" className="px-6 py-3">Status </th>
+                                        <th scope="th col" className="px-6 py-3">Nome</th>
+                                        <th scope="th col" className="px-6 py-3"></th>
+                                        <th scope="th col" className="px-6 py-3">Email</th>
+                                        <th scope="th col" className="px-6 py-3">Status </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste</th>
-                                        <td className="px-6 py-4">técnico</td>
+                                        <td className="px-6 py-4"></td>
                                         <td className="px-6 py-4"> teste@gmail.com</td>
                                         <td className="px-6 py-4">ativo</td>
                                     </tr>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste2 </th>
-                                        <td className="px-6 py-4">técnico</td>
+                                        <td className="px-6 py-4"></td>
                                         <td className="px-6 py-4">teste2@gmail.com</td>
                                         <td className="px-6 py-4">inativo</td>
                                     </tr>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste3 </th>
-                                        <td className="px-6 py-4"> usuário </td>
+                                        <td className="px-6 py-4">  </td>
                                         <td className="px-6 py-4"> teste3@gmail.com </td>
                                         <td className="px-6 py-4"> ativo</td>
                                     </tr>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste4 </th>
-                                        <td className="px-6 py-4">usuário</td>
+                                        <th scope="row" className="row px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste4 </th>
+                                        <td className="px-6 py-4"></td>
                                         <td className="px-6 py-4">teste4@gmail.com</td>
                                          <td className="px-6 py-4">
                                             inativo</td>
@@ -141,14 +140,14 @@ export default function setores() {
                 </div>
                 <div className="apoio">
                     <div className="tabela">
-                        <h1 className=" text-purple-700 bg-purple-50">Apoio Técnico</h1>
+                        <h1 className=" text-purple-700 bg-purple-50">Apoio Técnico </h1>
                         <div className="linha"></div>
                         <div className="relative overflow-x-auto">
                             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                 <thead className="text-xs text-purple-700 uppercase bg-purple-50 dark:bg-gray-700 dark:text-gray-400">
                                     <tr>
                                         <th scope="col" className="px-6 py-3"> Nome</th>
-                                        <th scope="col" className="px-6 py-3"> Setor</th>
+                                        <th scope="col" className="px-6 py-3"> </th>
                                         <th scope="col" className="px-6 py-3"> Email </th>
                                         <th scope="col" className="px-6 py-3">Status</th>
                                     </tr>
@@ -156,24 +155,24 @@ export default function setores() {
                                 <tbody>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste </th>
-                                        <td className="px-6 py-4"> técnico</td>
+                                        <td className="px-6 py-4"> </td>
                                         <td className="px-6 py-4">teste@gmail.com</td>
                                         <td className="px-6 py-4">ativo</td>
                                     </tr>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste2</th>
-                                        <td className="px-6 py-4"> técnico</td>
+                                        <td className="px-6 py-4"> </td>
                                         <td className="px-6 py-4"> teste2@gmail.com</td>
                                         <td className="px-6 py-4"> inativo</td>
                                     </tr>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste3 </th>
-                                        <td className="px-6 py-4"> usuário </td>
+                                        <td className="px-6 py-4">  </td>
                                         <td className="px-6 py-4">@gmail.com</td>
                                         <td className="px-6 py-4">ativo</td></tr>
                                     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste4</th>
-                                        <td className="px-6 py-4">usuário</td>
+                                        <th scope="row" className="row px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">teste4</th>
+                                        <td className="px-6 py-4"></td>
                                         <td className="px-6 py-4">teste4@gmail.Chamados</td>
                                         <td className="px-6 py-4">inativo</td>
                                     </tr>
