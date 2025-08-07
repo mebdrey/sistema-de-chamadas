@@ -2,14 +2,16 @@
 import { useEffect, useState } from "react";
 import Image from 'next/image';
 import Link from 'next/link';
-import { useGoogleLogin } from '@react-oauth/google';
+// import { useGoogleLogin } from '@react-oauth/google';
 import "./login.css";
+import { useRouter } from 'next/navigation';
+
 
 export default function Login() {
   useEffect(() => {
     document.title = 'Zelos - Login';
   }, []);
-
+const router = useRouter();
   // qnd clica no botao de entrar ele mostra a animacao das bolinhas carregando
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +31,7 @@ export default function Login() {
   e.preventDefault();
   setLoading(true);
 
-  const email = document.getElementById('floating_email').value;
+  const numero = document.getElementById('floating_num').value;
   const senha = document.getElementById('floating_password').value;
 
   try {
@@ -39,7 +41,7 @@ export default function Login() {
         'Content-Type': 'application/json'
       },
       credentials: 'include',
-      body: JSON.stringify({ username: email, password: senha })
+      body: JSON.stringify({ username: numero, password: senha })
     });
 
     const data = await response.json();
@@ -49,7 +51,7 @@ export default function Login() {
     } else {
       setErro('');
       alert('Login realizado com sucesso');
-      // redirecionamento
+      router.push('/usuario/chamados');
     }
   } catch (error) {
     console.error('Erro ao tentar login:', error);
@@ -58,15 +60,15 @@ export default function Login() {
   setLoading(false);
 };
 
-  // login com o google
-    const loginGoogle = useGoogleLogin({
-    onSuccess: credentialResponse => {
-      console.log('Sucesso:', credentialResponse);
-    },
-    onError: () => {
-      console.log('Login falhou');
-    },
-  });
+  // // login com o google
+  //   const loginGoogle = useGoogleLogin({
+  //   onSuccess: credentialResponse => {
+  //     console.log('Sucesso:', credentialResponse);
+  //   },
+  //   onError: () => {
+  //     console.log('Login falhou');
+  //   },
+  // });
 
   return (
     <main className="overflow-hidden w-screen h-screen">
@@ -76,7 +78,7 @@ export default function Login() {
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <a href="https://flowbite.com/" className="flex items-center space-x-3 rtl:space-x-reverse">
             <img src="https://flowbite.com/docs/images/logo.svg" className="h-8" alt="Zelos Logo" />
-            <span className="self-center text-2xl poppins-bold whitespace-nowrap zelos-name">Zelos</span>
+            <span className="self-center text-2xl poppins-bold whitespace-nowrap zelos-name"><img src="/img/zelos-name.svg" className="h-8" alt="Zelos name"/></span>
           </a>
         </div>
       </nav>
@@ -91,8 +93,10 @@ export default function Login() {
             {/* inputs de email e senha */}
             <form onSubmit={login}>
               <div className="relative z-0 w-full mb-5 group">
-                <input type="email" name="floating_email" id="floating_email" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-nonedark:focus:border-[#7F56D8] focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer poppins-regular my-9" placeholder=" " required />
-                <label htmlFor="floating_email" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-8 scale-75 top-2.5 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-[#7F56D8] peer-focus:dark:text-[#7F56D8] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 poppins-regular">Email</label>
+                {/* <input type="email" name="floating_email" id="floating_email" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-nonedark:focus:border-[#7F56D8] focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer poppins-regular my-9" placeholder=" " required />
+                <label htmlFor="floating_email" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-8 scale-75 top-2.5 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-[#7F56D8] peer-focus:dark:text-[#7F56D8] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 poppins-regular">Email</label> */}
+                <input type="nuber" name="floating_num" id="floating_num" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-nonedark:focus:border-[#7F56D8] focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer poppins-regular my-9" placeholder=" " required />
+                <label htmlFor="floating_num" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-8 scale-75 top-2.5 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-[#7F56D8] peer-focus:dark:text-[#7F56D8] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 poppins-regular">Usuário de serviço</label>
               </div>
 
               <div className="relative z-0 w-full mb-5 group">
@@ -100,7 +104,7 @@ export default function Login() {
                 <label htmlFor="floating_password" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-8 scale-75 top-2.5 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-[#7F56D8] peer-focus:dark:text-[#7F56D8] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 poppins-regular" >Senha</label>
               </div>
               {erro && (
-                <p className="text-red-500 text-sm mb-4 poppins-regular">{erro}</p>
+                <p className="text-red-500 text-sm mb-10 poppins-regular">{erro}</p>
               )}
               {/* concordancia com os termos + esqueci a senha*/}
               <div className="flex justify-between items-center mb-4 mb-10">
@@ -113,8 +117,8 @@ export default function Login() {
               </div>
 
               {/* botao de entrar */}
-              <button type="submit" disabled={loading} className="text-white bg-[#7F56D8] hover:bg-[#7761A9] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-[#7F56D8] dark:focus:ring-[#7761A9] poppins-regular px-18"> {loading ? (
-                <div className="flex items-center gap-1">
+              <button type="submit" disabled={loading} className="text-white bg-[#7F56D8] hover:bg-[#7761A9] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm w-full px-5 py-4 text-center dark:bg-blue-600 dark:hover:bg-[#7F56D8] dark:focus:ring-[#7761A9] poppins-regular px-18"> {loading ? (
+                <div className="flex items-center justify-center gap-1">
                   <div className="h-1 w-1 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></div>
                   <div className="h-1 w-1 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>
                   <div className="h-1 w-1 bg-white rounded-full animate-bounce"></div>
@@ -130,7 +134,7 @@ export default function Login() {
                 <div className='h-8 w-8 bg-black rounded-full animate-bounce'></div>
               </div> */}
 
-              <div>
+              {/* <div>
                 <div className="py-3 flex items-center text-xs text-gray-400 uppercase before:flex-1 before:border-t before:border-gray-200 before:me-6 after:flex-1 after:border-t after:border-gray-200 after:ms-6 my-8">Ou</div>
                 <button  onClick={() => loginGoogle()} type="button" className="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-xl border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none poppins-regular">
                   <svg className="w-4 h-auto" width="46" height="47" viewBox="0 0 46 47" fill="none">
@@ -139,7 +143,7 @@ export default function Login() {
                     <path d="M10.1212 28.1413C9.62245 26.6725 9.32908 25.1156 9.32908 23.5C9.32908 21.8844 9.62245 20.3275 10.0918 18.8588V18.5356L2.75765 12.8369L2.52296 12.9544C0.909439 16.1269 0 19.7106 0 23.5C0 27.2894 0.909439 30.8731 2.49362 34.0456L10.1212 28.1413Z" fill="#FBBC05" />
                     <path d="M23.4694 9.07688C27.8699 9.07688 30.8622 10.9863 32.5344 12.5725L39.1645 6.11C35.0867 2.32063 29.8061 0 23.4694 0C14.287 0 6.36607 5.2875 2.49362 12.9544L10.0918 18.8588C11.9987 13.1894 17.25 9.07688 23.4694 9.07688Z" fill="#EB4335" />
                   </svg>Entrar com o Google</button>
-              </div>
+              </div> */}
             </form>
 
           </div>
@@ -162,20 +166,3 @@ export default function Login() {
     </main>
   );
 }
-
-// export default function LoginPage() {
-//   return (
-//     <div>
-//       <h1>Login</h1>
-//       <GoogleLogin
-//         onSuccess={credentialResponse => {
-//           console.log('Sucesso:', credentialResponse);
-//           // aqui você pode enviar o token para seu backend para autenticar
-//         }}
-//         onError={() => {
-//           console.log('Login falhou');
-//         }}
-//       />
-//     </div>
-//   );
-// }

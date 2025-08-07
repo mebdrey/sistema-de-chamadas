@@ -121,4 +121,32 @@ const receberMensagensDoUsuario = async(id_usuario) =>{
     `
 }
 
+// busca servicos
+export const buscarTiposServico = async () => {
+    const tipos = await readAll('pool');
+    return tipos.filter(tipo => tipo.status_pool === 'ativo');
+  };
+
+// busca blocos (sem repetição)
+export const listarBlocos = async () => {
+    try {
+        const consulta = 'SELECT DISTINCT bloco FROM localChamado ORDER BY bloco ASC';
+      return await readQuery(consulta);
+    } catch (err) {
+        console.error("Erro ao buscar blocos:", err);
+        throw err;
+    }
+};
+
+// busca salas por bloco
+export const listarSalasPorBloco = async (bloco) => {
+    try {
+        const consulta = 'SELECT sala FROM localChamado WHERE bloco = ? ORDER BY sala ASC';
+    return await readQuery(consulta, [bloco]);
+    } catch (err) {
+        console.error("Erro ao buscar salas por bloco:", err);
+        throw err;
+    }
+};
+
 export { criarUsuarioMensagem, criarChamado, criarPrioridade, criarRelatorio, listarChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos };

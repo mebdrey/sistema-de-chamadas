@@ -1,13 +1,30 @@
 
-import { criarChamado, criarPrioridade, criarRelatorio, listarUsuarios, verTecnicos, verClientes, listarChamados, verRelatorios, criarUsuarioMensagem } from "../models/Chamado.js";
+import { buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, listarUsuarios, verTecnicos, verClientes, listarChamados, verRelatorios, criarUsuarioMensagem, listarSalasPorBloco, listarBlocos } from "../models/Chamado.js";
 
 // criar chamado -- funcionando
-const criarChamadoController = async (req, res) => {
+// const criarChamadoController = async (req, res) => {
+//     try {
+//         await criarChamado(req.body);
+//         res.status(201).json({ mensagem: 'Chamado criado com sucesso!!!' })
+//     } catch (err) {
+//         res.status(500).json({ erro: err.message });
+//     }
+// };
+
+export const criarChamadoController = async (req, res) => {
+    const { assunto, tipoServiço, bloco, sala, descricao, imagem } = req.body;
+    const username = req.user?.username; // req.user guarda o usuário logado
+
+    if (!assunto || !tipoServiço || !bloco || !sala || !descricao || !imagem) {
+        return res.status(400).json({ erro: 'Preencha todos os campos.' });
+    }
+
     try {
-        await criarChamado(req.body);
-        res.status(201).json({ mensagem: 'Chamado criado com sucesso!!!' })
-    } catch (err) {
-        res.status(500).json({ erro: err.message });
+        await criarChamado({ assunto, tipoServiço, bloco, sala, descricao, imagem, criado_por: username });
+        res.status(201).json({ mensagem: 'Chamado criado com sucesso.' });
+    } catch (error) {
+        console.error('Erro ao criar chamado:', error);
+        res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
     }
 };
 
@@ -109,4 +126,40 @@ const msgUsuarioTecnico = async (req, res) => {
     }
 };
 
-export { msgUsuarioTecnico, criarChamadoController, criarPrioridadeController, criarRelatorioController, listarUsuariosController, listarTecnicosController, listarClientesController, listarChamadosController, verRelatoriosController };
+// listar tipos de serviço
+export const listarTiposServicoController = async (req, res) => {
+    try {
+      const tiposAtivos = await buscarTiposServico();
+      res.json(tiposAtivos);
+    } catch (error) {
+      console.error('Erro ao listar tipos de serviço:', error);
+      res.status(500).json({ erro: 'Erro interno ao listar tipos.' });
+    }
+  };
+
+// listar blocos
+export const buscarBlocosController = async (req, res) => {
+    try {
+        const blocos = await listarBlocos();
+        res.status(200).json(blocos);
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar blocos.' });
+    }
+};
+
+export const buscarSalasPorBlocoController = async (req, res) => {
+    const { bloco } = req.params;
+
+    if (!bloco) {
+        return res.status(400).json({ erro: 'Bloco não informado.' });
+    }
+
+    try {
+        const salas = await listarSalasPorBloco(bloco);
+        res.status(200).json(salas);
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar salas.' });
+    }
+};
+
+export { msgUsuarioTecnico, criarPrioridadeController, criarRelatorioController, listarUsuariosController, listarTecnicosController, listarClientesController, listarChamadosController, verRelatoriosController };

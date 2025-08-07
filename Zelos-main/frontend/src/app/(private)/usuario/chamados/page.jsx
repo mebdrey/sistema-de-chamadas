@@ -2,6 +2,8 @@
 import SideBar from '../../../../components/NavBar/NavBar.jsx';
 import { useEffect, useState } from "react";
 import { initFlowbite } from 'flowbite'
+import { useRouter } from 'next/navigation';
+
 
 export default function ChamadosCliente() {
     // select de periodo 
@@ -12,18 +14,35 @@ export default function ChamadosCliente() {
     const [chamados, setChamados] = useState([])
     const [abaAtiva, setAbaAtiva] = useState('todos')
     // guarda o tipo de serviço que o usuario seleciona 
-    const [tipoServico, setTipoServico] = useState('');
+    const [tiposServico, setTiposServico] = useState([]);
+    // id do servico
+    const [tipoSelecionadoId, setTipoSelecionadoId] = useState('');
+    const router = useRouter();
     // guarda a sala selecionada 
-    const [salaSelecionada, setSalaSelecionada] = useState('');
 
-    // funcao do flowbite p/ configurar funções de inicializacao p dropdown, modal e assim por diante
-    // useEffect(() => {
-    //     initFlowbite()
-    // }, [])
+    const [blocos, setBlocos] = useState([]);
+    const [salas, setSalas] = useState([]);
+    const [blocoSelecionado, setBlocoSelecionado] = useState('');
 
     useEffect(() => {
         setIsMounted(true);
     }, []);
+
+    // verifica se esta logado/autorizado
+    useEffect(() => {
+        fetch('http://localhost:8080/auth/check-auth', { credentials: 'include' })
+            .then(res => {
+                if (!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(data => {
+                console.log('Usuário autenticado:', data.user);
+            })
+            .catch(() => {
+                router.push('/login');
+            });
+    }, []);
+
 
     // enviar respostas p back-end
     // useEffect(() => {
@@ -57,6 +76,62 @@ export default function ChamadosCliente() {
         { label: 'Esse ano', value: 'ano' }
     ];
 
+    // busca os tipos de servico
+    useEffect(() => {
+        fetch('http://localhost:8080/servicos', { credentials: 'include' })
+            .then(res => res.json())
+            .then(data => setTiposServico(data))
+            .catch(err => console.error('Erro ao carregar tipos:', err));
+    }, []);
+
+    // busca bloco e salas
+    useEffect(() => {
+        fetch('http://localhost:8080/blocos')
+            .then(res => res.json())
+            .then(setBlocos)
+            .catch(err => console.error('Erro ao buscar blocos:', err));
+    }, []);
+
+    useEffect(() => {
+        if (blocoSelecionado) {
+            fetch(`http://localhost:8080/salas/${blocoSelecionado}`)
+                .then(res => res.json())
+                .then(setSalas)
+                .catch(err => console.error('Erro ao buscar salas:', err));
+        } else {
+            setSalas([]);
+        }
+    }, [blocoSelecionado]);
+
+    const criarChamado = async (e) => {
+        e.preventDefault();
+
+        const novoChamado = {
+            assunto: assunto,
+            descricao: descricao,
+            tipo_id: tipoSelecionadoId,
+            sala: salaSelecionada,
+
+        };
+
+        const res = await fetch('http://localhost:8080/chamado', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(novoChamado),
+            credentials: 'include'
+        });
+
+        if (res.ok) {
+            alert('Chamado criado com sucesso!');
+            // resetar campos se quiser
+        } else {
+            alert('Erro ao criar chamado.');
+        }
+    };
+
+
+
+
     return (
         <>
             {/* <SideBar userType="usuario" /> */}
@@ -71,14 +146,6 @@ export default function ChamadosCliente() {
                         </svg></button>
 
                         <div id="dropdownRadioBgHover" className="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
-
-                            {/* {periodos.map((periodo, index) => (
-                                <div key={index} className="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-                                    <input id={`periodo-radio-${index}`} type="radio" value={periodo.value} name="periodo" checked={selecionarPeriodo === periodo.value} onChange={() => setSelecionarPeriodo(periodo.value)} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
-                                    <label htmlFor={`periodo-radio-${index}`} className="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300"> {periodo.label} </label>
-                                </div>
-                            ))} */}
-
                             {isMounted &&
                                 periodos.map((periodo, index) => (
                                     <div key={index} className="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
@@ -88,28 +155,6 @@ export default function ChamadosCliente() {
                                         </label>
                                     </div>
                                 ))}
-
-
-                            {/* <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownRadioBgHoverButton">
-                                <li>
-                                    <div className="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-                                        <input id={`periodo-radio-${index}`} type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
-                                        <label htmlFor={`periodo-radio-${index}`} className="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">Essa semana</label>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div className="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-                                        <input id="default-radio-5" type="radio" value="mes" name="default-radio" defaultChecked={true} onChange={() => setSelecionarPeriodo('mes')}} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
-                                        <label htmlFor="default-radio-5" className="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">Esse mês</label>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div className="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-                                        <input id="default-radio-6" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
-                                        <label htmlFor="default-radio-6" className="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">Esse ano</label>
-                                    </div>
-                                </li>
-                            </ul> */}
                         </div>
 
                         {/* barra de pesquisa */}
@@ -134,18 +179,6 @@ export default function ChamadosCliente() {
                     <section>
                         <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700">
                             <ul className="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist">
-                                {/* <li className="me-2" role="presentation">
-                                    <button className={`inline-block p-4 border-b-2 rounded-t-lg ${abaAtiva === 'todos' ? 'active' : ''}`} onClick={() => setAbaAtiva('todos')} id="todos-tab" data-tabs-target="#todos" type="button" role="tab" aria-controls="todos" aria-selected="false">Todos</button>
-                                </li>
-                                <li className="me-2" role="presentation">
-                                    <button className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === 'em aberto' ? 'active' : ''}`} onClick={() => setAbaAtiva('em aberto')} id="aberto-tab" data-tabs-target="#aberto" type="button" role="tab" aria-controls="aberto" aria-selected="false">Em aberto</button>
-                                </li>
-                                <li className="me-2" role="presentation">
-                                    <button className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300${abaAtiva === 'em andamento' ? 'active' : ''}`} onClick={() => setAbaAtiva('em andamento')} id="andamento-tab" data-tabs-target="#andamento" type="button" role="tab" aria-controls="andamento" aria-selected="false">Em andamento</button>
-                                </li>
-                                <li role="presentation">
-                                    <button className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === 'encerrados' ? 'active' : ''}`} onClick={() => setAbaAtiva('encerrados')} id="encerrados-tab" data-tabs-target="#encerrados" type="button" role="tab" aria-controls="encerrados" aria-selected="false">Encerrados</button>
-                                </li> */}
 
                                 {/* Tabs */}
                                 {statusAbas.map((status) => {
@@ -195,18 +228,19 @@ export default function ChamadosCliente() {
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="servico" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipo de serviço</label>
-                                                    <select id="servico" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" value={tipoServico} onChange={(e) => setTipoServico(e.target.value)}>
+                                                    <select id="servico" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" value={tipoSelecionadoId} onChange={(e) => setTipoSelecionadoId(e.target.value)} required>
                                                         <option value="">Selecione tipo de serviço</option>
-                                                        <option value="TV">TV/Monitors</option>
-                                                        <option value="PC">PC</option>
-                                                        <option value="GA">Gaming/Console</option>
-                                                        <option value="PH">Phones</option>
+                                                        {tiposServico.map(tipo => (
+                                                            <option key={tipo.id} value={tipo.id}>
+                                                                {tipo.titulo}
+                                                            </option>
+                                                        ))}
                                                     </select>
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="local" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Local</label>
-                                                    <div className="flex">
-                                                        <button id="states-button" data-dropdown-toggle="dropdown-states" className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-500 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600" type="button">Selecionar bloco <svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                                    {/* <div className="flex">
+                                                        <button id="states-button" data-dropdown-toggle="dropdown-states" className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-500 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600" type="button">Selecionar bloco<svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                                                             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                                                         </svg>
                                                         </button>
@@ -245,7 +279,25 @@ export default function ChamadosCliente() {
                                                             <option value="GE">Georgia</option>
                                                             <option value="MI">Michigan</option>
                                                         </select>
+                                                    </div> */}
+
+                                                    <div className="flex">
+<select id="bloco" value={blocoSelecionado} onChange={(e) => setBlocoSelecionado(e.target.value)} className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-500 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600">
+  <option value="" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">Selecione um bloco</option>
+  {blocos.map((b, index) => (
+    <option key={b.id || index} value={b.bloco} className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">{b.bloco}
+    </option>
+  ))}
+</select>
+
+<select id="salas" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-lg border-s-gray-100 dark:border-s-gray-700 border-s-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                            <option value="">Escolha a sala</option>
+                                                            {salas.map((s, index) => (
+                    <option key={index} value={s.sala}>{s.sala}</option>
+                ))}
+                                                        </select>
                                                     </div>
+
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descrição</label>
@@ -272,71 +324,6 @@ export default function ChamadosCliente() {
                         </div>
 
                         <div id="default-tab-content">
-                            {/* <div className="hidden flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70" id="todos" role="tabpanel" aria-labelledby="todos-tab">
-                                <div className="p-4 md:p-5">
-                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">Ticket# 2023-CS123</h3>
-                                    <h6 className="text-base font-bold text-gray-800 dark:text-white">How to deposit money to my portal?</h6>
-                                    <p className="mt-2 text-gray-500 dark:text-neutral-400">Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-
-                                </div>
-                                <div className="flex flex-row justify-between items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 md:py-4 md:px-5 dark:bg-neutral-900 dark:border-neutral-700">
-                                    <p className="text-sm text-gray-500 dark:text-neutral-500">Posted at 12:45 AM</p>
-                                    <a className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600" href="#">
-                                        Card link
-                                        <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="m9 18 6-6-6-6"></path>
-                                        </svg>
-                                    </a>
-                                </div>
-                            </div>
-                            <div className="hidden flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70" id="aberto" role="tabpanel" aria-labelledby="aberto-tab">
-                                <div className="p-4 md:p-5">
-                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">Ticket# 2023-CS123</h3>
-                                    <h6 className="text-base font-bold text-gray-800 dark:text-white">How to deposit money to my portal?</h6>
-                                    <p className="mt-2 text-gray-500 dark:text-neutral-400">Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-
-                                </div>
-                                <div className="flex flex-row justify-between items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 md:py-4 md:px-5 dark:bg-neutral-900 dark:border-neutral-700">
-                                    <p className="text-sm text-gray-500 dark:text-neutral-500">Posted at 12:45 AM</p>
-                                    <a className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600" href="#">
-                                        Card link
-                                        <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="m9 18 6-6-6-6"></path>
-                                        </svg>
-                                    </a>
-                                </div>
-                            </div>
-                            <div className="hidden flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70" id="andamento" role="tabpanel" aria-labelledby="andamento-tab">
-                                <div className="p-4 md:p-5">
-                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">Ticket# 2023-CS123</h3>
-                                    <h6 className="text-base font-bold text-gray-800 dark:text-white">How to deposit money to my portal?</h6>
-                                    <p className="mt-2 text-gray-500 dark:text-neutral-400">Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-
-                                </div>
-                                <div className="flex flex-row justify-between items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 md:py-4 md:px-5 dark:bg-neutral-900 dark:border-neutral-700">
-                                    <p className="text-sm text-gray-500 dark:text-neutral-500">Posted at 12:45 AM</p>
-                                    <a className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600" href="#">Ver relatório<svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="m9 18 6-6-6-6"></path>
-                                    </svg>
-                                    </a>
-                                </div>
-                            </div>
-                            <div className="hidden flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70" id="encerrados" role="tabpanel" aria-labelledby="encerrados-tab">
-                                <div className="p-4 md:p-5">
-                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">Ticket# 2023-CS123</h3>
-                                    <h6 className="text-base font-bold text-gray-800 dark:text-white">How to deposit money to my portal?</h6>
-                                    <p className="mt-2 text-gray-500 dark:text-neutral-400">Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                </div>
-                                <div className="flex flex-row justify-between items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 md:py-4 md:px-5 dark:bg-neutral-900 dark:border-neutral-700">
-                                    <p className="text-sm text-gray-500 dark:text-neutral-500">Posted at 12:45 AM</p>
-                                    <a className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600" href="#">
-                                        Card link
-                                        <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="m9 18 6-6-6-6"></path>
-                                        </svg>
-                                    </a>
-                                </div>
-                            </div> */}
 
                             {statusAbas.map((status) => {
                                 const statusId = normalizarId(status)

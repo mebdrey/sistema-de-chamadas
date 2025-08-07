@@ -15,6 +15,7 @@ router.post('/login', (req, res, next) => {
       
       if (!user) {
         console.warn('Falha na autenticação:', info?.message || 'Credenciais inválidas');
+        console.log('Info:', info);
         return res.status(401).json({ error: info?.message || 'Autenticação falhou' });
       }
 
@@ -24,16 +25,26 @@ router.post('/login', (req, res, next) => {
           console.error('Erro ao criar sessão:', loginErr);
           return res.status(500).json({ error: 'Erro ao criar sessão' });
         }
-
-        console.log('Usuário autenticado:', user.username);
+        console.log('Objeto user retornado pelo LDAP:', user);
+        // console.log('Usuário autenticado:', user.username);
+        console.log('Usuário autenticado:', user.sAMAccountName);
+        // return res.json({ 
+        //   message: 'Autenticado com sucesso', 
+        //   user: {
+        //     username: user.username,
+        //     displayName: user.displayName,
+        //     email: user.mail
+        //   }
+        // });
         return res.json({ 
           message: 'Autenticado com sucesso', 
           user: {
-            username: user.username,
-            displayName: user.displayName,
-            email: user.mail
+            username: user.sAMAccountName,           // nome de login
+            displayName: user.displayName || user.cn, // nome de exibição
+            email: user.mail                          // e-mail
           }
         });
+        
       });
     } catch (error) {
       console.error('Erro inesperado:', error);
@@ -71,11 +82,14 @@ router.post('/logout', (req, res) => {
 
 // Rota para verificar autenticação
 router.get('/check-auth', (req, res) => {
+  console.log('Sessão atual:', req.session);
+  console.log('Usuário logado:', req.user);
   if (req.isAuthenticated()) {
     return res.json({ 
       authenticated: true,
       user: {
-        username: req.user.username,
+        // username: req.user.username,
+        username: req.user.sAMAccountName,
         displayName: req.user.displayName
       }
     });
