@@ -43,7 +43,7 @@ export default function GraficoChamadosPorMes() {
       {
         name: 'New users',
         data: [6500, 6418, 6456, 6526, 6356, 6456],
-        color: '#1A56DB',
+        color: '#7F56D8',
       },
     ],
     xaxis: {
