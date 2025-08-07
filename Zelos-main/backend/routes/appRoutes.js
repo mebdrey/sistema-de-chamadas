@@ -1,5 +1,5 @@
 import express from "express";
-import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosController, listarTecnicosController, listarClientesController, msgUsuarioTecnico } from "../controllers/ChamadoController.js";
+import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosController, listarTecnicosController, listarClientesController,  UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController } from "../controllers/ChamadoController.js";
 import { enviarLinkRedefinicao, redefinirSenha } from '../controllers/RedefinirSenhaController.js';
 import { obterPerfilUsuarioController, editarPerfilController } from "../controllers/PerfilController.js";
 
@@ -26,5 +26,14 @@ router.get('/perfil', obterPerfilUsuarioController);
 router.patch('/editarPerfil', editarPerfilController);
 
 //para o chat de usuario para tecnico
-router.post('/chat', msgUsuarioTecnico);
+router.post('/enviar-msg', UsuarioEnviarMensagemController);
+
+//para o chat de técnico para usuario
+router.post('/tecnico-enviar-msg', TecnicoEnviarMensagemController);
+
+//tecnico receber essas mensagens enviadas para ele
+//router.get('/chat', receberMensagensController);
+router.get('/chat', lerMensagensController);
+
+
 export default router;

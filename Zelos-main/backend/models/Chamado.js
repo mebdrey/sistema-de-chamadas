@@ -64,6 +64,8 @@ const listarChamados = async (usuarioId) => {
     }
 }
 
+
+
 // ver tecnicos - adm -- funcionando
 const verTecnicos = async (dados) => {
     const consulta = 'SELECT * FROM usuarios WHERE funcao = "técnico" ';
@@ -99,26 +101,54 @@ const verRelatorios = async (table, where) => {
 
 //funções para o chat 
 
-//chat usuário -> técnico
-const criarUsuarioMensagem = async(dados) =>{
-    try{
-        return await create('mensagens_usuario_tecnico', {
+//chat usuário -> técnico e técnico -> usuario
+const escreverMensagem = async (dados) => {
+    try {
+        return await create('mensagens', {
             id_usuario: dados.id_usuario,
-            id_destinatario: dados.id_destinatario,
+            id_tecnico: dados.id_tecnico,
             conteudo: dados.conteudo,
             id_chamado: dados.id_chamado
         });
     }
-    catch (err){
-        console.error('Erro ao enviar mensagem! - models' , err);
+    catch (err) {
+        console.error('Erro ao enviar mensagem! - models', err);
         throw err;
     }
 }
 
-//técnico receber a mensagem
-const receberMensagensDoUsuario = async(id_usuario) =>{
-    const sql = `
-    `
+const lerMsg = async (idChamado) => {
+    const consulta = `SELECT * FROM mensagens WHERE id_chamado = ${idChamado}
+     order by data_envio asc`;
+    try {
+        return await readQuery(consulta);
+    }
+    catch (err) {
+        console.error('Erro ao listar mensagens do chamado especificado!!', err)
+    }
 }
 
-export { criarUsuarioMensagem, criarChamado, criarPrioridade, criarRelatorio, listarChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos };
+//técnico ler as mensagens enviadas para ele - usar esse quando a autenticação estiver funcionando
+// const receberMensagensDoUsuario = async (usuarioId) => {
+//     try {
+//         return await readAll('mensagens_usuario_tecnico', `id_destinatario = ${usuarioId}`)
+//     }
+//     catch (err) {
+//         console.error('Erro ao receber mensagens do usuário: ', err);
+//         throw err;
+//     };
+// }
+
+//ver mensagens (chat identificado pelo id do chamado)
+// const lerMensagens = async (idChamado) => {
+//     try {
+//         return await readAll('mensagens', `id_chamado = ${idChamado}`)
+//     }
+//     catch (err) {
+//         console.error('Erro ao ler mensagens do chamado especificado :', err);
+//         throw err;
+//     };
+// }
+
+
+export {lerMsg, escreverMensagem, criarChamado, criarPrioridade, criarRelatorio, listarChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos};

@@ -17,6 +17,12 @@ insert usuarios (nome, senha, email, funcao) value
 ("teste3", "teste3", "juliadeoliveiraec@gmail.com", "técnico"),
 ("Elias Coca Velloso", "eliasabc", "eliascocavp@gmail.com", "técnico");
 
+insert into usuarios (nome, senha, email, funcao) value
+("Lorena" , "1234", "lorena@email.com", "usuário");
+
+insert into usuarios (nome, senha, email, funcao) value
+("Mari", "mari1234", "mari@tecnica.com", "técnica");
+
 select * from usuarios;
     -- Criação da tabela `pool`
     
@@ -54,6 +60,12 @@ CREATE TABLE pool (
 insert chamados (titulo, descricao) value 
 ('teste1', 'primeiro teste de insert');
 
+insert into chamados (titulo, descricao, tecnico_id, usuario_id, status_chamado) values 
+("Erro de atualização", "Boa tarde, estou tentando atualizar meu navegador pois ele não está mais dando suporte a versão antiga. mas não está pegando, aparece 'erro ao atualizar' e não dá nenhuma explicação. O que fazer?",  2, 3, "pendente");
+
+insert into chamados (titulo, descricao, tecnico_id, usuario_id, status_chamado) values 
+("cmd abrindo toda hora", "Olá, o cmd do meu pc está aparecendo na tela toda hora, atrapalhando minhas atividades. Como resolver?", 4, 3, "pendente");
+
 select * from chamados;
 
 select * from chamados where usuario_id= 1 ;
@@ -88,23 +100,20 @@ select * from apontamentos;
   criacao DATETIME NOT NULL
 );
 
-create table mensagens_usuario_tecnico (
+create table mensagens (
 id int auto_increment primary key,
 id_usuario int,
-id_destinatario int,
+id_tecnico int,
 conteudo text,
-id_chamado int,
+id_chamado int, -- isso vai ser o identificador do chat
 data_envio datetime default current_timestamp,
 lida boolean default false,
-foreign key (id_destinatario) references usuarios(id),
+foreign key (id_tecnico) references usuarios(id),
 foreign key (id_usuario) references usuarios(id),
 foreign key (id_chamado) references chamados(id)
 );
 
-select *from mensagens_usuario_tecnico;
-
-insert into mensagens_usuario_tecnico (id_usuario, id_destinatario, conteudo, id_chamado) values 
-(3, 1, "Não consigo atualizar o google", 2 );
+select *from mensagens order by data_envio asc;
 
 
     -- Índices adicionais para otimização
