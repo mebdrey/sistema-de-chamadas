@@ -20,7 +20,7 @@ insert usuarios (nome, senha, numServico, email, funcao) value
 ("Maria de Brito Del Rey", "Senai@123", "84766243", "maria@gmail.com", "admin"),
 ("Lorena Oshiro do Carmo", "Senai@123", "87036285", "lorena@gmail.com", "admin"),
 ("Elias Coca Velloso", "Senai@123", "29572557", "elias@gmail.com", "tecnico");
-
+/*
 insert into usuarios (nome, senha, email, funcao) value
 ("Lorena" , "1234", "lorena@email.com", "usuário");
 
@@ -28,7 +28,7 @@ insert into usuarios (nome, senha, email, funcao) value
 ("Mari", "mari1234", "mari@tecnica.com", "técnica");
 
 select * from usuarios;
-
+*/
 -- Criação da tabela `pool`
 -- a Pool é a tabela dos diversos serviços oferecidos pelos técnicos
 /* Lista de tipos/categorias de serviço ofertados*/
@@ -63,6 +63,15 @@ CREATE TABLE pool (
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
     );
     */
+    
+    select * from chamados;
+select * from usuarios;
+
+create table localChamado(
+id int auto_increment primary key, 
+	bloco ENUM ('bloco_a', 'bloco_b', 'bloco_c', 'bloco_d'),
+    sala varchar(10)
+);
 
 CREATE TABLE chamados (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -72,6 +81,7 @@ CREATE TABLE chamados (
     tecnico_id INT,
     usuario_id INT,
     local_id int,
+    imagem VARCHAR(255),
     prioridade ENUM ('none','baixa', 'média', 'alta') DEFAULT 'none',
     status_chamado ENUM('pendente', 'em andamento', 'concluído') DEFAULT 'pendente',
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -80,12 +90,6 @@ CREATE TABLE chamados (
     FOREIGN KEY (local_id) REFERENCES localChamado(id),
     FOREIGN KEY (tecnico_id) REFERENCES usuarios(id),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
-);
-    
-create table localChamado(
-id int auto_increment primary key, 
-	bloco ENUM ('bloco_a', 'bloco_b', 'bloco_c', 'bloco_d'),
-    sala varchar(10)
 );
 
 INSERT INTO localChamado (bloco, sala) VALUES
@@ -181,7 +185,7 @@ foreign key (id_chamado) references chamados(id)
 select *from mensagens order by data_envio asc;
 
 
-    -- Índices adicionais para otimização
+-- Índices adicionais para otimização
 CREATE INDEX idx_usuarios_email ON usuarios(email);
 CREATE INDEX idx_chamados_status ON chamados(status_chamado);
 CREATE INDEX idx_apontamentos_comeco_fim ON apontamentos(comeco, fim);

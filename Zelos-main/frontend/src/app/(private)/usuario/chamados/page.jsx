@@ -6,23 +6,21 @@ import { useRouter } from 'next/navigation';
 
 
 export default function ChamadosCliente() {
-    // select de periodo 
-    const [selecionarPeriodo, setSelecionarPeriodo] = useState('mes') // "mes" = esse mês
-    // espera o componente estar carregado no navegador p evitar erros de renderizacao
-    const [isMounted, setIsMounted] = useState(false);
-    // p selecionar os chamados com base no status
-    const [chamados, setChamados] = useState([])
+    const [selecionarPeriodo, setSelecionarPeriodo] = useState('mes') // "mes" = esse mês // select de periodo 
+    const [isMounted, setIsMounted] = useState(false); // espera o componente estar carregado no navegador p evitar erros de renderizacao
+    const [chamados, setChamados] = useState([]) // p selecionar os chamados com base no status
     const [abaAtiva, setAbaAtiva] = useState('todos')
-    // guarda o tipo de serviço que o usuario seleciona 
-    const [tiposServico, setTiposServico] = useState([]);
-    // id do servico
-    const [tipoSelecionadoId, setTipoSelecionadoId] = useState('');
+    const [tiposServico, setTiposServico] = useState([]); // guarda o tipo de serviço que o usuario seleciona 
+    const [tipoSelecionadoId, setTipoSelecionadoId] = useState(''); // id do servico
     const router = useRouter();
-    // guarda a sala selecionada 
-
-    const [blocos, setBlocos] = useState([]);
+    const [blocos, setBlocos] = useState([]); // guarda a sala e bloco selecionada 
     const [salas, setSalas] = useState([]);
+    const [salaSelecionada, setSalaSelecionada] = useState('');
     const [blocoSelecionado, setBlocoSelecionado] = useState('');
+    const [imagemPreview, setImagemPreview] = useState(null); // preview da imagem
+    const [imagemArquivo, setImagemArquivo] = useState(null); // gaurda o arquivo da imagem
+    const [assunto, setAssunto] = useState(''); // gaurda o assunto do chamado
+    const [descricao, setDescricao] = useState(''); // gaurda a descricao do chamado
 
     useEffect(() => {
         setIsMounted(true);
@@ -103,33 +101,41 @@ export default function ChamadosCliente() {
         }
     }, [blocoSelecionado]);
 
+    //criar chamado
     const criarChamado = async (e) => {
         e.preventDefault();
 
-        const novoChamado = {
-            assunto: assunto,
-            descricao: descricao,
-            tipo_id: tipoSelecionadoId,
-            sala: salaSelecionada,
+        const formData = new FormData();
+        formData.append("assunto", assunto);
+        formData.append("descricao", descricao);
+        formData.append("tipo_id", tipoSelecionadoId);
+        formData.append("bloco", blocoSelecionado);
+        formData.append("sala", salaSelecionada);
+        formData.append("imagem", imagemArquivo);
 
-        };
-
-        const res = await fetch('http://localhost:8080/chamado', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(novoChamado),
-            credentials: 'include'
+        const res = await fetch("http://localhost:8080/chamado", {
+            method: "POST",
+            body: formData,
+            credentials: "include",
         });
 
         if (res.ok) {
-            alert('Chamado criado com sucesso!');
-            // resetar campos se quiser
+            alert("Chamado criado com sucesso!");
+            // limpar
+            setImagemPreview(null);
+            setImagemArquivo(null);
         } else {
-            alert('Erro ao criar chamado.');
+            alert("Erro ao criar chamado.");
         }
     };
 
-
+    const subirImagem = (e) => {
+        const file = e.target.files[0]; // pega o arquivo selecionado
+        if (file) {
+            setImagemArquivo(file); // guarda o arquivo real
+            setImagemPreview(URL.createObjectURL(file)); // gera uma url temporaria para mostrar
+        }
+    };
 
 
     return (
@@ -202,7 +208,7 @@ export default function ChamadosCliente() {
                                 })}
                             </ul>
 
-                            {/* modal */}
+                            {/* modal - criar chamado*/}
                             <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" className="flex flex-row items-center block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 h-fit text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button"><svg className="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>Novo chamado</button>
 
                             <div id="crud-modal" tabIndex="-1" aria-hidden="true" className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
@@ -220,11 +226,11 @@ export default function ChamadosCliente() {
                                             </button>
                                         </div>
 
-                                        <form className="p-4 md:p-5">
+                                        <form className="p-4 md:p-5" onSubmit={criarChamado}>
                                             <div className="grid gap-4 mb-4 grid-cols-2">
                                                 <div className="col-span-2">
                                                     <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Assunto</label>
-                                                    <input type="text" name="name" id="name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Digite o assunto" required="" />
+                                                    <input type="text" name="name" id="name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Digite o assunto" required="" value={assunto} onChange={(e) => setAssunto(e.target.value)}/>
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="servico" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipo de serviço</label>
@@ -282,26 +288,26 @@ export default function ChamadosCliente() {
                                                     </div> */}
 
                                                     <div className="flex">
-<select id="bloco" value={blocoSelecionado} onChange={(e) => setBlocoSelecionado(e.target.value)} className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-500 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600">
-  <option value="" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">Selecione um bloco</option>
-  {blocos.map((b, index) => (
-    <option key={b.id || index} value={b.bloco} className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">{b.bloco}
-    </option>
-  ))}
-</select>
+                                                        <select id="bloco" value={blocoSelecionado} onChange={(e) => setBlocoSelecionado(e.target.value)} className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-500 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600">
+                                                            <option value="" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">Selecione um bloco</option>
+                                                            {blocos.map((b, index) => (
+                                                                <option key={b.id || index} value={b.bloco} className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">{b.bloco}
+                                                                </option>
+                                                            ))}
+                                                        </select>
 
-<select id="salas" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-lg border-s-gray-100 dark:border-s-gray-700 border-s-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                        <select id="salas" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-lg border-s-gray-100 dark:border-s-gray-700 border-s-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={salaSelecionada} onChange={(e) => setSalaSelecionada(e.target.value)}>
                                                             <option value="">Escolha a sala</option>
                                                             {salas.map((s, index) => (
-                    <option key={index} value={s.sala}>{s.sala}</option>
-                ))}
+                                                                <option key={index} value={s.sala}>{s.sala}</option>
+                                                            ))}
                                                         </select>
                                                     </div>
 
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descrição</label>
-                                                    <textarea id="description" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Escreva a descrição do chamado"></textarea>
+                                                    <textarea id="description" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Escreva a descrição do chamado" value={descricao} onChange={(e) => setDescricao(e.target.value)}></textarea>
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="file" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enviar imagem</label>
@@ -311,7 +317,8 @@ export default function ChamadosCliente() {
                                                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                                 <svg className="me-1 -ms-1 w-8 h-8 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>
                                                             </div>
-                                                            <input id="dropzone-file" type="file" className="hidden" />
+                                                            <input id="dropzone-file" type="file" className="hidden" accept="image/*" onChange={subirImagem} />
+                                                            {imagemPreview && (<img src={imagemPreview} alt="Pré-visualização" className="mt-2 max-h-40 rounded-lg" />)}
                                                         </label>
                                                     </div>
                                                 </div>

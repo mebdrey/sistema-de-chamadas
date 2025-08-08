@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import authRotas from './routes/authRotas.js';
 import appRoutes from './routes/appRoutes.js';
 import passport from './config/ldap.js';
+import path from 'path';
 
 // 1. Carrega variáveis de ambiente PRIMEIRO
 dotenv.config();
@@ -47,6 +48,8 @@ app.use('/', appRoutes);
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'online' });
 });
+
+app.use('/uploads', express.static(path.resolve('uploads')));
 
 // 6. Tratamento de erros robusto
 process.on('unhandledRejection', (reason, promise) => {

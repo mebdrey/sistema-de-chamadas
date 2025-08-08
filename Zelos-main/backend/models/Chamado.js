@@ -1,6 +1,19 @@
 
 import { create, readAll, read, readQuery, update } from '../config/database.js';
 
+// cria usuario na tabela
+export const garantirUsuarioExiste = async (username) => {
+    const usuarios = await read('usuarios', { nome: username });
+
+    if (usuarios.length > 0) {
+        return usuarios[0].id; // retorna o id existente
+    }
+
+    // Se não existir, cria
+    const novoUsuario = await create('usuarios', { nome: username });
+    return novoUsuario.insertId;
+};
+
 //criar chamado usuário -- funcionando
 const criarChamado = async (dados) => {
     try {
@@ -63,8 +76,6 @@ const listarChamados = async (usuarioId) => {
         throw err;
     }
 }
-
-
 
 // ver tecnicos - adm -- funcionando
 const verTecnicos = async (dados) => {
@@ -156,8 +167,6 @@ export const listarSalasPorBloco = async (bloco) => {
     }
 };
 
-export { criarUsuarioMensagem, criarChamado, criarPrioridade, criarRelatorio, listarChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos };
-
 //técnico ler as mensagens enviadas para ele - usar esse quando a autenticação estiver funcionando
 // const receberMensagensDoUsuario = async (usuarioId) => {
 //     try {
@@ -180,5 +189,5 @@ export { criarUsuarioMensagem, criarChamado, criarPrioridade, criarRelatorio, li
 //     };
 // }
 
-
-export {lerMsg, escreverMensagem, criarChamado, criarPrioridade, criarRelatorio, listarChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos};
+//criarUsuarioMensagem
+export { lerMsg, escreverMensagem, criarChamado, criarPrioridade, criarRelatorio, listarChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos};

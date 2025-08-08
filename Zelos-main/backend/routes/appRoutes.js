@@ -1,14 +1,13 @@
 import express from "express";
 
-import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosController, listarTecnicosController, listarClientesController, msgUsuarioTecnico, listarTiposServicoController, buscarBlocosController, buscarSalasPorBlocoController } from "../controllers/ChamadoController.js";
-
-// import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosController, listarTecnicosController, listarClientesController,  UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController } from "../controllers/ChamadoController.js";
+import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosController, listarTecnicosController, listarClientesController, listarTiposServicoController, buscarBlocosController, buscarSalasPorBlocoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController } from "../controllers/ChamadoController.js";
 import { enviarLinkRedefinicao, redefinirSenha } from '../controllers/RedefinirSenhaController.js';
 import { obterPerfilUsuarioController, editarPerfilController } from "../controllers/PerfilController.js";
+import { upload } from '../middlewares/uploadMiddleware.js';
 
 const router = express.Router();
 
-router.post('/chamado', criarChamadoController);
+router.post('/chamado', upload.single('imagem'), criarChamadoController);
 router.post('/relatorio', criarRelatorioController);
 
 router.patch('/prioridade', criarPrioridadeController);
@@ -29,7 +28,7 @@ router.get('/perfil', obterPerfilUsuarioController);
 router.patch('/editarPerfil', editarPerfilController);
 
 //para o chat de usuario para tecnico
-router.post('/chat', msgUsuarioTecnico);
+router.post('/chat', UsuarioEnviarMensagemController);
 
 // listar tipos de serviço
 router.get('/servicos', listarTiposServicoController);

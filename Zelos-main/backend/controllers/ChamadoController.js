@@ -1,9 +1,7 @@
 
 
-import { buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, listarUsuarios, verTecnicos, verClientes, listarChamados, verRelatorios, criarUsuarioMensagem, listarSalasPorBloco, listarBlocos } from "../models/Chamado.js";
-
-// import { criarChamado, criarPrioridade, criarRelatorio, listarUsuarios, verTecnicos, verClientes, listarChamados, verRelatorios, escreverMensagem,   lerMsg } from "../models/Chamado.js";
-
+import { buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, listarUsuarios, verTecnicos, verClientes, listarChamados, verRelatorios, listarSalasPorBloco, listarBlocos,  escreverMensagem, lerMsg , garantirUsuarioExiste } from "../models/Chamado.js";
+//criarUsuarioMensagem
 
 // criar chamado -- funcionando
 // const criarChamadoController = async (req, res) => {
@@ -15,17 +13,55 @@ import { buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, list
 //     }
 // };
 
-export const criarChamadoController = async (req, res) => {
-    const { assunto, tipoServiço, bloco, sala, descricao, imagem } = req.body;
-    const username = req.user?.username; // req.user guarda o usuário logado
+// export const criarChamadoController = async (req, res) => {
+//     const { assunto, tipoServiço, bloco, sala, descricao, imagem } = req.body;
+//     const username = req.user?.username; // req.user guarda o usuário logado
 
-    if (!assunto || !tipoServiço || !bloco || !sala || !descricao || !imagem) {
+//     if (!assunto || !tipoServiço || !bloco || !sala || !descricao || !imagem) {
+//         return res.status(400).json({ erro: 'Preencha todos os campos.' });
+//     }
+
+//     try {
+//         await criarChamado({ assunto, tipoServiço, bloco, sala, descricao, imagem, criado_por: username });
+//         res.status(201).json({ mensagem: 'Chamado criado com sucesso.' });
+//     } catch (error) {
+//         console.error('Erro ao criar chamado:', error);
+//         res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
+//     }
+// };
+
+export const criarChamadoController = async (req, res) => {
+    const { assunto, tipo_id, bloco, sala, descricao } = req.body;
+    const username = req.user?.username;
+
+    if (!assunto || !tipo_id || !bloco || !sala || !descricao) {
         return res.status(400).json({ erro: 'Preencha todos os campos.' });
     }
 
+    const imagem = req.file?.filename || null;
+
     try {
-        await criarChamado({ assunto, tipoServiço, bloco, sala, descricao, imagem, criado_por: username });
+        // Garante que o usuário existe e pega seu id
+        const usuario_id = await garantirUsuarioExiste(username);
+
+        // Buscar local_id com base em bloco + sala
+        const localEncontrado = await read('localChamado', { bloco, sala });
+        if (!localEncontrado.length) {
+            return res.status(400).json({ erro: 'Local (bloco/sala) inválido.' });
+        }
+        const local_id = localEncontrado[0].id;
+
+        await criarChamado({
+            assunto,
+            tipo_id,
+            descricao,
+            imagem,
+            local_id,
+            usuario_id
+        });
+
         res.status(201).json({ mensagem: 'Chamado criado com sucesso.' });
+
     } catch (error) {
         console.error('Erro ao criar chamado:', error);
         res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
@@ -195,8 +231,6 @@ export const buscarSalasPorBlocoController = async (req, res) => {
     }
 };
 
-export { msgUsuarioTecnico, criarPrioridadeController, criarRelatorioController, listarUsuariosController, listarTecnicosController, listarClientesController, listarChamadosController, verRelatoriosController };
-
 const TecnicoEnviarMensagemController = async (req, res) => {
     try {
         //coisas da autenticacao idTecnico
@@ -214,6 +248,6 @@ const TecnicoEnviarMensagemController = async (req, res) => {
         res.status(500).json({mensagem: 'Erro ao técnico enviar mensagem!!'});
     }
 }
-
-export {lerMensagensController,  UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarChamadoController, criarPrioridadeController, criarRelatorioController, listarUsuariosController, listarTecnicosController, listarClientesController, listarChamadosController, verRelatoriosController };
+// msgUsuarioTecnico
+export { lerMensagensController,  UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarPrioridadeController, criarRelatorioController, listarUsuariosController, listarTecnicosController, listarClientesController, listarChamadosController, verRelatoriosController };
 
