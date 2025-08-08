@@ -63,9 +63,6 @@ CREATE TABLE pool (
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
     );
     */
-    
-    select * from chamados;
-select * from usuarios;
 
 create table localChamado(
 id int auto_increment primary key, 
@@ -151,7 +148,6 @@ CREATE TABLE apontamentos (
     FOREIGN KEY (chamado_id) REFERENCES chamados(id),
     FOREIGN KEY (tecnico_id) REFERENCES usuarios(id)
 );
-select * from apontamentos; 
 
 -- Criação da tabela `pool_tecnico`
 /* 	Relaciona quais técnicos podem atuar em quais pools*/
@@ -181,9 +177,6 @@ foreign key (id_tecnico) references usuarios(id),
 foreign key (id_usuario) references usuarios(id),
 foreign key (id_chamado) references chamados(id)
 );
-
-select *from mensagens order by data_envio asc;
-
 
 -- Índices adicionais para otimização
 CREATE INDEX idx_usuarios_email ON usuarios(email);
