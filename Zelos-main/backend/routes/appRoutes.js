@@ -1,6 +1,6 @@
 import express from "express";
 
-import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosController, listarTecnicosController, listarClientesController, listarTiposServicoController, buscarBlocosController, buscarSalasPorBlocoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController } from "../controllers/ChamadoController.js";
+import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarTecnicosController, listarAuxiliaresLimpezaController, listarClientesController, listarTiposServicoController, buscarBlocosController, buscarSalasPorBlocoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController } from "../controllers/ChamadoController.js";
 import { enviarLinkRedefinicao, redefinirSenha } from '../controllers/RedefinirSenhaController.js';
 import { obterPerfilUsuarioController, editarPerfilController } from "../controllers/PerfilController.js";
 import { upload } from '../middlewares/uploadMiddleware.js';
@@ -13,10 +13,10 @@ router.post('/relatorio', criarRelatorioController);
 router.patch('/prioridade', criarPrioridadeController);
 
 router.get('/verRelatorio', verRelatoriosController);
-router.get('/verChamados', listarChamadosController);
-router.get('/listarUsuarios', listarUsuariosController);
-router.get('/listarTecnicos', listarTecnicosController);
-router.get('/listarClientes', listarClientesController);
+router.get('/meus-chamados', listarChamadosController);
+router.get('/listar-auxiliaresLimpeza', listarAuxiliaresLimpezaController);
+router.get('/listar-tecnicos', listarTecnicosController);
+router.get('/listar-clientes', listarClientesController);
 
 // rota p/ solicitar o link de redefinicao
 router.post('/esqueci-senha', enviarLinkRedefinicao);

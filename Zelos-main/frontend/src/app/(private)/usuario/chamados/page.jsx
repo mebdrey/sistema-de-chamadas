@@ -1,5 +1,4 @@
 "use client"
-import SideBar from '../../../../components/NavBar/NavBar.jsx';
 import { useEffect, useState } from "react";
 import { initFlowbite } from 'flowbite'
 import { useRouter } from 'next/navigation';
@@ -21,6 +20,7 @@ export default function ChamadosCliente() {
     const [imagemArquivo, setImagemArquivo] = useState(null); // gaurda o arquivo da imagem
     const [assunto, setAssunto] = useState(''); // gaurda o assunto do chamado
     const [descricao, setDescricao] = useState(''); // gaurda a descricao do chamado
+    const [busca, setBusca] = useState(""); // armazena o que for digitado no campo de busca
 
     useEffect(() => {
         setIsMounted(true);
@@ -41,21 +41,23 @@ export default function ChamadosCliente() {
             });
     }, []);
 
+    // busca os chamados feitos pelo usuario
+    useEffect(() => {
+        fetch('http://localhost:8080/meus-chamados', { credentials: 'include' })
+            .then(res => {
+                if (!res.ok) throw new Error('Erro ao buscar chamados');
+                return res.json();
+            })
+            .then(data => {
+                console.log('Chamados recebidos:', data);
+                setChamados(data.chamados || []);
+            })
+            .catch(err => {
+                console.error('Erro ao carregar chamados:', err);
+                setChamados([]);
+            });
+    }, []);
 
-    // enviar respostas p back-end
-    // useEffect(() => {
-    //     //   fetch('http://localhost:8080/historico-chamados', { credentials: 'include' })
-    //     fetch('http://localhost:8080/verChamados', { credentials: 'include' })
-    //         .then(res => {
-    //             if (!res.ok) throw new Error('Erro ao buscar dados');
-    //             return res.json();
-    //         })
-    //         .then(data => setCliente(data.infoCliente || []))
-    //         .catch(err => {
-    //             console.error('Erro ao carregar chamados do usuário:', err);
-    //             setCliente([]);
-    //         });
-    // }, []);
 
     function primeiraLetraMaiuscula(str) {
         if (!str) return '';
@@ -63,7 +65,7 @@ export default function ChamadosCliente() {
     }
 
     // STATUS DOS CHAMAFOS
-    const statusAbas = ['Todos', 'Em aberto', 'Em andamento', 'Encerrados']
+    const statusAbas = ['todos', 'pendente', 'em andamento', 'concluído'];
     // funcao p normalizar id
     const normalizarId = (texto) => texto.toLowerCase().replace(/\s+/g, '-')
 
@@ -164,7 +166,7 @@ export default function ChamadosCliente() {
                         </div>
 
                         {/* barra de pesquisa */}
-                        <form className="flex items-center">
+                        {/* <form className="flex items-center">
                             <label htmlFor="simple-search" className="sr-only">Search</label>
                             <div className="relative w-80">
                                 <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -180,6 +182,27 @@ export default function ChamadosCliente() {
                                 </svg>
                                 <span className="sr-only">Search</span>
                             </button>
+                        </form> */}
+
+                        {/* Barra de pesquisa */}
+                        <form className="flex items-center" onSubmit={(e) => e.preventDefault()} // evita recarregar a página
+                        >
+                            <label htmlFor="simple-search" className="sr-only">Search</label>
+                            <div className="relative w-80">
+                                <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                    <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
+                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    id="simple-search"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    placeholder="Pesquisar chamado"
+                                    value={busca}
+                                    onChange={(e) => setBusca(e.target.value)}
+                                />
+                            </div>
                         </form>
                     </div>
                     <section>
@@ -191,17 +214,10 @@ export default function ChamadosCliente() {
                                     const statusId = normalizarId(status)
                                     return (
                                         <li className="me-2" role="presentation" key={status}>
-                                            <button
-                                                className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === statusId ? 'active' : ''}`}
-                                                onClick={() => setAbaAtiva(statusId)}
-                                                id={`${statusId}-tab`}
-                                                data-tabs-target={`#${statusId}`}
-                                                type="button"
-                                                role="tab"
-                                                aria-controls={statusId}
-                                                aria-selected={abaAtiva === statusId}
-                                            >
-                                                {status}
+                                            <button id={`${statusId}-tab`} onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === statusId ? "active border-blue-500 text-blue-600 dark:text-blue-400" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-neutral-400 dark:hover:text-neutral-300"
+                                                }`}
+                                                data-tabs-target={`#${statusId}`} type="button" role="tab" aria-controls={statusId} aria-selected={abaAtiva === statusId} >
+                                                {primeiraLetraMaiuscula(status)}
                                             </button>
                                         </li>
                                     )
@@ -230,7 +246,7 @@ export default function ChamadosCliente() {
                                             <div className="grid gap-4 mb-4 grid-cols-2">
                                                 <div className="col-span-2">
                                                     <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Assunto</label>
-                                                    <input type="text" name="name" id="name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Digite o assunto" required="" value={assunto} onChange={(e) => setAssunto(e.target.value)}/>
+                                                    <input type="text" name="name" id="name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Digite o assunto" required="" value={assunto} onChange={(e) => setAssunto(e.target.value)} />
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="servico" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipo de serviço</label>
@@ -245,48 +261,6 @@ export default function ChamadosCliente() {
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="local" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Local</label>
-                                                    {/* <div className="flex">
-                                                        <button id="states-button" data-dropdown-toggle="dropdown-states" className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-500 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600" type="button">Selecionar bloco<svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                                                        </svg>
-                                                        </button>
-                                                        <div id="dropdown-states" className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700">
-                                                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="states-button">
-                                                                <li>
-                                                                    <button type="button" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                                        <div className="inline-flex items-center">Bloco A</div>
-                                                                    </button>
-                                                                </li>
-                                                                <li>
-                                                                    <button type="button" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                                        <div className="inline-flex items-center">Bloco B</div>
-                                                                    </button>
-                                                                </li>
-                                                                <li>
-                                                                    <button type="button" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                                        <div className="inline-flex items-center">Bloco C</div>
-                                                                    </button>
-                                                                </li>
-                                                                <li>
-                                                                    <button type="button" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                                        <div className="inline-flex items-center">Bloco D</div>
-                                                                    </button>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                        <label htmlFor="salas" className="sr-only">Escolha a sala</label>
-                                                        <select id="salas" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-lg border-s-gray-100 dark:border-s-gray-700 border-s-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={salaSelecionada} onChange={(e) => setSalaSelecionada(e.target.value)}>
-                                                            <option value="">Escolha a sala</option>
-                                                            <option value="CA">California</option>
-                                                            <option value="TX">Texas</option>
-                                                            <option value="WH">Washinghton</option>
-                                                            <option value="FL">Florida</option>
-                                                            <option value="VG">Virginia</option>
-                                                            <option value="GE">Georgia</option>
-                                                            <option value="MI">Michigan</option>
-                                                        </select>
-                                                    </div> */}
-
                                                     <div className="flex">
                                                         <select id="bloco" value={blocoSelecionado} onChange={(e) => setBlocoSelecionado(e.target.value)} className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-500 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600">
                                                             <option value="" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">Selecione um bloco</option>
@@ -330,39 +304,30 @@ export default function ChamadosCliente() {
                             </div>
                         </div>
 
-                        <div id="default-tab-content">
-
+                        {/* visualizar chamados */}
+                        {/* <div id="default-tab-content">
                             {statusAbas.map((status) => {
                                 const statusId = normalizarId(status)
                                 const chamadosFiltrados =
-                                    status === 'todos'
-                                        ? chamados
-                                        : chamados.filter((c) => normalizarId(c.status_chamado) === statusId)
-
+                                    status === 'todos' ? chamados : chamados.filter((c) => normalizarId(c.status_chamado) === statusId)
                                 return (
-                                    <div
-                                        key={status}
-                                        className="hidden flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70"
-                                        id={statusId}
-                                        role="tabpanel"
-                                        aria-labelledby={`${statusId}-tab`}
-                                    >
+                                    <div key={status} className="hidden flex flex-col bg-white ark:bg-neutral-900 gap-5" id={statusId} role="tabpanel" aria-labelledby={`${statusId}-tab`} >
                                         {chamadosFiltrados.length === 0 ? (
                                             <div className="p-4 md:p-5">
                                                 <p className="text-gray-500 dark:text-neutral-400">Nenhum chamado encontrado.</p>
                                             </div>
                                         ) : (
                                             chamadosFiltrados.map((chamado) => (
-                                                <div key={chamado.id} className="p-4 md:p-5 border-b last:border-0 border-gray-200 dark:border-neutral-700">
-                                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">Ticket# {chamado.id}</h3>
-                                                    <h6 className="text-base font-bold text-gray-800 dark:text-white">{chamado.subtitulo}</h6>
+
+                                                <div key={chamado.id} className="p-4 md:p-5 border-b last:border-0 bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
+                                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}</h3>
+                                                    <h6 className="text-base font-bold text-gray-800 dark:text-white">{chamado.assunto}</h6>
                                                     <p className="mt-2 text-gray-500 dark:text-neutral-400">{chamado.descricao}</p>
                                                     <div className="flex flex-row justify-between items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 mt-4 dark:bg-neutral-900 dark:border-neutral-700">
                                                         <p className="text-sm text-gray-500 dark:text-neutral-500">
-                                                            Postado em {new Date(chamado.criado_em).toLocaleString('pt-BR')}
+                                                            Criado em {new Date(chamado.criado_em).toLocaleString('pt-BR')}
                                                         </p>
-                                                        <a className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600" href="#">
-                                                            Ver chamado
+                                                        <a className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600" href="#"> Ver chamado
                                                             <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                                 <path d="m9 18 6-6-6-6"></path>
                                                             </svg>
@@ -374,7 +339,88 @@ export default function ChamadosCliente() {
                                     </div>
                                 )
                             })}
+                        </div> */}
+                        <div id="default-tab-content">
+                            {statusAbas.map((status) => {
+                                const statusId = normalizarId(status);
+
+                                // Primeiro filtra por status
+                                let filtradosPorStatus =
+                                    status === "todos"
+                                        ? chamados
+                                        : chamados.filter((c) => normalizarId(c.status_chamado) === statusId);
+
+                                // Depois aplica filtro de busca
+                                let chamadosFiltrados = filtradosPorStatus.filter((c) =>
+                                    busca.trim() === ""
+                                        ? true
+                                        : c.assunto.toLowerCase().includes(busca.toLowerCase()) ||
+                                        c.descricao.toLowerCase().includes(busca.toLowerCase()) ||
+                                        String(c.id).includes(busca)
+                                );
+
+                                return (
+                                    <div
+                                        key={status}
+                                        className="hidden flex flex-col bg-white ark:bg-neutral-900 gap-5"
+                                        id={statusId}
+                                        role="tabpanel"
+                                        aria-labelledby={`${statusId}-tab`}
+                                    >
+                                        {chamadosFiltrados.length === 0 ? (
+                                            <div className="p-4 md:p-5">
+                                                <p className="text-gray-500 dark:text-neutral-400">
+                                                    Nenhum chamado encontrado.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            chamadosFiltrados.map((chamado) => (
+                                                <div
+                                                    key={chamado.id}
+                                                    className="p-4 md:p-5 border-b last:border-0 bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70"
+                                                >
+                                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">
+                                                        Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}
+                                                    </h3>
+                                                    <h6 className="text-base font-bold text-gray-800 dark:text-white">
+                                                        {chamado.assunto}
+                                                    </h6>
+                                                    <p className="mt-2 text-gray-500 dark:text-neutral-400">
+                                                        {chamado.descricao}
+                                                    </p>
+                                                    <div className="flex flex-row justify-between items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 mt-4 dark:bg-neutral-900 dark:border-neutral-700">
+                                                        <p className="text-sm text-gray-500 dark:text-neutral-500">
+                                                            Criado em {new Date(chamado.criado_em).toLocaleString("pt-BR")}
+                                                        </p>
+                                                        <a
+                                                            className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600"
+                                                            href="#"
+                                                        >
+                                                            Ver chamado
+                                                            <svg
+                                                                className="shrink-0 size-4"
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                width="24"
+                                                                height="24"
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                strokeWidth="2"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                            >
+                                                                <path d="m9 18 6-6-6-6"></path>
+                                                            </svg>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
+
                     </section>
                 </div>
             </div>

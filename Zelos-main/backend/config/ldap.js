@@ -32,10 +32,11 @@
 
 
 // o codigo abaixo é apenas p testar localmente mas deve ser apagado
+// config/ldap.js
 import passport from 'passport';
 import LdapStrategy from 'passport-ldapauth';
+import { read, create } from './database.js';
 
-// Verifica se estamos em modo de desenvolvimento (ambiente local)
 const isDev = process.env.NODE_ENV !== 'production' || process.env.BYPASS_LDAP === 'true';
 
 if (!isDev) {
@@ -49,26 +50,72 @@ if (!isDev) {
     }
   };
 
-  passport.use(new LdapStrategy(ldapOptions, (user, done) => {
-    if (!user) return done(null, false, { message: 'Usuário não encontrado' });
-    return done(null, user);
-  }));
-} else {
-  // Bypass para testes locais
-  passport.use('ldapauth', new (class extends passport.Strategy {
-    authenticate(req) {
-      const { username } = req.body;
+  passport.use(new LdapStrategy(ldapOptions, async (ldapUser, done) => {
+    try {
+      if (!ldapUser) {
+        return done(null, false, { message: 'Usuário não encontrado no LDAP' });
+      }
 
-      // Aqui você pode simular diferentes usuários
-      if (!username) return this.fail({ message: 'Nome de usuário é obrigatório' });
+      // 1. Procura no banco pelo username OU email
+      let existingUser = await read(
+        'usuarios',
+        `username = '${ldapUser.sAMAccountName}' OR email = '${ldapUser.mail}'`
+      );
 
-      const fakeUser = {
-        sAMAccountName: username,
-        displayName: 'Usuário Fictício',
-        mail: `${username}@teste.dev`
+      let userId;
+      if (existingUser) {
+        userId = existingUser.id;
+      } else {
+        // 2. Cria com valores padrão
+        const insertResult = await create('usuarios', {
+          username: ldapUser.sAMAccountName,
+          nome: ldapUser.displayName || ldapUser.cn || '',
+          email: ldapUser.mail || ''
+        });
+        userId = insertResult.insertId;
+      }
+
+      // 3. Retorna usuário padronizado
+      const finalUser = {
+        id: userId,
+        username: ldapUser.sAMAccountName,
+        nome: ldapUser.displayName || ldapUser.cn || '',
+        email: ldapUser.mail || ''
       };
 
-      return this.success(fakeUser);
+      return done(null, finalUser);
+
+    } catch (err) {
+      return done(err);
+    }
+  }));
+} else {
+  // Ambiente de desenvolvimento sem LDAP
+  passport.use('ldapauth', new (class extends passport.Strategy {
+    async authenticate(req) {
+      const { username } = req.body;
+      if (!username) return this.fail({ message: 'Nome de usuário é obrigatório' });
+
+      let existingUser = await read('usuarios', `username = '${username}'`);
+
+      let userId;
+      if (existingUser) {
+        userId = existingUser.id;
+      } else {
+        const insertResult = await create('usuarios', {
+          username,
+          nome: 'Usuário Fictício',
+          email: `${username}@teste.dev`
+        });
+        userId = insertResult.insertId;
+      }
+
+      this.success({
+        id: userId,
+        username,
+        nome: 'Usuário Fictício',
+        email: `${username}@teste.dev`
+      });
     }
   })());
 }
@@ -77,4 +124,3 @@ passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((user, done) => done(null, user));
 
 export default passport;
-

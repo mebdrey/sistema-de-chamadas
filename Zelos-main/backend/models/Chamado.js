@@ -1,27 +1,52 @@
 
 import { create, readAll, read, readQuery, update } from '../config/database.js';
 
-// cria usuario na tabela
-export const garantirUsuarioExiste = async (username) => {
-    const usuarios = await read('usuarios', { nome: username });
+// // cria usuario na tabela
+// export const garantirUsuarioExiste = async (username) => {
+//     const usuarios = await read('usuarios', { nome: username });
 
-    if (usuarios.length > 0) {
-        return usuarios[0].id; // retorna o id existente
-    }
+//     if (usuarios.length > 0) {
+//         return usuarios[0].id; // retorna o id existente
+//     }
 
-    // Se não existir, cria
-    const novoUsuario = await create('usuarios', { nome: username });
-    return novoUsuario.insertId;
-};
+//     // Se não existir, cria
+//     const novoUsuario = await create('usuarios', { nome: username });
+//     return novoUsuario.insertId;
+// };
 
 //criar chamado usuário -- funcionando
-const criarChamado = async (dados) => {
-    try {
-        return await create('chamados', dados)
-    } catch (err) {
-        console.error("Erro ao criar chamado!", err);
-        throw err;
-    }
+export const criarChamado = async (dados) => {
+  try {
+    return await create('chamados', dados);
+  } catch (err) {
+    console.error("Erro ao criar chamado!", err);
+    throw err;
+  }
+};
+
+// Buscar local_id com base no bloco e sala
+// export const buscarLocalId = async (bloco, sala) => {
+//   const consulta = `SELECT * FROM localChamado WHERE bloco = ? AND sala = ?`;
+//   const localEncontrado = await readQuery(consulta, [bloco, sala]);
+//   if (!localEncontrado[0].length) {
+//     return null;
+//   }
+//   return localEncontrado[0][0].id;
+// };
+
+// Buscar local_id com base no bloco e sala
+export const buscarLocalId = async (bloco, sala) => {
+  const consulta = `SELECT * FROM localChamado WHERE bloco = ? AND sala = ?`;
+  const localEncontrado = await readQuery(consulta, [bloco, sala]);
+
+  console.log("📥 Resultado bruto da query:", localEncontrado);
+
+  if (!localEncontrado || localEncontrado.length === 0) {
+    console.warn("Nenhum local encontrado para os parâmetros fornecidos.");
+    return null;
+  }
+
+  return localEncontrado[0].id;
 };
 
 
@@ -67,32 +92,45 @@ const listarUsuarios = async (dados) => {
 //     }
 // };
 
-const listarChamados = async (usuarioId) => {
+export const listarChamados = async (usuarioId) => {
     try {
-        return await readAll('chamados', `usuario_id= ${usuarioId}`)
-    }
-    catch (err) {
+        return await readAll('chamados', `usuario_id = ${usuarioId}`);
+    } catch (err) {
         console.error("Erro ao listar chamados!", err);
         throw err;
     }
-}
+};
+
 
 // ver tecnicos - adm -- funcionando
-const verTecnicos = async (dados) => {
-    const consulta = 'SELECT * FROM usuarios WHERE funcao = "técnico" ';
-    // const values = [ id, nome, email, funcao, status_usuarios];
-    // console.log('Valores para consulta:', values);
+// Técnicos (externo, apoio técnico, manutenção)
+export const verTecnicos = async () => {
+    const consulta = `
+        SELECT * FROM usuarios
+        WHERE funcao = "técnico externo"
+           OR funcao = "apoio técnico"
+           OR funcao = "manutenção"
+    `;
     try {
-        //   return await readQuery(consulta, values);
         return await readQuery(consulta);
     } catch (err) {
         throw err;
     }
 };
 
-// ver clientes - adm -- funcionando
-const verClientes = async (dados) => {
-    const consulta = 'SELECT * FROM usuarios WHERE funcao = "cliente" ';
+// Auxiliares de limpeza
+export const verAuxiliaresLimpeza = async () => {
+    const consulta = 'SELECT * FROM usuarios WHERE funcao = "auxiliar de limpeza"';
+    try {
+        return await readQuery(consulta);
+    } catch (err) {
+        throw err;
+    }
+};
+
+// Usuários comuns (clientes)
+export const verClientes = async () => {
+    const consulta = 'SELECT * FROM usuarios WHERE funcao = "usuario"';
     try {
         return await readQuery(consulta);
     } catch (err) {
@@ -190,4 +228,4 @@ export const listarSalasPorBloco = async (bloco) => {
 // }
 
 //criarUsuarioMensagem
-export { lerMsg, escreverMensagem, criarChamado, criarPrioridade, criarRelatorio, listarChamados, verRelatorios, listarUsuarios, verClientes, verTecnicos};
+export { lerMsg, escreverMensagem, criarPrioridade, criarRelatorio, verRelatorios, listarUsuarios, verClientes, verTecnicos};

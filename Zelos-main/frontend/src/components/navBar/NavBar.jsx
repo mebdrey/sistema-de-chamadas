@@ -2,7 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { initFlowbite } from 'flowbite'
-const SideBar = ({ userType, navFechada, setNavFechada }) => {
+import Image from 'next/image';
+
+const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
+    // const avatarUrl = user.image || `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(user.name || 'Usuario')}`;
     // espera o componente estar carregado no navegador p evitar erros de renderizacao
     // const [mounted, setMounted] = useState(false);
     // useEffect(() => {
@@ -166,7 +169,8 @@ const SideBar = ({ userType, navFechada, setNavFechada }) => {
                                     <div>
                                         <button type="button" className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" aria-expanded="false" data-dropdown-toggle="dropdown-user">
                                             <span className="sr-only">Open user menu</span>
-                                            <img className="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo" />
+                                             {/* <Image src={avatarUrl} alt="Foto do usuário" width={40} height={40} className='rounded-full'/> */}
+                                            {/* <img className="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo" /> */}
                                         </button>
                                     </div>
                                     <div className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm dark:bg-gray-700 dark:divide-gray-600" id="dropdown-user">

@@ -1,6 +1,6 @@
 
 
-import { buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, listarUsuarios, verTecnicos, verClientes, listarChamados, verRelatorios, listarSalasPorBloco, listarBlocos,  escreverMensagem, lerMsg , garantirUsuarioExiste } from "../models/Chamado.js";
+import { buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, verRelatorios, listarSalasPorBloco, listarBlocos,  escreverMensagem, lerMsg, buscarLocalId } from "../models/Chamado.js";
 //criarUsuarioMensagem
 
 // criar chamado -- funcionando
@@ -30,42 +30,85 @@ import { buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, list
 //     }
 // };
 
+// export const criarChamadoController = async (req, res) => {
+//   const { assunto, tipo_id, bloco, sala, descricao, prioridade } = req.body;
+//   const usuario_id = req.user?.id;
+//   console.log('chamadoControoler req.user:', req.user?.id)
+//   console.log('chamadoControoler usuario_id:', usuario_id)
+
+//   if (!assunto || !tipo_id || !bloco || !sala || !descricao) {
+//     return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
+//   }
+
+//   const imagem = req.file?.filename || null;
+
+//   try {
+//     const local_id = await buscarLocalId(bloco, sala);
+//     if (!local_id) {
+//       return res.status(400).json({ erro: 'Local (bloco/sala) inválido.' });
+//     }
+
+//     await criarChamado({
+//       assunto,
+//       tipo_id,
+//       descricao,
+//       prioridade: prioridade || 'none',
+//       imagem,
+//       local_id,
+//       usuario_id
+//     });
+
+//     res.status(201).json({ mensagem: 'Chamado criado com sucesso.' });
+
+//   } catch (error) {
+//     console.error('Erro ao criar chamado:', error);
+//     res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
+//   }
+// };
+
 export const criarChamadoController = async (req, res) => {
-    const { assunto, tipo_id, bloco, sala, descricao } = req.body;
-    const username = req.user?.username;
+  const { assunto, tipo_id, bloco, sala, descricao, prioridade } = req.body;
+  const usuario_id = req.user?.id;
 
-    if (!assunto || !tipo_id || !bloco || !sala || !descricao) {
-        return res.status(400).json({ erro: 'Preencha todos os campos.' });
+  // Verifica individualmente quais estão vazios
+  const camposVazios = [];
+  if (!assunto) camposVazios.push("assunto");
+  if (!tipo_id) camposVazios.push("tipo_id");
+  if (!bloco) camposVazios.push("bloco");
+  if (!sala) camposVazios.push("sala");
+  if (!descricao) camposVazios.push("descricao");
+
+  if (camposVazios.length > 0) {
+    console.warn("Campos obrigatórios vazios:", camposVazios);
+    return res.status(400).json({
+      erro: `Preencha todos os campos obrigatórios: ${camposVazios.join(", ")}`
+    });
+  }
+
+  const imagem = req.file?.filename || null;
+
+  try {
+    const local_id = await buscarLocalId(bloco, sala);
+    if (!local_id) {
+      return res.status(400).json({ erro: 'Local (bloco/sala) inválido.' });
     }
 
-    const imagem = req.file?.filename || null;
+    await criarChamado({
+      assunto,
+      tipo_id,
+      descricao,
+      prioridade: prioridade || 'none',
+      imagem,
+      local_id,
+      usuario_id
+    });
 
-    try {
-        // Garante que o usuário existe e pega seu id
-        const usuario_id = await garantirUsuarioExiste(username);
+    res.status(201).json({ mensagem: 'Chamado criado com sucesso.' });
 
-        // Buscar local_id com base em bloco + sala
-        const localEncontrado = await read('localChamado', { bloco, sala });
-        if (!localEncontrado.length) {
-            return res.status(400).json({ erro: 'Local (bloco/sala) inválido.' });
-        }
-        const local_id = localEncontrado[0].id;
-
-        await criarChamado({
-            assunto,
-            tipo_id,
-            descricao,
-            imagem,
-            local_id,
-            usuario_id
-        });
-
-        res.status(201).json({ mensagem: 'Chamado criado com sucesso.' });
-
-    } catch (error) {
-        console.error('Erro ao criar chamado:', error);
-        res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
-    }
+  } catch (error) {
+    console.error('Erro ao criar chamado:', error);
+    res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
+  }
 };
 
 //dar prioridade ao chamado -- não ta funcionando
@@ -89,49 +132,54 @@ const criarRelatorioController = async (req, res) => {
 };
 
 //listar todos os usuários -- funcionando
-const listarUsuariosController = async (req, res) => {
+// Listar técnicos
+export const listarTecnicosController = async (req, res) => {
     try {
-        // await listarUsuarios(req.body); 
-        const usuarios = await listarUsuarios(req.body);
-        res.status(200).json({ mensagem: 'Usuários listados com sucesso!!!', usuarios })
-    } catch (err) {
-        res.status(500).json({ erro: err.message });
-    }
-};
-
-// listar todos os tecnicos -- funcionando
-const listarTecnicosController = async (req, res) => {
-    try {
-        // await verTecnicos(req.body);
-        // const tecnicos = await verTecnicos(req.body);
         const tecnicos = await verTecnicos();
-        res.status(200).json({ mensagem: 'Técnicos listados com sucesso!!!', tecnicos })
+        res.status(200).json({ mensagem: 'Técnicos listados com sucesso!', tecnicos });
     } catch (err) {
         res.status(500).json({ erro: err.message });
     }
 };
 
-// listar todos os clientes -- funcionando
-const listarClientesController = async (req, res) => {
+// Listar auxiliares de limpeza
+export const listarAuxiliaresLimpezaController = async (req, res) => {
     try {
-        const clientes = await verClientes(req.body);
-        res.status(200).json({ mensagem: 'Clientes listados com sucesso!!!', clientes })
+        const auxiliares = await verAuxiliaresLimpeza();
+        res.status(200).json({ mensagem: 'Auxiliares de limpeza listados com sucesso!', auxiliares });
     } catch (err) {
         res.status(500).json({ erro: err.message });
     }
 };
 
-const listarChamadosController = async (req, res) => {
+// Listar usuários comuns (clientes)
+export const listarClientesController = async (req, res) => {
     try {
-        const usuarioId = req.usuarioId; // vindo do token JWT
+        const clientes = await verClientes();
+        res.status(200).json({ mensagem: 'Clientes listados com sucesso!', clientes });
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
+};
+
+export const listarChamadosController = async (req, res) => {
+    try {
+        const usuarioId = req.user?.id; // pegando do Passport
+        if (!usuarioId) {
+            return res.status(401).json({ message: 'Usuário não autenticado' });
+        }
+
         const chamados = await listarChamados(usuarioId);
-        res.status(200).json({ mensagem: 'Chamados listados com sucesso!!!', chamados })
-    }
-    catch (error) {
+
+        res.status(200).json({
+            mensagem: 'Chamados listados com sucesso!',
+            chamados
+        });
+    } catch (error) {
         console.error('Erro ao listar chamados:', error);
         res.status(500).json({ message: 'Erro ao listar chamados' });
     }
-}
+};
 
 //ver relatorios/apontamentos
 const verRelatoriosController = async (req, res) => {
@@ -195,6 +243,24 @@ const UsuarioEnviarMensagemController = async (req, res) => {
     }
 };
 
+const TecnicoEnviarMensagemController = async (req, res) => {
+    try {
+        //coisas da autenticacao idTecnico
+        //const idTecnico = req.idTecnico
+        const { idUsuario, idTecnico, conteudoMsg, idChamado } = req.body;
+        await escreverMensagem({
+            id_tecnico: idTecnico, //o id do tecnico seria  o técnico que respondeu o chamado
+            id_usuario: idUsuario,
+            conteudo: conteudoMsg,
+            id_chamado: idChamado
+        })
+        res.status(201).json({ mensagem: 'Mensagem enviada com sucesso!' });
+    } catch(error){
+        console.error(error);
+        res.status(500).json({mensagem: 'Erro ao técnico enviar mensagem!!'});
+    }
+}
+
 // listar tipos de serviço
 export const listarTiposServicoController = async (req, res) => {
     try {
@@ -231,23 +297,7 @@ export const buscarSalasPorBlocoController = async (req, res) => {
     }
 };
 
-const TecnicoEnviarMensagemController = async (req, res) => {
-    try {
-        //coisas da autenticacao idTecnico
-        //const idTecnico = req.idTecnico
-        const { idUsuario, idTecnico, conteudoMsg, idChamado } = req.body;
-        await escreverMensagem({
-            id_tecnico: idTecnico, //o id do tecnico seria  o técnico que respondeu o chamado
-            id_usuario: idUsuario,
-            conteudo: conteudoMsg,
-            id_chamado: idChamado
-        })
-        res.status(201).json({ mensagem: 'Mensagem enviada com sucesso!' });
-    } catch(error){
-        console.error(error);
-        res.status(500).json({mensagem: 'Erro ao técnico enviar mensagem!!'});
-    }
-}
+
 // msgUsuarioTecnico
-export { lerMensagensController,  UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarPrioridadeController, criarRelatorioController, listarUsuariosController, listarTecnicosController, listarClientesController, listarChamadosController, verRelatoriosController };
+export { lerMensagensController,  UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarPrioridadeController, criarRelatorioController, listarUsuariosController, listarTecnicosController, listarClientesController, verRelatoriosController };
 
