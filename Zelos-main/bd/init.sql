@@ -1,4 +1,4 @@
--- drop database zelos;
+DROP DATABASE IF EXISTS zelos;
 create database zelos;
 use zelos;
 
@@ -28,8 +28,8 @@ CREATE TABLE pool (
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by INT,
     updated_by INT,
-    FOREIGN KEY (created_by) REFERENCES usuarios(id),
-    FOREIGN KEY (updated_by) REFERENCES usuarios(id)
+	FOREIGN KEY (created_by) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (updated_by) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 insert into pool (titulo, descricao) values
 ('externo', 'Serviços realizados fora da empresa'),
@@ -41,8 +41,8 @@ CREATE TABLE usuario_servico (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
     servico_id INT NOT NULL,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
-    FOREIGN KEY (servico_id) REFERENCES pool(id)
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (servico_id) REFERENCES pool(id) ON DELETE CASCADE
 );
 
 -- trigger
@@ -59,18 +59,15 @@ BEGIN
         INSERT INTO usuario_servico (usuario_id, servico_id)
         SELECT NEW.id, id FROM pool
         WHERE titulo IN ('externo', 'apoio_tecnico', 'manutencao');
-
     -- Auxiliar de limpeza: apenas limpeza
     ELSEIF NEW.funcao = 'auxiliar de limpeza' THEN
         INSERT INTO usuario_servico (usuario_id, servico_id)
         SELECT NEW.id, id FROM pool
         WHERE titulo = 'limpeza';
-
     -- Admin: todos os serviços
     ELSEIF NEW.funcao = 'admin' THEN
         INSERT INTO usuario_servico (usuario_id, servico_id)
         SELECT NEW.id, id FROM pool;
-        
     -- Usuário comum: pode apenas solicitar (todos os serviços)
     ELSEIF NEW.funcao = 'usuario' THEN
         INSERT INTO usuario_servico (usuario_id, servico_id)
@@ -142,10 +139,10 @@ CREATE TABLE chamados (
     status_chamado ENUM('pendente', 'em andamento', 'concluído') DEFAULT 'pendente',
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (tipo_id) REFERENCES pool(id),
-    FOREIGN KEY (local_id) REFERENCES localChamado(id),
-    FOREIGN KEY (tecnico_id) REFERENCES usuarios(id),
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    FOREIGN KEY (tipo_id) REFERENCES pool(id) ON DELETE CASCADE,
+    FOREIGN KEY (local_id) REFERENCES localChamado(id) ON DELETE CASCADE,
+    FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
 -- Criação da tabela `apontamentos`
@@ -158,18 +155,19 @@ CREATE TABLE apontamentos (
     fim TIMESTAMP NULL,
     duracao INT AS (TIMESTAMPDIFF(SECOND, comeco, fim)) STORED, -- Calcula a duração em segundos
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (chamado_id) REFERENCES chamados(id),
-    FOREIGN KEY (tecnico_id) REFERENCES usuarios(id)
+    FOREIGN KEY (chamado_id) REFERENCES chamados(id) ON DELETE CASCADE,
+    FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
+
 -- Criação da tabela `pool_tecnico`
-/* 	Relaciona quais técnicos podem atuar em quais pools*/
+/* 	Relaciona quais técnicos podem atuar em quais pools - PROVAVELMTE ESSA TABELA NAO SERA USADA, ELA FOI SUBSTITUIDA POR "USUARIO_SERVICO"*/
 CREATE TABLE pool_tecnico (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_pool INT,
     id_tecnico INT,
-    FOREIGN KEY (id_pool) REFERENCES pool(id),
-    FOREIGN KEY (id_tecnico) REFERENCES usuarios(id)
+    FOREIGN KEY (id_pool) REFERENCES pool(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_tecnico) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
 CREATE TABLE redefinir_tokens (
@@ -179,16 +177,16 @@ CREATE TABLE redefinir_tokens (
 );
 
 create table mensagens (
-id int auto_increment primary key,
-id_usuario int,
-id_tecnico int,
-conteudo text,
-id_chamado int, -- isso vai ser o identificador do chat
-data_envio datetime default current_timestamp,
-lida boolean default false,
-foreign key (id_tecnico) references usuarios(id),
-foreign key (id_usuario) references usuarios(id),
-foreign key (id_chamado) references chamados(id)
+	id int auto_increment primary key,
+	id_usuario int,
+	id_tecnico int,
+	conteudo text,
+	id_chamado int, -- isso vai ser o identificador do chat
+	data_envio datetime default current_timestamp,
+	lida boolean default false,
+	FOREIGN KEY (id_tecnico) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_chamado) REFERENCES chamados(id) ON DELETE CASCADE
 );
 
 -- Índices adicionais para otimização

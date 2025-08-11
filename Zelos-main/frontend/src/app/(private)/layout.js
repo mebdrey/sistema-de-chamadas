@@ -17,7 +17,7 @@ export default function PrivateLayout({ children }) {
     return (
         <>
             <SideBar navFechada={navFechada} setNavFechada={setNavFechada} />
-            <main className="w-screen justify-items-end">
+            <main className="w-full justify-items-end">
                 <section className="h-fit transition-all duration-300" style={{ width: mainWidth }}>
                     {children}
                 </section>
