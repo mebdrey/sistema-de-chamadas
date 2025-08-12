@@ -38,11 +38,11 @@ router.post('/redefinir-senha', redefinirSenha);
 router.get('/perfil', obterPerfilUsuarioController);
 router.patch('/editarPerfil', editarPerfilController);
 
+
+//router.post('/chat', UsuarioEnviarMensagemController);
+
+
 //para o chat de usuario para tecnico
-router.post('/chat', UsuarioEnviarMensagemController);
-
-
-
 router.post('/enviar-msg', UsuarioEnviarMensagemController);
 
 //para o chat de técnico para usuario
