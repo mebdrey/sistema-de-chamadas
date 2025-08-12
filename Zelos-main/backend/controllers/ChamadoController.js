@@ -105,41 +105,53 @@ const TecnicoEnviarMensagemController = async (req, res) => {
 
 // usado para usuarios comuns ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 export const criarChamadoController = async (req, res) => {
-  const { assunto, tipo_id, bloco, sala, descricao, prioridade } = req.body;
+  // const { assunto, tipo_id, bloco, sala, descricao, prioridade, patrimonio } = req.body;
+  const { assunto, tipo_id, descricao, prioridade, patrimonio } = req.body;
   const usuario_id = req.user?.id;
-
   // Verifica individualmente quais estão vazios
-  const camposVazios = [];
-  if (!assunto) camposVazios.push("assunto");
-  if (!tipo_id) camposVazios.push("tipo_id");
-  if (!bloco) camposVazios.push("bloco");
-  if (!sala) camposVazios.push("sala");
-  if (!descricao) camposVazios.push("descricao");
-
-  if (camposVazios.length > 0) {
-    console.warn("Campos obrigatórios vazios:", camposVazios);
-    return res.status(400).json({
-      erro: `Preencha todos os campos obrigatórios: ${camposVazios.join(", ")}`
-    });
-  }
+  // const camposVazios = [];
+  // if (!assunto) camposVazios.push("assunto");
+  // if (!tipo_id) camposVazios.push("tipo_id");
+  // if (!bloco) camposVazios.push("bloco");
+  // if (!sala) camposVazios.push("sala");
+  // if (!descricao) camposVazios.push("descricao");
+  // if (camposVazios.length > 0) {
+  //   console.warn("Campos obrigatórios vazios:", camposVazios);
+  //   return res.status(400).json({
+  //     erro: `Preencha todos os campos obrigatórios: ${camposVazios.join(", ")}`
+  //   });}
 
   const imagem = req.file?.filename || null;
-
   try {
-    const local_id = await buscarLocalId(bloco, sala);
-    if (!local_id) {
-      return res.status(400).json({ erro: 'Local (bloco/sala) inválido.' });
+    // const local_id = await buscarLocalId(bloco, sala);
+
+    // if (!local_id) {
+    //   return res.status(400).json({ erro: 'Local (bloco/sala) inválido.' });
+    // }
+    const dadosChamado = {
+    assunto,
+    tipo_id: tipo_id || null,
+    descricao,
+    prioridade: prioridade || 'none',
+    imagem: imagem || null,
+    // bloco:bloco || null,
+    // sala: sala || null,
+    usuario_id: usuario_id || null,
+    patrimonio: patrimonio || null
+  };
+  Object.keys(dadosChamado).forEach((key) => {
+    if (dadosChamado[key] === undefined) {
+      dadosChamado[key] = null;
     }
-
-    await criarChamado({ assunto, tipo_id, descricao, prioridade: prioridade || 'none', imagem, local_id, usuario_id });
-
+  });
+    await criarChamado(dadosChamado);
+    // await criarChamado({ assunto, tipo_id, descricao, prioridade: prioridade || 'none', imagem, local_id, usuario_id, patrimonio});
     res.status(201).json({ mensagem: 'Chamado criado com sucesso.' });
 
   } catch (error) {
     console.error('Erro ao criar chamado:', error);
     res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
-  }
-};
+  }};
 
 export const listarChamadosController = async (req, res) => {
     try {
@@ -147,9 +159,7 @@ export const listarChamadosController = async (req, res) => {
         if (!usuarioId) {
             return res.status(401).json({ message: 'Usuário não autenticado' });
         }
-
         const chamados = await listarChamados(usuarioId);
-
         res.status(200).json({
             mensagem: 'Chamados listados com sucesso!',
             chamados
@@ -157,8 +167,8 @@ export const listarChamadosController = async (req, res) => {
     } catch (error) {
         console.error('Erro ao listar chamados:', error);
         res.status(500).json({ message: 'Erro ao listar chamados' });
-    }
-};
+    }};
+
 // listar tipos de serviço
 export const listarTiposServicoController = async (req, res) => {
     try {
@@ -167,8 +177,7 @@ export const listarTiposServicoController = async (req, res) => {
     } catch (error) {
       console.error('Erro ao listar tipos de serviço:', error);
       res.status(500).json({ erro: 'Erro interno ao listar tipos.' });
-    }
-  };
+    } };
 
 // listar blocos
 export const buscarBlocosController = async (req, res) => {
@@ -177,8 +186,7 @@ export const buscarBlocosController = async (req, res) => {
         res.status(200).json(blocos);
     } catch (err) {
         res.status(500).json({ erro: 'Erro ao buscar blocos.' });
-    }
-};
+    }};
 
 export const buscarSalasPorBlocoController = async (req, res) => {
     const { bloco } = req.params;
@@ -186,14 +194,12 @@ export const buscarSalasPorBlocoController = async (req, res) => {
     if (!bloco) {
         return res.status(400).json({ erro: 'Bloco não informado.' });
     }
-
     try {
         const salas = await listarSalasPorBloco(bloco);
         res.status(200).json(salas);
     } catch (err) {
         res.status(500).json({ erro: 'Erro ao buscar salas.' });
-    }
-};
+    }};
 
 // usado para o adm -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 export const listarUsuariosPorSetorController = async (req, res) => {
@@ -209,8 +215,7 @@ export const listarUsuariosPorSetorController = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ erro: err.message });
-  }
-};
+  }};
 
 export const excluirUsuarioController = async (req, res) => {
   const usuarioId = parseInt(req.params.id, 10);
@@ -230,8 +235,7 @@ export const excluirUsuarioController = async (req, res) => {
   } catch (error) {
     console.error('Erro ao excluir usuário:', error);
     return res.status(500).json({ erro: 'Erro interno ao excluir usuário.' });
-  }
-};
+  }};
 
 export const listarTodosChamadosController = async(req,res)=>{
   try {
@@ -251,8 +255,7 @@ export const listarChamadosDisponiveisController = async (req, res) => {
     res.json(chamados);
   } catch (error) {
     res.status(500).json({ erro: 'Erro ao listar chamados disponíveis.' });
-  }
-};
+  }};
 
 export const pegarChamadoController = async (req, res) => {
   const usuario_id = req.user?.id;
@@ -267,9 +270,8 @@ export const pegarChamadoController = async (req, res) => {
     res.status(200).json({ mensagem: 'Chamado atribuído com sucesso.' });
   } catch (error) {
     res.status(400).json({ erro: error.message });
-  }
-};
+  }};
 
 // msgUsuarioTecnico
-export { lerMensagensController,  UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarPrioridadeController, criarRelatorioController, verRelatoriosController };
+export { lerMensagensController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarPrioridadeController, criarRelatorioController, verRelatoriosController };
 

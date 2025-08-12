@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { initFlowbite } from 'flowbite'
 import { useRouter } from 'next/navigation';
 
-
 export default function ChamadosCliente() {
     const [selecionarPeriodo, setSelecionarPeriodo] = useState('mes') // "mes" = esse mês // select de periodo 
     const [isMounted, setIsMounted] = useState(false); // espera o componente estar carregado no navegador p evitar erros de renderizacao
@@ -12,10 +11,11 @@ export default function ChamadosCliente() {
     const [tiposServico, setTiposServico] = useState([]); // guarda o tipo de serviço que o usuario seleciona 
     const [tipoSelecionadoId, setTipoSelecionadoId] = useState(''); // id do servico
     const router = useRouter();
-    const [blocos, setBlocos] = useState([]); // guarda a sala e bloco selecionada 
-    const [salas, setSalas] = useState([]);
-    const [salaSelecionada, setSalaSelecionada] = useState('');
-    const [blocoSelecionado, setBlocoSelecionado] = useState('');
+    const [patrimonio, setpatrimonio] = useState(null);
+    // const [blocos, setBlocos] = useState([]); // guarda a sala e bloco selecionada 
+    // const [salas, setSalas] = useState([]);
+    // const [salaSelecionada, setSalaSelecionada] = useState('');
+    // const [blocoSelecionado, setBlocoSelecionado] = useState('');
     const [imagemPreview, setImagemPreview] = useState(null); // preview da imagem
     const [imagemArquivo, setImagemArquivo] = useState(null); // gaurda o arquivo da imagem
     const [assunto, setAssunto] = useState(''); // gaurda o assunto do chamado
@@ -71,9 +71,8 @@ export default function ChamadosCliente() {
 
     // array com periodos
     const periodos = [
-        { label: 'Essa semana', value: 'semana' },
-        { label: 'Esse mês', value: 'mes' },
-        { label: 'Esse ano', value: 'ano' }
+        { label: 'Crescente', value: 'crescente' },
+        { label: 'Decrescente', value: 'decrescente' }
     ];
 
     // busca os tipos de servico
@@ -85,35 +84,31 @@ export default function ChamadosCliente() {
     }, []);
 
     // busca bloco e salas
-    useEffect(() => {
-        fetch('http://localhost:8080/blocos')
-            .then(res => res.json())
-            .then(setBlocos)
-            .catch(err => console.error('Erro ao buscar blocos:', err));
-    }, []);
-
-    useEffect(() => {
-        if (blocoSelecionado) {
-            fetch(`http://localhost:8080/salas/${blocoSelecionado}`)
-                .then(res => res.json())
-                .then(setSalas)
-                .catch(err => console.error('Erro ao buscar salas:', err));
-        } else {
-            setSalas([]);
-        }
-    }, [blocoSelecionado]);
+    // useEffect(() => {
+    //     fetch('http://localhost:8080/blocos')
+    //         .then(res => res.json())
+    //         .then(setBlocos)
+    //         .catch(err => console.error('Erro ao buscar blocos:', err)); }, []);
+    // useEffect(() => {
+    //     if (blocoSelecionado) {
+    //         fetch(`http://localhost:8080/salas/${blocoSelecionado}`)
+    //             .then(res => res.json())
+    //             .then(setSalas)
+    //             .catch(err => console.error('Erro ao buscar salas:', err));
+    //     } else { setSalas([]);}
+    // }, [blocoSelecionado]);
 
     //criar chamado
     const criarChamado = async (e) => {
         e.preventDefault();
-
         const formData = new FormData();
         formData.append("assunto", assunto);
         formData.append("descricao", descricao);
         formData.append("tipo_id", tipoSelecionadoId);
-        formData.append("bloco", blocoSelecionado);
-        formData.append("sala", salaSelecionada);
+        // formData.append("bloco", blocoSelecionado);
+        // formData.append("sala", salaSelecionada);
         formData.append("imagem", imagemArquivo);
+        formData.append("patrimonio", patrimonio);
 
         const res = await fetch("http://localhost:8080/chamado", {
             method: "POST",
@@ -139,20 +134,17 @@ export default function ChamadosCliente() {
         }
     };
 
-
     return (
         <>
             {/* <SideBar userType="usuario" /> */}
             {/* conteudo da pagina */}
             <div className="p-4 w-full">
                 <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
-
                     <div className='flex flex-row w-full justify-between mb-15'>
                         {/* select */}
-                        <button id="dropdownRadioBgHoverButton" data-dropdown-toggle="dropdownRadioBgHover" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Período <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                        <button id="dropdownRadioBgHoverButton" data-dropdown-toggle="dropdownRadioBgHover" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Ordenar <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                         </svg></button>
-
                         <div id="dropdownRadioBgHover" className="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
                             {isMounted &&
                                 periodos.map((periodo, index) => (
@@ -164,7 +156,6 @@ export default function ChamadosCliente() {
                                     </div>
                                 ))}
                         </div>
-
                         {/* barra de pesquisa */}
                         {/* <form className="flex items-center">
                             <label htmlFor="simple-search" className="sr-only">Search</label>
@@ -172,21 +163,16 @@ export default function ChamadosCliente() {
                                 <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                                     <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
                                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
-                                    </svg>
-                                </div>
-                                <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Pesquisar chamado" required />
-                            </div>
+                                    </svg></div>
+                                <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Pesquisar chamado" required /></div>
                             <button type="submit" className="p-2.5 ms-2 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                                 <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                                 </svg>
                                 <span className="sr-only">Search</span>
-                            </button>
-                        </form> */}
-
+                            </button></form> */}
                         {/* Barra de pesquisa */}
-                        <form className="flex items-center" onSubmit={(e) => e.preventDefault()} // evita recarregar a página
-                        >
+                        <form className="flex items-center" onSubmit={(e) => e.preventDefault()}> 
                             <label htmlFor="simple-search" className="sr-only">Search</label>
                             <div className="relative w-80">
                                 <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -200,15 +186,13 @@ export default function ChamadosCliente() {
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="Pesquisar chamado"
                                     value={busca}
-                                    onChange={(e) => setBusca(e.target.value)}
-                                />
+                                    onChange={(e) => setBusca(e.target.value)} />
                             </div>
                         </form>
                     </div>
                     <section>
                         <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700">
                             <ul className="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist">
-
                                 {/* Tabs */}
                                 {statusAbas.map((status) => {
                                     const statusId = normalizarId(status)
@@ -223,15 +207,11 @@ export default function ChamadosCliente() {
                                     )
                                 })}
                             </ul>
-
                             {/* modal - criar chamado*/}
                             <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" className="flex flex-row items-center block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 h-fit text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button"><svg className="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>Novo chamado</button>
-
                             <div id="crud-modal" tabIndex="-1" aria-hidden="true" className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
                                 <div className="relative p-4 w-full max-w-md max-h-full">
-
                                     <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
-
                                         <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
                                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Novo chamado</h3>
                                             <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal">
@@ -241,7 +221,6 @@ export default function ChamadosCliente() {
                                                 <span className="sr-only">Close modal</span>
                                             </button>
                                         </div>
-
                                         <form className="p-4 md:p-5" onSubmit={criarChamado}>
                                             <div className="grid gap-4 mb-4 grid-cols-2">
                                                 <div className="col-span-2">
@@ -257,27 +236,24 @@ export default function ChamadosCliente() {
                                                                 {tipo.titulo}
                                                             </option>
                                                         ))}
-                                                    </select>
-                                                </div>
-                                                <div className="col-span-2">
+                                                    </select></div>
+                                                {/* <div className="col-span-2">
                                                     <label htmlFor="local" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Local</label>
                                                     <div className="flex">
                                                         <select id="bloco" value={blocoSelecionado} onChange={(e) => setBlocoSelecionado(e.target.value)} className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-500 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600">
                                                             <option value="" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">Selecione um bloco</option>
                                                             {blocos.map((b, index) => (
                                                                 <option key={b.id || index} value={b.bloco} className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">{b.bloco}
-                                                                </option>
-                                                            ))}
+                                                                </option>))}
                                                         </select>
-
                                                         <select id="salas" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-lg border-s-gray-100 dark:border-s-gray-700 border-s-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={salaSelecionada} onChange={(e) => setSalaSelecionada(e.target.value)}>
                                                             <option value="">Escolha a sala</option>
                                                             {salas.map((s, index) => (
-                                                                <option key={index} value={s.sala}>{s.sala}</option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-
+                                                                <option key={index} value={s.sala}>{s.sala}</option>))}
+                                                        </select> </div></div> */}
+                                                <div className="col-span-2">
+                                                    <label htmlFor="patrimonio" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Patrimônio</label>
+                                                    <input type="text" name="patrimonio" value="" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white" />
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descrição</label>
@@ -303,7 +279,6 @@ export default function ChamadosCliente() {
                                 </div>
                             </div>
                         </div>
-
                         {/* visualizar chamados */}
                         {/* <div id="default-tab-content">
                             {statusAbas.map((status) => {
@@ -315,70 +290,39 @@ export default function ChamadosCliente() {
                                         {chamadosFiltrados.length === 0 ? (
                                             <div className="p-4 md:p-5">
                                                 <p className="text-gray-500 dark:text-neutral-400">Nenhum chamado encontrado.</p>
-                                            </div>
-                                        ) : (
-                                            chamadosFiltrados.map((chamado) => (
-
+                                            </div> ) : ( chamadosFiltrados.map((chamado) => (
                                                 <div key={chamado.id} className="p-4 md:p-5 border-b last:border-0 bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
                                                     <h3 className="text-lg font-bold text-gray-800 dark:text-white">Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}</h3>
                                                     <h6 className="text-base font-bold text-gray-800 dark:text-white">{chamado.assunto}</h6>
                                                     <p className="mt-2 text-gray-500 dark:text-neutral-400">{chamado.descricao}</p>
                                                     <div className="flex flex-row justify-between items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 mt-4 dark:bg-neutral-900 dark:border-neutral-700">
-                                                        <p className="text-sm text-gray-500 dark:text-neutral-500">
-                                                            Criado em {new Date(chamado.criado_em).toLocaleString('pt-BR')}
-                                                        </p>
+                                                        <p className="text-sm text-gray-500 dark:text-neutral-500">Criado em {new Date(chamado.criado_em).toLocaleString('pt-BR')}</p>
                                                         <a className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600" href="#"> Ver chamado
                                                             <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                                 <path d="m9 18 6-6-6-6"></path>
                                                             </svg>
                                                         </a>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                )
-                            })}
-                        </div> */}
+                                                    </div> </div> )) )} </div> ) })}</div> */}
                         <div id="default-tab-content">
                             {statusAbas.map((status) => {
                                 const statusId = normalizarId(status);
-
                                 // Primeiro filtra por status
                                 let filtradosPorStatus =
                                     status === "todos"
-                                        ? chamados
-                                        : chamados.filter((c) => normalizarId(c.status_chamado) === statusId);
-
+                                        ? chamados : chamados.filter((c) => normalizarId(c.status_chamado) === statusId);
                                 // Depois aplica filtro de busca
                                 let chamadosFiltrados = filtradosPorStatus.filter((c) =>
-                                    busca.trim() === ""
-                                        ? true
-                                        : c.assunto.toLowerCase().includes(busca.toLowerCase()) ||
-                                        c.descricao.toLowerCase().includes(busca.toLowerCase()) ||
-                                        String(c.id).includes(busca)
-                                );
-
+                                    busca.trim() === "" ? true : c.assunto.toLowerCase().includes(busca.toLowerCase()) || c.descricao.toLowerCase().includes(busca.toLowerCase()) || String(c.id).includes(busca));
                                 return (
-                                    <div
-                                        key={status}
-                                        className="hidden flex flex-col bg-white ark:bg-neutral-900 gap-5"
-                                        id={statusId}
-                                        role="tabpanel"
-                                        aria-labelledby={`${statusId}-tab`}
-                                    >
+                                    <div key={status} className="hidden flex flex-col bg-white ark:bg-neutral-900 gap-5" id={statusId} role="tabpanel" aria-labelledby={`${statusId}-tab`}>
                                         {chamadosFiltrados.length === 0 ? (
                                             <div className="p-4 md:p-5">
-                                                <p className="text-gray-500 dark:text-neutral-400">
-                                                    Nenhum chamado encontrado.
-                                                </p>
-                                            </div>
-                                        ) : (
+                                                <p className="text-gray-500 dark:text-neutral-400"> Nenhum chamado encontrado. </p>
+                                            </div>) : (
                                             chamadosFiltrados.map((chamado) => (
                                                 <div
                                                     key={chamado.id}
-                                                    className="p-4 md:p-5 border-b last:border-0 bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70"
-                                                >
+                                                    className="p-4 md:p-5 border-b last:border-0 bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
                                                     <h3 className="text-lg font-bold text-gray-800 dark:text-white">
                                                         Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}
                                                     </h3>
@@ -392,35 +336,18 @@ export default function ChamadosCliente() {
                                                         <p className="text-sm text-gray-500 dark:text-neutral-500">
                                                             Criado em {new Date(chamado.criado_em).toLocaleString("pt-BR")}
                                                         </p>
-                                                        <a
-                                                            className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600"
-                                                            href="#"
-                                                        >
-                                                            Ver chamado
-                                                            <svg
-                                                                className="shrink-0 size-4"
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                width="24"
-                                                                height="24"
-                                                                viewBox="0 0 24 24"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                strokeWidth="2"
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                            >
+                                                        <a className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600"
+                                                            href="#" > Ver chamado
+                                                            <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
                                                                 <path d="m9 18 6-6-6-6"></path>
                                                             </svg>
                                                         </a>
                                                     </div>
-                                                </div>
-                                            ))
-                                        )}
+                                                </div>)))}
                                     </div>
                                 );
                             })}
                         </div>
-
                     </section>
                 </div>
             </div>
