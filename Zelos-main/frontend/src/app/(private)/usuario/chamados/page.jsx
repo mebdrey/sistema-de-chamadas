@@ -106,7 +106,6 @@ export default function ChamadosCliente() {
     //criar chamado
     const criarChamado = async (e) => {
         e.preventDefault();
-
         const formData = new FormData();
         formData.append("assunto", assunto);
         formData.append("descricao", descricao);
@@ -128,17 +127,14 @@ export default function ChamadosCliente() {
             setImagemArquivo(null);
         } else {
             alert("Erro ao criar chamado.");
-        }
-    };
+        } };
 
     const subirImagem = (e) => {
         const file = e.target.files[0]; // pega o arquivo selecionado
         if (file) {
             setImagemArquivo(file); // guarda o arquivo real
             setImagemPreview(URL.createObjectURL(file)); // gera uma url temporaria para mostrar
-        }
-    };
-
+        }};
 
     return (
         <>
@@ -183,10 +179,8 @@ export default function ChamadosCliente() {
                                 <span className="sr-only">Search</span>
                             </button>
                         </form> */}
-
                         {/* Barra de pesquisa */}
-                        <form className="flex items-center" onSubmit={(e) => e.preventDefault()} // evita recarregar a página
-                        >
+                        <form className="flex items-center" onSubmit={(e) => e.preventDefault()} > 
                             <label htmlFor="simple-search" className="sr-only">Search</label>
                             <div className="relative w-80">
                                 <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -260,24 +254,10 @@ export default function ChamadosCliente() {
                                                     </select>
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="local" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Local</label>
+                                                    <label htmlFor="local" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Patrimônio</label>
                                                     <div className="flex">
-                                                        <select id="bloco" value={blocoSelecionado} onChange={(e) => setBlocoSelecionado(e.target.value)} className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-500 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600">
-                                                            <option value="" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">Selecione um bloco</option>
-                                                            {blocos.map((b, index) => (
-                                                                <option key={b.id || index} value={b.bloco} className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">{b.bloco}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-
-                                                        <select id="salas" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-lg border-s-gray-100 dark:border-s-gray-700 border-s-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={salaSelecionada} onChange={(e) => setSalaSelecionada(e.target.value)}>
-                                                            <option value="">Escolha a sala</option>
-                                                            {salas.map((s, index) => (
-                                                                <option key={index} value={s.sala}>{s.sala}</option>
-                                                            ))}
-                                                        </select>
+                                                    <input type="text" name="name" value="" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"/>
                                                     </div>
-
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descrição</label>
