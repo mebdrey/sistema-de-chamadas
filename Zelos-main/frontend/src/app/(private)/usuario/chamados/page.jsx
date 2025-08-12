@@ -105,11 +105,10 @@ export default function ChamadosCliente() {
         formData.append("assunto", assunto);
         formData.append("descricao", descricao);
         formData.append("tipo_id", tipoSelecionadoId);
-        // formData.append("bloco", blocoSelecionado);
-        // formData.append("sala", salaSelecionada);
         formData.append("imagem", imagemArquivo);
         formData.append("patrimonio", patrimonio);
-
+        // formData.append("bloco", blocoSelecionado);
+        // formData.append("sala", salaSelecionada);
         const res = await fetch("http://localhost:8080/chamado", {
             method: "POST",
             body: formData,
@@ -172,7 +171,7 @@ export default function ChamadosCliente() {
                                 <span className="sr-only">Search</span>
                             </button></form> */}
                         {/* Barra de pesquisa */}
-                        <form className="flex items-center" onSubmit={(e) => e.preventDefault()}> 
+                        <form className="flex items-center" onSubmit={(e) => e.preventDefault()}>
                             <label htmlFor="simple-search" className="sr-only">Search</label>
                             <div className="relative w-80">
                                 <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
