@@ -105,31 +105,47 @@ const TecnicoEnviarMensagemController = async (req, res) => {
 
 // usado para usuarios comuns ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 export const criarChamadoController = async (req, res) => {
-  const { assunto, tipo_id, bloco, sala, descricao, prioridade } = req.body;
+  // const { assunto, tipo_id, bloco, sala, descricao, prioridade, patrimonio } = req.body;
+  const { assunto, tipo_id, descricao, prioridade, patrimonio } = req.body;
   const usuario_id = req.user?.id;
-
   // Verifica individualmente quais estão vazios
-  const camposVazios = [];
-  if (!assunto) camposVazios.push("assunto");
-  if (!tipo_id) camposVazios.push("tipo_id");
-  if (!bloco) camposVazios.push("bloco");
-  if (!sala) camposVazios.push("sala");
-  if (!descricao) camposVazios.push("descricao");
-
-  if (camposVazios.length > 0) {
-    console.warn("Campos obrigatórios vazios:", camposVazios);
-    return res.status(400).json({
-      erro: `Preencha todos os campos obrigatórios: ${camposVazios.join(", ")}`
-    });}
+  // const camposVazios = [];
+  // if (!assunto) camposVazios.push("assunto");
+  // if (!tipo_id) camposVazios.push("tipo_id");
+  // if (!bloco) camposVazios.push("bloco");
+  // if (!sala) camposVazios.push("sala");
+  // if (!descricao) camposVazios.push("descricao");
+  // if (camposVazios.length > 0) {
+  //   console.warn("Campos obrigatórios vazios:", camposVazios);
+  //   return res.status(400).json({
+  //     erro: `Preencha todos os campos obrigatórios: ${camposVazios.join(", ")}`
+  //   });}
 
   const imagem = req.file?.filename || null;
-
   try {
-    const local_id = await buscarLocalId(bloco, sala);
-    if (!local_id) {
-      return res.status(400).json({ erro: 'Local (bloco/sala) inválido.' });
+    // const local_id = await buscarLocalId(bloco, sala);
+
+    // if (!local_id) {
+    //   return res.status(400).json({ erro: 'Local (bloco/sala) inválido.' });
+    // }
+    const dadosChamado = {
+    assunto,
+    tipo_id: tipo_id || null,
+    descricao,
+    prioridade: prioridade || 'none',
+    imagem: imagem || null,
+    // bloco:bloco || null,
+    // sala: sala || null,
+    usuario_id: usuario_id || null,
+    patrimonio: patrimonio || null
+  };
+  Object.keys(dadosChamado).forEach((key) => {
+    if (dadosChamado[key] === undefined) {
+      dadosChamado[key] = null;
     }
-    await criarChamado({ assunto, tipo_id, descricao, prioridade: prioridade || 'none', imagem, local_id, usuario_id });
+  });
+    await criarChamado(dadosChamado);
+    // await criarChamado({ assunto, tipo_id, descricao, prioridade: prioridade || 'none', imagem, local_id, usuario_id, patrimonio});
     res.status(201).json({ mensagem: 'Chamado criado com sucesso.' });
 
   } catch (error) {
@@ -234,9 +250,11 @@ export const listarChamadosDisponiveisController = async (req, res) => {
 export const pegarChamadoController = async (req, res) => {
   const usuario_id = req.user?.id;
   const { chamado_id } = req.body;
+
   if (!chamado_id) {
     return res.status(400).json({ erro: 'ID do chamado é obrigatório.' });
   }
+
   try {
     await pegarChamado(chamado_id, usuario_id);
     res.status(200).json({ mensagem: 'Chamado atribuído com sucesso.' });
@@ -245,5 +263,5 @@ export const pegarChamadoController = async (req, res) => {
   }};
 
 // msgUsuarioTecnico
-export {lerMensagensController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarPrioridadeController, criarRelatorioController, verRelatoriosController };
+export { lerMensagensController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarPrioridadeController, criarRelatorioController, verRelatoriosController };
 

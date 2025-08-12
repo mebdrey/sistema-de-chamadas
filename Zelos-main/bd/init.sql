@@ -14,7 +14,7 @@ CREATE TABLE usuarios (
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
+select * from chamados;
 insert usuarios (nome, senha, numServico, email, funcao) value
 ("Julia Alves de Oliveira", "Senai@123", '90452786', "julia@gmail.com", "admin"),
 ("Maria de Brito Del Rey", "Senai@123", "84766243", "maria@gmail.com", "admin"),
@@ -40,7 +40,6 @@ CREATE TABLE pool (
     FOREIGN KEY (created_by) REFERENCES usuarios(id),
     FOREIGN KEY (updated_by) REFERENCES usuarios(id)
 );
-select * from pool;
 
     -- Criação da tabela `chamados`
     /*
@@ -74,14 +73,14 @@ CREATE TABLE chamados (
     tipo_id INT,
     tecnico_id INT,
     usuario_id INT,
-    local_id int,
+    patrimonio int,
     imagem VARCHAR(255),
     prioridade ENUM ('none','baixa', 'média', 'alta') DEFAULT 'none',
     status_chamado ENUM('pendente', 'em andamento', 'concluído') DEFAULT 'pendente',
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (tipo_id) REFERENCES pool(id),
-    FOREIGN KEY (local_id) REFERENCES localChamado(id),
+    FOREIGN KEY (patrimonio) REFERENCES localChamado(id),
     FOREIGN KEY (tecnico_id) REFERENCES usuarios(id),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );
@@ -110,11 +109,11 @@ INSERT INTO localChamado (bloco, sala, equipamento) VALUES
 ('bloco_a', 'a0-1010', 'Etiqueta eletrônica'),('bloco_a', 'a0-1011', 'Controladora de acesso'),('bloco_a', 'a0-1012', 'Teclado');
 
 /*
-insert chamados (titulo, descricao) value 
+insert chamados (assunto, descricao) value 
 ('teste1', 'primeiro teste de insert');
-insert into chamados (titulo, descricao, tecnico_id, usuario_id, status_chamado) values 
+insert into chamados (assunto, descricao, tecnico_id, usuario_id, status_chamado) values 
 ("Erro de atualização", "Boa tarde, estou tentando atualizar meu navegador pois ele não está mais dando suporte a versão antiga. mas não está pegando, aparece 'erro ao atualizar' e não dá nenhuma explicação. O que fazer?",  2, 3, "pendente");
-insert into chamados (titulo, descricao, tecnico_id, usuario_id, status_chamado) values 
+insert into chamados (assunto, descricao, tecnico_id, usuario_id, status_chamado) values 
 ("cmd abrindo toda hora", "Olá, o cmd do meu pc está aparecendo na tela toda hora, atrapalhando minhas atividades. Como resolver?", 4, 3, "pendente");
 select * from chamados;
 select * from chamados where usuario_id= 1 ;
@@ -158,8 +157,6 @@ foreign key (id_tecnico) references usuarios(id),
 foreign key (id_usuario) references usuarios(id),
 foreign key (id_chamado) references chamados(id)
 );
-
-select *from mensagens order by data_envio asc;
 
 -- Índices adicionais para otimização
 CREATE INDEX idx_usuarios_email ON usuarios(email);

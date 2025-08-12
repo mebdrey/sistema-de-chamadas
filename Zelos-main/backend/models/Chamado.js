@@ -4,14 +4,11 @@ import { create, readAll, read, readQuery, update, deleteRecord } from '../confi
 // // cria usuario na tabela
 // export const garantirUsuarioExiste = async (username) => {
 //     const usuarios = await read('usuarios', { nome: username });
-
 //     if (usuarios.length > 0) {
 //         return usuarios[0].id; // retorna o id existente}
-
 //     // Se não existir, cria
 //     const novoUsuario = await create('usuarios', { nome: username });
 //     return novoUsuario.insertId;};
-
 // Buscar local_id com base no bloco e sala
 // export const buscarLocalId = async (bloco, sala) => {
 //   const consulta = `SELECT * FROM localChamado WHERE bloco = ? AND sala = ?`;
@@ -19,8 +16,6 @@ import { create, readAll, read, readQuery, update, deleteRecord } from '../confi
 //   if (!localEncontrado[0].length) {
 //     return null;
 //   }return localEncontrado[0][0].id;};
-
-
 
 //prioridade do chamado - técnico -- não esta funcionando, não esta recebendo as informaçoes do id(quando tento enviar o id pelo body ele junta no set)
 const criarPrioridade = async (dados, id) => {
@@ -113,14 +108,11 @@ export const buscarTiposServico = async () => {
 export const buscarLocalId = async (bloco, sala) => {
     const consulta = `SELECT * FROM localChamado WHERE bloco = ? AND sala = ?`;
     const localEncontrado = await readQuery(consulta, [bloco, sala]);
-
     console.log("Resultado da query:", localEncontrado);
-
     if (!localEncontrado || localEncontrado.length === 0) {
         console.warn("Nenhum local encontrado para os parâmetros fornecidos.");
         return null;
     }
-
     return localEncontrado[0].id;
 };
 
