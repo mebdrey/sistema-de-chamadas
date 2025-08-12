@@ -1,6 +1,6 @@
 import express from "express";
 
-import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosPorSetorController, listarTiposServicoController, buscarBlocosController, buscarSalasPorBlocoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController } from "../controllers/ChamadoController.js";
+import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosPorSetorController, listarTiposServicoController, buscarBlocosController, buscarSalasPorBlocoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController } from "../controllers/ChamadoController.js";
 import { enviarLinkRedefinicao, redefinirSenha } from '../controllers/RedefinirSenhaController.js';
 import { obterPerfilUsuarioController, editarPerfilController } from "../controllers/PerfilController.js";
 import { upload } from '../middlewares/uploadMiddleware.js';
@@ -17,6 +17,7 @@ router.get('/servicos', listarTiposServicoController); // listar tipos de servi√
 // rotas usadas para o adm ------------------------------------------------------------------------------------------------------------------------------------------------
 router.get('/usuarios-por-setor', listarUsuariosPorSetorController); // adm - ver usuarios
 router.delete('/usuarios/:id', excluirUsuarioController); // adm- excluir usuarios
+router.get('/todos-chamados', listarTodosChamadosController) // ver todos os chamados registrados
 
 // rotas usadas para tecnicos e auxiliares ------------------------------------------------------------------------------------------------------------------------------------------------
 router.get('/chamados-disponiveis', listarChamadosDisponiveisController); // lista chamados disponiveis para o tecnico/auxiliar logado

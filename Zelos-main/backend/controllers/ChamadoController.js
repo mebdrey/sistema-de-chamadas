@@ -1,6 +1,6 @@
 
 
-import { buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, verRelatorios, listarSalasPorBloco, listarBlocos,  escreverMensagem, lerMsg, buscarLocalId, excluirUsuario, pegarChamado } from "../models/Chamado.js";
+import { buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, verRelatorios, listarSalasPorBloco, listarBlocos,  escreverMensagem, lerMsg, buscarLocalId, excluirUsuario, pegarChamado, verChamados } from "../models/Chamado.js";
 
 
 //dar prioridade ao chamado -- não ta funcionando
@@ -232,6 +232,16 @@ export const excluirUsuarioController = async (req, res) => {
     return res.status(500).json({ erro: 'Erro interno ao excluir usuário.' });
   }
 };
+
+export const listarTodosChamadosController = async(req,res)=>{
+  try {
+    const chamados = await verChamados();
+    res.status(200).json(chamados);
+} catch (err) {
+    console.error('Erro ao listar chamados: ', err);
+    res.status(500).json({ mensagem: 'Erro ao listar chamados' });
+}
+}
 
 // usado para TECNICOS E AUXILIARES ------------------------------------------------------------------------------------------------------------------------------------------------------------
 export const listarChamadosDisponiveisController = async (req, res) => {

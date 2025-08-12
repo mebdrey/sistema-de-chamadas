@@ -206,6 +206,15 @@ export const verClientes = async () => {
     }
 };
 
+export const verChamados = async () =>{
+    try{
+        return await readAll('chamados')
+    } catch (error) {
+        console.error('Erro ao listar chamados:', error);
+        throw error;
+    }
+}
+
 // funções utilizadas para TECNICOS E AUXILIARES DE LIMPEZA ------------------------------------------------------------------------------------------------------------------------------------
 export const listarChamadosDisponiveis = async (usuario_id) => {
     const sql = ` SELECT c.* FROM chamados c INNER JOIN usuario_servico us ON us.servico_id = c.tipo_id WHERE us.usuario_id = ? AND c.status_chamado = 'pendente' AND c.tecnico_id IS NULL `;

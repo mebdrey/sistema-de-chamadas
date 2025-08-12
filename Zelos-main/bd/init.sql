@@ -144,6 +144,19 @@ CREATE TABLE chamados (
     FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+INSERT INTO chamados (assunto, descricao, tipo_id, tecnico_id, usuario_id, local_id, imagem, prioridade, status_chamado)
+VALUES
+('Troca de lâmpada', 'A lâmpada da sala 201 está queimada.', 1, NULL, 3, 2, 'lampada.jpg', 'baixa', 'pendente'),
+('Computador não liga', 'PC da secretaria não inicializa, tela preta.', 2, NULL, 4, 1, 'pc_quebrado.png', 'alta', 'pendente'),
+('Vazamento de água', 'Canos do banheiro do 1º andar estão vazando.', 3, NULL, 5, 3, 'vazamento.jpg', 'média', 'pendente'),
+('Ar-condicionado não funciona', 'Sala de aula 305 sem ar-condicionado.', 1, NULL, 6, 4, 'ar_condicionado.jpg', 'alta', 'pendente'),
+('Impressora travando', 'Impressora do laboratório não puxa papel.', 2, NULL, 7, 5, 'impressora.jpg', 'média', 'pendente'),
+('Cadeira quebrada', 'Cadeira da recepção está instável.', 3, NULL, 8, 6, 'cadeira.jpg', 'baixa', 'pendente'),
+('Problema na rede Wi-Fi', 'Sinal fraco na biblioteca.', 2, NULL, 9, 7, 'wifi.png', 'alta', 'pendente'),
+('Porta emperrada', 'Porta do almoxarifado não abre direito.', 3, NULL, 10, 8, 'porta.jpg', 'baixa', 'pendente'),
+('Queda de energia', 'Falta de energia em parte do prédio.', 1, NULL, 11, 9, 'energia.jpg', 'alta', 'pendente'),
+('Janela quebrada', 'Janela do corredor do 2º andar está trincada.', 3, NULL, 12, 10, 'janela.jpg', 'média', 'pendente');
+select *from chamados;
 
 -- Criação da tabela `apontamentos`
 CREATE TABLE apontamentos (
