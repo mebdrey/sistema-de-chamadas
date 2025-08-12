@@ -6,15 +6,11 @@ import { create, readAll, read, readQuery, update, deleteRecord } from '../confi
 //     const usuarios = await read('usuarios', { nome: username });
 
 //     if (usuarios.length > 0) {
-//         return usuarios[0].id; // retorna o id existente
-//     }
+//         return usuarios[0].id; // retorna o id existente}
 
 //     // Se não existir, cria
 //     const novoUsuario = await create('usuarios', { nome: username });
-//     return novoUsuario.insertId;
-// };
-
-
+//     return novoUsuario.insertId;};
 
 // Buscar local_id com base no bloco e sala
 // export const buscarLocalId = async (bloco, sala) => {
@@ -22,9 +18,7 @@ import { create, readAll, read, readQuery, update, deleteRecord } from '../confi
 //   const localEncontrado = await readQuery(consulta, [bloco, sala]);
 //   if (!localEncontrado[0].length) {
 //     return null;
-//   }
-//   return localEncontrado[0][0].id;
-// };
+//   }return localEncontrado[0][0].id;};
 
 
 
@@ -36,8 +30,7 @@ const criarPrioridade = async (dados, id) => {
     } catch (err) {
         console.error('erro ao inserir prioridade no chamado!', err);
         throw err;
-    }
-};
+    }};
 
 //criar relatório - técnico -- funcionando
 const criarRelatorio = async (dados) => {
@@ -55,8 +48,7 @@ const criarRelatorio = async (dados) => {
 //         return await readAll('usuarios', dados)
 //     } catch (err) {
 //         console.error('Erro ao listar usuarios!!!', err);
-//     }
-// }
+//     }}
 
 //ver relatórios do técnico
 const verRelatorios = async (table, where) => {
@@ -65,10 +57,9 @@ const verRelatorios = async (table, where) => {
     } catch (err) {
         console.error('Erro ao listar relatórios!!!', err);
         throw err;
-    }
-}
+    }}
 
-//funções para o chat 
+//funções para o chat -------------------------------------------------------------------------------------
 
 //chat usuário -> técnico e técnico -> usuario
 const escreverMensagem = async (dados) => {
@@ -78,13 +69,11 @@ const escreverMensagem = async (dados) => {
             id_tecnico: dados.id_tecnico,
             conteudo: dados.conteudo,
             id_chamado: dados.id_chamado
-        });
-    }
+        });}
     catch (err) {
         console.error('Erro ao enviar mensagem! - models', err);
         throw err;
-    }
-}
+    }}
 
 const lerMsg = async (idChamado) => {
     const consulta = `SELECT * FROM mensagens WHERE id_chamado = ${idChamado}
@@ -94,8 +83,7 @@ const lerMsg = async (idChamado) => {
     }
     catch (err) {
         console.error('Erro ao listar mensagens do chamado especificado!!', err)
-    }
-}
+    }}
 
 // funções utilizadas para usuarios comuns --------------------------------------------------------------------------------------------------------------------------------------------
 //criar chamado usuário -- funcionando
@@ -105,8 +93,7 @@ export const criarChamado = async (dados) => {
     } catch (err) {
         console.error("Erro ao criar chamado!", err);
         throw err;
-    }
-};
+    }};
 
 export const listarChamados = async (usuarioId) => {
     try {
@@ -114,13 +101,12 @@ export const listarChamados = async (usuarioId) => {
     } catch (err) {
         console.error("Erro ao listar chamados!", err);
         throw err;
-    }
-};
+    }};
 
 // busca servicos
 export const buscarTiposServico = async () => {
     const tipos = await readAll('pool');
-    return tipos.filter(tipo => tipo.status_pool === 'ativo');
+    return tipos.filter(tipo => tipo.status=== 'ativo');
 };
 
 // Buscar local_id com base no bloco e sala

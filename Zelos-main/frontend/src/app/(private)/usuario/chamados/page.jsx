@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { initFlowbite } from 'flowbite'
 import { useRouter } from 'next/navigation';
 
-
 export default function ChamadosCliente() {
     const [selecionarPeriodo, setSelecionarPeriodo] = useState('mes') // "mes" = esse mês // select de periodo 
     const [isMounted, setIsMounted] = useState(false); // espera o componente estar carregado no navegador p evitar erros de renderizacao
@@ -38,8 +37,7 @@ export default function ChamadosCliente() {
             })
             .catch(() => {
                 router.push('/login');
-            });
-    }, []);
+            });}, []);
 
     // busca os chamados feitos pelo usuario
     useEffect(() => {
@@ -55,8 +53,7 @@ export default function ChamadosCliente() {
             .catch(err => {
                 console.error('Erro ao carregar chamados:', err);
                 setChamados([]);
-            });
-    }, []);
+            });}, []);
 
 
     function primeiraLetraMaiuscula(str) {
@@ -142,13 +139,11 @@ export default function ChamadosCliente() {
             {/* conteudo da pagina */}
             <div className="p-4 w-full">
                 <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
-
                     <div className='flex flex-row w-full justify-between mb-15'>
                         {/* select */}
                         <button id="dropdownRadioBgHoverButton" data-dropdown-toggle="dropdownRadioBgHover" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Período <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                         </svg></button>
-
                         <div id="dropdownRadioBgHover" className="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
                             {isMounted &&
                                 periodos.map((periodo, index) => (
@@ -160,7 +155,6 @@ export default function ChamadosCliente() {
                                     </div>
                                 ))}
                         </div>
-
                         {/* barra de pesquisa */}
                         {/* <form className="flex items-center">
                             <label htmlFor="simple-search" className="sr-only">Search</label>
@@ -194,15 +188,13 @@ export default function ChamadosCliente() {
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="Pesquisar chamado"
                                     value={busca}
-                                    onChange={(e) => setBusca(e.target.value)}
-                                />
+                                    onChange={(e) => setBusca(e.target.value)}/>
                             </div>
                         </form>
                     </div>
                     <section>
                         <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700">
                             <ul className="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist">
-
                                 {/* Tabs */}
                                 {statusAbas.map((status) => {
                                     const statusId = normalizarId(status)
@@ -213,19 +205,12 @@ export default function ChamadosCliente() {
                                                 data-tabs-target={`#${statusId}`} type="button" role="tab" aria-controls={statusId} aria-selected={abaAtiva === statusId} >
                                                 {primeiraLetraMaiuscula(status)}
                                             </button>
-                                        </li>
-                                    )
-                                })}
-                            </ul>
-
+                                        </li> )})} </ul>
                             {/* modal - criar chamado*/}
                             <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" className="flex flex-row items-center block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 h-fit text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button"><svg className="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>Novo chamado</button>
-
                             <div id="crud-modal" tabIndex="-1" aria-hidden="true" className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
                                 <div className="relative p-4 w-full max-w-md max-h-full">
-
                                     <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
-
                                         <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
                                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Novo chamado</h3>
                                             <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal">
@@ -235,7 +220,6 @@ export default function ChamadosCliente() {
                                                 <span className="sr-only">Close modal</span>
                                             </button>
                                         </div>
-
                                         <form className="p-4 md:p-5" onSubmit={criarChamado}>
                                             <div className="grid gap-4 mb-4 grid-cols-2">
                                                 <div className="col-span-2">

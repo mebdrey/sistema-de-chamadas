@@ -40,6 +40,8 @@ CREATE TABLE pool (
     FOREIGN KEY (created_by) REFERENCES usuarios(id),
     FOREIGN KEY (updated_by) REFERENCES usuarios(id)
 );
+select * from pool;
+
     -- Criação da tabela `chamados`
     /*
     CREATE TABLE chamados (
@@ -169,3 +171,4 @@ insert into pool (titulo, descricao) values
 ('manutencao', 'Manutenção preventiva e corretiva' ),
 ('apoio_tecnico', 'Suporte e atendimento técnico' ),
 ('limpeza', 'Serviços de limpeza' );
+DELETE FROM pool WHERE id=1;

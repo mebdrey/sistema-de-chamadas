@@ -120,8 +120,7 @@ export const criarChamadoController = async (req, res) => {
     console.warn("Campos obrigatórios vazios:", camposVazios);
     return res.status(400).json({
       erro: `Preencha todos os campos obrigatórios: ${camposVazios.join(", ")}`
-    });
-  }
+    });}
 
   const imagem = req.file?.filename || null;
 
@@ -130,16 +129,13 @@ export const criarChamadoController = async (req, res) => {
     if (!local_id) {
       return res.status(400).json({ erro: 'Local (bloco/sala) inválido.' });
     }
-
     await criarChamado({ assunto, tipo_id, descricao, prioridade: prioridade || 'none', imagem, local_id, usuario_id });
-
     res.status(201).json({ mensagem: 'Chamado criado com sucesso.' });
 
   } catch (error) {
     console.error('Erro ao criar chamado:', error);
     res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
-  }
-};
+  }};
 
 export const listarChamadosController = async (req, res) => {
     try {
@@ -147,9 +143,7 @@ export const listarChamadosController = async (req, res) => {
         if (!usuarioId) {
             return res.status(401).json({ message: 'Usuário não autenticado' });
         }
-
         const chamados = await listarChamados(usuarioId);
-
         res.status(200).json({
             mensagem: 'Chamados listados com sucesso!',
             chamados
@@ -157,8 +151,8 @@ export const listarChamadosController = async (req, res) => {
     } catch (error) {
         console.error('Erro ao listar chamados:', error);
         res.status(500).json({ message: 'Erro ao listar chamados' });
-    }
-};
+    }};
+
 // listar tipos de serviço
 export const listarTiposServicoController = async (req, res) => {
     try {
@@ -167,8 +161,7 @@ export const listarTiposServicoController = async (req, res) => {
     } catch (error) {
       console.error('Erro ao listar tipos de serviço:', error);
       res.status(500).json({ erro: 'Erro interno ao listar tipos.' });
-    }
-  };
+    } };
 
 // listar blocos
 export const buscarBlocosController = async (req, res) => {
@@ -177,8 +170,7 @@ export const buscarBlocosController = async (req, res) => {
         res.status(200).json(blocos);
     } catch (err) {
         res.status(500).json({ erro: 'Erro ao buscar blocos.' });
-    }
-};
+    }};
 
 export const buscarSalasPorBlocoController = async (req, res) => {
     const { bloco } = req.params;
@@ -186,14 +178,12 @@ export const buscarSalasPorBlocoController = async (req, res) => {
     if (!bloco) {
         return res.status(400).json({ erro: 'Bloco não informado.' });
     }
-
     try {
         const salas = await listarSalasPorBloco(bloco);
         res.status(200).json(salas);
     } catch (err) {
         res.status(500).json({ erro: 'Erro ao buscar salas.' });
-    }
-};
+    }};
 
 // usado para o adm -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 export const listarUsuariosPorSetorController = async (req, res) => {
@@ -209,8 +199,7 @@ export const listarUsuariosPorSetorController = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ erro: err.message });
-  }
-};
+  }};
 
 export const excluirUsuarioController = async (req, res) => {
   const usuarioId = parseInt(req.params.id, 10);
@@ -230,8 +219,7 @@ export const excluirUsuarioController = async (req, res) => {
   } catch (error) {
     console.error('Erro ao excluir usuário:', error);
     return res.status(500).json({ erro: 'Erro interno ao excluir usuário.' });
-  }
-};
+  }};
 
 // usado para TECNICOS E AUXILIARES ------------------------------------------------------------------------------------------------------------------------------------------------------------
 export const listarChamadosDisponiveisController = async (req, res) => {
@@ -241,25 +229,21 @@ export const listarChamadosDisponiveisController = async (req, res) => {
     res.json(chamados);
   } catch (error) {
     res.status(500).json({ erro: 'Erro ao listar chamados disponíveis.' });
-  }
-};
+  }};
 
 export const pegarChamadoController = async (req, res) => {
   const usuario_id = req.user?.id;
   const { chamado_id } = req.body;
-
   if (!chamado_id) {
     return res.status(400).json({ erro: 'ID do chamado é obrigatório.' });
   }
-
   try {
     await pegarChamado(chamado_id, usuario_id);
     res.status(200).json({ mensagem: 'Chamado atribuído com sucesso.' });
   } catch (error) {
     res.status(400).json({ erro: error.message });
-  }
-};
+  }};
 
 // msgUsuarioTecnico
-export { lerMensagensController,  UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarPrioridadeController, criarRelatorioController, verRelatoriosController };
+export {lerMensagensController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarPrioridadeController, criarRelatorioController, verRelatoriosController };
 
