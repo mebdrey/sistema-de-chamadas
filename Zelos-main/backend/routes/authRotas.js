@@ -65,6 +65,7 @@ router.post('/login', (req, res, next) => {
       
       if (!user) {
         console.warn('Falha na autenticação:', info?.message || 'Credenciais inválidas');
+        console.log('Info:', info);
         return res.status(401).json({ error: info?.message || 'Autenticação falhou' });
       }
 
@@ -74,7 +75,7 @@ router.post('/login', (req, res, next) => {
           console.error('Erro ao criar sessão:', loginErr);
           return res.status(500).json({ error: 'Erro ao criar sessão' });
         }
-
+        console.log('Info:', info);
         console.log('Usuário autenticado:', user.username);
         return res.json({ 
           message: 'Autenticado com sucesso', 
