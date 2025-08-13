@@ -101,7 +101,7 @@ export const listarChamados = async (usuarioId) => {
 // busca servicos
 export const buscarTiposServico = async () => {
     const tipos = await readAll('pool');
-    return tipos.filter(tipo => tipo.status=== 'ativo');
+    return tipos.filter(tipo => tipo.status_pool === 'ativo');
 };
 
 // Buscar local_id com base no bloco e sala
