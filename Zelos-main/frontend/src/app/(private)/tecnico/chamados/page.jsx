@@ -1,9 +1,100 @@
 'use client'
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { initFlowbite } from "flowbite";
 import './chamados.css'
 
 export default function ChamadosTecnico() {
     const [isOpen, setIsOpen] = useState(false); // p drawer abrir e fechar
+    const [selecionarPeriodo, setSelecionarPeriodo] = useState('mes') // "mes" = esse mês // select de periodo 
+    const [isMounted, setIsMounted] = useState(false); // espera o componente estar carregado no navegador p evitar erros de renderizacao
+    const [chamados, setChamados] = useState([]) // p selecionar os chamados com base no status
+    const [abaAtiva, setAbaAtiva] = useState('todos')
+    const [tiposServico, setTiposServico] = useState([]); // guarda o tipo de serviço que o usuario seleciona 
+
+    const [busca, setBusca] = useState(""); // armazena o que for digitado no campo de busca
+
+    // const [isOpen, setIsOpen] = useState(false); // p drawer abrir e fechar
+
+    useEffect(() => {
+        setIsMounted(true);
+        initFlowbite(); // inicializa dropdowns, modais, etc.
+    }, []);
+
+    function primeiraLetraMaiuscula(str) {
+        if (!str) return '';
+        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    }
+
+    // busca os chamados feitos pelo usuario
+    useEffect(() => {
+        fetch('http://localhost:8080/todos-chamados', { credentials: 'include' })
+            .then(res => {
+                if (!res.ok) throw new Error('Erro ao buscar chamados');
+                return res.json();
+            })
+            .then(data => {
+                console.log('Chamados recebidos:', data);
+                setChamados(Array.isArray(data) ? data : data.chamados || []);
+            })
+            .catch(err => {
+                console.error('Erro ao carregar chamados:', err);
+                setChamados([]);
+            });
+    }, []);
+
+    // STATUS DOS CHAMAFOS
+    const statusAbas = ['todos', 'pendente', 'em andamento', 'concluído'];
+    // funcao p normalizar id
+    const normalizarId = (texto) => texto.toLowerCase().replace(/\s+/g, '-');
+
+    // array com periodos
+    const periodos = [
+        { label: 'Essa semana', value: 'semana' },
+        { label: 'Esse mês', value: 'mes' },
+        { label: 'Esse ano', value: 'ano' }
+    ];
+
+    // array com prioridade
+    const prioridades = [
+        { label: 'Alta', value: 'alta' },
+        { label: 'Média', value: 'media' },
+        { label: 'Baixa', value: 'baixa' }
+    ];
+
+    // busca os tipos de servico
+    useEffect(() => {
+        fetch('http://localhost:8080/servicos', { credentials: 'include' })
+            .then(res => res.json())
+            .then(data => setTiposServico(data))
+            .catch(err => console.error('Erro ao carregar tipos:', err));
+    }, []);
+
+    //chama a funcao de contar os chamados
+    //  const [qtdChamados, setQtdChamados] = useState(null);
+    // useEffect(() => {
+    //     fetch('http://localhost:8080/contar-chamados')
+    //       .then(res => res.json())
+    //       .then(data => {
+    //         console.log("Resposta da API:", data);
+    //         setQtdChamados(data[0]['count(*)']);
+    //       })
+    //       .catch(err => console.error(err));
+    //   }, []);
+
+    //   if (qtdChamados === null) return <p>Carregando...</p>;
+
+      const [pendentes, setPendentes] = useState(null);
+      useEffect(() =>{
+        fetch('http://localhost:8080/pendentes')
+        .then(res => res.json())
+        .then(data =>{
+            console.log("Resposta da API: ", data );
+            setPendentes(data[0] ['count(*)']);
+        })
+        .catch(err =>console.error(err));
+      }, []);
+
+      if (pendentes === null) return <p>Carregando...</p>;
 
     return (
         <>
@@ -16,81 +107,337 @@ export default function ChamadosTecnico() {
 
                     <div className="flex justify-between">
 
-                        <div className="total-chamados"><p>Total de Chamados: 1244</p></div>
+                        
+                            <div className="total-chamados" ><p>Chamados Pendentes: {pendentes}</p></div>
+                        
+
+                        {/* Barra de pesquisa */}
+                        <form className="flex items-center" onSubmit={(e) => e.preventDefault()} // evita recarregar a página
+                        >
+                            <label htmlFor="simple-search" className="sr-only">Search</label>
+                            <div className="relative w-80">
+                                <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                    <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
+                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    id="simple-search"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    placeholder="Pesquisar chamado"
+                                    value={busca}
+                                    onChange={(e) => setBusca(e.target.value)}
+                                />
+                            </div>
+                        </form>
 
                         <div className="filtros flex gap-3">
-                            <select className="filtro rounded-sm w-[150px] border-gray-200 focus:outline-none focus:ring-0 focus:border-gray-500" >
-                                <option value="prioridade">Prioridade</option>
-                                <option value="prioridade1">Prioridade Alta</option>
-                                <option value="prioridade2">Prioridade Média</option>
-                                <option value="prioridade">Prioridade Baixa</option>
-                            </select>
-                            <select className="filtro rounded-sm w-[150px] border-gray-200 focus:outline-none focus:ring-0 focus:border-gray-500" >
-                                <option value="setor">Setores</option>
-                                <option value="setor1">Setor Técnico</option>
-                                <option value="setor2">Setor de Limpeza</option>
-                            </select>
-                            <select className="filtro rounded-sm w-[150px] border-gray-200 focus:outline-none focus:ring-0 focus:border-gray-500" >
-                                <option value="tempo">Essa semana</option>
-                                <option value="tempo1">Hoje</option>
-                                <option value="tempo2">Esse mês</option>
-                            </select>
+
+                            {/* select */}
+                            <button id="dropdownFiltroBtn" data-dropdown-toggle="dropdownFiltro" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Filtros <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                            </button>
+
+                            <div id="dropdownFiltro" className="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
+                                {isMounted &&
+                                    periodos.map((periodo, index) => (
+                                        <div key={index} className="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+                                            <input id={`periodo-radio-${index}`} type="radio" value={periodo.value} name="periodo" checked={selecionarPeriodo === periodo.value} onChange={() => setSelecionarPeriodo(periodo.value)} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
+                                            <label htmlFor={`periodo-radio-${index}`} className="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">
+                                                {periodo.label}
+                                            </label>
+                                        </div>
+                                    ))}
+                            </div>
+                            {/**select - setor */}
+                            <button id="dropdownSetorBtn" data-dropdown-toggle="dropdownSetor" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Setor <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                            </button>
+                            <div id="dropdownSetor" className="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
+                                {isMounted &&
+                                    periodos.map((setor, index) => (
+                                        <div key={index} className="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+                                            <input id={`setor-radio-${index}`} type="radio" value={setor.value} name="setor" checked={selecionarPeriodo === setor.value} onChange={() => setSelecionarPeriodo(setor.value)} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
+                                            <label htmlFor={`setor-radio-${index}`} className="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">
+                                                {setor.label}
+                                            </label>
+                                        </div>
+                                    ))}
+                            </div>
+
+                            {/**select - prioridade */}
+                            <button id="dropdownPrioridadeBtn" data-dropdown-toggle="dropdownPrioridade" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Prioridade <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                            </button>
+                            <div id="dropdownPrioridade" className="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
+                                {isMounted &&
+                                    prioridades.map((prioridade, index) => (
+                                        <div key={index} className="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+                                            <input id={`prioridade-radio-${index}`} type="radio" value={prioridade.value} name="prioridade" checked={selecionarPeriodo === prioridade.value} onChange={() => setSelecionarPeriodo(prioridade.value)} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
+                                            <label htmlFor={`prioridade-radio-${index}`} className="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">
+                                                {prioridade.label}
+                                            </label>
+                                        </div>
+                                    ))}
+                            </div>
+
                         </div>
+
 
                     </div>
 
-                    <div className="cards-chamados">
-                        {/**tab do tailwind */}
-                        <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
-                            {/**Categorias */}
-                            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-styled-tab" data-tabs-toggle="#default-styled-tab-content" data-tabs-active-classes="text-purple-600 hover:text-purple-600 dark:text-purple-500 dark:hover:text-purple-500 border-purple-600 dark:border-purple-500" data-tabs-inactive-classes="dark:border-transparent text-gray-500 hover:text-gray-600 dark:text-gray-400 border-gray-100 hover:border-gray-300 dark:border-gray-700 dark:hover:text-gray-300" role="tablist">
-                                <li class="me-2" role="presentation">
-                                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="profile-styled-tab" data-tabs-target="#styled-profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Todos</button>
-                                </li>
-                                <li class="me-2" role="presentation">
-                                    <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="dashboard-styled-tab" data-tabs-target="#styled-dashboard" type="button" role="tab" aria-controls="dashboard" aria-selected="false">Aberto</button>
-                                </li>
-                                <li class="me-2" role="presentation">
-                                    <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="settings-styled-tab" data-tabs-target="#styled-settings" type="button" role="tab" aria-controls="settings" aria-selected="false">Em andamento</button>
-                                </li>
-                                <li role="presentation">
-                                    <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="contacts-styled-tab" data-tabs-target="#styled-contacts" type="button" role="tab" aria-controls="contacts" aria-selected="false">Fechado</button>
-                                </li>
+                    <section>
+                        <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700">
+                            <ul className="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist">
+
+                                {/* Tabs */}
+                                {statusAbas.map((status) => {
+                                    const statusId = normalizarId(status)
+                                    return (
+                                        <li className="me-2" role="presentation" key={status}>
+                                            <button id={`${statusId}-tab`} onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === statusId ? "active border-blue-500 text-blue-600 dark:text-blue-400" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-neutral-400 dark:hover:text-neutral-300"
+                                                }`}
+                                                data-tabs-target={`#${statusId}`} type="button" role="tab" aria-controls={statusId} aria-selected={abaAtiva === statusId} >
+                                                {primeiraLetraMaiuscula(status)}
+                                            </button>
+                                        </li>
+                                    )
+                                })}
                             </ul>
                         </div>
-                        <div id="default-styled-tab-content">
-                            {/**Conteúdo */}
+                        <div id="default-tab-content">
+                            {statusAbas.map((status) => {
+                                const statusId = normalizarId(status);
 
-                            <div class="hidden p-4 rounded-lg  " id="styled-profile" role="tabpanel" aria-labelledby="profile-tab">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Colocar aqui todos os chamados</p>
+                                // Primeiro filtra por status
+                                let filtradosPorStatus = status === "todos" ? chamados : chamados.filter((c) => normalizarId(c.status_chamado) === statusId);
 
-                                <div className="cards">
-                                    <div className="card p-3 border-1 border-gray-200 rounded-md w-[400px] h-[250px]">
-                                        <div className="flex justify-between">
-                                            <div className="flex gap-2">
-                                                <div className="icone"><svg className="icone-chamado w-[20px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M288.6 76.8C344.8 20.6 436 20.6 492.2 76.8C548.4 133 548.4 224.2 492.2 280.4L328.2 444.4C293.8 478.8 238.1 478.8 203.7 444.4C169.3 410 169.3 354.3 203.7 319.9L356.5 167.3C369 154.8 389.3 154.8 401.8 167.3C414.3 179.8 414.3 200.1 401.8 212.6L249 365.3C239.6 374.7 239.6 389.9 249 399.2C258.4 408.5 273.6 408.6 282.9 399.2L446.9 235.2C478.1 204 478.1 153.3 446.9 122.1C415.7 90.9 365 90.9 333.8 122.1L169.8 286.1C116.7 339.2 116.7 425.3 169.8 478.4C222.9 531.5 309 531.5 362.1 478.4L492.3 348.3C504.8 335.8 525.1 335.8 537.6 348.3C550.1 360.8 550.1 381.1 537.6 393.6L407.4 523.6C329.3 601.7 202.7 601.7 124.6 523.6C46.5 445.5 46.5 318.9 124.6 240.8L288.6 76.8z" /></svg></div>
-                                                <h1 className="titulo-chamado">Meu PC não quer atualizar</h1>
+                                // Depois aplica filtro de busca
+                                let chamadosFiltrados = filtradosPorStatus.filter((c) =>
+                                    busca.trim() === ""
+                                        ? true
+                                        : c.assunto.toLowerCase().includes(busca.toLowerCase()) ||
+                                        c.descricao.toLowerCase().includes(busca.toLowerCase()) ||
+                                        String(c.id).includes(busca)
+                                );
+
+                                return (
+                                    <div key={status} className="hidden flex flex-wrap justify-start  gap-5" id={statusId} role="tabpanel" aria-labelledby={`${statusId}-tab`} >
+                                        {chamadosFiltrados.length === 0 ? (
+                                            <div className="p-4 md:p-5">
+                                                <p className="text-gray-500 dark:text-neutral-400"> Nenhum chamado encontrado.
+                                                </p>
                                             </div>
+                                        ) : (
+                                            chamadosFiltrados.map((chamado) => (
+                                                <div key={chamado.id} onClick={() => setIsOpen(true)} className=" p-4 md:p-5 max-w-xs flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:border-t-blue-500 dark:shadow-neutral-700/70 cursor-pointer w-1/3">
+                                                    <div className="flex items-center gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:border-neutral-700">
+                                                        <h3 className="text-base font-bold text-gray-800 dark:text-white">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
+                                                        <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-full text-sm px-5 py-1 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <p className="text-xs text-gray-500 dark:text-neutral-500">Usuário</p>
+                                                            <p className="text-sm font-bold text-gray-800 dark:text-white">Nome usuario</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs text-gray-500 dark:text-neutral-500">Criado em</p>
+                                                            <p className="text-sm font-bold text-gray-800 dark:text-white">{" "} {new Date(chamado.criado_em).toLocaleDateString("pt-BR", {
+                                                                month: "short", // abreviação do mês
+                                                                day: "numeric", // dia
+                                                                year: "numeric", // ano
+                                                            })}
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs text-gray-500 dark:text-neutral-500">Prioridade</p>
+                                                            <p className="text-sm font-bold text-gray-800 dark:text-white">{chamado.prioridade}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs text-gray-500 dark:text-neutral-500">Chamado ID</p>
+                                                            <p className="text-sm font-bold text-gray-800 dark:text-white">#{chamado.id}</p>
+                                                        </div>
+                                                    </div>
+                                                    {/* Drawer */}
+                                                    <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen p-4 overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-white w-80 dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
+                                                        <h5 id="drawer-right-label" className="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400">
+                                                            <svg className="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                                                            </svg>Detalhes do chamado</h5>
+                                                        <button type="button" onClick={() => setIsOpen(false)} className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white" >
+                                                            <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                                            </svg>
+                                                            <span className="sr-only">Close menu</span>
+                                                        </button>
+                                                        <div>
+                                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Usuário</p>
+                                                            <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">Usuário</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Assunto</p>
+                                                            <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamado.assunto}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Descrição</p>
+                                                            <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamado.descricao}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
+                                                            <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamado.imagem}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Técnico/Auxiliar</p>
+                                                            <div className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">
+                                                                {!chamado.tecnico_id ? (
+                                                                    <>
+                                                                        <div>Nenhum técnico/auxiliar atribuído.</div>
 
-                                            <div className="status">Aberto</div>
-                                        </div>
+                                                                        <button id="dropdownUsersButton" data-dropdown-toggle="dropdownUsers" data-dropdown-placement="bottom" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" > Adicionar funcionário<svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" ><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                                                        </svg>
+                                                                        </button>
+
+                                                                        <div id="dropdownUsers" className="z-10 hidden bg-white rounded-lg shadow-sm w-60 dark:bg-gray-700" >
+                                                                            <ul className="h-48 py-2 overflow-y-auto text-gray-700 dark:text-gray-200" aria-labelledby="dropdownUsersButton" >
+                                                                                <li>
+                                                                                    <a href="#" className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" >
+                                                                                        <img className="w-6 h-6 me-2 rounded-full" src="/docs/images/people/profile-picture-1.jpg" alt="Jese image" />Jese Leos
+                                                                                    </a>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <a href="#" className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" >
+                                                                                        <img className="w-6 h-6 me-2 rounded-full" src="/docs/images/people/profile-picture-2.jpg" alt="Robert image" />
+                                                                                        Robert Gough
+                                                                                    </a>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <a href="#" className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" >
+                                                                                        <img
+                                                                                            className="w-6 h-6 me-2 rounded-full"
+                                                                                            src="/docs/images/people/profile-picture-3.jpg"
+                                                                                            alt="Bonnie image"
+                                                                                        />
+                                                                                        Bonnie Green
+                                                                                    </a>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <a
+                                                                                        href="#"
+                                                                                        className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                                                    >
+                                                                                        <img
+                                                                                            className="w-6 h-6 me-2 rounded-full"
+                                                                                            src="/docs/images/people/profile-picture-4.jpg"
+                                                                                            alt="Leslie image"
+                                                                                        />
+                                                                                        Leslie Livingston
+                                                                                    </a>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <a
+                                                                                        href="#"
+                                                                                        className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                                                    >
+                                                                                        <img
+                                                                                            className="w-6 h-6 me-2 rounded-full"
+                                                                                            src="/docs/images/people/profile-picture-5.jpg"
+                                                                                            alt="Michael image"
+                                                                                        />
+                                                                                        Michael Gough
+                                                                                    </a>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <a
+                                                                                        href="#"
+                                                                                        className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                                                    >
+                                                                                        <img
+                                                                                            className="w-6 h-6 me-2 rounded-full"
+                                                                                            src="/docs/images/people/profile-picture-2.jpg"
+                                                                                            alt="Joseph image"
+                                                                                        />
+                                                                                        Joseph Mcfall
+                                                                                    </a>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <a
+                                                                                        href="#"
+                                                                                        className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                                                    >
+                                                                                        <img
+                                                                                            className="w-6 h-6 me-2 rounded-full"
+                                                                                            src="/docs/images/people/profile-picture-3.jpg"
+                                                                                            alt="Roberta image"
+                                                                                        />
+                                                                                        Roberta Casas
+                                                                                    </a>
+                                                                                </li>
+                                                                                <li>
+                                                                                    <a
+                                                                                        href="#"
+                                                                                        className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                                                    >
+                                                                                        <img
+                                                                                            className="w-6 h-6 me-2 rounded-full"
+                                                                                            src="/docs/images/people/profile-picture-1.jpg"
+                                                                                            alt="Neil image"
+                                                                                        />
+                                                                                        Neil Sims
+                                                                                    </a>
+                                                                                </li>
+                                                                            </ul>
+                                                                            <a
+                                                                                href="#"
+                                                                                className="flex items-center p-3 text-sm font-medium text-blue-600 border-t border-gray-200 rounded-b-lg bg-gray-50 dark:border-gray-600 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-blue-500 hover:underline"
+                                                                            >
+                                                                                <svg
+                                                                                    className="w-4 h-4 me-2"
+                                                                                    aria-hidden="true"
+                                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 20 18"
+                                                                                >
+                                                                                    <path d="M6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Zm11-3h-2V5a1 1 0 0 0-2 0v2h-2a1 1 0 1 0 0 2h2v2a1 1 0 0 0 2 0V9h2a1 1 0 1 0 0-2Z" />
+                                                                                </svg>
+                                                                                Add new user
+                                                                            </a>
+                                                                        </div>
+                                                                    </>
+                                                                ) : (
+                                                                    <p>{chamado.tecnico_nome}</p>
+                                                                )}
+                                                            </div>
+
+                                                        </div>
+                                                        <div>
+                                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Usuário</p>
+                                                            <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">Usuário</p>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <a href="#" className="px-4 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg focus:outline-none hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Learn more</a>
+                                                            <a href="#" className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                                                                Get access
+                                                                <svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                                                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
+                                                                </svg>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                            ))
+                                        )}
                                     </div>
-                                </div>
-                            </div>
-
-                            <div class="hidden p-4 rounded-lg " id="styled-dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Colocar aqui os chamados abertos</p>
-                            </div>
-
-                            <div class="hidden p-4 rounded-lg " id="styled-settings" role="tabpanel" aria-labelledby="settings-tab">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Colocar aqui os chamados em andamento</p>
-                            </div>
-
-                            <div class="hidden p-4 rounded-lg " id="styled-contacts" role="tabpanel" aria-labelledby="contacts-tab">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Colocar aqui os chamados fechados</p>
-                            </div>
+                                );
+                            })}
                         </div>
-                    </div>
+                    </section>
 
                 </div>
             </section>

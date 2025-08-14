@@ -203,6 +203,46 @@ export const listarChamadosDisponiveis = async (usuario_id) => {
     }
 };
 
+export const contarTodosChamados = async() =>{
+    const sql = `select count(*) from chamados ;`;
+    try{
+        return await readQuery(sql);
+    }
+    catch (err){
+        throw err;
+    }
+};
+
+export const contarChamadosPendentes = async()=>{
+    const sql = `select count(*) from chamados where status_chamado = 'pendente'`;
+    try{
+        return await readQuery(sql);
+    }
+    catch(err){
+        throw err;
+    }
+};
+
+export const contarChamadosEmAndamento = async()=>{
+    const sql = `select count(*) from chamados where status_chamado = 'em andamento'`;
+    try{
+        return await readQuery(sql);
+    }
+    catch(err){
+        throw err;
+    }
+};
+
+export const contarChamadosConcluido = async()=>{
+    const sql = `select count(*) from chamados where status_chamado = 'concluido'`;
+    try{
+        return await readQuery(sql);
+    }
+    catch(err){
+        throw err;
+    }
+};
+
 export const pegarChamado = async (chamado_id, usuario_id) => {
     // verifica se o chamado existe
     const chamado = await read('chamados', `id = ${chamado_id}`);
@@ -225,7 +265,7 @@ export const pegarChamado = async (chamado_id, usuario_id) => {
     }
 };
 
-
+ 
 //técnico ler as mensagens enviadas para ele - usar esse quando a autenticação estiver funcionando
 // const receberMensagensDoUsuario = async (usuarioId) => {
 //     try {
@@ -247,6 +287,8 @@ export const pegarChamado = async (chamado_id, usuario_id) => {
 //         throw err;
 //     };
 // }
+
+//contar  a quantidade total de chamados ativos
 
 //criarUsuarioMensagem
 export { lerMsg, escreverMensagem, criarPrioridade, criarRelatorio, verRelatorios };

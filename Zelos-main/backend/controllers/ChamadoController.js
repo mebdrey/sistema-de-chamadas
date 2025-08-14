@@ -1,6 +1,6 @@
 
 
-import { buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, verRelatorios, listarSalasPorBloco, listarBlocos,  escreverMensagem, lerMsg, buscarLocalId, excluirUsuario, pegarChamado, verChamados } from "../models/Chamado.js";
+import { buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, verRelatorios, listarSalasPorBloco, listarBlocos,  escreverMensagem, lerMsg, buscarLocalId, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido } from "../models/Chamado.js";
 
 
 //dar prioridade ao chamado -- não ta funcionando
@@ -271,6 +271,46 @@ export const pegarChamadoController = async (req, res) => {
   } catch (error) {
     res.status(400).json({ erro: error.message });
   }};
+
+  export const contarChamadosController = async (req, res) =>{
+    try{
+    const total = await contarTodosChamados();
+    res.json(total);
+  } catch(error){
+    console.error('Erro ao contar chamados!! ', error);
+    res.status(500).json({erro: 'erro ao contar chamados'});
+  }
+  };
+
+  export const chamadosPendentesController = async(req,res) =>{
+    try{
+      const total = await contarChamadosPendentes();
+      res.json(total);
+    } catch(error){
+      console.error('erro ao contar chamados pendentes: ', error);
+      res.status(500).json({erro: 'erro ao contar chamados pendentes!'});
+    }
+  };
+
+  export const chamadosEmAndamentoController = async(req,res) =>{
+    try{
+      const total = await contarChamadosEmAndamento();
+      res.json(total);
+    } catch(error){
+      console.error('erro ao contar chamados em andamento: ', error);
+      res.status(500).json({erro: 'erro ao contar chamados em andamento!'});
+    }
+  };
+
+  export const chamadosConcluidoController = async(req,res) =>{
+    try{
+      const total = await contarChamadosConcluido();
+      res.json(total);
+    } catch(error){
+      console.error('erro ao contar chamados concluídos: ', error);
+      res.status(500).json({erro: 'erro ao contar chamados concluídos!'});
+    }
+  };
 
 // msgUsuarioTecnico
 export { lerMensagensController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarPrioridadeController, criarRelatorioController, verRelatoriosController };
