@@ -1,6 +1,6 @@
 import express from "express";
 
-import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosPorSetorController, listarTiposServicoController, buscarBlocosController, buscarSalasPorBlocoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController } from "../controllers/ChamadoController.js";
+import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosPorSetorController, listarTiposServicoController, buscarBlocosController, buscarSalasPorBlocoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController } from "../controllers/ChamadoController.js";
 import { enviarLinkRedefinicao, redefinirSenha } from '../controllers/RedefinirSenhaController.js';
 import { obterPerfilUsuarioController, editarPerfilController } from "../controllers/PerfilController.js";
 import { upload } from '../middlewares/uploadMiddleware.js';
@@ -52,5 +52,11 @@ router.post('/tecnico-enviar-msg', TecnicoEnviarMensagemController);
 //tecnico receber essas mensagens enviadas para ele
 //router.get('/chat', receberMensagensController);
 router.get('/chat', lerMensagensController);
+
+//contar chamados 
+router.get('/contar-chamados', contarChamadosController);
+router.get('/pendentes', chamadosPendentesController);
+router.get('/em-andamento', chamadosEmAndamentoController);
+router.get('/concluido', chamadosConcluidoController)
 
 export default router;
