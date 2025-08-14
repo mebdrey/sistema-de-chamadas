@@ -41,28 +41,28 @@ export default function ChamadosTecnico() {
 
                     <div className="cards-chamados">
                         {/**tab do tailwind */}
-                        <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
+                        <div className="mb-4 border-b border-gray-200 dark:border-gray-700">
                             {/**Categorias */}
-                            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-styled-tab" data-tabs-toggle="#default-styled-tab-content" data-tabs-active-classes="text-purple-600 hover:text-purple-600 dark:text-purple-500 dark:hover:text-purple-500 border-purple-600 dark:border-purple-500" data-tabs-inactive-classes="dark:border-transparent text-gray-500 hover:text-gray-600 dark:text-gray-400 border-gray-100 hover:border-gray-300 dark:border-gray-700 dark:hover:text-gray-300" role="tablist">
-                                <li class="me-2" role="presentation">
-                                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="profile-styled-tab" data-tabs-target="#styled-profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Todos</button>
+                            <ul className="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-styled-tab" data-tabs-toggle="#default-styled-tab-content" data-tabs-active-classes="text-purple-600 hover:text-purple-600 dark:text-purple-500 dark:hover:text-purple-500 border-purple-600 dark:border-purple-500" data-tabs-inactive-classes="dark:border-transparent text-gray-500 hover:text-gray-600 dark:text-gray-400 border-gray-100 hover:border-gray-300 dark:border-gray-700 dark:hover:text-gray-300" role="tablist">
+                                <li className="me-2" role="presentation">
+                                    <button className="inline-block p-4 border-b-2 rounded-t-lg" id="profile-styled-tab" data-tabs-target="#styled-profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Todos</button>
                                 </li>
-                                <li class="me-2" role="presentation">
-                                    <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="dashboard-styled-tab" data-tabs-target="#styled-dashboard" type="button" role="tab" aria-controls="dashboard" aria-selected="false">Aberto</button>
+                                <li className="me-2" role="presentation">
+                                    <button className="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="dashboard-styled-tab" data-tabs-target="#styled-dashboard" type="button" role="tab" aria-controls="dashboard" aria-selected="false">Aberto</button>
                                 </li>
-                                <li class="me-2" role="presentation">
-                                    <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="settings-styled-tab" data-tabs-target="#styled-settings" type="button" role="tab" aria-controls="settings" aria-selected="false">Em andamento</button>
+                                <li className="me-2" role="presentation">
+                                    <button className="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="settings-styled-tab" data-tabs-target="#styled-settings" type="button" role="tab" aria-controls="settings" aria-selected="false">Em andamento</button>
                                 </li>
                                 <li role="presentation">
-                                    <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="contacts-styled-tab" data-tabs-target="#styled-contacts" type="button" role="tab" aria-controls="contacts" aria-selected="false">Fechado</button>
+                                    <button className="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="contacts-styled-tab" data-tabs-target="#styled-contacts" type="button" role="tab" aria-controls="contacts" aria-selected="false">Fechado</button>
                                 </li>
                             </ul>
                         </div>
                         <div id="default-styled-tab-content">
                             {/**Conteúdo */}
 
-                            <div class="hidden p-4 rounded-lg  " id="styled-profile" role="tabpanel" aria-labelledby="profile-tab">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Colocar aqui todos os chamados</p>
+                            <div className="hidden p-4 rounded-lg  " id="styled-profile" role="tabpanel" aria-labelledby="profile-tab">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Colocar aqui todos os chamados</p>
 
                                 <div className="cards">
                                     <div className="card p-3 border-1 border-gray-200 rounded-md w-[400px] h-[250px]">
@@ -78,16 +78,16 @@ export default function ChamadosTecnico() {
                                 </div>
                             </div>
 
-                            <div class="hidden p-4 rounded-lg " id="styled-dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Colocar aqui os chamados abertos</p>
+                            <div className="hidden p-4 rounded-lg " id="styled-dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Colocar aqui os chamados abertos</p>
                             </div>
 
-                            <div class="hidden p-4 rounded-lg " id="styled-settings" role="tabpanel" aria-labelledby="settings-tab">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Colocar aqui os chamados em andamento</p>
+                            <div className="hidden p-4 rounded-lg " id="styled-settings" role="tabpanel" aria-labelledby="settings-tab">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Colocar aqui os chamados em andamento</p>
                             </div>
 
-                            <div class="hidden p-4 rounded-lg " id="styled-contacts" role="tabpanel" aria-labelledby="contacts-tab">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Colocar aqui os chamados fechados</p>
+                            <div className="hidden p-4 rounded-lg " id="styled-contacts" role="tabpanel" aria-labelledby="contacts-tab">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Colocar aqui os chamados fechados</p>
                             </div>
                         </div>
                     </div>

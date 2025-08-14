@@ -272,46 +272,86 @@ CREATE TABLE chamados (
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (tipo_id) REFERENCES pool(id) ON DELETE CASCADE,
-    FOREIGN KEY (local_id) REFERENCES localChamado(id) ON DELETE CASCADE,
     FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
 -- 10 chamados pendentes
-INSERT INTO chamados (assunto, descricao, tipo_id, tecnico_id, usuario_id, local_id, imagem, prioridade, status_chamado)
+INSERT INTO chamados (assunto, descricao, tipo_id, tecnico_id, usuario_id, imagem, prioridade, status_chamado)
 VALUES
-('Problema na impressora', 'Impressora não está imprimindo.', 1, 1, 2, 1, NULL, 'média', 'pendente'),
-('Computador lento', 'PC demora muito para iniciar.', 2, 1, 3, 2, NULL, 'baixa', 'pendente'),
-('Sem acesso à internet', 'Conexão caiu repentinamente.', 3, 2, 4, 3, NULL, 'alta', 'pendente'),
-('Monitor apagado', 'Tela do monitor não acende.', 1, 3, 5, 1, NULL, 'baixa', 'pendente'),
-('Teclado com teclas falhando', 'Algumas teclas não funcionam.', 2, 4, 6, 2, NULL, 'none', 'pendente'),
-('Erro no sistema', 'Sistema trava ao abrir módulo de vendas.', 3, 5, 7, 3, NULL, 'alta', 'pendente'),
-('Telefone sem linha', 'Telefone fixo não recebe chamadas.', 1, 6, 8, 1, NULL, 'média', 'pendente'),
-('Queda de energia', 'Sala ficou sem luz após curto-circuito.', 2, 7, 9, 2, NULL, 'alta', 'pendente'),
-('Câmera de segurança inoperante', 'Câmera não transmite imagem.', 3, 8, 10, 3, NULL, 'média', 'pendente'),
-('Problema no projetor', 'Imagem do projetor está desfocada.', 1, 1, 2, 1, NULL, 'baixa', 'pendente'),
+('Problema na impressora', 'Impressora não está imprimindo.', 1, 1, 2, NULL, 'média', 'pendente'),
+('Computador lento', 'PC demora muito para iniciar.', 2, 1, 3, NULL, 'baixa', 'pendente'),
+('Sem acesso à internet', 'Conexão caiu repentinamente.', 3, 2, 4, NULL, 'alta', 'pendente'),
+('Monitor apagado', 'Tela do monitor não acende.', 1, 3, 5, NULL, 'baixa', 'pendente'),
+('Teclado com teclas falhando', 'Algumas teclas não funcionam.', 2, 4, 6, NULL, 'none', 'pendente'),
+('Erro no sistema', 'Sistema trava ao abrir módulo de vendas.', 3, 5, 7, NULL, 'alta', 'pendente'),
+('Telefone sem linha', 'Telefone fixo não recebe chamadas.', 1, 6, 8, NULL, 'média', 'pendente'),
+('Queda de energia', 'Sala ficou sem luz após curto-circuito.', 2, 7, 9, NULL, 'alta', 'pendente'),
+('Câmera de segurança inoperante', 'Câmera não transmite imagem.', 3, 8, 10, NULL, 'média', 'pendente'),
+('Problema no projetor', 'Imagem do projetor está desfocada.', 1, 1, 2, NULL, 'baixa', 'pendente'),
 -- 10 chamados em andamento
-('Troca de HD', 'HD com setores defeituosos, troca em andamento.', 1, 1, 3, 2, NULL, 'alta', 'em andamento'),
-('Instalação de software', 'Instalando novo sistema de gestão.', 2, 2, 4, 3, NULL, 'média', 'em andamento'),
-('Ajuste na rede', 'Reconfigurando roteadores e switches.', 3, 3, 5, 1, NULL, 'alta', 'em andamento'),
-('Limpeza interna do PC', 'Retirando poeira e trocando pasta térmica.', 1, 4, 6, 2, NULL, 'baixa', 'em andamento'),
-('Atualização de drivers', 'Atualizando drivers de vídeo e áudio.', 2, 5, 7, 3, NULL, 'média', 'em andamento'),
-('Substituição de cabo', 'Trocando cabo HDMI defeituoso.', 3, 6, 8, 1, NULL, 'baixa', 'em andamento'),
-('Correção de bug', 'Ajustando falha no sistema interno.', 1, 7, 9, 2, NULL, 'alta', 'em andamento'),
-('Backup de dados', 'Realizando cópia de segurança.', 2, 8, 10, 3, NULL, 'média', 'em andamento'),
-('Troca de memória RAM', 'Instalando pentes novos de RAM.', 3, 1, 2, 1, NULL, 'alta', 'em andamento'),
-('Testes de rede', 'Executando testes de estabilidade.', 1, 2, 3, 2, NULL, 'baixa', 'em andamento'),
+('Troca de HD', 'HD com setores defeituosos, troca em andamento.', 1, 1, 3, NULL, 'alta', 'em andamento'),
+('Instalação de software', 'Instalando novo sistema de gestão.', 2, 2, 4, NULL, 'média', 'em andamento'),
+('Ajuste na rede', 'Reconfigurando roteadores e switches.', 3, 3, 5, NULL, 'alta', 'em andamento'),
+('Limpeza interna do PC', 'Retirando poeira e trocando pasta térmica.', 1, 4, 6, NULL, 'baixa', 'em andamento'),
+('Atualização de drivers', 'Atualizando drivers de vídeo e áudio.', 2, 5, 7, NULL, 'média', 'em andamento'),
+('Substituição de cabo', 'Trocando cabo HDMI defeituoso.', 3, 6, 8, NULL, 'baixa', 'em andamento'),
+('Correção de bug', 'Ajustando falha no sistema interno.', 1, 7, 9, NULL, 'alta', 'em andamento'),
+('Backup de dados', 'Realizando cópia de segurança.', 2, 8, 10, NULL, 'média', 'em andamento'),
+('Troca de memória RAM', 'Instalando pentes novos de RAM.', 3, 1, 2, NULL, 'alta', 'em andamento'),
+('Testes de rede', 'Executando testes de estabilidade.', 1, 2, 3, NULL, 'baixa', 'em andamento'),
 -- 10 chamados concluídos
-('Troca de mouse', 'Mouse defeituoso substituído.', 1, 3, 4, 3, NULL, 'baixa', 'concluído'),
-('Formatação de PC', 'Computador formatado com sucesso.', 2, 4, 5, 1, NULL, 'média', 'concluído'),
-('Troca de monitor', 'Novo monitor instalado.', 3, 5, 6, 2, NULL, 'alta', 'concluído'),
-('Reparo de teclado', 'Teclado com teclas substituídas.', 1, 6, 7, 3, NULL, 'média', 'concluído'),
-('Instalação de impressora', 'Nova impressora configurada.', 2, 7, 8, 1, NULL, 'baixa', 'concluído'),
-('Configuração de rede', 'Rede ajustada e funcionando.', 3, 8, 9, 2, NULL, 'alta', 'concluído'),
-('Reparo de projetor', 'Imagem ajustada e projetor funcional.', 1, 1, 10, 3, NULL, 'média', 'concluído'),
-('Limpeza de gabinete', 'Limpeza interna concluída.', 2, 2, 2, 1, NULL, 'baixa', 'concluído'),
-('Atualização de sistema', 'Sistema atualizado para última versão.', 3, 3, 3, 2, NULL, 'alta', 'concluído'),
-('Troca de fonte de PC', 'Fonte de alimentação substituída.', 1, 4, 4, 3, NULL, 'média', 'concluído');
+('Troca de mouse', 'Mouse defeituoso substituído.', 1, 3, 4, NULL, 'baixa', 'concluído'),
+('Formatação de PC', 'Computador formatado com sucesso.', 2, 4, 5, NULL, 'média', 'concluído'),
+('Troca de monitor', 'Novo monitor instalado.', 3, 5, 6, NULL, 'alta', 'concluído'),
+('Reparo de teclado', 'Teclado com teclas substituídas.', 1, 6, 7, NULL, 'média', 'concluído'),
+('Instalação de impressora', 'Nova impressora configurada.', 2, 7, 8, NULL, 'baixa', 'concluído'),
+('Configuração de rede', 'Rede ajustada e funcionando.', 3, 8, 9,  NULL, 'alta', 'concluído'),
+('Reparo de projetor', 'Imagem ajustada e projetor funcional.', 1, 1, 10,  NULL, 'média', 'concluído'),
+('Limpeza de gabinete', 'Limpeza interna concluída.', 2, 2, 2, NULL, 'baixa', 'concluído'),
+('Atualização de sistema', 'Sistema atualizado para última versão.', 3, 3, 3, NULL, 'alta', 'concluído'),
+('Troca de fonte de PC', 'Fonte de alimentação substituída.', 1, 4, 4, NULL, 'média', 'concluído');
+
+/*  after insert -> serve para definir a data_limite logo no momento da criação, com base na prioridade informada.
+after update -> util caso a prioridade seja mudada depois da criação.*/
+DELIMITER $$
+
+-- Quando INSERE um chamado
+CREATE TRIGGER trg_chamados_sla_insert
+AFTER INSERT ON chamados
+FOR EACH ROW
+BEGIN
+    UPDATE chamados
+    SET data_limite = CASE NEW.prioridade
+        WHEN 'baixa'   THEN DATE_ADD(NEW.criado_em, INTERVAL 72 HOUR)
+        WHEN 'média'   THEN DATE_ADD(NEW.criado_em, INTERVAL 24 HOUR)
+        WHEN 'alta'    THEN DATE_ADD(NEW.criado_em, INTERVAL 8 HOUR)
+        WHEN 'urgente' THEN DATE_ADD(NEW.criado_em, INTERVAL 4 HOUR)
+        ELSE NULL
+    END
+    WHERE id = NEW.id;
+END$$
+
+-- Quando ATUALIZA a prioridade
+CREATE TRIGGER trg_chamados_sla_update
+AFTER UPDATE ON chamados
+FOR EACH ROW
+BEGIN
+    -- recalcula só se a prioridade mudou
+    IF NEW.prioridade <> OLD.prioridade THEN
+        UPDATE chamados
+        SET data_limite = CASE NEW.prioridade
+            WHEN 'baixa'   THEN DATE_ADD(NEW.criado_em, INTERVAL 72 HOUR)
+            WHEN 'média'   THEN DATE_ADD(NEW.criado_em, INTERVAL 24 HOUR)
+            WHEN 'alta'    THEN DATE_ADD(NEW.criado_em, INTERVAL 8 HOUR)
+            WHEN 'urgente' THEN DATE_ADD(NEW.criado_em, INTERVAL 4 HOUR)
+            ELSE NULL
+        END
+        WHERE id = NEW.id;
+    END IF;
+END$$
+
+DELIMITER ;
 
 -- Criação da tabela `apontamentos`
 CREATE TABLE apontamentos (

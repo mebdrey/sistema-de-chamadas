@@ -31,6 +31,63 @@ export default function admDashboard() {
         <div className="p-4 w-full">
           <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
 
+<div class="mb-4 flex justify-center items-center gap-x-3">
+  <label for="toggle-count-switch" class="text-sm text-gray-800 dark:text-neutral-200">Monthly</label>
+  <label for="toggle-count-switch" class="relative inline-block w-11 h-6 cursor-pointer">
+    <input type="checkbox" id="toggle-count-switch" class="peer sr-only"/>
+    <span class="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-blue-600 dark:bg-neutral-700 dark:peer-checked:bg-blue-500 peer-disabled:opacity-50 peer-disabled:pointer-events-none"></span>
+    <span class="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full dark:bg-neutral-400 dark:peer-checked:bg-white"></span>
+  </label>
+  <label for="toggle-count-switch" class="text-sm text-gray-800 dark:text-neutral-200">Annual</label>
+</div>
+
+<div class="grid grid-cols-3 lg:items-center border border-gray-200 rounded-xl dark:border-neutral-700">
+
+  <div class="flex flex-col p-4">
+    <h4 class="text-gray-800 mb-1 dark:text-neutral-200">Startup</h4>
+    <div class="flex gap-x-1">
+      <span class="text-xl font-normal text-gray-800 dark:text-neutral-200">$</span>
+      <p data-hs-toggle-count='{
+          "target": "#toggle-count-switch",
+          "min": 19,
+          "max": 29
+        }' class="text-gray-800 font-semibold text-3xl dark:text-neutral-200">
+        19
+      </p>
+    </div>
+  </div>
+  
+  <div class="flex flex-col p-4">
+    <div class="flex justify-between">
+      <h4 class="text-gray-800 mb-1 dark:text-neutral-200">Team</h4>
+    </div>
+    <div class="flex gap-x-1">
+      <span class="text-xl font-normal text-gray-800 dark:text-neutral-200">$</span>
+      <p data-hs-toggle-count='{
+          "target": "#toggle-count-switch",
+          "min": 89,
+          "max": 99
+        }' class="text-gray-800 font-semibold text-3xl dark:text-neutral-200">
+        89
+      </p>
+    </div>
+  </div>
+
+  <div class="flex flex-col p-4">
+    <h4 class="text-gray-800 mb-1 dark:text-neutral-200">Enterprise</h4>
+    <div class="flex gap-x-1">
+      <span class="text-xl font-normal text-gray-800 dark:text-neutral-200">$</span>
+      <p data-hs-toggle-count='{
+          "target": "#toggle-count-switch",
+          "min": 129,
+          "max": 149
+        }' class="text-gray-800 font-semibold text-3xl dark:text-neutral-200">
+        129
+      </p>
+    </div>
+  </div>
+  
+</div>
             { /* aqui serão card com alguns numeros */}
             <div className="grid grid-cols-3 gap-4 mb-4">
               {qndtChamados.map((nChamados, index) => (

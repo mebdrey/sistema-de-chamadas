@@ -3,6 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { initFlowbite } from 'flowbite'
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
+const DropdownNotification = dynamic(
+    () => import('./DropDownNotificacao.jsx'),
+    { ssr: false } // não renderiza no servidor
+  );
+
+const UserDropdown = dynamic(
+    () => import('./userDropDown.jsx'),
+    { ssr: false } // não renderiza no servidor
+);
 
 const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
     // links da sidebar
@@ -38,6 +48,16 @@ const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
         setNavFechada(prev => !prev);
     };
 
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+      setMounted(true);
+    }, []);
+  
+    if (!mounted) return null; // evita SSR
+
+//   const [userOpen, setUserOpen] = useState(false);
+
     return (
         <>
             {/*navbar */}
@@ -52,8 +72,9 @@ const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
                                 </svg>
                             </button>
                             <a href="https://flowbite.com" className="flex ms-2 md:me-24">
-                                <img src="https://flowbite.com/docs/images/logo.svg" className="h-8 me-3" alt="FlowBite Logo" />
-                                <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">Flowbite</span>
+                            <img src="/img/zelos-name.svg" className="h-8 me-3" alt="Zelos Logo" />
+                                {/* <img src="https://flowbite.com/docs/images/logo.svg" className="h-8 me-3" alt="FlowBite Logo" />
+                                <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">Flowbite</span> */}
                             </a>
                         </div>
 
@@ -151,19 +172,18 @@ const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
                                     </div>
                                 </a>
                             </div>
+                             {/* {mounted && <DropdownNotification />} */}
 
                             {/* avatar do usuario */}
+                            {/* {mounted && <UserDropdown />} */}
                             <div className="flex items-center">
                                 <div className="flex items-center ms-3">
                                     <div>
                                         <button type="button" className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" aria-expanded="false" data-dropdown-toggle="dropdown-user">
                                             <span className="sr-only">Open user menu</span>
-                                            <div class="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
-                                                <svg class="absolute w-10 h-10 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                            <div className="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+                                                <svg className="absolute w-10 h-10 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path></svg>
                                             </div>
-
-                                            {/* <Image src={avatarUrl} alt="Foto do usuário" width={40} height={40} className='rounded-full'/> */}
-                                            {/* <img className="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo" /> */}
                                         </button>
                                     </div>
                                     <div className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm dark:bg-gray-700 dark:divide-gray-600" id="dropdown-user">
@@ -192,7 +212,7 @@ const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
             </nav>
 
             {/* itens da sidebar */}
-            <aside
+            {/* <aside
                 id="logo-sidebar"
                 className={`fixed top-0 left-0 z-40 h-screen pt-20 transition-all bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 ${navFechada ? 'w-16' : 'w-64'}`} aria-label="Sidebar">
                 <div className={`flex px-2 mb-5 ${navFechada ? 'justify-center' : 'justify-end'}`}>
@@ -214,10 +234,10 @@ const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
                             </svg>
                         )}
                     </button>
-                </div>
+                </div> */}
 
                 {/* links */}
-                <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+                {/* <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
                     <ul className="space-y-2 font-medium">
                         {links.map((link) => (
                             <li key={link.href}>
@@ -236,7 +256,58 @@ const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
                         ))}
                     </ul>
                 </div>
-            </aside>
+            </aside> */}
+
+<aside
+      id="logo-sidebar"
+      className={`fixed top-0 left-0 z-40 h-screen pt-20 transition-all bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 ${navFechada ? 'w-16' : 'w-64'}`}
+      aria-label="Sidebar"
+    >
+      <div className={`flex px-2 mb-5 ${navFechada ? 'justify-center' : 'justify-end'}`}>
+        <button
+          onClick={sidebar}
+          data-drawer-target="logo-sidebar"
+          data-drawer-toggle="logo-sidebar"
+          aria-controls="logo-sidebar"
+          className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors"
+        >
+          {navFechada ? (
+            <svg className="hs-overlay-minified:block shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2" />
+              <path d="M15 3v18" />
+              <path d="m8 9 3 3-3 3" />
+            </svg>
+          ) : (
+            <svg className="hs-overlay-minified:hidden shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2" />
+              <path d="M15 3v18" />
+              <path d="m10 15-3-3 3-3" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+        <ul className="space-y-2 font-medium">
+          {links.map((link) => (
+            <li key={link.href}>
+              <a href={link.href} className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                {link.icon}
+                <span
+                  className={
+                    "ml-3 transition-all duration-200 " +
+                    (navFechada ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto")
+                  }
+                >
+                  {link.label}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </aside>
+
         </>
     )
 }
