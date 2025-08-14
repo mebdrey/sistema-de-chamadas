@@ -265,7 +265,7 @@ CREATE TABLE chamados (
     tipo_id INT,
     tecnico_id INT,
     usuario_id INT,
-    local_id int,
+    prazo_horas INT,
     imagem VARCHAR(255),
     prioridade ENUM ('none','baixa', 'média', 'alta') DEFAULT 'none',
     status_chamado ENUM('pendente', 'em andamento', 'concluído') DEFAULT 'pendente',
@@ -276,6 +276,42 @@ CREATE TABLE chamados (
     FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+
+-- 10 chamados pendentes
+INSERT INTO chamados (assunto, descricao, tipo_id, tecnico_id, usuario_id, local_id, imagem, prioridade, status_chamado)
+VALUES
+('Problema na impressora', 'Impressora não está imprimindo.', 1, 1, 2, 1, NULL, 'média', 'pendente'),
+('Computador lento', 'PC demora muito para iniciar.', 2, 1, 3, 2, NULL, 'baixa', 'pendente'),
+('Sem acesso à internet', 'Conexão caiu repentinamente.', 3, 2, 4, 3, NULL, 'alta', 'pendente'),
+('Monitor apagado', 'Tela do monitor não acende.', 1, 3, 5, 1, NULL, 'baixa', 'pendente'),
+('Teclado com teclas falhando', 'Algumas teclas não funcionam.', 2, 4, 6, 2, NULL, 'none', 'pendente'),
+('Erro no sistema', 'Sistema trava ao abrir módulo de vendas.', 3, 5, 7, 3, NULL, 'alta', 'pendente'),
+('Telefone sem linha', 'Telefone fixo não recebe chamadas.', 1, 6, 8, 1, NULL, 'média', 'pendente'),
+('Queda de energia', 'Sala ficou sem luz após curto-circuito.', 2, 7, 9, 2, NULL, 'alta', 'pendente'),
+('Câmera de segurança inoperante', 'Câmera não transmite imagem.', 3, 8, 10, 3, NULL, 'média', 'pendente'),
+('Problema no projetor', 'Imagem do projetor está desfocada.', 1, 1, 2, 1, NULL, 'baixa', 'pendente'),
+-- 10 chamados em andamento
+('Troca de HD', 'HD com setores defeituosos, troca em andamento.', 1, 1, 3, 2, NULL, 'alta', 'em andamento'),
+('Instalação de software', 'Instalando novo sistema de gestão.', 2, 2, 4, 3, NULL, 'média', 'em andamento'),
+('Ajuste na rede', 'Reconfigurando roteadores e switches.', 3, 3, 5, 1, NULL, 'alta', 'em andamento'),
+('Limpeza interna do PC', 'Retirando poeira e trocando pasta térmica.', 1, 4, 6, 2, NULL, 'baixa', 'em andamento'),
+('Atualização de drivers', 'Atualizando drivers de vídeo e áudio.', 2, 5, 7, 3, NULL, 'média', 'em andamento'),
+('Substituição de cabo', 'Trocando cabo HDMI defeituoso.', 3, 6, 8, 1, NULL, 'baixa', 'em andamento'),
+('Correção de bug', 'Ajustando falha no sistema interno.', 1, 7, 9, 2, NULL, 'alta', 'em andamento'),
+('Backup de dados', 'Realizando cópia de segurança.', 2, 8, 10, 3, NULL, 'média', 'em andamento'),
+('Troca de memória RAM', 'Instalando pentes novos de RAM.', 3, 1, 2, 1, NULL, 'alta', 'em andamento'),
+('Testes de rede', 'Executando testes de estabilidade.', 1, 2, 3, 2, NULL, 'baixa', 'em andamento'),
+-- 10 chamados concluídos
+('Troca de mouse', 'Mouse defeituoso substituído.', 1, 3, 4, 3, NULL, 'baixa', 'concluído'),
+('Formatação de PC', 'Computador formatado com sucesso.', 2, 4, 5, 1, NULL, 'média', 'concluído'),
+('Troca de monitor', 'Novo monitor instalado.', 3, 5, 6, 2, NULL, 'alta', 'concluído'),
+('Reparo de teclado', 'Teclado com teclas substituídas.', 1, 6, 7, 3, NULL, 'média', 'concluído'),
+('Instalação de impressora', 'Nova impressora configurada.', 2, 7, 8, 1, NULL, 'baixa', 'concluído'),
+('Configuração de rede', 'Rede ajustada e funcionando.', 3, 8, 9, 2, NULL, 'alta', 'concluído'),
+('Reparo de projetor', 'Imagem ajustada e projetor funcional.', 1, 1, 10, 3, NULL, 'média', 'concluído'),
+('Limpeza de gabinete', 'Limpeza interna concluída.', 2, 2, 2, 1, NULL, 'baixa', 'concluído'),
+('Atualização de sistema', 'Sistema atualizado para última versão.', 3, 3, 3, 2, NULL, 'alta', 'concluído'),
+('Troca de fonte de PC', 'Fonte de alimentação substituída.', 1, 4, 4, 3, NULL, 'média', 'concluído');
 
 -- Criação da tabela `apontamentos`
 CREATE TABLE apontamentos (
