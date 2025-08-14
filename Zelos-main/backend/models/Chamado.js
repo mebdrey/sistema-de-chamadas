@@ -104,7 +104,7 @@ export const buscarTiposServico = async () => {
     return tipos.filter(tipo => tipo.status=== 'ativo');
 };
 
-// Buscar local_id com base no bloco e sala
+// Buscar local_id com base no bloco e sala ----------não está sendo utilizado --------------------------------------------------------------
 export const buscarLocalId = async (bloco, sala) => {
     const consulta = `SELECT * FROM localChamado WHERE bloco = ? AND sala = ?`;
     const localEncontrado = await readQuery(consulta, [bloco, sala]);
@@ -116,7 +116,7 @@ export const buscarLocalId = async (bloco, sala) => {
     return localEncontrado[0].id;
 };
 
-// busca blocos (sem repetição)
+// busca blocos (sem repetição) ----------não está sendo utilizado --------------------------------------------------------------
 export const listarBlocos = async () => {
     try {
         const consulta = 'SELECT DISTINCT bloco FROM localChamado ORDER BY bloco ASC';
@@ -127,7 +127,7 @@ export const listarBlocos = async () => {
     }
 };
 
-// busca salas por bloco
+// busca salas por bloco ----------não está sendo utilizado --------------------------------------------------------------
 export const listarSalasPorBloco = async (bloco) => {
     try {
         const consulta = 'SELECT sala FROM localChamado WHERE bloco = ? ORDER BY sala ASC';
