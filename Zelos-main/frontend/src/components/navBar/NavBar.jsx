@@ -5,17 +5,6 @@ import { initFlowbite } from 'flowbite'
 import Image from 'next/image';
 
 const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
-    // const avatarUrl = user.image || `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(user.name || 'Usuario')}`;
-    // espera o componente estar carregado no navegador p evitar erros de renderizacao
-    // const [mounted, setMounted] = useState(false);
-    // useEffect(() => {
-    //     setMounted(true);
-    // }, []);
-    // if (!mounted) return null;
-
-    // useEffect(() => {
-    //   initFlowbite()
-    // }, [])
     // links da sidebar
     let links = [];
 
@@ -169,7 +158,11 @@ const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
                                     <div>
                                         <button type="button" className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" aria-expanded="false" data-dropdown-toggle="dropdown-user">
                                             <span className="sr-only">Open user menu</span>
-                                             {/* <Image src={avatarUrl} alt="Foto do usuário" width={40} height={40} className='rounded-full'/> */}
+                                            <div class="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+                                                <svg class="absolute w-10 h-10 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                            </div>
+
+                                            {/* <Image src={avatarUrl} alt="Foto do usuário" width={40} height={40} className='rounded-full'/> */}
                                             {/* <img className="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo" /> */}
                                         </button>
                                     </div>

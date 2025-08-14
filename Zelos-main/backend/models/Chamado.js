@@ -101,7 +101,7 @@ export const listarChamados = async (usuarioId) => {
 // busca servicos
 export const buscarTiposServico = async () => {
     const tipos = await readAll('pool');
-    return tipos.filter(tipo => tipo.status=== 'ativo');
+    return tipos.filter(tipo => tipo.status_pool === 'ativo');
 };
 
 // Buscar local_id com base no bloco e sala ----------não está sendo utilizado --------------------------------------------------------------
@@ -183,6 +183,15 @@ export const verClientes = async () => {
         throw err;
     }
 };
+
+export const verChamados = async () =>{
+    try{
+        return await readAll('chamados')
+    } catch (error) {
+        console.error('Erro ao listar chamados:', error);
+        throw error;
+    }
+}
 
 // funções utilizadas para TECNICOS E AUXILIARES DE LIMPEZA ------------------------------------------------------------------------------------------------------------------------------------
 export const listarChamadosDisponiveis = async (usuario_id) => {

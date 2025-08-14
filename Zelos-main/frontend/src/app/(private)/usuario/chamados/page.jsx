@@ -11,7 +11,7 @@ export default function ChamadosCliente() {
     const [tiposServico, setTiposServico] = useState([]); // guarda o tipo de serviço que o usuario seleciona 
     const [tipoSelecionadoId, setTipoSelecionadoId] = useState(''); // id do servico
     const router = useRouter();
-    const [patrimonio, setpatrimonio] = useState(null);
+const [patrimonio, setPatrimonio] = useState('');
     // const [blocos, setBlocos] = useState([]); // guarda a sala e bloco selecionada 
     // const [salas, setSalas] = useState([]);
     // const [salaSelecionada, setSalaSelecionada] = useState('');
@@ -116,10 +116,12 @@ export default function ChamadosCliente() {
         });
 
         if (res.ok) {
-            alert("Chamado criado com sucesso!");
             // limpar
             setImagemPreview(null);
             setImagemArquivo(null);
+  const novoChamado = await res.json(); // retorna o chamado criado
+  setChamados((prev) => [novoChamado, ...prev]); // insere no topo
+            alert("Chamado criado com sucesso!");
         } else {
             alert("Erro ao criar chamado.");
         }
@@ -252,7 +254,7 @@ export default function ChamadosCliente() {
                                                         </select> </div></div> */}
                                                 <div className="col-span-2">
                                                     <label htmlFor="patrimonio" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Patrimônio</label>
-                                                    <input type="text" name="patrimonio" value="" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white" />
+                                                    <input type="text" name="patrimonio" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Digite o número de patrimônio" required="" value={patrimonio} onChange={(e) => setPatrimonio(e.target.value)}/>
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descrição</label>
@@ -261,13 +263,13 @@ export default function ChamadosCliente() {
                                                 <div className="col-span-2">
                                                     <label htmlFor="file" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enviar imagem</label>
                                                     {/* <textarea id="file" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Escreva a descrição do chamado"></textarea> */}
-                                                    <div className="flex items-center justify-center w-1/2 h-20">
-                                                        <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                                                    <div className="flex items-center justify-center w-1/2 h-70">
+                                                        <label htmlFor="dropzone-file" className="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 overflow-hidden">
                                                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                                 <svg className="me-1 -ms-1 w-8 h-8 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>
                                                             </div>
                                                             <input id="dropzone-file" type="file" className="hidden" accept="image/*" onChange={subirImagem} />
-                                                            {imagemPreview && (<img src={imagemPreview} alt="Pré-visualização" className="mt-2 max-h-40 rounded-lg" />)}
+                                                            {imagemPreview && (<img src={imagemPreview} alt="Pré-visualização" className="rounded-lg absolute inset-0 w-full h-full object-cover" />)}
                                                         </label>
                                                     </div>
                                                 </div>
@@ -311,7 +313,12 @@ export default function ChamadosCliente() {
                                         ? chamados : chamados.filter((c) => normalizarId(c.status_chamado) === statusId);
                                 // Depois aplica filtro de busca
                                 let chamadosFiltrados = filtradosPorStatus.filter((c) =>
-                                    busca.trim() === "" ? true : c.assunto.toLowerCase().includes(busca.toLowerCase()) || c.descricao.toLowerCase().includes(busca.toLowerCase()) || String(c.id).includes(busca));
+  busca.trim() === "" ? true :
+    (c.assunto || "").toLowerCase().includes(busca.toLowerCase()) ||
+    (c.descricao || "").toLowerCase().includes(busca.toLowerCase()) ||
+    String(c.id).includes(busca)
+);
+
                                 return (
                                     <div key={status} className="hidden flex flex-col bg-white ark:bg-neutral-900 gap-5" id={statusId} role="tabpanel" aria-labelledby={`${statusId}-tab`}>
                                         {chamadosFiltrados.length === 0 ? (

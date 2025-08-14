@@ -75,14 +75,14 @@ router.post('/login', (req, res, next) => {
           console.error('Erro ao criar sessão:', loginErr);
           return res.status(500).json({ error: 'Erro ao criar sessão' });
         }
-        console.log('Info:', info);
+        console.log('Objeto user retornado pelo LDAP:', user);
         console.log('Usuário autenticado:', user.username);
         return res.json({ 
           message: 'Autenticado com sucesso', 
           user: {
-            username: user.username,
-            displayName: user.displayName,
-            email: user.mail
+            username: user.username, // nome de login
+            displayName: user.displayName, // nome de exibição
+            email: user.mail // e-mail
           }
         });
       });
