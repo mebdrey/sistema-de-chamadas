@@ -397,6 +397,17 @@ create table mensagens (
     FOREIGN KEY (id_chamado) REFERENCES chamados(id) ON DELETE CASCADE
 );
 
+create table relatorios(
+    id int auto_increment primary key,
+    id_usuario int,
+    id_tecnico int,
+    id_chamado int,
+    relatorio text,
+    data_envio datetime default current_timestamp,
+    FOREIGN KEY (id_tecnico) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_chamado) REFERENCES chamados(id) ON DELETE CASCADE
+)
 -- Índices adicionais para otimização
 CREATE INDEX idx_usuarios_email ON usuarios(email);
 CREATE INDEX idx_chamados_status ON chamados(status_chamado);

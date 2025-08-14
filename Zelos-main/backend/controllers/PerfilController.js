@@ -9,8 +9,8 @@ const obterPerfilUsuarioController = async (req, res) => {
                 if (err) reject(err);
                 else resolve();
             }); });
-        // const {id } = req.session.usuario;
-        const id  =1;
+        const id  = req.usuarioId;
+        // const id  =1;
         console.log("obterPerfilUsuario: ", req.session);
         const dados = await obterDadosDoUsuario(id);
         if (!dados) {
@@ -26,8 +26,8 @@ const obterPerfilUsuarioController = async (req, res) => {
     //editar email de perfil -- funcionando, só não consegui testar com o id da sessão
 const editarPerfilController = async (req, res) => {
   try {
-    // const id = req.session.usuario.id;
-    const id = 1;
+    const id = req.usuarioId;
+    // const id = 1;
     const { email } = req.body;
     const atualizacoes = {};
     if (email !== undefined && email !== "") atualizacoes.email = email;
