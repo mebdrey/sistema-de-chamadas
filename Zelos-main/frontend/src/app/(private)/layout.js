@@ -3,7 +3,7 @@ import "../globals.css";
 import { useState, useEffect } from 'react';
 import SideBar from '../../components/NavBar/NavBar.jsx';
 import { initFlowbite } from 'flowbite'
-
+import 'flowbite/dist/flowbite.css';
 import { usePathname } from "next/navigation";
 import { getMetadataFromPath } from "../utils/metadata.js";
 
@@ -24,10 +24,9 @@ export default function PrivateLayout({ children }) {
     const sidebarWidth = navFechada ? 64 : 256; // valores em px correspondentes ao Tailwind
     const mainWidth = `calc(100% - ${sidebarWidth}px)`;
 
-    // funcao do flowbite p/ configurar funções de inicializacao p dropdown, modal e assim por diante
-        useEffect(() => {
-            initFlowbite()
-        }, [])
+    useEffect(() => {
+        import('flowbite'); // garante que o JS rode só no cliente
+      }, []);
     return (
         <>
             <SideBar navFechada={navFechada} setNavFechada={setNavFechada} />
