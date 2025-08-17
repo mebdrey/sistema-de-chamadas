@@ -27,8 +27,18 @@ export default function Setores() {
 
     // Juntar usuários só dos setores selecionados para exibir numa tabela só
     const usuariosFiltrados = Object.entries(setores)
-        .filter(([nomeSetor]) => setoresSelecionados[nomeSetor])
-        .flatMap(([, usuarios]) => usuarios);
+  .filter(([nomeSetor]) => setoresSelecionados[nomeSetor])
+  .flatMap(([, usuarios]) => usuarios)
+  .filter((usuario) => {
+    const termo = busca.toLowerCase();
+    return (
+      usuario.nome.toLowerCase().includes(termo) ||
+      usuario.email.toLowerCase().includes(termo) ||
+      usuario.funcao.toLowerCase().includes(termo) ||
+      usuario.id.toString().includes(termo)  // caso queira buscar por id também
+    );
+  });
+
 
     // excluir usuario
     function deletarUsuario(id) {
@@ -133,24 +143,24 @@ export default function Setores() {
                     </div>
 
                     <label htmlFor="table-search" className="sr-only">Search</label>
-                   {/* Barra de pesquisa */}
-                   <form className="flex items-center" onSubmit={(e) => e.preventDefault()}>
-                            <label htmlFor="simple-search" className="sr-only">Search</label>
-                            <div className="relative w-80">
-                                <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                    <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
-                                    </svg>
-                                </div>
-                                <input
-                                    type="text"
-                                    id="simple-search"
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    placeholder="Pesquisar por usuário"
-                                    value={busca}
-                                    onChange={(e) => setBusca(e.target.value)} />
+                    {/* Barra de pesquisa */}
+                    <form className="flex items-center" onSubmit={(e) => e.preventDefault()}>
+                        <label htmlFor="simple-search" className="sr-only">Search</label>
+                        <div className="relative w-80">
+                            <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
+                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
+                                </svg>
                             </div>
-                        </form>
+                            <input
+                                type="text"
+                                id="simple-search"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                placeholder="Pesquisar por usuário"
+                                value={busca}
+                                onChange={(e) => setBusca(e.target.value)} />
+                        </div>
+                    </form>
                 </div>
 
 
@@ -219,7 +229,16 @@ export default function Setores() {
                             {usuariosFiltrados.map((usuario) => (
                                 <tr key={usuario.id} className="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600" >
                                     <th scope="row" className="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white" >
-                                        <img className="w-10 h-10 rounded-full" src={usuario.foto_url} alt={usuario.nome} />
+                                        <div className="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+                                            {usuario.foto_url ? (
+                                                <img className="w-10 h-10 rounded-full object-cover" src={usuario.foto_url} alt={usuario.nome} />
+                                            ) : (
+                                                <svg className="absolute w-10 h-10 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                </svg>
+                                            )}
+                                        </div>
+
 
                                         <div className="ms-3">
                                             <div>{usuario.nome}</div>

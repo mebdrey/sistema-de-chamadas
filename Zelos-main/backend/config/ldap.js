@@ -108,7 +108,6 @@
 
 // o codigo abaixo é apenas p testar localmente mas deve ser apagado
 // config/ldap.js
-// config/ldap.js
 import passport from 'passport';
 import LdapStrategy from 'passport-ldapauth';
 import { read, create } from './database.js';

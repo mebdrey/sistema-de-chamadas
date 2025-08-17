@@ -121,20 +121,54 @@ router.post('/logout', (req, res) => {
 });
 
 // Rota para verificar autenticação
-router.get('/check-auth', (req, res) => {
-  console.log('Sessão atual:', req.session);
-  console.log('Usuário logado:', req.user);
-  if (req.isAuthenticated()) {
-    return res.json({ 
+// router.get('/check-auth', (req, res) => {
+//   console.log('Sessão atual:', req.session);
+//   console.log('Usuário logado:', req.user);
+//   if (req.isAuthenticated()) {
+//     return res.json({ 
+//       authenticated: true,
+//       user: {
+//         // username: req.user.username,
+//         username: req.user.sAMAccountName,
+//         displayName: req.user.displayName
+//       }
+//     });
+//   }
+//   res.status(401).json({ authenticated: false });
+// });
+
+import { read } from '../config/database.js'; 
+router.get('/check-auth', async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ authenticated: false });
+  }
+
+  try {
+    const username = req.user.sAMAccountName || req.user.username;
+
+    const usuarioDB = await read('usuarios', `username = '${username}'`);
+
+    if (!usuarioDB) {
+      return res.status(404).json({ error: 'Usuário não encontrado no banco' });
+    }
+
+    res.json({
       authenticated: true,
       user: {
-        // username: req.user.username,
-        username: req.user.sAMAccountName,
-        displayName: req.user.displayName
+        id: usuarioDB.id,
+        nome: usuarioDB.nome,
+        username: usuarioDB.username,
+        email: usuarioDB.email,
+        funcao: usuarioDB.funcao,
+        ftPerfil: usuarioDB.ftPerfil
       }
     });
+
+  } catch (err) {
+    console.error('Erro ao buscar usuário do banco:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
-  res.status(401).json({ authenticated: false });
 });
+
 
 export default router;
