@@ -42,18 +42,6 @@ export default function ChamadosTecnico() {
             });
     }, []);
 
-    //busca as mensagens do chamado
-    useEffect(() =>{
-fetch('http://localhost:8080/chat', {credentials: 'include'})
-.then(res=>{
-    if(!res.ok) throw new Error('Erro ao ler mensagens');
-    return res.json();
-})
-.then(data =>{
-    console.log('Mensagens recebidas:', data)
-})
-    })
-
     // STATUS DOS CHAMAFOS
     const statusAbas = ['todos', 'pendente', 'em andamento', 'concluído'];
     // funcao p normalizar id
@@ -95,18 +83,18 @@ fetch('http://localhost:8080/chat', {credentials: 'include'})
 
     //   if (qtdChamados === null) return <p>Carregando...</p>;
 
-    const [pendentes, setPendentes] = useState(null);
-    useEffect(() => {
+      const [pendentes, setPendentes] = useState(null);
+      useEffect(() =>{
         fetch('http://localhost:8080/pendentes')
-            .then(res => res.json())
-            .then(data => {
-                console.log("Resposta da API: ", data);
-                setPendentes(data[0]['count(*)']);
-            })
-            .catch(err => console.error(err));
-    }, []);
+        .then(res => res.json())
+        .then(data =>{
+            console.log("Resposta da API: ", data );
+            setPendentes(data[0] ['count(*)']);
+        })
+        .catch(err =>console.error(err));
+      }, []);
 
-    if (pendentes === null) return <p>Carregando...</p>;
+      if (pendentes === null) return <p>Carregando...</p>;
 
     return (
         <>
@@ -119,9 +107,9 @@ fetch('http://localhost:8080/chat', {credentials: 'include'})
 
                     <div className="flex justify-between">
 
-
-                        <div className="total-chamados" ><p>Chamados Pendentes: {pendentes}</p></div>
-
+                        
+                            <div className="total-chamados" ><p>Chamados Pendentes: {pendentes}</p></div>
+                        
 
                         {/* Barra de pesquisa */}
                         <form className="flex items-center" onSubmit={(e) => e.preventDefault()} // evita recarregar a página
@@ -274,9 +262,8 @@ fetch('http://localhost:8080/chat', {credentials: 'include'})
                                                             <p className="text-sm font-bold text-gray-800 dark:text-white">#{chamado.id}</p>
                                                         </div>
                                                     </div>
-
                                                     {/* Drawer */}
-                                                    <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen p-4 overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-white w-150 dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
+                                                    <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen p-4 overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-white w-80 dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
                                                         <h5 id="drawer-right-label" className="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400">
                                                             <svg className="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                                                                 <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
@@ -287,49 +274,23 @@ fetch('http://localhost:8080/chat', {credentials: 'include'})
                                                             </svg>
                                                             <span className="sr-only">Close menu</span>
                                                         </button>
-
-                                                        {/**Infos do chamado */}
-                                                        <div className="grid grid-cols-3  justify-center">
-                                                            <div>
-                                                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Usuário</p>
-                                                                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">Usuário</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Assunto</p>
-                                                                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamado.assunto}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Status</p>
-                                                                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamado.status_chamado}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Data de envio</p>
-                                                                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">26/07/2025</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">ID do chamado</p>
-                                                                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamado.id}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Prioridade</p>
-                                                                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamado.prioridade}</p>
-                                                            </div>
+                                                        <div>
+                                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Usuário</p>
+                                                            <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">Usuário</p>
                                                         </div>
-
-
-                                                        {/**Descrição do chamado */}
-                                                        <div className="card-descricao border border-gray-200 rounded-md p-2 shadow-md">
+                                                        <div>
+                                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Assunto</p>
+                                                            <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamado.assunto}</p>
+                                                        </div>
+                                                        <div>
                                                             <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Descrição</p>
                                                             <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamado.descricao}</p>
-                                                            <div>
-                                                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
-                                                                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamado.imagem}</p>
-                                                            </div>
                                                         </div>
-
-                                                        {/**chat / comentários */}
-
-                                                        {/* <div>
+                                                        <div>
+                                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
+                                                            <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamado.imagem}</p>
+                                                        </div>
+                                                        <div>
                                                             <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Técnico/Auxiliar</p>
                                                             <div className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">
                                                                 {!chamado.tecnico_id ? (
@@ -451,8 +412,11 @@ fetch('http://localhost:8080/chat', {credentials: 'include'})
                                                                 )}
                                                             </div>
 
-                                                        </div> */}
-
+                                                        </div>
+                                                        <div>
+                                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Usuário</p>
+                                                            <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">Usuário</p>
+                                                        </div>
 
                                                         <div className="grid grid-cols-2 gap-4">
                                                             <a href="#" className="px-4 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg focus:outline-none hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Learn more</a>
