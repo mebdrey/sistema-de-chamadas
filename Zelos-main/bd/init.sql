@@ -77,12 +77,12 @@ END$$
 
 DELIMITER ;
 
-insert usuarios (nome, senha, username, email, funcao) value
-("Julia Alves de Oliveira", "Senai@123", '90452786', "julia@gmail.com", "admin"), /* administrador*/
-("Maria de Brito Del Rey", "Senai@123", "84766243", "maria@gmail.com", "admin"), /* administrador*/
-("Lorena Oshiro do Carmo", "Senai@123", "87036285", "lorena@gmail.com", "admin"), /* administrador*/
-("Elias Coca Velloso", "Senai@123", "29572557", "elias@gmail.com", "tecnico"), /* externo */ 
-("Eduardo de Oliveira", "Senai@123", "67240311", "eduardo@gmail.com", "tecnico"), /* externo */
+insert usuarios (nome, senha, username, email, funcao) values
+("Julia Alves de Oliveira", "Senai@123", 'juliaalves', "julia@gmail.com", "admin"), /* administrador*/
+("Maria de Brito Del Rey", "Senai@123", "mariabrito", "maria@gmail.com", "admin"), /* administrador*/
+("Lorena Oshiro do Carmo", "Senai@123", "lorenaoshiro", "lorena@gmail.com", "admin"), /* administrador*/
+("Elias Coca Velloso", "Senai@123", "eliascoca", "elias@gmail.com", "tecnico"), /* externo */ 
+("Eduardo de Oliveira", "Senai@123", "eduardooliveira", "eduardo@gmail.com", "tecnico"), /* externo */
 ("Henrique Lima", "Senai@123", "56951065", "henrique@gmail.com", "tecnico"), /* externo */
 ("Luciana Pereira", "Senai@123", "82649175", "luciana.pereira@gmail.com", "tecnico"), /* externo */
 ("Ana Costa", "Senai@123", "91726483", "ana.costa@gmail.com", "tecnico"), /* externo */
@@ -99,7 +99,7 @@ CREATE TABLE chamados (
     tipo_id INT,
     tecnico_id INT,
     usuario_id INT,
-    prazo_horas INT,
+    data_limite DATETIME NULL,
     patrimonio int,
     imagem VARCHAR(255),
     prioridade ENUM ('none','baixa', 'média', 'alta') DEFAULT 'none',
@@ -175,7 +175,7 @@ VALUES
 ('Faxina geral do prédio', 'Faxina nos andares 1 a 3.', 4, 10, 1, NULL, 'alta', 'concluído', '2025-07-25 17:00:00');
 
 /*  after insert -> serve para definir a data_limite logo no momento da criação, com base na prioridade informada.
-after update -> util caso a prioridade seja mudada depois da criação.*/
+after update -> util caso a prioridade seja mudada depois da criação.
 DELIMITER $$
 
 -- Quando INSERE um chamado
@@ -214,6 +214,7 @@ BEGIN
 END$$
 
 DELIMITER ;
+*/
 
 -- Criação da tabela `apontamentos`
 CREATE TABLE apontamentos (
@@ -291,4 +292,5 @@ CREATE INDEX idx_chamados_status ON chamados(status_chamado);
 CREATE INDEX idx_apontamentos_comeco_fim ON apontamentos(comeco, fim);
 
 select *from usuarios;
+select *from chamados;
 select *from usuario_servico;

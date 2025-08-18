@@ -6,12 +6,11 @@ import Link from 'next/link';
 import "./login.css";
 import { useRouter } from 'next/navigation';
 
-
 export default function Login() {
   useEffect(() => {
     document.title = 'Zelos - Login';
   }, []);
-const router = useRouter();
+  const router = useRouter();
   // qnd clica no botao de entrar ele mostra a animacao das bolinhas carregando
   const [loading, setLoading] = useState(false);
 
@@ -26,39 +25,49 @@ const router = useRouter();
 
   // login
   const [erro, setErro] = useState('');
+  const [user, setUser] = useState(null);
 
   const login = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  const numero = document.getElementById('floating_num').value;
-  const senha = document.getElementById('floating_password').value;
+    const numero = document.getElementById('floating_num').value;
+    const senha = document.getElementById('floating_password').value;
 
-  try {
-    const response = await fetch('http://localhost:8080/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({ username: numero, password: senha })
-    });
+    try {
+      const response = await fetch('http://localhost:8080/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ username: numero, password: senha })
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      setErro(data?.error || data?.mensagem || 'Falha no login');
-    } else {
-      setErro('');
-      alert('Login realizado com sucesso');
-      router.push('/usuario/chamados');
+      if (!response.ok) {
+        setErro(data?.error || data?.mensagem || 'Falha no login');
+      } else {
+        setErro('');
+        setUser(data.user);
+        alert('Login realizado com sucesso');
+        const funcao = data.user.funcao?.toLowerCase();
+
+        if (funcao === 'admin') {
+          router.push('/admin/chamados');
+        } else if (funcao === 'tecnico' || funcao === 'auxiliar de limpeza') {
+          router.push('/tecnico/chamados');
+        } else {
+          router.push('/usuario/chamados');
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao tentar login:', error);
+      setErro('Erro de rede ao tentar fazer login');
     }
-  } catch (error) {
-    console.error('Erro ao tentar login:', error);
-    setErro('Erro de rede ao tentar fazer login');
-  }
-  setLoading(false);
-};
+    setLoading(false);
+  };
 
   return (
     <main className="overflow-hidden w-screen h-screen">
@@ -67,7 +76,7 @@ const router = useRouter();
       <nav className="bg-white border-gray-200 w-screen">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <a href="/login" className="flex items-center space-x-3 rtl:space-x-reverse">
-            <span className="self-center text-2xl poppins-bold whitespace-nowrap zelos-name"><img src="/img/zelos-name.svg" className="h-8" alt="Zelos name"/></span>
+            <span className="self-center text-2xl poppins-bold whitespace-nowrap zelos-name"><img src="/img/zelos-name.svg" className="h-8" alt="Zelos name" /></span>
           </a>
         </div>
       </nav>

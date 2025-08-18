@@ -97,6 +97,7 @@ export const criarChamadoController = async (req, res) => {
 
   const imagem = req.file?.filename || null;
   try {
+    const data_limite = calcularDataLimite(prioridade);
     const dadosChamado = {
     assunto,
     tipo_id: tipo_id || null,
@@ -104,7 +105,8 @@ export const criarChamadoController = async (req, res) => {
     prioridade: prioridade || 'none',
     imagem: imagem || null,
     usuario_id: usuario_id || null,
-    patrimonio: patrimonio || null
+    patrimonio: patrimonio || null,
+    data_limite
   };
   Object.keys(dadosChamado).forEach((key) => {
     if (dadosChamado[key] === undefined) {
@@ -118,6 +120,24 @@ export const criarChamadoController = async (req, res) => {
     console.error('Erro ao criar chamado:', error);
     res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
   }};
+
+export function calcularDataLimite(prioridade) {
+ const agora = new Date();
+  
+    switch (prioridade) {
+      case "baixa":
+        return new Date(agora.getTime() + 72 * 60 * 60 * 1000); // +72h
+      case "média":
+        return new Date(agora.getTime() + 24 * 60 * 60 * 1000); // +24h
+      case "alta":
+        return new Date(agora.getTime() + 8 * 60 * 60 * 1000);  // +8h
+      case "urgente":
+        return new Date(agora.getTime() + 4 * 60 * 60 * 1000);  // +4h
+      default:
+        return null;
+    }
+  }
+  
 
 export const listarChamadosController = async (req, res) => {
     try {

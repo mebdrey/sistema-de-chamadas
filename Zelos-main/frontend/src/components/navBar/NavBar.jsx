@@ -1,7 +1,11 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
+
+const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
+    const router = useRouter();
+
     // links da sidebar
     let links = [];
 
@@ -44,6 +48,27 @@ const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
 
     if (!mounted) return null; // evita SSR
 
+// ----- Função de logout -----
+const handleLogout = async () => {
+    try {
+      const res = await fetch('http://localhost:8080/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+  
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro no logout');
+  
+      setUser(null); 
+      alert('Logout realizado com sucesso');
+      router.push('/login');
+    } catch (err) {
+      console.error('Erro ao deslogar:', err);
+      alert('Erro de rede ao tentar deslogar');
+    }
+  };
+  
     return (
         <>
             {/*navbar */}
@@ -169,14 +194,14 @@ const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
                                             <span className="sr-only">Open user menu</span>
                                             <div className="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
                                                 {user?.ftPerfil ? (
-                                                <img className="object-cover w-full h-full" src={user.ftPerfil} alt="Foto de perfil" />
-                                            ) : (
-                                                <svg className="absolute w-10 h-10 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                                                </svg>
-                                            )}
+                                                    <img className="object-cover w-full h-full" src={user.ftPerfil} alt="Foto de perfil" />
+                                                ) : (
+                                                    <svg className="absolute w-10 h-10 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                    </svg>
+                                                )}
                                             </div>
-                                            
+
                                         </button>
                                     </div>
                                     {dropdownUserOpen && (
@@ -190,7 +215,10 @@ const SideBar = ({ user, userType, navFechada, setNavFechada }) => {
                                                     <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Perfil</a>
                                                 </li>
                                                 <li>
-                                                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Sair</a>
+                                                <button className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem"   onClick={(e) => {
+            e.preventDefault();
+            handleLogout();
+          }}>Sair</button>
                                                 </li>
                                             </ul>
                                         </div>

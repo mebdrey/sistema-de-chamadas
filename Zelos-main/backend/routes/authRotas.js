@@ -12,7 +12,7 @@ const router = express.Router();
 //         console.error('Erro na autenticação:', err);
 //         return res.status(500).json({ error: 'Erro interno no servidor' });
 //       }
-      
+
 //       if (!user) {
 //         console.warn('Falha na autenticação:', info?.message || 'Credenciais inválidas');
 //         console.log('Info:', info);
@@ -44,7 +44,7 @@ const router = express.Router();
 //             email: user.mail                          // e-mail
 //           }
 //         });
-        
+
 //       });
 //     } catch (error) {
 //       console.error('Erro inesperado:', error);
@@ -54,44 +54,91 @@ const router = express.Router();
 // });
 
 // Rota de Login
+// router.post('/login', (req, res, next) => {
+//   // Middleware de autenticação com tratamento de erros
+//   passport.authenticate('ldapauth', { session: true }, (err, user, info) => {
+//     try {
+//       if (err) {
+//         console.error('Erro na autenticação:', err);
+//         return res.status(500).json({ error: 'Erro interno no servidor' });
+//       }
+
+//       if (!user) {
+//         console.warn('Falha na autenticação:', info?.message || 'Credenciais inválidas');
+//         console.log('Info:', info);
+//         return res.status(401).json({ error: info?.message || 'Autenticação falhou' });
+//       }
+
+//       // Loga o usuário manualmente para garantir a sessão
+//       req.logIn(user, (loginErr) => {
+//         if (loginErr) {
+//           console.error('Erro ao criar sessão:', loginErr);
+//           return res.status(500).json({ error: 'Erro ao criar sessão' });
+//         }
+//         console.log('Objeto user retornado pelo LDAP:', user);
+//         console.log('Usuário autenticado:', user.username);
+//         return res.json({ 
+//           message: 'Autenticado com sucesso', 
+//           user: {
+//             nome: user.displayName || user.cn || '', // Nome real do LDAP
+//             username: user.sAMAccountName || user.uid || '', // Login/usuário
+//             email: user.mail || '' // Email do LDAP
+//           }
+//         });
+//       });
+//     } catch (error) {
+//       console.error('Erro inesperado:', error);
+//       res.status(500).json({ error: 'Erro inesperado no servidor' });
+//     }
+//   })(req, res, next);
+// });
+
 router.post('/login', (req, res, next) => {
-  // Middleware de autenticação com tratamento de erros
-  passport.authenticate('ldapauth', { session: true }, (err, user, info) => {
-    try {
+  try {
+    const { username } = req.body;
+
+    // Se o username for numérico → LDAP (não precisa de nome, é default)
+    // Senão → Local
+    const estrategia = /^\d+$/.test(username) ? "ldapauth" : "local-db";
+
+    passport.authenticate(estrategia, { session: true }, (err, user, info) => {
       if (err) {
-        console.error('Erro na autenticação:', err);
-        return res.status(500).json({ error: 'Erro interno no servidor' });
+        console.error("Erro na autenticação:", err);
+        return res.status(500).json({ error: "Erro interno no servidor" });
       }
-      
+
       if (!user) {
-        console.warn('Falha na autenticação:', info?.message || 'Credenciais inválidas');
-        console.log('Info:', info);
-        return res.status(401).json({ error: info?.message || 'Autenticação falhou' });
+        console.warn("Falha na autenticação:", info?.message || "Credenciais inválidas");
+        return res.status(401).json({ error: info?.message || "Autenticação falhou" });
       }
 
       // Loga o usuário manualmente para garantir a sessão
       req.logIn(user, (loginErr) => {
         if (loginErr) {
-          console.error('Erro ao criar sessão:', loginErr);
-          return res.status(500).json({ error: 'Erro ao criar sessão' });
+          console.error("Erro ao criar sessão:", loginErr);
+          return res.status(500).json({ error: "Erro ao criar sessão" });
         }
-        console.log('Objeto user retornado pelo LDAP:', user);
-        console.log('Usuário autenticado:', user.username);
-        return res.json({ 
-          message: 'Autenticado com sucesso', 
+        console.log("Sessão criada:", req.session);
+        console.log("Usuário autenticado:", user.username);
+
+        return res.json({
+          message: "Autenticado com sucesso",
           user: {
-            username: user.username, // nome de login
-            displayName: user.displayName, // nome de exibição
-            email: user.mail // e-mail
+            nome: user.displayName || user.cn || user.nome || "", // Nome real LDAP ou do banco
+            username: user.sAMAccountName || user.uid || user.username || "", // Login
+            email: user.mail || user.email || "", // Email
+            funcao: user.funcao || "usuario"
           }
         });
       });
-    } catch (error) {
-      console.error('Erro inesperado:', error);
-      res.status(500).json({ error: 'Erro inesperado no servidor' });
-    }
-  })(req, res, next);
+    })(req, res, next);
+
+  } catch (error) {
+    console.error("Erro inesperado:", error);
+    res.status(500).json({ error: "Erro inesperado no servidor" });
+  }
 });
+
 
 // Rota de Logout
 router.post('/logout', (req, res) => {
@@ -100,21 +147,21 @@ router.post('/logout', (req, res) => {
   }
 
   console.log('Usuário deslogando:', req.user?.username);
-  
+
   req.logout((err) => {
     if (err) {
       console.error('Erro no logout:', err);
       return res.status(500).json({ error: 'Erro ao realizar logout' });
     }
-    
+
     // Destrói a sessão completamente
     req.session.destroy((destroyErr) => {
       if (destroyErr) {
         console.error('Erro ao destruir sessão:', destroyErr);
         return res.status(500).json({ error: 'Erro ao encerrar sessão' });
       }
-      
-      res.clearCookie('connect.sid'); // Remove o cookie de sessão
+
+      res.clearCookie('connect.sid', { path: '/' }); // Remove o cookie de sessão
       res.json({ message: 'Logout realizado com sucesso' });
     });
   });
@@ -137,7 +184,7 @@ router.post('/logout', (req, res) => {
 //   res.status(401).json({ authenticated: false });
 // });
 
-import { read } from '../config/database.js'; 
+import { read } from '../config/database.js';
 router.get('/check-auth', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ authenticated: false });
