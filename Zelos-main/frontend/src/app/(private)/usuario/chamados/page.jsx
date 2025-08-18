@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { initFlowbite } from 'flowbite'
 import { useRouter } from 'next/navigation';
+import OrdenarPor from '@/components/DropDown/DropDown.jsx'
 
 export default function ChamadosCliente() {
     const [selecionarPeriodo, setSelecionarPeriodo] = useState('mes') // "mes" = esse mês // select de periodo 
@@ -11,16 +12,14 @@ export default function ChamadosCliente() {
     const [tiposServico, setTiposServico] = useState([]); // guarda o tipo de serviço que o usuario seleciona 
     const [tipoSelecionadoId, setTipoSelecionadoId] = useState(''); // id do servico
     const router = useRouter();
-const [patrimonio, setPatrimonio] = useState('');
-    // const [blocos, setBlocos] = useState([]); // guarda a sala e bloco selecionada 
-    // const [salas, setSalas] = useState([]);
-    // const [salaSelecionada, setSalaSelecionada] = useState('');
-    // const [blocoSelecionado, setBlocoSelecionado] = useState('');
+    const [patrimonio, setPatrimonio] = useState('');
     const [imagemPreview, setImagemPreview] = useState(null); // preview da imagem
     const [imagemArquivo, setImagemArquivo] = useState(null); // gaurda o arquivo da imagem
     const [assunto, setAssunto] = useState(''); // gaurda o assunto do chamado
     const [descricao, setDescricao] = useState(''); // gaurda a descricao do chamado
     const [busca, setBusca] = useState(""); // armazena o que for digitado no campo de busca
+    // const [showDropdown, setShowDropdown] = useState(false); // mostrar o dropdown
+    // const [ordenarPor, setOrdenarPor] = useState('mais_recente'); // ordenar por mais recente ou mais antigo, por padrao ele mostra os mais recentes primeiro
 
     useEffect(() => {
         setIsMounted(true);
@@ -67,13 +66,8 @@ const [patrimonio, setPatrimonio] = useState('');
     // STATUS DOS CHAMAFOS
     const statusAbas = ['todos', 'pendente', 'em andamento', 'concluído'];
     // funcao p normalizar id
-    const normalizarId = (texto) => texto.toLowerCase().replace(/\s+/g, '-')
-
-    // array com periodos
-    const periodos = [
-        { label: 'Crescente', value: 'crescente' },
-        { label: 'Decrescente', value: 'decrescente' }
-    ];
+    const normalizarId = (texto) =>
+        typeof texto === 'string' ? texto.toLowerCase().replace(/\s+/g, '-') : '';
 
     // busca os tipos de servico
     useEffect(() => {
@@ -82,21 +76,6 @@ const [patrimonio, setPatrimonio] = useState('');
             .then(data => setTiposServico(data))
             .catch(err => console.error('Erro ao carregar tipos:', err));
     }, []);
-
-    // busca bloco e salas
-    // useEffect(() => {
-    //     fetch('http://localhost:8080/blocos')
-    //         .then(res => res.json())
-    //         .then(setBlocos)
-    //         .catch(err => console.error('Erro ao buscar blocos:', err)); }, []);
-    // useEffect(() => {
-    //     if (blocoSelecionado) {
-    //         fetch(`http://localhost:8080/salas/${blocoSelecionado}`)
-    //             .then(res => res.json())
-    //             .then(setSalas)
-    //             .catch(err => console.error('Erro ao buscar salas:', err));
-    //     } else { setSalas([]);}
-    // }, [blocoSelecionado]);
 
     //criar chamado
     const criarChamado = async (e) => {
@@ -107,8 +86,6 @@ const [patrimonio, setPatrimonio] = useState('');
         formData.append("tipo_id", tipoSelecionadoId);
         formData.append("imagem", imagemArquivo);
         formData.append("patrimonio", patrimonio);
-        // formData.append("bloco", blocoSelecionado);
-        // formData.append("sala", salaSelecionada);
         const res = await fetch("http://localhost:8080/chamado", {
             method: "POST",
             body: formData,
@@ -119,8 +96,8 @@ const [patrimonio, setPatrimonio] = useState('');
             // limpar
             setImagemPreview(null);
             setImagemArquivo(null);
-  const novoChamado = await res.json(); // retorna o chamado criado
-  setChamados((prev) => [novoChamado, ...prev]); // insere no topo
+            const novoChamado = await res.json(); // retorna o chamado criado
+            setChamados((prev) => [novoChamado, ...prev]); // insere no topo
             alert("Chamado criado com sucesso!");
         } else {
             alert("Erro ao criar chamado.");
@@ -135,44 +112,69 @@ const [patrimonio, setPatrimonio] = useState('');
         }
     };
 
+    // formata os tipos de servico
+    function formatarLabel(str) {
+        const correcoes = {
+            manutencao: "Manutenção",
+            apoio_tecnico: "Apoio Técnico"
+        };
+
+        const palavras = str.replace(/_/g, " ").split(" ");
+
+        return palavras
+            .map(palavra => {
+                const semAcento = palavra.toLowerCase();
+                return correcoes[semAcento] || (palavra.charAt(0).toUpperCase() + palavra.slice(1));
+            })
+            .join(" ");
+    }
+
+    // const opcoesOrdenacao = [
+    //     { label: 'Mais antigo primeiro', value: 'mais_antigo' },
+    //     { label: 'Mais recente primeiro', value: 'mais_recente' }
+    // ];
+
+    // // Fecha ao clicar fora
+    // useEffect(() => {
+    //     const handleClickOutside = (event) => {
+    //         if (!event.target.closest('#ordenarDropdownWrapper')) {
+    //             setShowDropdown(false);
+    //         }
+    //     };
+    //     document.addEventListener('click', handleClickOutside);
+    //     return () => document.removeEventListener('click', handleClickOutside);
+    // }, []);
     return (
         <>
-            {/* <SideBar userType="usuario" /> */}
             {/* conteudo da pagina */}
             <div className="p-4 w-full">
                 <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
                     <div className='flex flex-row w-full justify-between mb-15'>
                         {/* select */}
-                        <button id="dropdownRadioBgHoverButton" data-dropdown-toggle="dropdownRadioBgHover" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Ordenar <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                        </svg></button>
-                        <div id="dropdownRadioBgHover" className="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
-                            {isMounted &&
-                                periodos.map((periodo, index) => (
+                        {/* <div id="ordenarDropdownWrapper" className="relative inline-block">
+                            <button onClick={(e) => {
+                                e.stopPropagation(); // previne o fechamento imediato
+                                setShowDropdown(!showDropdown);
+                            }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" > Ordenar por
+                                <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" >
+                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                </svg>
+                            </button>
+
+                            <div className={`absolute mt-2 z-10 ${showDropdown ? 'block' : 'hidden'} w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600`}>
+                                {opcoesOrdenacao.map((opcao, index) => (
                                     <div key={index} className="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-                                        <input id={`periodo-radio-${index}`} type="radio" value={periodo.value} name="periodo" checked={selecionarPeriodo === periodo.value} onChange={() => setSelecionarPeriodo(periodo.value)} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
-                                        <label htmlFor={`periodo-radio-${index}`} className="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">
-                                            {periodo.label}
+                                        <input id={`ordenar-radio-${index}`} type="radio" value={opcao.value} name="ordenar" checked={ordenarPor === opcao.value} onChange={() => setOrdenarPor(opcao.value)} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
+                                        <label htmlFor={`ordenar-radio-${index}`} className="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">
+                                            {opcao.label}
                                         </label>
                                     </div>
                                 ))}
-                        </div>
+                            </div>
+                        </div> */}
+                        <OrdenarPor />
+
                         {/* barra de pesquisa */}
-                        {/* <form className="flex items-center">
-                            <label htmlFor="simple-search" className="sr-only">Search</label>
-                            <div className="relative w-80">
-                                <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                    <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
-                                    </svg></div>
-                                <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Pesquisar chamado" required /></div>
-                            <button type="submit" className="p-2.5 ms-2 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                                </svg>
-                                <span className="sr-only">Search</span>
-                            </button></form> */}
-                        {/* Barra de pesquisa */}
                         <form className="flex items-center" onSubmit={(e) => e.preventDefault()}>
                             <label htmlFor="simple-search" className="sr-only">Search</label>
                             <div className="relative w-80">
@@ -181,28 +183,20 @@ const [patrimonio, setPatrimonio] = useState('');
                                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
                                     </svg>
                                 </div>
-                                <input
-                                    type="text"
-                                    id="simple-search"
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    placeholder="Pesquisar chamado"
-                                    value={busca}
-                                    onChange={(e) => setBusca(e.target.value)} />
+                                <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Pesquisar chamado" value={busca} onChange={(e) => setBusca(e.target.value)} />
                             </div>
                         </form>
                     </div>
                     <section>
                         <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700">
-                            <ul className="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist">
+                            <ul className="flex flex-wrap -mb-px text-sm font-medium text-center">
                                 {/* Tabs */}
                                 {statusAbas.map((status) => {
                                     const statusId = normalizarId(status)
                                     return (
                                         <li className="me-2" role="presentation" key={status}>
-                                            <button id={`${statusId}-tab`} onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === statusId ? "active border-blue-500 text-blue-600 dark:text-blue-400" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-neutral-400 dark:hover:text-neutral-300"
-                                                }`}
-                                                data-tabs-target={`#${statusId}`} type="button" role="tab" aria-controls={statusId} aria-selected={abaAtiva === statusId} >
-                                                {primeiraLetraMaiuscula(status)}
+                                            <button onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === statusId ? "active border-blue-500 text-blue-600 dark:text-blue-400" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-neutral-400 dark:hover:text-neutral-300"
+                                                }`} type="button" >{primeiraLetraMaiuscula(status)}
                                             </button>
                                         </li>
                                     )
@@ -234,27 +228,13 @@ const [patrimonio, setPatrimonio] = useState('');
                                                         <option value="">Selecione tipo de serviço</option>
                                                         {tiposServico.map(tipo => (
                                                             <option key={tipo.id} value={tipo.id}>
-                                                                {tipo.titulo}
+                                                                {formatarLabel(tipo.titulo)}
                                                             </option>
                                                         ))}
                                                     </select></div>
-                                                {/* <div className="col-span-2">
-                                                    <label htmlFor="local" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Local</label>
-                                                    <div className="flex">
-                                                        <select id="bloco" value={blocoSelecionado} onChange={(e) => setBlocoSelecionado(e.target.value)} className="shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-500 bg-gray-100 border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600">
-                                                            <option value="" className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">Selecione um bloco</option>
-                                                            {blocos.map((b, index) => (
-                                                                <option key={b.id || index} value={b.bloco} className="inline-flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white">{b.bloco}
-                                                                </option>))}
-                                                        </select>
-                                                        <select id="salas" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-e-lg border-s-gray-100 dark:border-s-gray-700 border-s-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={salaSelecionada} onChange={(e) => setSalaSelecionada(e.target.value)}>
-                                                            <option value="">Escolha a sala</option>
-                                                            {salas.map((s, index) => (
-                                                                <option key={index} value={s.sala}>{s.sala}</option>))}
-                                                        </select> </div></div> */}
                                                 <div className="col-span-2">
                                                     <label htmlFor="patrimonio" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Patrimônio</label>
-                                                    <input type="text" name="patrimonio" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Digite o número de patrimônio" required="" value={patrimonio} onChange={(e) => setPatrimonio(e.target.value)}/>
+                                                    <input type="text" name="patrimonio" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Digite o número de patrimônio" required="" value={patrimonio} onChange={(e) => setPatrimonio(e.target.value)} />
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descrição</label>
@@ -262,7 +242,6 @@ const [patrimonio, setPatrimonio] = useState('');
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="file" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enviar imagem</label>
-                                                    {/* <textarea id="file" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Escreva a descrição do chamado"></textarea> */}
                                                     <div className="flex items-center justify-center w-1/2 h-70">
                                                         <label htmlFor="dropzone-file" className="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 overflow-hidden">
                                                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -281,69 +260,41 @@ const [patrimonio, setPatrimonio] = useState('');
                             </div>
                         </div>
                         {/* visualizar chamados */}
-                        {/* <div id="default-tab-content">
-                            {statusAbas.map((status) => {
-                                const statusId = normalizarId(status)
-                                const chamadosFiltrados =
-                                    status === 'todos' ? chamados : chamados.filter((c) => normalizarId(c.status_chamado) === statusId)
-                                return (
-                                    <div key={status} className="hidden flex flex-col bg-white ark:bg-neutral-900 gap-5" id={statusId} role="tabpanel" aria-labelledby={`${statusId}-tab`} >
-                                        {chamadosFiltrados.length === 0 ? (
-                                            <div className="p-4 md:p-5">
-                                                <p className="text-gray-500 dark:text-neutral-400">Nenhum chamado encontrado.</p>
-                                            </div> ) : ( chamadosFiltrados.map((chamado) => (
-                                                <div key={chamado.id} className="p-4 md:p-5 border-b last:border-0 bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
-                                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}</h3>
-                                                    <h6 className="text-base font-bold text-gray-800 dark:text-white">{chamado.assunto}</h6>
-                                                    <p className="mt-2 text-gray-500 dark:text-neutral-400">{chamado.descricao}</p>
-                                                    <div className="flex flex-row justify-between items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 mt-4 dark:bg-neutral-900 dark:border-neutral-700">
-                                                        <p className="text-sm text-gray-500 dark:text-neutral-500">Criado em {new Date(chamado.criado_em).toLocaleString('pt-BR')}</p>
-                                                        <a className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600" href="#"> Ver chamado
-                                                            <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                <path d="m9 18 6-6-6-6"></path>
-                                                            </svg>
-                                                        </a>
-                                                    </div> </div> )) )} </div> ) })}</div> */}
                         <div id="default-tab-content">
                             {statusAbas.map((status) => {
                                 const statusId = normalizarId(status);
                                 // Primeiro filtra por status
-                                let filtradosPorStatus =
-                                    status === "todos"
-                                        ? chamados : chamados.filter((c) => normalizarId(c.status_chamado) === statusId);
+                                let filtradosPorStatus = status === "todos" ? chamados : chamados.filter((c) => normalizarId(c.status_chamado) === statusId);
                                 // Depois aplica filtro de busca
-                                let chamadosFiltrados = filtradosPorStatus.filter((c) =>
-  busca.trim() === "" ? true :
-    (c.assunto || "").toLowerCase().includes(busca.toLowerCase()) ||
-    (c.descricao || "").toLowerCase().includes(busca.toLowerCase()) ||
-    String(c.id).includes(busca)
-);
+                let chamadosFiltrados = filtradosPorStatus
+                  .filter((c) =>
+                    busca.trim() === ""
+                      ? true
+                      : c.assunto.toLowerCase().includes(busca.toLowerCase()) ||
+                      c.descricao.toLowerCase().includes(busca.toLowerCase()) ||
+                      String(c.id).includes(busca)
+                  )
+                  .sort((a, b) => {
+                    const dataA = new Date(a.criado_em);
+                    const dataB = new Date(b.criado_em);
+                    return ordenarPor === 'mais_antigo' ? dataA - dataB : dataB - dataA;
+                  });
 
                                 return (
-                                    <div key={status} className="hidden flex flex-col bg-white ark:bg-neutral-900 gap-5" id={statusId} role="tabpanel" aria-labelledby={`${statusId}-tab`}>
+                                    <div key={status} className={`${abaAtiva === statusId ? "block" : "hidden"} flex flex-col bg-white dark:bg-neutral-900 gap-5`}>
                                         {chamadosFiltrados.length === 0 ? (
                                             <div className="p-4 md:p-5">
                                                 <p className="text-gray-500 dark:text-neutral-400"> Nenhum chamado encontrado. </p>
                                             </div>) : (
                                             chamadosFiltrados.map((chamado) => (
-                                                <div
-                                                    key={chamado.id}
-                                                    className="p-4 md:p-5 border-b last:border-0 bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
-                                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-                                                        Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}
-                                                    </h3>
-                                                    <h6 className="text-base font-bold text-gray-800 dark:text-white">
-                                                        {chamado.assunto}
-                                                    </h6>
-                                                    <p className="mt-2 text-gray-500 dark:text-neutral-400">
-                                                        {chamado.descricao}
-                                                    </p>
+                                                <div key={chamado.id} className="p-4 md:p-5 border-b last:border-0 bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
+                                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}</h3>
+                                                    <h6 className="text-base font-bold text-gray-800 dark:text-white">{chamado.assunto}</h6>
+                                                    <p className="mt-2 text-gray-500 dark:text-neutral-400">{chamado.descricao}</p>
                                                     <div className="flex flex-row justify-between items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 mt-4 dark:bg-neutral-900 dark:border-neutral-700">
-                                                        <p className="text-sm text-gray-500 dark:text-neutral-500">
-                                                            Criado em {new Date(chamado.criado_em).toLocaleString("pt-BR")}
-                                                        </p>
+                                                        <p className="text-sm text-gray-500 dark:text-neutral-500">Criado em {new Date(chamado.criado_em).toLocaleString("pt-BR")}</p>
                                                         <a className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600"
-                                                            href="#" > Ver chamado
+                                                            href="#" >Ver relatório
                                                             <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
                                                                 <path d="m9 18 6-6-6-6"></path>
                                                             </svg>

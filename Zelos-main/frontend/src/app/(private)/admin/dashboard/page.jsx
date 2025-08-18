@@ -1,280 +1,293 @@
 "use client"
-import React, { useEffect, useState, useRef } from "react";
-import './dashboard.css'
-import GraficoDeLinhas from '../../../../components/GraficoLinhas/GraficoDeLinhas.jsx'
-import GraficoChamadosPorMes from '../../../../components/GraficoMes/GraficoChamadosPorMes.jsx'
-// import ApexCharts from 'apexcharts';
+import { useEffect, useState } from "react";
 
-export default function admDashboard() {
+export default function Setores() {
+    const [setoresSelecionados, setSetoresSelecionados] = useState({ auxiliares: true, tecnicos: true, }); // Estado que guarda quais setores estão selecionados no dropdown, inicialmente todos true para mostrar todos ao entrar na página
+    const [setores, setSetores] = useState({}); // Dados completos dos usuários por setor vindo da API
+    const [dropdownAberto, setDropdownAberto] = useState(false); // Estado para controlar dropdown aberto/fechado
+    const [dropdownAbertoId, setDropdownAbertoId] = useState(null); // controla o estado de dropdown aberto/fechado (dropdown p cada usuario)
+    const [busca, setBusca] = useState(""); // armazena o que for digitado no campo de busca
 
-  // cards sobre os chamados
-  const qndtChamados = [
-    {
-      tipo: 'em aberto',
-      link: '#',
-      qtd: 55
-    }, {
-      tipo: 'em andamento',
-      link: '#',
-      qtd: 55
-    }, {
-      tipo: 'encerrados',
-      link: '#',
-      qtd: 55
+    // Carrega dados da API ao montar componente
+    useEffect(() => {
+        fetch("http://localhost:8080/usuarios-por-setor")
+            .then((res) => res.json())
+            .then((data) => {
+                setSetores(data);
+            });
+    }, []);
+
+    // Função para lidar com check/uncheck dos setores no dropdown
+    function toggleSetor(nomeSetor) {
+        setSetoresSelecionados((prev) => ({
+            ...prev,
+            [nomeSetor]: !prev[nomeSetor],
+        }));
     }
-  ];
 
-  return (
-    <>
-      {/* conteudo da pagina */}
-      <div className="page">
+    // Juntar usuários só dos setores selecionados para exibir numa tabela só
+    const usuariosFiltrados = Object.entries(setores)
+  .filter(([nomeSetor]) => setoresSelecionados[nomeSetor])
+  .flatMap(([, usuarios]) => usuarios)
+  .filter((usuario) => {
+    const termo = busca.toLowerCase();
+    return (
+      usuario.nome.toLowerCase().includes(termo) ||
+      usuario.email.toLowerCase().includes(termo) ||
+      usuario.funcao.toLowerCase().includes(termo) ||
+      usuario.id.toString().includes(termo)  // caso queira buscar por id também
+    );
+  });
+
+
+    // excluir usuario
+    function deletarUsuario(id) {
+        if (window.confirm("Tem certeza que deseja excluir este usuário?")) {
+            fetch(`http://localhost:8080/usuarios/${id}`, {
+                method: "DELETE",
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error("Erro ao excluir usuário");
+                    return res.json();
+                })
+                .then((data) => {
+                    alert(data.mensagem);
+                    // Recarrega a lista
+                    setSetores((prev) => {
+                        const atualizado = { ...prev };
+                        for (const setor in atualizado) {
+                            atualizado[setor] = atualizado[setor].filter((u) => u.id !== id);
+                        }
+                        return atualizado;
+                    });
+                })
+                .catch((err) => {
+                    console.error(err);
+                    alert("Não foi possível excluir o usuário.");
+                });
+        }
+    }
+
+
+    return (
         <div className="p-4 w-full">
-          <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
+            <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
 
-<div class="mb-4 flex justify-center items-center gap-x-3">
-  <label for="toggle-count-switch" class="text-sm text-gray-800 dark:text-neutral-200">Monthly</label>
-  <label for="toggle-count-switch" class="relative inline-block w-11 h-6 cursor-pointer">
-    <input type="checkbox" id="toggle-count-switch" class="peer sr-only"/>
-    <span class="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-blue-600 dark:bg-neutral-700 dark:peer-checked:bg-blue-500 peer-disabled:opacity-50 peer-disabled:pointer-events-none"></span>
-    <span class="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full dark:bg-neutral-400 dark:peer-checked:bg-white"></span>
-  </label>
-  <label for="toggle-count-switch" class="text-sm text-gray-800 dark:text-neutral-200">Annual</label>
-</div>
+                <div className="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 p-4 bg-white dark:bg-gray-900">
+                    <div className="relative inline-block text-left">
+                        {/* <button onClick={() => setDropdownAberto(!dropdownAberto)} className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" >
+                                Action
+                                <svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                </svg>
+                            </button>
 
-<div class="grid grid-cols-3 lg:items-center border border-gray-200 rounded-xl dark:border-neutral-700">
+                            {dropdownAberto && (
+                                <div className="z-10 absolute mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600" style={{ top: "100%", left: 0 }} >
+                                    <ul className="py-1 text-sm text-gray-700 dark:text-gray-200">
+                                        <li>
+                                            <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" onClick={e => { e.preventDefault(); setMostrarCheckboxes(true); setDropdownAberto(false); }}>
+                                                Adicionar usuário
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" onClick={e => { e.preventDefault(); setMostrarCheckboxes(true); setDropdownAberto(false); }}>
+                                                Ativar conta
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <div className="py-1">
+                                        <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white" onClick={e => { e.preventDefault(); setMostrarCheckboxes(true); setDropdownAberto(false); }}>
+                                            Deletar usuário
+                                        </a>
+                                    </div>
+                                </div>
+                            )} */}
 
-  <div class="flex flex-col p-4">
-    <h4 class="text-gray-800 mb-1 dark:text-neutral-200">Startup</h4>
-    <div class="flex gap-x-1">
-      <span class="text-xl font-normal text-gray-800 dark:text-neutral-200">$</span>
-      <p data-hs-toggle-count='{
-          "target": "#toggle-count-switch",
-          "min": 19,
-          "max": 29
-        }' class="text-gray-800 font-semibold text-3xl dark:text-neutral-200">
-        19
-      </p>
-    </div>
-  </div>
-  
-  <div class="flex flex-col p-4">
-    <div class="flex justify-between">
-      <h4 class="text-gray-800 mb-1 dark:text-neutral-200">Team</h4>
-    </div>
-    <div class="flex gap-x-1">
-      <span class="text-xl font-normal text-gray-800 dark:text-neutral-200">$</span>
-      <p data-hs-toggle-count='{
-          "target": "#toggle-count-switch",
-          "min": 89,
-          "max": 99
-        }' class="text-gray-800 font-semibold text-3xl dark:text-neutral-200">
-        89
-      </p>
-    </div>
-  </div>
+                        <button id="dropdownHelperButton" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
+                            <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" >
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                        </button>
 
-  <div class="flex flex-col p-4">
-    <h4 class="text-gray-800 mb-1 dark:text-neutral-200">Enterprise</h4>
-    <div class="flex gap-x-1">
-      <span class="text-xl font-normal text-gray-800 dark:text-neutral-200">$</span>
-      <p data-hs-toggle-count='{
-          "target": "#toggle-count-switch",
-          "min": 129,
-          "max": 149
-        }' class="text-gray-800 font-semibold text-3xl dark:text-neutral-200">
-        129
-      </p>
-    </div>
-  </div>
-  
-</div>
-            { /* aqui serão card com alguns numeros */}
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              {qndtChamados.map((nChamados, index) => (
-                <div className="flex items-center justify-center h-fit rounded-sm">
-
-                  <div key={index} className="w-full p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-                    <div className="flex flex-row gap-3">
-                      <svg className="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-                      </svg>
-                      <h5 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">{nChamados.qtd}</h5>
+                        {/* Dropdown menu */}
+                        {dropdownAberto && (
+                            <div id="dropdownHelper" className="z-10 absolute mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600" style={{ top: "100%", left: 0 }} >
+                                <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHelperButton" >
+                                    {Object.keys(setores).map((nomeSetor) => (
+                                        <li key={nomeSetor}>
+                                            <div className="flex p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+                                                <div className="flex items-center h-5">
+                                                    <input
+                                                        id={`checkbox-${nomeSetor}`}
+                                                        type="checkbox"
+                                                        checked={!!setoresSelecionados[nomeSetor]}
+                                                        onChange={() => toggleSetor(nomeSetor)}
+                                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                                                    />
+                                                </div>
+                                                <div className="ms-2 text-sm">
+                                                    <label
+                                                        htmlFor={`checkbox-${nomeSetor}`}
+                                                        className="font-medium text-gray-900 dark:text-gray-300 capitalize"
+                                                    >
+                                                        {nomeSetor}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                     </div>
 
-                    <p className="mb-3 font-normal text-gray-500 dark:text-gray-400">Chamados {nChamados.tipo}</p>
-                    <a href={nChamados.link} className="inline-flex font-medium items-center text-blue-600 hover:underline">
-                      Ver mais
-                      <svg className="w-3 h-3 ms-2.5 rtl:rotate-[270deg]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778" />
-                      </svg>
-                    </a>
+                    <label htmlFor="table-search" className="sr-only">Search</label>
+                    {/* Barra de pesquisa */}
+                    <form className="flex items-center" onSubmit={(e) => e.preventDefault()}>
+                        <label htmlFor="simple-search" className="sr-only">Search</label>
+                        <div className="relative w-80">
+                            <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
+                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                id="simple-search"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                placeholder="Pesquisar por usuário"
+                                value={busca}
+                                onChange={(e) => setBusca(e.target.value)} />
+                        </div>
+                    </form>
+                </div>
+
+
+                {/* Dropdown botão */}
+                {/* <button id="dropdownHelperButton" data-dropdown-toggle="dropdownHelper" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
+        <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" >
+          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+        </svg>
+      </button>
+
+      {/* Dropdown menu */}
+                {/* {dropdownAberto && (
+        <div id="dropdownHelper"
+          className="z-10 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-60 dark:bg-gray-700 dark:divide-gray-600"
+        >
+          <ul
+            className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200"
+            aria-labelledby="dropdownHelperButton"
+          >
+            {Object.keys(setores).map((nomeSetor) => (
+              <li key={nomeSetor}>
+                <div className="flex p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+                  <div className="flex items-center h-5">
+                    <input
+                      id={`checkbox-${nomeSetor}`}
+                      type="checkbox"
+                      checked={!!setoresSelecionados[nomeSetor]}
+                      onChange={() => toggleSetor(nomeSetor)}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                    />
+                  </div>
+                  <div className="ms-2 text-sm">
+                    <label
+                      htmlFor={`checkbox-${nomeSetor}`}
+                      className="font-medium text-gray-900 dark:text-gray-300 capitalize"
+                    >
+                      {nomeSetor}
+                    </label>
                   </div>
                 </div>
-              ))}
-            </div>
-            <div className="flex items-center justify-center h-fit mb-4 rounded-sm">
-              <div className="w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
-
-                <GraficoChamadosPorMes />
-              </div>
-            </div>
-
-            <div className="tabela">
-              <h1 className="text-purple-700">Usuários</h1>
-              <div className="relative overflow-x-auto">
-                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                  <thead className="text-xs text-purple-700 uppercase bg-purple-50 dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                      <th scope="col" className="px-6 py-3">
-                        Nome
-                      </th>
-                      <th scope="col" className="px-6 py-3">
-                        Setor
-                      </th>
-                      <th scope="col" className="px-6 py-3">
-                        Email
-                      </th>
-                      <th scope="col" className="px-6 py-3">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                      <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                        teste
-                      </th>
-                      <td className="px-6 py-4">
-                        técnico
-                      </td>
-                      <td className="px-6 py-4">
-                        teste@gmail.com
-                      </td>
-                      <td className="px-6 py-4">
-                        ativo
-                      </td>
-                    </tr>
-                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                        teste2
-                      </th>
-                      <td className="px-6 py-4">
-                        técnico
-                      </td>
-                      <td className="px-6 py-4">
-                        teste2@gmail.com
-                      </td>
-                      <td className="px-6 py-4">
-                        inativo
-                      </td>
-                    </tr>
-                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                        teste3
-                      </th>
-                      <td className="px-6 py-4">
-                        usuário
-                      </td>
-                      <td className="px-6 py-4">
-                        teste3@gmail.com
-                      </td>
-                      <td className="px-6 py-4">
-                        ativo
-                      </td>
-                    </tr>
-                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                        teste4
-                      </th>
-                      <td className="px-6 py-4">
-                        usuário
-                      </td>
-                      <td className="px-6 py-4">
-                        teste4@gmail.com
-                      </td>
-                      <td className="px-6 py-4">
-                        inativo
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-            </div>
-
-            {/* grupo de 4 graficos pequenos */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              {/* <GraficoDeLinhas /> */}
-
-              {/* <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
-              <p className="text-2xl text-gray-400 dark:text-gray-500">
-                <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
-                </svg>
-              </p>
-            </div>
-            <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
-              <p className="text-2xl text-gray-400 dark:text-gray-500">
-                <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
-                </svg>
-              </p>
-            </div>
-            <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
-              <p className="text-2xl text-gray-400 dark:text-gray-500">
-                <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
-                </svg>
-              </p>
-            </div> */}
-            </div>
-
-
-            {/* grafico grande */}
-            {/* <div className="flex items-center justify-center h-48 mb-4 rounded-sm bg-gray-50 dark:bg-gray-800">
-            <p className="text-2xl text-gray-400 dark:text-gray-500">
-              <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
-              </svg>
-            </p>
-          </div> */}
-
-
-            {/* grupo de 4 graficos pequenos */}
-            {/* <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
-              <p className="text-2xl text-gray-400 dark:text-gray-500">
-                <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
-                </svg>
-              </p>
-            </div>
-            <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
-              <p className="text-2xl text-gray-400 dark:text-gray-500">
-                <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
-                </svg>
-              </p>
-            </div>
-            <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
-              <p className="text-2xl text-gray-400 dark:text-gray-500">
-                <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
-                </svg>
-              </p>
-            </div>
-            <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
-              <p className="text-2xl text-gray-400 dark:text-gray-500">
-                <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
-                </svg>
-              </p>
-            </div>
-          </div> */}
-
-          </div>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
-    </>
-  )
+      )} */}
+
+                {/* Tabela única com usuários filtrados */}
+                <div className="overflow-auto">
+                    <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th className="px-6 py-3">Nome</th>
+                                <th className="px-6 py-3">Função</th>
+                                <th className="px-6 py-3">Status</th>
+                                <th className="px-6 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {usuariosFiltrados.length === 0 && (
+                                <tr>
+                                    <td colSpan="3" className="px-6 py-4 text-center">
+                                        Nenhum usuário para o tipo selecionado.
+                                    </td>
+                                </tr>
+                            )}
+                            {usuariosFiltrados.map((usuario) => (
+                                <tr key={usuario.id} className="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600" >
+                                    <th scope="row" className="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white" >
+                                        <div className="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+                                            {usuario.foto_url ? (
+                                                <img className="w-10 h-10 rounded-full object-cover" src={usuario.foto_url} alt={usuario.nome} />
+                                            ) : (
+                                                <svg className="absolute w-10 h-10 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                </svg>
+                                            )}
+                                        </div>
+
+
+                                        <div className="ms-3">
+                                            <div>{usuario.nome}</div>
+                                            <div className="text-gray-500 text-sm">{usuario.email}</div>
+                                        </div>
+                                    </th>
+                                    <td className="px-6 py-4">{usuario.funcao}</td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center">
+                                            <div
+                                                className={`h-2.5 w-2.5 rounded-full me-2 ${usuario.status_usuarios === "ativo"
+                                                    ? "bg-green-500"
+                                                    : "bg-red-500"
+                                                    }`}
+                                            ></div>
+                                            {usuario.status_usuarios}
+                                        </div>
+                                    </td>
+
+                                    <td className="relative">
+                                        <button onClick={() => setDropdownAbertoId((prev) => (prev === usuario.id ? null : usuario.id))} className="inline-flex items-center p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600" type="button" aria-expanded={dropdownAbertoId === usuario.id} aria-haspopup="true" >
+                                            <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3" >
+                                                <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
+                                            </svg>
+                                        </button>
+
+                                        {/* Dropdown */}
+                                        {dropdownAbertoId === usuario.id && (
+                                            <div className="z-10 absolute right-0 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600" role="menu" aria-orientation="vertical" aria-labelledby="dropdownMenuIconHorizontalButton" >
+                                                <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
+                                                    <li>
+                                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Ver perfil</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Desativar conta</a>
+                                                    </li>
+                                                </ul>
+                                                <div className="py-2">
+                                                    <a onClick={() => deletarUsuario(usuario.id)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white" role="menuitem">Deletar usuário</a>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
 }

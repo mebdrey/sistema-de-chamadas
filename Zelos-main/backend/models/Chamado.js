@@ -37,13 +37,19 @@ const criarRelatorio = async (dados) => {
     }
 };
 
-// ver usuarios - adm -- funcionando
-// const listarUsuarios = async (dados) => {
-//     try {
-//         return await readAll('usuarios', dados)
-//     } catch (err) {
-//         console.error('Erro ao listar usuarios!!!', err);
-//     }}
+export async function criarNotificacao({ usuario_id, tipo, titulo, descricao, chamado_id = null }) {
+    const query = `
+        INSERT INTO notificacoes (usuario_id, tipo, titulo, descricao, chamado_id)
+        VALUES (?, ?, ?, ?, ?)
+    `;
+    const values = [usuario_id, tipo, titulo, descricao, chamado_id];
+    try {
+        await readQuery(query, values);
+    } catch (err) {
+        console.error('Erro ao criar notificação:', err);
+        throw err;
+    }
+}
 
 //ver relatórios do técnico
 const verRelatorios = async (table, where) => {
@@ -104,40 +110,6 @@ export const buscarTiposServico = async () => {
     return tipos.filter(tipo => tipo.status_pool === 'ativo');
 };
 
-// Buscar local_id com base no bloco e sala ----------não está sendo utilizado --------------------------------------------------------------
-export const buscarLocalId = async (bloco, sala) => {
-    const consulta = `SELECT * FROM localChamado WHERE bloco = ? AND sala = ?`;
-    const localEncontrado = await readQuery(consulta, [bloco, sala]);
-    console.log("Resultado da query:", localEncontrado);
-    if (!localEncontrado || localEncontrado.length === 0) {
-        console.warn("Nenhum local encontrado para os parâmetros fornecidos.");
-        return null;
-    }
-    return localEncontrado[0].id;
-};
-
-// busca blocos (sem repetição) ----------não está sendo utilizado --------------------------------------------------------------
-export const listarBlocos = async () => {
-    try {
-        const consulta = 'SELECT DISTINCT bloco FROM localChamado ORDER BY bloco ASC';
-        return await readQuery(consulta);
-    } catch (err) {
-        console.error("Erro ao buscar blocos:", err);
-        throw err;
-    }
-};
-
-// busca salas por bloco ----------não está sendo utilizado --------------------------------------------------------------
-export const listarSalasPorBloco = async (bloco) => {
-    try {
-        const consulta = 'SELECT sala FROM localChamado WHERE bloco = ? ORDER BY sala ASC';
-        return await readQuery(consulta, [bloco]);
-    } catch (err) {
-        console.error("Erro ao buscar salas por bloco:", err);
-        throw err;
-    }
-};
-
 // funções utilizadas para ADMINs --------------------------------------------------------------------------------------------------------------------------------------------
 export const excluirUsuario = async (usuarioId) => {
     try {
@@ -192,6 +164,26 @@ export const verChamados = async () =>{
         throw error;
     }
 }
+
+export const contarChamadosPorStatus = async (modo) => {
+  let sql = `
+    SELECT status_chamado, COUNT(*) AS qtd
+    FROM chamados
+    WHERE YEAR(criado_em) = YEAR(NOW())
+  `;
+
+  if (modo === 'mensal') {
+    sql += ` AND MONTH(criado_em) = MONTH(NOW())`;
+  }
+
+  sql += ` GROUP BY status_chamado`;
+
+  try {
+    return await readQuery(sql);
+  } catch (err) {
+    throw err;
+  }
+};
 
 // funções utilizadas para TECNICOS E AUXILIARES DE LIMPEZA ------------------------------------------------------------------------------------------------------------------------------------
 export const listarChamadosDisponiveis = async (usuario_id) => {
