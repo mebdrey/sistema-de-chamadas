@@ -1,8 +1,8 @@
 import "./globals.css";
 import Head from 'next/head'
-import { GoogleOAuthProvider } from '@react-oauth/google';
 
 export default function RootLayout({ children }) {
+
   return (
     <html lang="pt-br">
       <Head>
@@ -15,12 +15,10 @@ export default function RootLayout({ children }) {
         <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
       </Head>
       <body>
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
-          {children}
-        </GoogleOAuthProvider>
+        {children}
         <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossOrigin="anonymous"></script>
-     
+
       </body>
     </html>
   );

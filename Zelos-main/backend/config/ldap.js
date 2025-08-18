@@ -31,12 +31,48 @@
 // export default passport;
 
 
-// p deixar ao entregar o projeto
 // config/ldap.js
 // import passport from 'passport';
 // import LdapStrategy from 'passport-ldapauth';
 // import { read, create } from './database.js';
 
+// // Função auxiliar para verificar/inserir usuário no MySQL
+// // Função auxiliar para verificar/inserir usuário no MySQL
+// async function ensureUserInDatabase(user) {
+//   const username = user.sAMAccountName;
+//   const nome = user.displayName || user.cn || username;
+//   const email = user.mail || user.userPrincipalName || `${username}@senai.br`;
+//   const funcao = 'usuario';
+//   const senha = ''; // senha vazia pois autentica via LDAP
+
+//   // Verificar se já existe
+//   const existingUser = await read('usuarios', `username = '${username}'`);
+
+//   if (!existingUser) {
+//     const insertId = await create('usuarios', {
+//       nome,
+//       senha,
+//       username,
+//       email,
+//       funcao,
+//       status_usuarios: 'ativo'
+//     });
+
+//     return {
+//       id: insertId,
+//       nome,
+//       senha,
+//       username,
+//       email,
+//       funcao,
+//       status_usuarios: 'ativo'
+//     };
+//   }
+
+//   return existingUser;
+// }
+
+// // ----- Sempre LDAP real -----
 // const ldapOptions = {
 //   server: {
 //     url: 'ldap://10.189.87.7:389',
@@ -53,46 +89,23 @@
 //       return done(null, false, { message: 'Usuário não encontrado' });
 //     }
 
-//     const username = user.sAMAccountName;
-//     const nome = user.cn || 'Sem nome';
-//     const email = user.userPrincipalName || `${username}@senai.br`;
-//     const funcao = 'usuario'; // valor padrão
-//     const senha = ''; // senha vazia, pois autentica via LDAP
+//     console.log("Usuário retornado pelo LDAP cru:", user); // <-- aqui você vê o objeto completo do LDAP
 
-//     // Verificar se usuário já existe
-//     const existingUser = await read('usuarios', `username = '${username}'`);
+//     const usuarioDB = await ensureUserInDatabase(user);
 
-//     let usuarioDB;
-//     if (!existingUser) {
-//       // Criar novo usuário no banco
-//       const insertId = await create('usuarios', {
-//         nome,
-//         senha,
-//         username,
-//         email,
-//         funcao,
-//         status_usuarios: 'ativo'
-//       });
+//     // Junta os dois: dados do banco + dados do LDAP
+//     const usuarioFinal = {
+//       ...usuarioDB,
+//       ldapRaw: user // mantém o objeto LDAP original
+//     };
 
-//       usuarioDB = {
-//         id: insertId,
-//         nome,
-//         senha,
-//         username,
-//         email,
-//         funcao,
-//         status_usuarios: 'ativo'
-//       };
-//     } else {
-//       usuarioDB = existingUser;
-//     }
-
-//     return done(null, usuarioDB);
-//   } catch (error) {
-//     console.error('Erro no LDAP:', error);
-//     return done(error);
+//     return done(null, usuarioFinal);
+//   } catch (err) {
+//     console.error('Erro LDAP:', err);
+//     return done(err);
 //   }
 // }));
+
 
 // passport.serializeUser((user, done) => {
 //   done(null, user);
@@ -101,113 +114,138 @@
 // passport.deserializeUser((user, done) => {
 //   done(null, user);
 // });
-
 // export default passport;
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
+import LdapStrategy from "passport-ldapauth";
+import { read, create } from "./database.js";
 
-
-
-// o codigo abaixo é apenas p testar localmente mas deve ser apagado
-// config/ldap.js
-// config/ldap.js
-import passport from 'passport';
-import LdapStrategy from 'passport-ldapauth';
-import { read, create } from './database.js';
-
-const isDev = process.env.NODE_ENV !== 'production' || process.env.BYPASS_LDAP === 'true';
-
-// Função auxiliar para verificar/inserir usuário no MySQL
+// ----- Função auxiliar para inserir usuário LDAP no banco -----
 async function ensureUserInDatabase(user) {
   const username = user.sAMAccountName;
-  const nome = user.cn || user.displayName || 'Sem nome';
-  const email = user.userPrincipalName || user.mail || `${username}@senai.br`;
-  const funcao = 'usuario';
-  const senha = ''; // senha vazia pois autentica via LDAP
+  const nome = user.displayName || user.cn || username;
+  const email = user.mail || user.userPrincipalName || `${username}@senai.br`;
+  const funcao = "usuario";
+  const senha = ""; // senha vazia pois autentica via LDAP
 
-  // Verificar se já existe
-  const existingUser = await read('usuarios', `username = '${username}'`);
+  let existingUsers = await read("usuarios", `username = '${username}'`);
 
-  if (!existingUser) {
-    const insertId = await create('usuarios', {
-      nome,
-      senha,
-      username,
-      email,
-      funcao,
-      status_usuarios: 'ativo'
-    });
+  // Garante que seja sempre um array
+  if (!existingUsers) existingUsers = [];
+  else if (!Array.isArray(existingUsers)) existingUsers = [existingUsers];
 
-    return {
-      id: insertId,
-      nome,
-      senha,
-      username,
-      email,
-      funcao,
-      status_usuarios: 'ativo'
-    };
+  if (existingUsers.length === 0) {
+    try {
+      const insertId = await create("usuarios", {
+        nome,
+        senha,
+        username,
+        email,
+        funcao,
+        status_usuarios: "ativo"
+      });
+      return { id: insertId, nome, username, funcao };
+    } catch (err) {
+      if (err.code === "ER_DUP_ENTRY") {
+        let result = await read("usuarios", `username = '${username}'`);
+        if (!Array.isArray(result)) result = [result];
+        const userExistente = result[0];
+        return {
+          id: userExistente.id,
+          nome: userExistente.nome,
+          username: userExistente.username,
+          funcao: userExistente.funcao
+        };
+      }
+      throw err;
+    }
   }
 
-  return existingUser;
+  // Pega o primeiro usuário existente
+  const usuarioExistente = existingUsers[0];
+  return {
+    id: usuarioExistente.id,
+    nome: usuarioExistente.nome,
+    username: usuarioExistente.username,
+    funcao: usuarioExistente.funcao
+  };
 }
 
-if (!isDev) {
-  // ----- Modo Produção (LDAP real) -----
-  const ldapOptions = {
-    server: {
-      url: 'ldap://10.189.87.7:389',
-      bindDN: 'cn=script,ou=Funcionarios,ou=Usuarios123,dc=educ123,dc=sp,dc=senai,dc=br',
-      bindCredentials: '7GFGOy4ATCiqW9c86eStgCe0RA9BgA',
-      searchBase: 'ou=Alunos,ou=Usuarios123,dc=educ123,dc=sp,dc=senai,dc=br',
-      searchFilter: '(sAMAccountName={{username}})'
-    }
-  };
+// ----- Estratégia LDAP -----
+const ldapOptions = {
+  server: {
+    url: "ldap://10.189.87.7:389",
+    bindDN: "cn=script,ou=Funcionarios,ou=Usuarios123,dc=educ123,dc=sp,dc=senai,dc=br",
+    bindCredentials: "7GFGOy4ATCiqW9c86eStgCe0RA9BgA",
+    searchBase: "ou=Alunos,ou=Usuarios123,dc=educ123,dc=sp,dc=senai,dc=br",
+    searchFilter: "(sAMAccountName={{username}})"
+  }
+};
 
-  passport.use(new LdapStrategy(ldapOptions, async (user, done) => {
+passport.use(
+  new LdapStrategy(ldapOptions, async (user, done) => {
     try {
-      if (!user) {
-        return done(null, false, { message: 'Usuário não encontrado' });
-      }
-      const usuarioDB = await ensureUserInDatabase(user);
-      return done(null, usuarioDB);
+      if (!user) return done(null, false, { message: "Usuário LDAP não encontrado" });
+      const usuarioFinal = await ensureUserInDatabase(user);
+      return done(null, usuarioFinal);
     } catch (err) {
-      console.error('Erro LDAP:', err);
       return done(err);
     }
-  }));
+  })
+);
 
-} else {
-  // ----- Modo Desenvolvimento (sem LDAP) -----
-  passport.use('ldapauth', new (class extends passport.Strategy {
-    async authenticate(req) {
+// ----- Estratégia Local (admins, técnicos, auxiliares) -----
+passport.use(
+  "local-db",
+  new LocalStrategy(
+    { usernameField: "username", passwordField: "password" },
+    async (username, password, done) => {
       try {
-        const { username } = req.body;
-        if (!username) {
-          return this.fail({ message: 'Nome de usuário é obrigatório' });
-        }
+        let result = await read("usuarios", `username = '${username}'`);
+        if (!result) result = [];
+        else if (!Array.isArray(result)) result = [result];
 
-        // Usuário fake para teste local
-        const fakeUser = {
-          sAMAccountName: username,
-          displayName: 'Usuário Fictício',
-          mail: `${username}@teste.dev`
-        };
+        const user = result[0];
+        if (!user) return done(null, false, { message: "Usuário não encontrado" });
 
-        const usuarioDB = await ensureUserInDatabase(fakeUser);
-        return this.success(usuarioDB);
+        const senhaValida = user.senha === password; // ou bcrypt.compare(password, user.senha)
+        if (!senhaValida) return done(null, false, { message: "Senha incorreta" });
+        if (user.status_usuarios !== "ativo") return done(null, false, { message: "Usuário inativo" });
+
+        return done(null, {
+          id: user.id,
+          nome: user.nome,
+          username: user.username,
+          funcao: user.funcao
+        });
       } catch (err) {
-        console.error('Erro LDAP fake:', err);
-        return this.error(err);
+        return done(err);
       }
     }
-  })());
-}
+  )
+);
 
+// ----- Serialize / Deserialize -----
 passport.serializeUser((user, done) => {
-  done(null, user);
+  done(null, user.id); // salva apenas o ID na sessão
 });
 
-passport.deserializeUser((user, done) => {
-  done(null, user);
+passport.deserializeUser(async (id, done) => {
+  try {
+    let result = await read("usuarios", `id = ${id}`);
+    if (!result) return done(null, false);
+    if (!Array.isArray(result)) result = [result];
+    const user = result[0];
+
+    done(null, {
+      id: user.id,
+      nome: user.nome,
+      username: user.username,
+      funcao: user.funcao
+    });
+  } catch (err) {
+    done(err, null);
+  }
 });
 
 export default passport;

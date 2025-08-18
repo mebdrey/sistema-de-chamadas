@@ -1,6 +1,6 @@
 
 
-import { buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, verRelatorios, listarSalasPorBloco, listarBlocos,  escreverMensagem, lerMsg, buscarLocalId, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido } from "../models/Chamado.js";
+import { criarNotificacao, buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, verRelatorios, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus } from "../models/Chamado.js";
 
 
 //dar prioridade ao chamado -- não ta funcionando
@@ -33,19 +33,6 @@ const verRelatoriosController = async (req, res) => {
         res.status(500).json({ erro: 'Erro ao buscar relatórios!!!' })
     }
 }
-
-//técnico ler as mensagens dos usuários (enviadas para ele
-// const receberMensagensController = async (req, res) => {
-//     try {
-//         //const usuarioId = req.usuarioId; //vindo do token JWT
-//         const usuarioId = 2; //só até a autenticação estar funcionando
-//         const mensagens = await receberMensagensDoUsuario(usuarioId);
-//         res.status(200).json({ mensagem: 'Mensagens listadas com sucesso!', mensagens });
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({ erro: 'Erro ao listar mensagens !', err });
-//     }
-// }
 
 
 //ler as mensagens (especificadas pelo id do chamado) por ordem de envio
@@ -105,39 +92,21 @@ const TecnicoEnviarMensagemController = async (req, res) => {
 
 // usado para usuarios comuns ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 export const criarChamadoController = async (req, res) => {
-  // const { assunto, tipo_id, bloco, sala, descricao, prioridade, patrimonio } = req.body;
   const { assunto, tipo_id, descricao, prioridade, patrimonio } = req.body;
   const usuario_id = req.user?.id;
-  // Verifica individualmente quais estão vazios
-  // const camposVazios = [];
-  // if (!assunto) camposVazios.push("assunto");
-  // if (!tipo_id) camposVazios.push("tipo_id");
-  // if (!bloco) camposVazios.push("bloco");
-  // if (!sala) camposVazios.push("sala");
-  // if (!descricao) camposVazios.push("descricao");
-  // if (camposVazios.length > 0) {
-  //   console.warn("Campos obrigatórios vazios:", camposVazios);
-  //   return res.status(400).json({
-  //     erro: `Preencha todos os campos obrigatórios: ${camposVazios.join(", ")}`
-  //   });}
 
   const imagem = req.file?.filename || null;
   try {
-    // const local_id = await buscarLocalId(bloco, sala);
-
-    // if (!local_id) {
-    //   return res.status(400).json({ erro: 'Local (bloco/sala) inválido.' });
-    // }
+    const data_limite = calcularDataLimite(prioridade);
     const dadosChamado = {
     assunto,
     tipo_id: tipo_id || null,
     descricao,
     prioridade: prioridade || 'none',
     imagem: imagem || null,
-    // bloco:bloco || null,
-    // sala: sala || null,
     usuario_id: usuario_id || null,
-    patrimonio: patrimonio || null
+    patrimonio: patrimonio || null,
+    data_limite
   };
   Object.keys(dadosChamado).forEach((key) => {
     if (dadosChamado[key] === undefined) {
@@ -145,13 +114,30 @@ export const criarChamadoController = async (req, res) => {
     }
   });
     await criarChamado(dadosChamado);
-    // await criarChamado({ assunto, tipo_id, descricao, prioridade: prioridade || 'none', imagem, local_id, usuario_id, patrimonio});
     res.status(201).json({ mensagem: 'Chamado criado com sucesso.' });
 
   } catch (error) {
     console.error('Erro ao criar chamado:', error);
     res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
   }};
+
+export function calcularDataLimite(prioridade) {
+ const agora = new Date();
+  
+    switch (prioridade) {
+      case "baixa":
+        return new Date(agora.getTime() + 72 * 60 * 60 * 1000); // +72h
+      case "média":
+        return new Date(agora.getTime() + 24 * 60 * 60 * 1000); // +24h
+      case "alta":
+        return new Date(agora.getTime() + 8 * 60 * 60 * 1000);  // +8h
+      case "urgente":
+        return new Date(agora.getTime() + 4 * 60 * 60 * 1000);  // +4h
+      default:
+        return null;
+    }
+  }
+  
 
 export const listarChamadosController = async (req, res) => {
     try {
@@ -178,28 +164,6 @@ export const listarTiposServicoController = async (req, res) => {
       console.error('Erro ao listar tipos de serviço:', error);
       res.status(500).json({ erro: 'Erro interno ao listar tipos.' });
     } };
-
-// listar blocos
-export const buscarBlocosController = async (req, res) => {
-    try {
-        const blocos = await listarBlocos();
-        res.status(200).json(blocos);
-    } catch (err) {
-        res.status(500).json({ erro: 'Erro ao buscar blocos.' });
-    }};
-
-export const buscarSalasPorBlocoController = async (req, res) => {
-    const { bloco } = req.params;
-
-    if (!bloco) {
-        return res.status(400).json({ erro: 'Bloco não informado.' });
-    }
-    try {
-        const salas = await listarSalasPorBloco(bloco);
-        res.status(200).json(salas);
-    } catch (err) {
-        res.status(500).json({ erro: 'Erro ao buscar salas.' });
-    }};
 
 // usado para o adm -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 export const listarUsuariosPorSetorController = async (req, res) => {
@@ -246,6 +210,34 @@ export const listarTodosChamadosController = async(req,res)=>{
     res.status(500).json({ mensagem: 'Erro ao listar chamados' });
 }
 }
+
+export const contarChamadosPorStatusController = async (req, res) => {
+  const { modo } = req.query;
+
+  if (!modo || (modo !== 'mensal' && modo !== 'anual')) {
+    return res.status(400).json({ erro: 'Modo inválido. Use "mensal" ou "anual".' });
+  }
+
+  try {
+    const resultado = await contarChamadosPorStatus(modo);
+
+    // Garante que sempre tenha todos os status, mesmo que contagem = 0
+    const todosOsStatus = ['pendente', 'em andamento', 'concluído'];
+    const respostaFinal = todosOsStatus.map((status) => {
+      const encontrado = resultado.find((r) => r.status_chamado === status);
+      return {
+        tipo: status,
+        qtd: encontrado ? encontrado.qtd : 0,
+        link: `/chamados?status=${status}`, // link genérico, você pode ajustar
+      };
+    });
+
+    res.json(respostaFinal);
+  } catch (error) {
+    console.error('Erro ao contar chamados por status:', error);
+    res.status(500).json({ erro: 'Erro interno ao contar chamados por status.' });
+  }
+};
 
 // usado para TECNICOS E AUXILIARES ------------------------------------------------------------------------------------------------------------------------------------------------------------
 export const listarChamadosDisponiveisController = async (req, res) => {

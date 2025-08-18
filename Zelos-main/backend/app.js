@@ -25,8 +25,12 @@ try {
   app.use(session({
     secret: '64f2389797442630e3942bb18f0127363031079caebabbf3493d02608ab40acc5861f6645b8c5dfb2fcc9dca21719dadc265facfadbf4df7f3c4c139d7bbf33b',
     resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false, sameSite: 'lax' }
+  saveUninitialized: false,
+  cookie: {
+    secure: false,
+    sameSite: 'lax',
+    httpOnly: true
+  }
   }));
 
   // 4. Inicialização segura do Passport
