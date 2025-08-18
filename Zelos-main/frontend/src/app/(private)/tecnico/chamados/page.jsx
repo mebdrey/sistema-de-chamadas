@@ -238,7 +238,7 @@ let chamadosFiltrados = chamados
 
 
                 return (
-                  <div key={status} className={`${abaAtiva === statusId ? "block" : "hidden"} grid sm:grid-cols-2 lg:grid-cols-5 bg-white dark:bg-neutral-900 gap-5`} >
+                  <div key={status} className={`${abaAtiva === statusId ? "block" : "hidden"} grid lg:grid-cols-5 bg-white dark:bg-neutral-900 gap-5`} >
                     {chamadosFiltrados.length === 0 ? (
                       <div className="p-4 md:p-5">
                         <p className="text-gray-500 dark:text-neutral-400"> Nenhum chamado encontrado.
