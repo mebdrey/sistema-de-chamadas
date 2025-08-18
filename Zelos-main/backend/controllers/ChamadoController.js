@@ -1,6 +1,6 @@
 
 
-import { criarNotificacao, buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, verRelatorios, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus } from "../models/Chamado.js";
+import { criarNotificacao, buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, verRelatorios, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção } from "../models/Chamado.js";
 
 
 //dar prioridade ao chamado -- não ta funcionando
@@ -262,9 +262,9 @@ export const pegarChamadoController = async (req, res) => {
     res.status(200).json({ mensagem: 'Chamado atribuído com sucesso.' });
   } catch (error) {
     res.status(400).json({ erro: error.message });
-  }};
-
-  export const contarChamadosController = async (req, res) =>{
+  }
+};
+ export const contarChamadosController = async (req, res) =>{
     try{
     const total = await contarTodosChamados();
     res.json(total);
@@ -304,6 +304,22 @@ export const pegarChamadoController = async (req, res) => {
     }
   };
 
+  export const listarChamadosFuncionarioController = async (req, res) => {
+  const usuario_id = req.user?.id;
+  const status = req.query.status; // Ex: 'pendente', 'em andamento', etc.
+
+  if (!usuario_id || !status) {
+    return res.status(400).json({ erro: 'Parâmetros ausentes.' });
+  }
+
+  try {
+    const chamados = await listarChamadosPorStatusEFunção(usuario_id, status);
+    res.json(chamados);
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao buscar chamados por status.' });
+  }
+};
+
+
 // msgUsuarioTecnico
 export { lerMensagensController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarPrioridadeController, criarRelatorioController, verRelatoriosController };
-

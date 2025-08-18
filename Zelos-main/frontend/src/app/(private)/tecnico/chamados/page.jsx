@@ -43,21 +43,48 @@ export default function ChamadosTecnico() {
   // }, []);
 
   // busca os chamados feitos pelo usuario
-  useEffect(() => {
-    fetch('http://localhost:8080/todos-chamados', { credentials: 'include' })
-      .then(res => {
-        if (!res.ok) throw new Error('Erro ao buscar chamados');
-        return res.json();
-      })
-      .then(data => {
-        console.log('Chamados recebidos:', data);
-        setChamados(Array.isArray(data) ? data : data.chamados || []);
-      })
-      .catch(err => {
-        console.error('Erro ao carregar chamados:', err);
-        setChamados([]);
-      });
-  }, []);
+  // useEffect(() => {
+  //   fetch('http://localhost:8080/todos-chamados', { credentials: 'include' })
+  //     .then(res => {
+  //       if (!res.ok) throw new Error('Erro ao buscar chamados');
+  //       return res.json();
+  //     })
+  //     .then(data => {
+  //       console.log('Chamados recebidos:', data);
+  //       setChamados(Array.isArray(data) ? data : data.chamados || []);
+  //     })
+  //     .catch(err => {
+  //       console.error('Erro ao carregar chamados:', err);
+  //       setChamados([]);
+  //     });
+  // }, []);
+
+const atualizarChamados = async () => {
+  try {
+    if (abaAtiva === 'todos') {
+      const [pendente, andamento, concluido] = await Promise.all([
+        fetch('http://localhost:8080/chamados-funcionario?status=pendente', { credentials: 'include' }).then(res => res.json()),
+        fetch('http://localhost:8080/chamados-funcionario?status=em andamento', { credentials: 'include' }).then(res => res.json()),
+        fetch('http://localhost:8080/chamados-funcionario?status=concluido', { credentials: 'include' }).then(res => res.json()),
+      ]);
+      setChamados([...pendente, ...andamento, ...concluido]);
+    } else {
+      const response = await fetch(
+        `http://localhost:8080/chamados-funcionario?status=${abaAtiva.replace('-', ' ')}`,
+        { credentials: 'include' }
+      );
+      const data = await response.json();
+      setChamados(Array.isArray(data) ? data : []);
+    }
+  } catch (err) {
+    console.error('Erro ao carregar chamados:', err);
+    setChamados([]);
+  }
+};
+
+useEffect(() => {
+  atualizarChamados();
+}, [abaAtiva]);
 
 
   function primeiraLetraMaiuscula(str) {
@@ -106,6 +133,28 @@ export default function ChamadosTecnico() {
     return mapa;
   }, [tiposServico]);
 
+  const pegarChamado = async (chamadoId) => {
+  try {
+    const response = await fetch('http://localhost:8080/pegar-chamado', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ chamado_id: chamadoId }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.erro || 'Erro ao pegar chamado');
+
+    alert(data.mensagem);
+    atualizarChamados(); // recarrega a aba
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
 
   return (
     <>
@@ -141,7 +190,8 @@ export default function ChamadosTecnico() {
                           <div className="flex p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
                             <div className="flex items-center h-5">
                               <input id={`prioridade-checkbox-${index}`} type="checkbox" name="prioridade" value={prioridade.value} checked={prioridadesSelecionadas.includes(prioridade.value)}
-                                onChange={(e) => { const checked = e.target.checked; const valor = prioridade.value;
+                                onChange={(e) => {
+                                  const checked = e.target.checked; const valor = prioridade.value;
                                   if (checked) {
                                     setPrioridadesSelecionadas((prev) => [...prev, valor]);
                                   } else {
@@ -150,7 +200,7 @@ export default function ChamadosTecnico() {
                                     );
                                   }
                                 }}
-                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"/>
+                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
                             </div>
                             <div className="ms-2 text-sm">
                               <label htmlFor={`prioridade-checkbox-${index}`} className="font-medium text-gray-900 dark:text-gray-300">
@@ -176,7 +226,7 @@ export default function ChamadosTecnico() {
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
                   </svg>
                 </div>
-                <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Pesquisar chamado" value={busca} onChange={(e) => setBusca(e.target.value)}/>
+                <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Pesquisar chamado" value={busca} onChange={(e) => setBusca(e.target.value)} />
               </div>
             </form>
           </div>
@@ -200,41 +250,41 @@ export default function ChamadosTecnico() {
             <div id="default-tab-content">
               {statusAbas.map((status) => {
                 const statusId = normalizarId(status);
-console.log("Aba ativa:", abaAtiva);
+                console.log("Aba ativa:", abaAtiva);
 
                 // Primeiro filtra por status
                 let filtradosPorStatus = status === "pendente" ? chamados : chamados.filter((c) => normalizarId(c.status_chamado) === statusId);
 
                 // // Depois aplica filtro de busca
-               const statusIdAtivo = abaAtiva;
+                const statusIdAtivo = abaAtiva;
 
-// Filtrando apenas com base na aba ativa
-let chamadosFiltrados = chamados
-  .filter((c) => {
-    const correspondeStatus =
-      statusIdAtivo === "todos" || normalizarId(c.status_chamado) === statusIdAtivo;
+                // Filtrando apenas com base na aba ativa
+                let chamadosFiltrados = chamados
+                  .filter((c) => {
+                    const correspondeStatus =
+                      statusIdAtivo === "todos" || normalizarId(c.status_chamado) === statusIdAtivo;
 
-    const correspondeBusca =
-      busca.trim() === "" ||
-      c.assunto.toLowerCase().includes(busca.toLowerCase()) ||
-      c.descricao.toLowerCase().includes(busca.toLowerCase()) ||
-      String(c.id).includes(busca);
+                    const correspondeBusca =
+                      busca.trim() === "" ||
+                      c.assunto.toLowerCase().includes(busca.toLowerCase()) ||
+                      c.descricao.toLowerCase().includes(busca.toLowerCase()) ||
+                      String(c.id).includes(busca);
 
-    const correspondeSetor =
-      setoresSelecionados.length === 0 ||
-      setoresSelecionados.includes(mapaTipoIdParaTitulo[c.tipo_id]);
+                    const correspondeSetor =
+                      setoresSelecionados.length === 0 ||
+                      setoresSelecionados.includes(mapaTipoIdParaTitulo[c.tipo_id]);
 
-    const correspondePrioridade =
-      prioridadesSelecionadas.length === 0 ||
-      prioridadesSelecionadas.includes(c.prioridade);
+                    const correspondePrioridade =
+                      prioridadesSelecionadas.length === 0 ||
+                      prioridadesSelecionadas.includes(c.prioridade);
 
-    return correspondeStatus && correspondeBusca && correspondeSetor && correspondePrioridade;
-  })
-  .sort((a, b) => {
-    const dataA = new Date(a.criado_em);
-    const dataB = new Date(b.criado_em);
-    return ordenarPor === "mais_antigo" ? dataA - dataB : dataB - dataA;
-  });
+                    return correspondeStatus && correspondeBusca && correspondeSetor && correspondePrioridade;
+                  })
+                  .sort((a, b) => {
+                    const dataA = new Date(a.criado_em);
+                    const dataB = new Date(b.criado_em);
+                    return ordenarPor === "mais_antigo" ? dataA - dataB : dataB - dataA;
+                  });
 
 
                 return (
@@ -274,6 +324,18 @@ let chamadosFiltrados = chamados
                               <p className="text-sm font-bold text-gray-800 dark:text-white">#{chamado.id}</p>
                             </div>
                           </div>
+                          {/* botão para pegar chamado, só se aba for pendente */}
+                          {abaAtiva === 'pendente' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation(); // evitar que abra o modal
+                                pegarChamado(chamado.id);
+                              }}
+                              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg"
+                            >
+                              Pegar chamado
+                            </button>
+                          )}
                         </div>
 
                       ))

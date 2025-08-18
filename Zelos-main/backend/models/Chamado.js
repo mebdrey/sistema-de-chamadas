@@ -236,25 +236,69 @@ export const contarChamadosConcluido = async()=>{
 };
 
 export const pegarChamado = async (chamado_id, usuario_id) => {
-    // verifica se o chamado existe
-    const chamado = await read('chamados', `id = ${chamado_id}`);
-    if (!chamado) throw new Error('Chamado não encontrado');
+  // Verifica se o chamado existe e ainda não foi atribuído
+  const consulta = `
+    SELECT c.*
+    FROM chamados c
+    INNER JOIN usuario_servico us ON us.servico_id = c.tipo_id
+    WHERE c.id = ? 
+      AND us.usuario_id = ?
+      AND c.status_chamado = 'pendente'
+      AND c.tecnico_id IS NULL
+    LIMIT 1;
+  `;
 
-    // atualiza o chamado somente se técnico_id for NULL
-    if (chamado.tecnico_id) throw new Error('Chamado já atribuído');
+  const resultados = await readQuery(consulta, [chamado_id, usuario_id]);
+  const chamado = resultados[0];
 
-    try {
-        // update condicional: so altera se tecnico_id for NULL
-        const sql = ` UPDATE chamados  SET tecnico_id = ?, status_chamado = 'em andamento' WHERE id = ? AND tecnico_id IS NULL `;
-        const result = await readQuery(sql, [usuario_id, chamado_id]);
+  if (!chamado) {
+    throw new Error('Chamado não encontrado, já atribuído ou não pertence à sua função.');
+  }
 
-        if (result.affectedRows === 0) {
-            throw new Error('Chamado já foi atribuído a outro usuário.');
-        }
-        return result.affectedRows;
-    } catch (err) {
-        throw err;
-    }
+  // Tenta atualizar o chamado para o técnico logado
+  const sqlUpdate = `
+    UPDATE chamados 
+    SET tecnico_id = ?, status_chamado = 'em andamento' 
+    WHERE id = ? AND tecnico_id IS NULL
+  `;
+
+  const result = await readQuery(sqlUpdate, [usuario_id, chamado_id]);
+
+  if (result.affectedRows === 0) {
+    throw new Error('Chamado já foi atribuído a outro usuário.');
+  }
+
+  return result.affectedRows;
+};
+
+
+export const listarChamadosPorStatusEFunção = async (usuario_id, status) => {
+  let condicaoStatus = '';
+  const params = [usuario_id];
+
+  if (status === 'pendente') {
+    condicaoStatus = `AND c.status_chamado = 'pendente' AND c.tecnico_id IS NULL`;
+  } else if (status === 'em andamento') {
+    condicaoStatus = `AND c.status_chamado = 'em andamento' AND c.tecnico_id = ?`;
+    params.push(usuario_id);
+  } else if (status === 'concluido') {
+    condicaoStatus = `AND c.status_chamado = 'concluido' AND c.tecnico_id = ?`;
+    params.push(usuario_id);
+  }
+
+  const sql = `
+    SELECT c.* 
+    FROM chamados c
+    INNER JOIN usuario_servico us ON us.servico_id = c.tipo_id
+    WHERE us.usuario_id = ? ${condicaoStatus}
+    ORDER BY c.criado_em DESC
+  `;
+
+  try {
+    return await readQuery(sql, params);
+  } catch (err) {
+    throw err;
+  }
 };
 
  
