@@ -42,12 +42,8 @@ router.patch('/editarPerfil', editarPerfilController);
 
 //para o chat de usuario para tecnico
 router.post('/enviar-msg', UsuarioEnviarMensagemController);
-
 //para o chat de técnico para usuario
 router.post('/tecnico-enviar-msg', TecnicoEnviarMensagemController);
-
-//tecnico receber essas mensagens enviadas para ele
-//router.get('/chat', receberMensagensController);
 router.get('/chat', lerMensagensController);
 
 

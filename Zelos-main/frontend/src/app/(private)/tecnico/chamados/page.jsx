@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import { initFlowbite } from 'flowbite'
 import { useRouter } from 'next/navigation';
 import OrdenarPor from '@/components/DropDown/DropDown.jsx'
+import axios from "axios";
 
 export default function ChamadosTecnico() {
   const [isOpen, setIsOpen] = useState(false); // p drawer abrir e fechar
@@ -22,73 +23,97 @@ export default function ChamadosTecnico() {
   const [descricao, setDescricao] = useState('');
   const [apontamentoAtivo, setApontamentoAtivo] = useState(null);
 
+  const [conteudo, setConteudo] = useState('');
+
   // Buscar apontamentos 
- useEffect(() => {
-  const buscarApontamentos = async () => {
-    if (!chamadoSelecionado?.id) return;
+  useEffect(() => {
+    const buscarApontamentos = async () => {
+      if (!chamadoSelecionado?.id) return;
+
+      try {
+        const response = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
+        const data = await response.json();
+
+        setApontamentos(data);
+        setApontamentoAtivo(data.find((a) => !a.fim));
+      } catch (error) {
+        console.error('Erro ao buscar apontamentos:', error);
+      }
+    };
+
+    buscarApontamentos();
+  }, [chamadoSelecionado]);
+
+  // cria apontamento
+  const iniciarApontamento = async () => {
+    if (!descricao.trim() || !chamadoSelecionado?.id) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
-      const data = await response.json();
+      const response = await fetch('http://localhost:8080/criar-apontamento', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          chamado_id: chamadoSelecionado.id,
+          descricao
+        })
+      });
 
+      if (!response.ok) throw new Error('Erro ao criar apontamento');
+
+      // Atualiza a lista após criar
+      const res = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
+      const data = await res.json();
       setApontamentos(data);
       setApontamentoAtivo(data.find((a) => !a.fim));
+      setDescricao('');
     } catch (error) {
-      console.error('Erro ao buscar apontamentos:', error);
+      console.error('Erro ao criar apontamento:', error);
     }
   };
 
-  buscarApontamentos();
-}, [chamadoSelecionado]);
+  //envia mensagem - tecnico
+  const enviarMsg = async() =>{
+    try{
+      const response = await fetch('http://localhost:8080/tecnico-enviar-msg', {
+        method: 'POST',
+        headers: {'Content-Type' : 'application/json'},
+        credentials: 'include',
+        body: JSON.stringify({
+          idChamado: chamadoSelecionado.id,
+          conteudoMsg: conteudo
+        })
+      });
+      if (!response.ok) throw new Error('Erro ao enviar mensagem');
 
-// cria apontamento
-  const iniciarApontamento = async () => {
-  if (!descricao.trim() || !chamadoSelecionado?.id) return;
+      const res = await axios.get(`http://localhost:8080/chat?idChamado=${chamadoSelecionado.id}`);
+      
 
-  try {
-    const response = await fetch('http://localhost:8080/criar-apontamento', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        chamado_id: chamadoSelecionado.id,
-        descricao
-      })
-    });
-
-    if (!response.ok) throw new Error('Erro ao criar apontamento');
-
-    // Atualiza a lista após criar
-    const res = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
-    const data = await res.json();
-    setApontamentos(data);
-    setApontamentoAtivo(data.find((a) => !a.fim));
-    setDescricao('');
-  } catch (error) {
-    console.error('Erro ao criar apontamento:', error);
+    } catch(error){
+      console.error('Erro ao enviar mensagem: ', error);
+    }
   }
-};
 
-// finalizar apontamento
-const finalizarApontamento = async (id) => {
-  try {
-    const response = await fetch('http://localhost:8080/finalizar-apontamento', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apontamento_id: id })
-    });
+  // finalizar apontamento
+  const finalizarApontamento = async (id) => {
+    try {
+      const response = await fetch('http://localhost:8080/finalizar-apontamento', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apontamento_id: id })
+      });
 
-    if (!response.ok) throw new Error('Erro ao finalizar apontamento');
+      if (!response.ok) throw new Error('Erro ao finalizar apontamento');
 
-    // Atualiza a lista após finalizar
-    const res = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
-    const data = await res.json();
-    setApontamentos(data);
-    setApontamentoAtivo(null);
-  } catch (error) {
-    console.error('Erro ao finalizar apontamento:', error);
-  }
-};
+      // Atualiza a lista após finalizar
+      const res = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
+      const data = await res.json();
+      setApontamentos(data);
+      setApontamentoAtivo(null);
+    } catch (error) {
+      console.error('Erro ao finalizar apontamento:', error);
+    }
+  };
 
 
   useEffect(() => {
@@ -227,6 +252,28 @@ const finalizarApontamento = async (id) => {
       alert(err.message);
     }
   };
+
+  // ver mensagens
+  const [mensagens, setMensagens] = useState([]);
+  const [loadingMensagens, setLoadingMensagens] = useState(false)
+
+  useEffect(() => {
+    const fetchMensagens = async () => {
+      if (!chamadoSelecionado?.id) return;
+
+      setLoadingMensagens(true);
+      try {
+        const res = await axios.get(`http://localhost:8080/chat?idChamado=${chamadoSelecionado.id}`);
+        setMensagens(res.data.mensagens);
+      } catch (err) {
+        console.error("Erro ao buscar mensagens do chamado", err);
+      } finally {
+        setLoadingMensagens(false);
+      }
+    };
+
+    fetchMensagens();
+  }, [chamadoSelecionado]);
 
   return (
     <>
@@ -479,6 +526,8 @@ const finalizarApontamento = async (id) => {
                 </button>
               </div>
             </div> */}
+
+            {/**drawer */}
             <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-[#F8FAFB] w-full dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
               <div className="w-full p-4 bg-white">
                 <h5 id="drawer-right-label" className="inline-flex items-center text-base font-semibold text-gray-500 dark:text-gray-400">
@@ -517,7 +566,47 @@ const finalizarApontamento = async (id) => {
                     </div>
                   </div>
 
-                  <div class="flex items-start gap-2.5">
+
+                  {/**mensagem */}
+                  {loadingMensagens ? (
+                    <p className="text-gray-500">Carregando mensagens...</p>
+                  ) : (
+                    mensagens.map((msg, index) => {
+                      const isTecnico = msg.id_tecnico !== null;
+                      const data = new Date(msg.data_envio).toLocaleString();
+
+                      return (
+                        <div key={index} className={`flex items-start gap-2.5 ${isTecnico ? "justify-end" : ""}`}>
+                          {!isTecnico && (
+                            <img className="w-8 h-8 rounded-full" src="/images/usuario.png" alt="Usuário" />
+                          )}
+                          <div className={`flex flex-col gap-1 w-2/3 ${isTecnico ? "items-end text-right" : ""}`}>
+                            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                              <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                {isTecnico ? "Técnico" : "Usuário"}
+                              </span>
+                              <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{data}</span>
+                            </div>
+                            <div className={`flex flex-col leading-1.5 p-4 border-gray-200 rounded-xl dark:bg-gray-700 ${isTecnico ? "bg-[#E6DAFF] rounded-s-xl rounded-ss-xl" : "bg-white rounded-e-xl rounded-es-xl"}`}>
+                              <p className="text-sm font-normal text-gray-900 dark:text-white">{msg.conteudo}</p>
+                            </div>
+                          </div>
+                          {isTecnico && (
+                            <img className="w-8 h-8 rounded-full" src="/images/tecnico.png" alt="Técnico" />
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+
+                  {/**input de mensagens */}
+
+                  <label htmlFor="conteudo" value={conteudo} onChange={(e) => setConteudo(e.target.value)} className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enviar mensagem</label>
+                  <textarea  id="conteudo" aria-describedby="helper-text-explanation" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Escrever Mensagem">
+                    
+                  </textarea>
+                  <button onClick={enviarMsg} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" >Enviar Mensagem</button>
+                  {/* <div class="flex items-start gap-2.5">
                     <img class="w-8 h-8 rounded-full" src="/docs/images/people/profile-picture-3.jpg" alt="Jese image" />
                     <div class="flex flex-col gap-1 w-2/3 ">
                       <div class="flex items-center space-x-2 rtl:space-x-reverse">
@@ -544,7 +633,7 @@ const finalizarApontamento = async (id) => {
                         <p class="text-sm font-normal text-gray-900 dark:text-white">Resposta do tecnico</p>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
 
                 {/* apontamentos */}
