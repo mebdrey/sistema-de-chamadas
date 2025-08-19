@@ -1,6 +1,6 @@
 
 
-import { criarNotificacao, buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, verRelatorios, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção } from "../models/Chamado.js";
+import { criarNotificacao, buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, verRelatorios, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario } from "../models/Chamado.js";
 
 
 //dar prioridade ao chamado -- não ta funcionando
@@ -34,6 +34,24 @@ const verRelatoriosController = async (req, res) => {
     }
 }
 
+export const buscarChamadoComNomeUsuarioController = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ erro: "ID do chamado é obrigatório." });
+  }
+
+  try {
+    const chamado = await buscarChamadoComNomeUsuario(id);
+    if (!chamado) {
+      return res.status(404).json({ erro: "Chamado não encontrado." });
+    }
+    res.json(chamado);
+  } catch (error) {
+    console.error("Erro ao buscar chamado com nome do usuário:", error);
+    res.status(500).json({ erro: "Erro ao buscar chamado." });
+  }
+};
 
 //ler as mensagens (especificadas pelo id do chamado) por ordem de envio
 const lerMensagensController = async (req, res) =>{
@@ -317,6 +335,42 @@ export const pegarChamadoController = async (req, res) => {
     res.json(chamados);
   } catch (error) {
     res.status(500).json({ erro: 'Erro ao buscar chamados por status.' });
+  }
+};
+
+export const listarApontamentosController = async (req, res) => {
+  try {
+    const chamado_id = req.params.chamado_id;
+    const apontamentos = await listarApontamentosPorChamado(chamado_id);
+    res.json(apontamentos);
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao listar apontamentos' });
+  }
+};
+
+export const criarApontamentoController = async (req, res) => {
+  try {
+    const { chamado_id, descricao } = req.body;
+    const tecnico_id = req.user?.id;
+
+    if (!descricao || !chamado_id) {
+      return res.status(400).json({ erro: 'Descrição e chamado_id são obrigatórios' });
+    }
+
+    await criarApontamento({ chamado_id, tecnico_id, descricao });
+    res.status(201).json({ mensagem: 'Apontamento iniciado com sucesso' });
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao criar apontamento' });
+  }
+};
+
+export const finalizarApontamentoController = async (req, res) => {
+  try {
+    const { apontamento_id } = req.body;
+    await finalizarApontamento(apontamento_id);
+    res.json({ mensagem: 'Apontamento encerrado com sucesso' });
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao finalizar apontamento' });
   }
 };
 

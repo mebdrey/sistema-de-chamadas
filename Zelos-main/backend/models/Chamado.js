@@ -1,22 +1,6 @@
 
 import { create, readAll, read, readQuery, update, deleteRecord } from '../config/database.js';
 
-// // cria usuario na tabela
-// export const garantirUsuarioExiste = async (username) => {
-//     const usuarios = await read('usuarios', { nome: username });
-//     if (usuarios.length > 0) {
-//         return usuarios[0].id; // retorna o id existente}
-//     // Se não existir, cria
-//     const novoUsuario = await create('usuarios', { nome: username });
-//     return novoUsuario.insertId;};
-// Buscar local_id com base no bloco e sala
-// export const buscarLocalId = async (bloco, sala) => {
-//   const consulta = `SELECT * FROM localChamado WHERE bloco = ? AND sala = ?`;
-//   const localEncontrado = await readQuery(consulta, [bloco, sala]);
-//   if (!localEncontrado[0].length) {
-//     return null;
-//   }return localEncontrado[0][0].id;};
-
 //prioridade do chamado - técnico -- não esta funcionando, não esta recebendo as informaçoes do id(quando tento enviar o id pelo body ele junta no set)
 const criarPrioridade = async (dados, id) => {
     try {
@@ -50,6 +34,21 @@ export async function criarNotificacao({ usuario_id, tipo, titulo, descricao, ch
         throw err;
     }
 }
+
+export const buscarChamadoComNomeUsuario = async (chamadoId) => {
+  const sql = `
+    SELECT c.*, u.nome AS nome_usuario
+    FROM chamados c
+    JOIN usuarios u ON c.usuario_id = u.id
+    WHERE c.id = ?
+  `;
+  try {
+    const result = await readQuery(sql, [chamadoId]);
+    return result[0];
+  } catch (err) {
+    throw err;
+  }
+};
 
 //ver relatórios do técnico
 const verRelatorios = async (table, where) => {
@@ -287,9 +286,10 @@ export const listarChamadosPorStatusEFunção = async (usuario_id, status) => {
   }
 
   const sql = `
-    SELECT c.* 
+    SELECT c.*, u.nome AS nome_usuario
     FROM chamados c
     INNER JOIN usuario_servico us ON us.servico_id = c.tipo_id
+    INNER JOIN usuarios u ON u.id = c.usuario_id
     WHERE us.usuario_id = ? ${condicaoStatus}
     ORDER BY c.criado_em DESC
   `;
@@ -301,6 +301,32 @@ export const listarChamadosPorStatusEFunção = async (usuario_id, status) => {
   }
 };
 
+// buscar todos os apontamentos de um chamado
+export const listarApontamentosPorChamado = async (chamado_id) => {
+  const sql = `SELECT * FROM apontamentos WHERE chamado_id = ? ORDER BY comeco ASC`;
+  return await readQuery(sql, [chamado_id]);
+};
+
+// criar um novo apontamento
+export const criarApontamento = async ({ chamado_id, tecnico_id, descricao }) => {
+  const data = {
+    chamado_id,
+    tecnico_id,
+    descricao,
+    comeco: new Date().toISOString().slice(0, 19).replace('T', ' ')
+  };
+
+  return await create('apontamentos', data);
+};
+
+// finalizar um apontamento
+export const finalizarApontamento = async (apontamento_id) => {
+  const data = {
+    fim: new Date().toISOString().slice(0, 19).replace('T', ' ')
+  };
+
+  return await update('apontamentos', data, `id = ${apontamento_id} AND fim IS NULL`);
+};
  
 //técnico ler as mensagens enviadas para ele - usar esse quando a autenticação estiver funcionando
 // const receberMensagensDoUsuario = async (usuarioId) => {

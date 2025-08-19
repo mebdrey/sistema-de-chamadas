@@ -230,23 +230,6 @@ CREATE TABLE apontamentos (
     FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
-
--- Criação da tabela `pool_tecnico`
-/* 	Relaciona quais técnicos podem atuar em quais pools - PROVAVELMTE ESSA TABELA NAO SERA USADA, ELA FOI SUBSTITUIDA POR "USUARIO_SERVICO"*/
-CREATE TABLE pool_tecnico (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    id_pool INT,
-    id_tecnico INT,
-    FOREIGN KEY (id_pool) REFERENCES pool(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_tecnico) REFERENCES usuarios(id) ON DELETE CASCADE
-);
-
-CREATE TABLE redefinir_tokens (
-  email TEXT NOT NULL,
-  token TEXT NOT NULL,
-  criacao DATETIME NOT NULL
-);
-
 create table mensagens (
 	id int auto_increment primary key,
 	id_usuario int,
@@ -294,3 +277,4 @@ CREATE INDEX idx_apontamentos_comeco_fim ON apontamentos(comeco, fim);
 select *from usuarios;
 select *from chamados;
 select *from usuario_servico;
+

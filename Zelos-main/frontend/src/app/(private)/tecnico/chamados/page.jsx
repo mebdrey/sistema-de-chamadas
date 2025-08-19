@@ -18,6 +18,79 @@ export default function ChamadosTecnico() {
   const [ordenarPor, setOrdenarPor] = useState('mais_recente'); // ordenar por mais recente ou mais antigo, por padrao ele mostra os mais recentes primeiro
   const [chamadoSelecionado, setChamadoSelecionado] = useState(null);
 
+  const [apontamentos, setApontamentos] = useState([]);
+  const [descricao, setDescricao] = useState('');
+  const [apontamentoAtivo, setApontamentoAtivo] = useState(null);
+
+  // Buscar apontamentos 
+ useEffect(() => {
+  const buscarApontamentos = async () => {
+    if (!chamadoSelecionado?.id) return;
+
+    try {
+      const response = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
+      const data = await response.json();
+
+      setApontamentos(data);
+      setApontamentoAtivo(data.find((a) => !a.fim));
+    } catch (error) {
+      console.error('Erro ao buscar apontamentos:', error);
+    }
+  };
+
+  buscarApontamentos();
+}, [chamadoSelecionado]);
+
+// cria apontamento
+  const iniciarApontamento = async () => {
+  if (!descricao.trim() || !chamadoSelecionado?.id) return;
+
+  try {
+    const response = await fetch('http://localhost:8080/criar-apontamento', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        chamado_id: chamadoSelecionado.id,
+        descricao
+      })
+    });
+
+    if (!response.ok) throw new Error('Erro ao criar apontamento');
+
+    // Atualiza a lista após criar
+    const res = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
+    const data = await res.json();
+    setApontamentos(data);
+    setApontamentoAtivo(data.find((a) => !a.fim));
+    setDescricao('');
+  } catch (error) {
+    console.error('Erro ao criar apontamento:', error);
+  }
+};
+
+// finalizar apontamento
+const finalizarApontamento = async (id) => {
+  try {
+    const response = await fetch('http://localhost:8080/finalizar-apontamento', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apontamento_id: id })
+    });
+
+    if (!response.ok) throw new Error('Erro ao finalizar apontamento');
+
+    // Atualiza a lista após finalizar
+    const res = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
+    const data = await res.json();
+    setApontamentos(data);
+    setApontamentoAtivo(null);
+  } catch (error) {
+    console.error('Erro ao finalizar apontamento:', error);
+  }
+};
+
+
   useEffect(() => {
     setIsMounted(true);
     initFlowbite(); // inicializa dropdowns, modais, etc.
@@ -59,32 +132,32 @@ export default function ChamadosTecnico() {
   //     });
   // }, []);
 
-const atualizarChamados = async () => {
-  try {
-    if (abaAtiva === 'todos') {
-      const [pendente, andamento, concluido] = await Promise.all([
-        fetch('http://localhost:8080/chamados-funcionario?status=pendente', { credentials: 'include' }).then(res => res.json()),
-        fetch('http://localhost:8080/chamados-funcionario?status=em andamento', { credentials: 'include' }).then(res => res.json()),
-        fetch('http://localhost:8080/chamados-funcionario?status=concluido', { credentials: 'include' }).then(res => res.json()),
-      ]);
-      setChamados([...pendente, ...andamento, ...concluido]);
-    } else {
-      const response = await fetch(
-        `http://localhost:8080/chamados-funcionario?status=${abaAtiva.replace('-', ' ')}`,
-        { credentials: 'include' }
-      );
-      const data = await response.json();
-      setChamados(Array.isArray(data) ? data : []);
+  const atualizarChamados = async () => {
+    try {
+      if (abaAtiva === 'todos') {
+        const [pendente, andamento, concluido] = await Promise.all([
+          fetch('http://localhost:8080/chamados-funcionario?status=pendente', { credentials: 'include' }).then(res => res.json()),
+          fetch('http://localhost:8080/chamados-funcionario?status=em andamento', { credentials: 'include' }).then(res => res.json()),
+          fetch('http://localhost:8080/chamados-funcionario?status=concluido', { credentials: 'include' }).then(res => res.json()),
+        ]);
+        setChamados([...pendente, ...andamento, ...concluido]);
+      } else {
+        const response = await fetch(
+          `http://localhost:8080/chamados-funcionario?status=${abaAtiva.replace('-', ' ')}`,
+          { credentials: 'include' }
+        );
+        const data = await response.json();
+        setChamados(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar chamados:', err);
+      setChamados([]);
     }
-  } catch (err) {
-    console.error('Erro ao carregar chamados:', err);
-    setChamados([]);
-  }
-};
+  };
 
-useEffect(() => {
-  atualizarChamados();
-}, [abaAtiva]);
+  useEffect(() => {
+    atualizarChamados();
+  }, [abaAtiva]);
 
 
   function primeiraLetraMaiuscula(str) {
@@ -134,31 +207,29 @@ useEffect(() => {
   }, [tiposServico]);
 
   const pegarChamado = async (chamadoId) => {
-  try {
-    const response = await fetch('http://localhost:8080/pegar-chamado', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ chamado_id: chamadoId }),
-    });
+    try {
+      const response = await fetch('http://localhost:8080/pegar-chamado', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ chamado_id: chamadoId }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) throw new Error(data.erro || 'Erro ao pegar chamado');
+      if (!response.ok) throw new Error(data.erro || 'Erro ao pegar chamado');
 
-    alert(data.mensagem);
-    atualizarChamados(); // recarrega a aba
-  } catch (err) {
-    alert(err.message);
-  }
-};
-
+      alert(data.mensagem);
+      atualizarChamados(); // recarrega a aba
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   return (
     <>
-      {/* <SideBar userType="usuario" /> */}
       {/* conteudo da pagina */}
       <div className="p-4 w-full">
         <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
@@ -325,14 +396,11 @@ useEffect(() => {
                             </div>
                           </div>
                           {/* botão para pegar chamado, só se aba for pendente */}
-                          {abaAtiva === 'pendente' && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation(); // evitar que abra o modal
-                                pegarChamado(chamado.id);
-                              }}
-                              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg"
-                            >
+                          {chamado.status_chamado === 'pendente' && (
+                            <button onClick={(e) => {
+                              e.stopPropagation(); // evitar que abra o modal
+                              pegarChamado(chamado.id);
+                            }} className="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg" >
                               Pegar chamado
                             </button>
                           )}
@@ -367,7 +435,7 @@ useEffect(() => {
             </div>
 
             {/* Drawer */}
-            <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen p-4 overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-white w-80 dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
+            {/* <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen p-4 overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-white w-80 dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`}  tabIndex="-1" aria-labelledby="drawer-right-label" >
               <h5 id="drawer-right-label" className="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400">
                 <svg className="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
@@ -380,7 +448,7 @@ useEffect(() => {
               </button>
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Usuário</p>
-                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">Usuário</p>
+                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.nome_usuario || 'Nome não encontrado'}</p>
               </div>
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Assunto</p>
@@ -392,166 +460,153 @@ useEffect(() => {
               </div>
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
-                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.imagem}</p>
+                {chamadoSelecionado?.imagem ? ( <img src={chamadoSelecionado.imagem} alt="Imagem do chamado" className="mb-6 rounded-lg w-full max-w-md" /> ) : ( <p className="mb-6 text-sm font-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
+              </div>
+             
+              <div>
+                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Prioridade</p>
+                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.prioridade}</p>
               </div>
               <div>
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Técnico/Auxiliar</p>
-                <div className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">
-                  {!chamadoSelecionado?.tecnico_id ? (
-                    <>
-                      <div>Nenhum técnico/auxiliar atribuído.</div>
-
-                      <button id="dropdownUsersButton" data-dropdown-toggle="dropdownUsers" data-dropdown-placement="bottom" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" > Adicionar funcionário<svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" ><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                      </svg>
-                      </button>
-
-                      <div id="hs-predefined-markup-wrapper-for-copy" className="space-y-3"></div>
-
-                      <p className="mt-3 text-end">
-                        <button type="button" data-hs-copy-markup='{
-      "targetSelector": "#hs-predefined-markup-content-for-copy > *",
-      "wrapperSelector": "#hs-predefined-markup-wrapper-for-copy",
-      "limit": 3
-    }' className="py-1.5 px-2 inline-flex items-center gap-x-1 text-xs font-medium rounded-full border border-dashed border-gray-200 bg-white text-gray-800 hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                          <svg className="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M5 12h14"></path>
-                            <path d="M12 5v14"></path>
-                          </svg>
-                          Add Name
-                        </button>
-                      </p>
-
-
-                      <div id="hs-predefined-markup-content-for-copy" className="hidden">
-                        <input type="text" className="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Enter Name" />
-                      </div>
-
-                      <div id="dropdownUsers" className="z-10 hidden bg-white rounded-lg shadow-sm w-60 dark:bg-gray-700" >
-                        <ul className="h-48 py-2 overflow-y-auto text-gray-700 dark:text-gray-200" aria-labelledby="dropdownUsersButton" >
-                          <li>
-                            <a href="#" className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" >
-                              <img className="w-6 h-6 me-2 rounded-full" src="/docs/images/people/profile-picture-1.jpg" alt="Jese image" />Jese Leos
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#" className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" >
-                              <img className="w-6 h-6 me-2 rounded-full" src="/docs/images/people/profile-picture-2.jpg" alt="Robert image" />
-                              Robert Gough
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#" className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" >
-                              <img
-                                className="w-6 h-6 me-2 rounded-full"
-                                src="/docs/images/people/profile-picture-3.jpg"
-                                alt="Bonnie image"
-                              />
-                              Bonnie Green
-                            </a>
-                          </li>
-                          <li>
-                            <a
-                              href="#"
-                              className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                            >
-                              <img
-                                className="w-6 h-6 me-2 rounded-full"
-                                src="/docs/images/people/profile-picture-4.jpg"
-                                alt="Leslie image"
-                              />
-                              Leslie Livingston
-                            </a>
-                          </li>
-                          <li>
-                            <a
-                              href="#"
-                              className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                            >
-                              <img
-                                className="w-6 h-6 me-2 rounded-full"
-                                src="/docs/images/people/profile-picture-5.jpg"
-                                alt="Michael image"
-                              />
-                              Michael Gough
-                            </a>
-                          </li>
-                          <li>
-                            <a
-                              href="#"
-                              className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                            >
-                              <img
-                                className="w-6 h-6 me-2 rounded-full"
-                                src="/docs/images/people/profile-picture-2.jpg"
-                                alt="Joseph image"
-                              />
-                              Joseph Mcfall
-                            </a>
-                          </li>
-                          <li>
-                            <a
-                              href="#"
-                              className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                            >
-                              <img
-                                className="w-6 h-6 me-2 rounded-full"
-                                src="/docs/images/people/profile-picture-3.jpg"
-                                alt="Roberta image"
-                              />
-                              Roberta Casas
-                            </a>
-                          </li>
-                          <li>
-                            <a
-                              href="#"
-                              className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                            >
-                              <img
-                                className="w-6 h-6 me-2 rounded-full"
-                                src="/docs/images/people/profile-picture-1.jpg"
-                                alt="Neil image"
-                              />
-                              Neil Sims
-                            </a>
-                          </li>
-                        </ul>
-                        <a
-                          href="#"
-                          className="flex items-center p-3 text-sm font-medium text-blue-600 border-t border-gray-200 rounded-b-lg bg-gray-50 dark:border-gray-600 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-blue-500 hover:underline"
-                        >
-                          <svg
-                            className="w-4 h-4 me-2"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="currentColor"
-                            viewBox="0 0 20 18"
-                          >
-                            <path d="M6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Zm11-3h-2V5a1 1 0 0 0-2 0v2h-2a1 1 0 1 0 0 2h2v2a1 1 0 0 0 2 0V9h2a1 1 0 1 0 0-2Z" />
-                          </svg>
-                          Add new user
-                        </a>
-                      </div>
-                    </>
-                  ) : (
-                    <p>{chamadoSelecionado?.tecnico_nome}</p>
-                  )}
-                </div>
-
-              </div>
-              <div>
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Usuário</p>
-                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">Usuário</p>
+                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Chamado ID</p>
+                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">#{chamadoSelecionado?.id}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <a href="#" className="px-4 py-2 text-sm font-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg focus:outline-none hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Learn more</a>
-                <a href="#" className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                  Get access
-                  <svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+              <div className="">
+                <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Pegar chamado<svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
                   </svg>
-                </a>
+                </button>
               </div>
+            </div> */}
+            <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-[#F8FAFB] w-full dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
+              <div className="w-full p-4 bg-white">
+                <h5 id="drawer-right-label" className="inline-flex items-center text-base font-semibold text-gray-500 dark:text-gray-400">
+                  <svg className="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                  </svg>Detalhes do chamado
+                </h5>
+                <button type="button" onClick={() => setIsOpen(false)} className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white" >
+                  <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                  </svg>
+                  <span className="sr-only">Close menu</span>
+                </button>
+              </div>
+
+              <div className="w-full h-full justify-between flex flex-row">
+                {/*informaç~eos do chamado */}
+                <div className="w-2/3 p-10">
+                  <div className="grid grid-cols-2 mb-10">
+                    <div>
+                      <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Usuário</p>
+                      <p className="mb-6 text-lg font-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.nome_usuario || 'Nome não encontrado'}</p>
+                    </div>
+                    <div>
+                      <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Assunto</p>
+                      <p className="mb-6 text-lg font-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.assunto}</p>
+                    </div>
+
+                    <div>
+                      <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Prioridade</p>
+                      <p className="mb-6 text-lg font-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.prioridade}</p>
+                    </div>
+                    <div>
+                      <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Chamado ID</p>
+                      <p className="mb-6 text-lg font-bold text-gray-800 dark:text-gray-400">#{chamadoSelecionado?.id}</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-2.5">
+                    <img class="w-8 h-8 rounded-full" src="/docs/images/people/profile-picture-3.jpg" alt="Jese image" />
+                    <div class="flex flex-col gap-1 w-2/3 ">
+                      <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white">Bonnie Green</span>
+                        <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{chamadoSelecionado?.criado_em}</span>
+                      </div>
+                      <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-white rounded-e-xl rounded-es-xl dark:bg-gray-700">
+                        <p class="text-sm font-normal text-gray-900 dark:text-white">{chamadoSelecionado?.descricao}</p>
+                        <div>
+                          {chamadoSelecionado?.imagem ? (<img src={chamadoSelecionado.imagem} alt="Imagem do chamado" className="mt-6 rounded-lg w-full max-w-md" />) : (<p className="mt-6 text-sm font-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-2.5 justify-end">
+                    <img class="w-8 h-8 rounded-full order-2" src="/docs/images/people/profile-picture-3.jpg" alt="Jese image" />
+                    <div class="flex flex-col gap-1 w-2/3 items-end text-right">
+                      <div class="flex items-center space-x-2 rtl:space-x-reverse flex-row">
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white">Bonnie Green</span>
+                        <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{chamadoSelecionado?.criado_em}</span>
+                      </div>
+                      <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-[#E6DAFF] rounded-s-xl rounded-ss-xl dark:bg-gray-700">
+                        <p class="text-sm font-normal text-gray-900 dark:text-white">Resposta do tecnico</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* apontamentos */}
+                <div className="w-1/3 bg-white p-10 h-full">
+                  <div className="w-full px-4 py-8">
+                    <h1 className="text-2xl font-bold mb-6">Apontamentos do chamado #{chamadoSelecionado?.id}</h1>
+
+                    {/* Timeline */}
+                    <ol className="relative border-s border-gray-300 mb-10">
+                      {apontamentos.map((a) => (
+                        <li key={a.id} className="mb-10 ms-4">
+                          <div className={`absolute w-3 h-3 rounded-full mt-1.5 -start-1.5 ${a.fim ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                          <time className="mb-1 text-sm text-gray-500">
+                            {new Date(a.comeco).toLocaleString('pt-BR')}
+                          </time>
+                          <h3 className="text-lg font-semibold">
+                            {a.fim ? 'Apontamento finalizado' : 'Apontamento em andamento'}
+                          </h3>
+                          <p className="text-gray-700">{a.descricao}</p>
+                          {a.fim && (
+                            <p className="text-sm text-gray-500 mt-1">
+                              Encerrado em {new Date(a.fim).toLocaleString('pt-BR')}
+                            </p>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+
+                    {/* Formulário */}
+                    {!apontamentoAtivo && (
+                      <div className="mb-6">
+                        <label htmlFor="descricao" className="block mb-2 text-sm font-medium text-gray-900">
+                          Nova atividade realizada
+                        </label>
+                        <textarea
+                          id="descricao"
+                          rows="4"
+                          value={descricao}
+                          onChange={(e) => setDescricao(e.target.value)}
+                          className="w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Descreva o que foi feito..."
+                        />
+                        <button onClick={iniciarApontamento} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" >Adicionar apontamento</button>
+                      </div>
+                    )}
+
+                    {/* Botão para encerrar apontamento */}
+                    {apontamentoAtivo && (
+                      <div className="mt-6">
+                        <p className="text-sm text-gray-700 mb-2"> Apontamento em andamento desde:{' '}
+                          {new Date(apontamentoAtivo.comeco).toLocaleString('pt-BR')}
+                        </p>
+                        <button
+                          onClick={() => finalizarApontamento(apontamentoAtivo.id)}
+                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                        >Fechar apontamento</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
             </div>
           </section>
         </div >

@@ -1,10 +1,12 @@
 import express from "express";
 
-import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosPorSetorController, listarTiposServicoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController } from "../controllers/ChamadoController.js";
+import { criarChamadoController, criarPrioridadeController, criarRelatorioController, listarChamadosController, verRelatoriosController, listarUsuariosPorSetorController, listarTiposServicoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, buscarChamadoComNomeUsuarioController } from "../controllers/ChamadoController.js";
 import { obterPerfilUsuarioController, editarPerfilController } from "../controllers/PerfilController.js";
 import { upload } from '../middlewares/uploadMiddleware.js';
 
 const router = express.Router();
+
+router.get("/chamado/:id", buscarChamadoComNomeUsuarioController);
 
 // rotas usadas em usuario -----------------------------------------------------------------------------------------------------------------------------------------------
 router.post('/chamado', upload.single('imagem'), criarChamadoController); // criação de chamados
@@ -18,17 +20,18 @@ router.get('/todos-chamados', listarTodosChamadosController) // ver todos os cha
 router.get('/contar-por-status', contarChamadosPorStatusController);
 
 // rotas usadas para tecnicos e auxiliares ------------------------------------------------------------------------------------------------------------------------------------------------
-router.get('/chamados-disponiveis', listarChamadosDisponiveisController); // lista chamados disponiveis para o tecnico/auxiliar logado
+// router.get('/chamados-disponiveis', listarChamadosDisponiveisController); 
 router.post('/pegar-chamado', pegarChamadoController); // tecnico/auxiliar pega um chamado
+router.get('/chamados-funcionario', listarChamadosFuncionarioController); // lista chamados disponiveis para o tecnico/auxiliar logado
+router.get('/apontamentos/:chamado_id', listarApontamentosController); // lista os apontamentos feitos para determinado chamamdo 
+router.post('/criar-apontamento',  criarApontamentoController); // tecnico cria apontamentos
+router.patch('/finalizar-apontamento', finalizarApontamentoController); // tecnico finaliza apontamentos
 
 router.post('/relatorio', criarRelatorioController);
 
 router.patch('/prioridade', criarPrioridadeController);
 
 router.get('/verRelatorio', verRelatoriosController);
-router.get('/chamados-funcionario', listarChamadosFuncionarioController);
-
-
 //relacionados a perfil
 router.get('/perfil', obterPerfilUsuarioController);
 router.patch('/editarPerfil', editarPerfilController);
