@@ -3,10 +3,14 @@ import { useEffect, useState, useRef } from "react";
 import './dashboard.css';
 import GraficoPorStatus from "../../../../components/GraficoFuncao/GraficoChamadosFuncao.jsx/GraficosFuncao";
 // import GraficoDeLinhas from '../../../../components/GraficoLinhas/GraficoDeLinhas.jsx'
-import GraficoChamadosPorMes from '../../../../components/GraficoMes/GraficoChamadosPorMes.jsx';
-import ChamadosPorPrioridade from "../../../../GraficoDeBarras/GraficoDeBarras.jsx";
-import KpiSla from "../../../../components/Kpi/kpi.jsx";
-import Indicadores from  "../../../../components/Indicadores/Indicadores.jsx";
+// import GraficoChamadosPorMes from '../../../../components/GraficoMes/GraficoChamadosPorMes.jsx';
+// import ChamadosPorPrioridade from "../../../../GraficoDeBarras/GraficoDeBarras.jsx";
+// import KpiSla from "../../../../components/Kpi/kpi.jsx";
+// import Indicadores from  "../../../../components/Indicadores/Indicadores.jsx";
+import ChamadosPorPrioridade from "@/components/GraficoDeBarras/GraficoDeBarras";
+import KpiSla from "@/components/Kpi/kpi";
+import Indicadores from "@/components/Indicadores/Indicadores";
+import GraficoChamadosPorMes from "@/components/GraficoMes/GraficoChamadosPorMes";
 
 export default function Setores() {
     const [setoresSelecionados, setSetoresSelecionados] = useState({ auxiliares: true, tecnicos: true, }); // Estado que guarda quais setores estão selecionados no dropdown, inicialmente todos true para mostrar todos ao entrar na página
