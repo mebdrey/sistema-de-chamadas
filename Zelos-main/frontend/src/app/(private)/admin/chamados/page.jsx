@@ -22,26 +22,6 @@ export default function ChamadosAdmin() {
     setIsMounted(true);
     initFlowbite(); // inicializa dropdowns, modais, etc.
   }, []);
-
-  // useEffect(() => {
-  //     setIsMounted(true);
-  // }, []);
-
-  // // verifica se esta logado/autorizado
-  // useEffect(() => {
-  //     fetch('http://localhost:8080/auth/check-auth', { credentials: 'include' })
-  //         .then(res => {
-  //             if (!res.ok) throw new Error();
-  //             return res.json();
-  //         })
-  //         .then(data => {
-  //             console.log('Usuário autenticado:', data.user);
-  //         })
-  //         .catch(() => {
-  //             router.push('/login');
-  //         });
-  // }, []);
-
   // busca os chamados feitos pelo usuario
   useEffect(() => {
     fetch('http://localhost:8080/todos-chamados', { credentials: 'include' })
@@ -319,7 +299,7 @@ export default function ChamadosAdmin() {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs text-gray-500 dark:text-neutral-500">Usuário</p>
-                              <p className="text-sm font-bold text-gray-800 dark:text-white">Nome usuario</p>
+                              <p className="text-sm font-bold text-gray-800 dark:text-white">{chamado?.nome_usuario || 'Nome não encontrado'}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 dark:text-neutral-500">Criado em</p>

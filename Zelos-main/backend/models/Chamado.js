@@ -89,7 +89,8 @@ const lerMsg = async (idChamado) => {
 //criar chamado usuário -- funcionando
 export const criarChamado = async (dados) => {
     try {
-        return await create('chamados', dados);
+        const resultado = await create('chamados', dados); 
+        return resultado;
     } catch (err) {
         console.error("Erro ao criar chamado!", err);
         throw err;

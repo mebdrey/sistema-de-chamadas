@@ -109,6 +109,24 @@ const TecnicoEnviarMensagemController = async (req, res) => {
 }
 
 // usado para usuarios comuns ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+export function calcularDataLimite(prioridade) {
+  const agora = new Date();
+   
+     switch (prioridade) {
+       case "baixa":
+         return new Date(agora.getTime() + 72 * 60 * 60 * 1000); // +72h
+       case "média":
+         return new Date(agora.getTime() + 24 * 60 * 60 * 1000); // +24h
+       case "alta":
+         return new Date(agora.getTime() + 8 * 60 * 60 * 1000);  // +8h
+       case "urgente":
+         return new Date(agora.getTime() + 4 * 60 * 60 * 1000);  // +4h
+       default:
+         return null;
+     }
+   }
+
 export const criarChamadoController = async (req, res) => {
   const { assunto, tipo_id, descricao, prioridade, patrimonio } = req.body;
   const usuario_id = req.user?.id;
@@ -131,31 +149,13 @@ export const criarChamadoController = async (req, res) => {
       dadosChamado[key] = null;
     }
   });
-    await criarChamado(dadosChamado);
-    res.status(201).json({ mensagem: 'Chamado criado com sucesso.' });
+  const resultado = await criarChamado(dadosChamado);
+  res.status(201).json({ ...dadosChamado, id: resultado, status_chamado: "pendente", criado_em: new Date() });  
 
   } catch (error) {
     console.error('Erro ao criar chamado:', error);
     res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
   }};
-
-export function calcularDataLimite(prioridade) {
- const agora = new Date();
-  
-    switch (prioridade) {
-      case "baixa":
-        return new Date(agora.getTime() + 72 * 60 * 60 * 1000); // +72h
-      case "média":
-        return new Date(agora.getTime() + 24 * 60 * 60 * 1000); // +24h
-      case "alta":
-        return new Date(agora.getTime() + 8 * 60 * 60 * 1000);  // +8h
-      case "urgente":
-        return new Date(agora.getTime() + 4 * 60 * 60 * 1000);  // +4h
-      default:
-        return null;
-    }
-  }
-  
 
 export const listarChamadosController = async (req, res) => {
     try {
@@ -188,12 +188,10 @@ export const listarUsuariosPorSetorController = async (req, res) => {
   try {
     const tecnicos = await verTecnicos();
     const auxiliares = await verAuxiliaresLimpeza();
-    const clientes = await verClientes();
 
     res.status(200).json({
       tecnicos,
-      auxiliares,
-      clientes
+      auxiliares
     });
   } catch (err) {
     res.status(500).json({ erro: err.message });
@@ -240,7 +238,7 @@ export const contarChamadosPorStatusController = async (req, res) => {
     const resultado = await contarChamadosPorStatus(modo);
 
     // Garante que sempre tenha todos os status, mesmo que contagem = 0
-    const todosOsStatus = ['pendente', 'em andamento', 'concluído'];
+    const todosOsStatus = ['pendente', 'em andamento', 'concluido'];
     const respostaFinal = todosOsStatus.map((status) => {
       const encontrado = resultado.find((r) => r.status_chamado === status);
       return {
