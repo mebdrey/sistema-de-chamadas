@@ -9,27 +9,19 @@
 //     bindCredentials: '7GFGOy4ATCiqW9c86eStgCe0RA9BgA',
 //     searchBase: 'ou=Alunos,ou=Usuarios123,dc=educ123,dc=sp,dc=senai,dc=br',
 //     searchFilter: '(sAMAccountName={{username}})'
-//   }
-// };
+//   }};
 
 // passport.use(new LdapStrategy(ldapOptions, (user, done) => {
 //   if (!user) {
 //     return done(null, false, { message: 'Usuário não encontrado' });
 //   }
-//   return done(null, user);
-// }));
+//   return done(null, user);}));
 
+// passport.serializeUser((user, done) => { done(null, user);});
 
-// passport.serializeUser((user, done) => {
-//   done(null, user);
-// });
-
-// passport.deserializeUser((user, done) => {
-//   done(null, user);
-// });
+// passport.deserializeUser((user, done) => { done(null, user);});
 
 // export default passport;
-
 
 // config/ldap.js
 // import passport from 'passport';
@@ -55,8 +47,7 @@
 //       username,
 //       email,
 //       funcao,
-//       status_usuarios: 'ativo'
-//     });
+//       status_usuarios: 'ativo'});
 
 //     return {
 //       id: insertId,
@@ -65,12 +56,9 @@
 //       username,
 //       email,
 //       funcao,
-//       status_usuarios: 'ativo'
-//     };
-//   }
+//       status_usuarios: 'ativo'};}
 
-//   return existingUser;
-// }
+//   return existingUser;}
 
 // // ----- Sempre LDAP real -----
 // const ldapOptions = {
@@ -80,8 +68,7 @@
 //     bindCredentials: '7GFGOy4ATCiqW9c86eStgCe0RA9BgA',
 //     searchBase: 'ou=Alunos,ou=Usuarios123,dc=educ123,dc=sp,dc=senai,dc=br',
 //     searchFilter: '(sAMAccountName={{username}})'
-//   }
-// };
+//   }};
 
 // passport.use(new LdapStrategy(ldapOptions, async (user, done) => {
 //   try {
@@ -96,20 +83,17 @@
 //     // Junta os dois: dados do banco + dados do LDAP
 //     const usuarioFinal = {
 //       ...usuarioDB,
-//       ldapRaw: user // mantém o objeto LDAP original
-//     };
+//       ldapRaw: user // mantém o objeto LDAP original};
 
 //     return done(null, usuarioFinal);
 //   } catch (err) {
 //     console.error('Erro LDAP:', err);
 //     return done(err);
-//   }
-// }));
+//   }}));
 
 
 // passport.serializeUser((user, done) => {
-//   done(null, user);
-// });
+//   done(null, user);});
 
 // passport.deserializeUser((user, done) => {
 //   done(null, user);
