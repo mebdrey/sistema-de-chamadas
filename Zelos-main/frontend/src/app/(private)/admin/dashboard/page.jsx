@@ -1,5 +1,16 @@
 "use client"
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import './dashboard.css';
+import GraficoPorStatus from "../../../../components/GraficoFuncao/GraficoChamadosFuncao.jsx/GraficosFuncao";
+// import GraficoDeLinhas from '../../../../components/GraficoLinhas/GraficoDeLinhas.jsx'
+// import GraficoChamadosPorMes from '../../../../components/GraficoMes/GraficoChamadosPorMes.jsx';
+// import ChamadosPorPrioridade from "../../../../GraficoDeBarras/GraficoDeBarras.jsx";
+// import KpiSla from "../../../../components/Kpi/kpi.jsx";
+// import Indicadores from  "../../../../components/Indicadores/Indicadores.jsx";
+import ChamadosPorPrioridade from "@/components/GraficoDeBarras/GraficoDeBarras";
+import KpiSla from "@/components/Kpi/kpi";
+import Indicadores from "@/components/Indicadores/Indicadores";
+import GraficoChamadosPorMes from "@/components/GraficoMes/GraficoChamadosPorMes";
 
 export default function Setores() {
     const [setoresSelecionados, setSetoresSelecionados] = useState({ auxiliares: true, tecnicos: true, }); // Estado que guarda quais setores estão selecionados no dropdown, inicialmente todos true para mostrar todos ao entrar na página
@@ -8,13 +19,16 @@ export default function Setores() {
     const [dropdownAbertoId, setDropdownAbertoId] = useState(null); // controla o estado de dropdown aberto/fechado (dropdown p cada usuario)
     const [busca, setBusca] = useState(""); // armazena o que for digitado no campo de busca
 
+    const qndtChamados = [
+        { tipo: 'em aberto', qtd: 55 },
+        { tipo: 'em andamento', qtd: 55 },
+        { tipo: 'encerrados', qtd: 55 }];
+
     // Carrega dados da API ao montar componente
     useEffect(() => {
         fetch("http://localhost:8080/usuarios-por-setor")
             .then((res) => res.json())
-            .then((data) => {
-                setSetores(data);
-            });
+            .then((data) => { setSetores(data); });
     }, []);
 
     // Função para lidar com check/uncheck dos setores no dropdown
@@ -27,61 +41,105 @@ export default function Setores() {
 
     // Juntar usuários só dos setores selecionados para exibir numa tabela só
     const usuariosFiltrados = Object.entries(setores)
-  .filter(([nomeSetor]) => setoresSelecionados[nomeSetor])
-  .flatMap(([, usuarios]) => usuarios)
-  .filter((usuario) => {
-    const termo = busca.toLowerCase();
-    return (
-      usuario.nome.toLowerCase().includes(termo) ||
-      usuario.email.toLowerCase().includes(termo) ||
-      usuario.funcao.toLowerCase().includes(termo) ||
-      usuario.id.toString().includes(termo)  // caso queira buscar por id também
-    );
-  });
-
+        .filter(([nomeSetor]) => setoresSelecionados[nomeSetor])
+        .flatMap(([, usuarios]) => usuarios)
+        .filter((usuario) => {
+            const termo = busca.toLowerCase();
+            return (
+                usuario.nome.toLowerCase().includes(termo) ||
+                usuario.email.toLowerCase().includes(termo) ||
+                usuario.funcao.toLowerCase().includes(termo) ||
+                usuario.id.toString().includes(termo)  // caso queira buscar por id também
+            );
+        });
 
     // excluir usuario
     function deletarUsuario(id) {
         if (window.confirm("Tem certeza que deseja excluir este usuário?")) {
             fetch(`http://localhost:8080/usuarios/${id}`, {
                 method: "DELETE",
-            })
-                .then((res) => {
-                    if (!res.ok) throw new Error("Erro ao excluir usuário");
-                    return res.json();
-                })
-                .then((data) => {
-                    alert(data.mensagem);
-                    // Recarrega a lista
-                    setSetores((prev) => {
-                        const atualizado = { ...prev };
-                        for (const setor in atualizado) {
-                            atualizado[setor] = atualizado[setor].filter((u) => u.id !== id);
-                        }
-                        return atualizado;
-                    });
-                })
-                .catch((err) => {
-                    console.error(err);
-                    alert("Não foi possível excluir o usuário.");
+            }).then((res) => {
+                if (!res.ok) throw new Error("Erro ao excluir usuário");
+                return res.json();
+            }).then((data) => {
+                alert(data.mensagem);
+                // Recarrega a lista
+                setSetores((prev) => {
+                    const atualizado = { ...prev };
+                    for (const setor in atualizado) {
+                        atualizado[setor] = atualizado[setor].filter((u) => u.id !== id);
+                    } return atualizado;
                 });
+            }).catch((err) => {
+                console.error(err);
+                alert("Não foi possível excluir o usuário.");
+            });
         }
     }
-
 
     return (
         <div className="p-4 w-full">
             <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
+                { /*CARDS DA QUANTIDADE DE CHAMADOS*/}
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                    {qndtChamados.map((nChamados, index) => (
+                        <div className="flex items-center justify-center h-fit rounded-sm">
+                            <div key={index} className="w-full p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                                <div className="flex flex-row gap-3">
+                                    <svg className="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
+                                    </svg>
+                                    <h5 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">{nChamados.qtd}</h5>
+                                </div>
+                                <p className="mb-3 font-normal text-gray-500 dark:text-gray-400">Chamados {nChamados.tipo}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <div className="grid grid-cols-3 gap-1 mb-4">
+                    <div className="col-span-2 flex items-center justify-center h-fit mb-4 rounded-sm">
+                        <div className="w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
+                            <GraficoChamadosPorMes />
+                        </div>
+                    </div>
+                    <div className="col-span-1 flex items-center justify-center h-fit mb-4 rounded-sm">
+                        <div className="w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
+                            <GraficoPorStatus />
+                        </div>
+                    </div>
+                </div>
 
-                <div className="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 p-4 bg-white dark:bg-gray-900">
-                    <div className="relative inline-block text-left">
-                        {/* <button onClick={() => setDropdownAberto(!dropdownAberto)} className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" >
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                    <ChamadosPorPrioridade />
+                    <KpiSla />
+                </div>
+
+                <Indicadores />
+                {/* Dropdown botão */}
+                {/* <button id="dropdownHelperButton" data-dropdown-toggle="dropdownHelper" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
+        <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" >
+          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" /></svg></button>
+      {/* Dropdown menu */}
+                {/* {dropdownAberto && (
+        <div id="dropdownHelper" className="z-10 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-60 dark:bg-gray-700 dark:divide-gray-600" >
+          <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHelperButton" >
+            {Object.keys(setores).map((nomeSetor) => (
+              <li key={nomeSetor}>
+                <div className="flex p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+                  <div className="flex items-center h-5">
+                    <input id={`checkbox-${nomeSetor}`} type="checkbox" checked={!!setoresSelecionados[nomeSetor]} onChange={() => toggleSetor(nomeSetor)} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"/>
+                  </div>
+                  <div className="ms-2 text-sm">
+                    <label htmlFor={`checkbox-${nomeSetor}`} className="font-medium text-gray-900 dark:text-gray-300 capitalize" >{nomeSetor} </label>  </div> </div> </li> ))} </ul> </div>)} */}
+                {/* Tabela única com usuários filtrados */}
+                {/* <div className="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 p-4 bg-white dark:bg-gray-900"> */}
+                {/* <div className="relative inline-block text-left"> */}
+                {/* <button onClick={() => setDropdownAberto(!dropdownAberto)} className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" >
                                 Action
                                 <svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                                 </svg>
                             </button>
-
                             {dropdownAberto && (
                                 <div className="z-10 absolute mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600" style={{ top: "100%", left: 0 }} >
                                     <ul className="py-1 text-sm text-gray-700 dark:text-gray-200">
@@ -103,34 +161,21 @@ export default function Setores() {
                                     </div>
                                 </div>
                             )} */}
-
-                        <button id="dropdownHelperButton" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
-                            <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" >
-                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                            </svg>
-                        </button>
-
-                        {/* Dropdown menu */}
-                        {dropdownAberto && (
+                {/* <button id="dropdownHelperButton" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
+                            <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" ><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" /></svg>
+                        </button> */}
+                {/* Dropdown menu */}
+                {/* {dropdownAberto && (
                             <div id="dropdownHelper" className="z-10 absolute mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600" style={{ top: "100%", left: 0 }} >
                                 <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHelperButton" >
                                     {Object.keys(setores).map((nomeSetor) => (
                                         <li key={nomeSetor}>
                                             <div className="flex p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
                                                 <div className="flex items-center h-5">
-                                                    <input
-                                                        id={`checkbox-${nomeSetor}`}
-                                                        type="checkbox"
-                                                        checked={!!setoresSelecionados[nomeSetor]}
-                                                        onChange={() => toggleSetor(nomeSetor)}
-                                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                                                    />
+                                                    <input id={`checkbox-${nomeSetor}`} type="checkbox" checked={!!setoresSelecionados[nomeSetor]} onChange={() => toggleSetor(nomeSetor)} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
                                                 </div>
                                                 <div className="ms-2 text-sm">
-                                                    <label
-                                                        htmlFor={`checkbox-${nomeSetor}`}
-                                                        className="font-medium text-gray-900 dark:text-gray-300 capitalize"
-                                                    >
+                                                    <label htmlFor={`checkbox-${nomeSetor}`} className="font-medium text-gray-900 dark:text-gray-300 capitalize">
                                                         {nomeSetor}
                                                     </label>
                                                 </div>
@@ -141,10 +186,9 @@ export default function Setores() {
                             </div>
                         )}
                     </div>
-
-                    <label htmlFor="table-search" className="sr-only">Search</label>
-                    {/* Barra de pesquisa */}
-                    <form className="flex items-center" onSubmit={(e) => e.preventDefault()}>
+                    <label htmlFor="table-search" className="sr-only">Search</label> */}
+                {/* Barra de pesquisa */}
+                {/* <form className="flex items-center" onSubmit={(e) => e.preventDefault()}>
                         <label htmlFor="simple-search" className="sr-only">Search</label>
                         <div className="relative w-80">
                             <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -152,62 +196,10 @@ export default function Setores() {
                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
                                 </svg>
                             </div>
-                            <input
-                                type="text"
-                                id="simple-search"
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                placeholder="Pesquisar por usuário"
-                                value={busca}
-                                onChange={(e) => setBusca(e.target.value)} />
+                            <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Pesquisar por usuário" value={busca} onChange={(e) => setBusca(e.target.value)} />
                         </div>
                     </form>
                 </div>
-
-
-                {/* Dropdown botão */}
-                {/* <button id="dropdownHelperButton" data-dropdown-toggle="dropdownHelper" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
-        <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" >
-          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-        </svg>
-      </button>
-
-      {/* Dropdown menu */}
-                {/* {dropdownAberto && (
-        <div id="dropdownHelper"
-          className="z-10 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-60 dark:bg-gray-700 dark:divide-gray-600"
-        >
-          <ul
-            className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200"
-            aria-labelledby="dropdownHelperButton"
-          >
-            {Object.keys(setores).map((nomeSetor) => (
-              <li key={nomeSetor}>
-                <div className="flex p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-                  <div className="flex items-center h-5">
-                    <input
-                      id={`checkbox-${nomeSetor}`}
-                      type="checkbox"
-                      checked={!!setoresSelecionados[nomeSetor]}
-                      onChange={() => toggleSetor(nomeSetor)}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                    />
-                  </div>
-                  <div className="ms-2 text-sm">
-                    <label
-                      htmlFor={`checkbox-${nomeSetor}`}
-                      className="font-medium text-gray-900 dark:text-gray-300 capitalize"
-                    >
-                      {nomeSetor}
-                    </label>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )} */}
-
-                {/* Tabela única com usuários filtrados */}
                 <div className="overflow-auto">
                     <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -238,8 +230,6 @@ export default function Setores() {
                                                 </svg>
                                             )}
                                         </div>
-
-
                                         <div className="ms-3">
                                             <div>{usuario.nome}</div>
                                             <div className="text-gray-500 text-sm">{usuario.email}</div>
@@ -248,25 +238,18 @@ export default function Setores() {
                                     <td className="px-6 py-4">{usuario.funcao}</td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center">
-                                            <div
-                                                className={`h-2.5 w-2.5 rounded-full me-2 ${usuario.status_usuarios === "ativo"
-                                                    ? "bg-green-500"
-                                                    : "bg-red-500"
-                                                    }`}
-                                            ></div>
+                                            <div className={`h-2.5 w-2.5 rounded-full me-2 ${usuario.status_usuarios === "ativo" ? "bg-green-500" : "bg-red-500"}`}></div>
                                             {usuario.status_usuarios}
                                         </div>
                                     </td>
-
                                     <td className="relative">
                                         <button onClick={() => setDropdownAbertoId((prev) => (prev === usuario.id ? null : usuario.id))} className="inline-flex items-center p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600" type="button" aria-expanded={dropdownAbertoId === usuario.id} aria-haspopup="true" >
                                             <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3" >
                                                 <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
                                             </svg>
-                                        </button>
-
-                                        {/* Dropdown */}
-                                        {dropdownAbertoId === usuario.id && (
+                                        </button> */}
+                {/* Dropdown */}
+                {/* {dropdownAbertoId === usuario.id && (
                                             <div className="z-10 absolute right-0 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600" role="menu" aria-orientation="vertical" aria-labelledby="dropdownMenuIconHorizontalButton" >
                                                 <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
                                                     <li>
@@ -283,11 +266,11 @@ export default function Setores() {
                                         )}
                                     </td>
                                 </tr>
-                            ))}
-                        </tbody>
+                            ))} */}
+                {/* </tbody>
                     </table>
-                </div>
+                </div> */}
             </div>
-        </div>
+        </div >
     );
 }
