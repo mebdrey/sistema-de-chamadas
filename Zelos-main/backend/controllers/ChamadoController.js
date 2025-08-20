@@ -1,39 +1,8 @@
 
 
-import { criarNotificacao, buscarTiposServico, criarChamado, criarPrioridade, criarRelatorio, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, verRelatorios, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario } from "../models/Chamado.js";
+import { criarNotificacao, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorStatus, obterChamadosPorTipo, obterAtividadesTecnicos } from "../models/Chamado.js";
 
-
-//dar prioridade ao chamado -- não ta funcionando
-const criarPrioridadeController = async (req, res) => {
-  try {
-    await criarPrioridade(req.body);
-    res.status(201).json({ mensagem: 'prioridade inserida com sucesso!!!' })
-  } catch (err) {
-    res.status(500).json({ erro: err.message })
-  }
-};
-
-//criar relatorio -- funcionando
-const criarRelatorioController = async (req, res) => {
-  try {
-    await criarRelatorio(req.body);
-    res.status(201).json({ mensagem: 'relatório criado com sucesso!!!' })
-  } catch (err) {
-    res.status(500).json({ erro: err.message })
-  }
-};
-
-//ver relatorios/apontamentos
-const verRelatoriosController = async (req, res) => {
-  try {
-    const relatorios = await verRelatorios(req.body);
-    res.json(relatorios);
-  } catch (erro) {
-    console.error(erro);
-    res.status(500).json({ erro: 'Erro ao buscar relatórios!!!' })
-  }
-}
-
+// busca nome do usuario com base no ID
 export const buscarChamadoComNomeUsuarioController = async (req, res) => {
   const { id } = req.params;
 
@@ -52,8 +21,6 @@ export const buscarChamadoComNomeUsuarioController = async (req, res) => {
     res.status(500).json({ erro: "Erro ao buscar chamado." });
   }
 };
-
-
 
 //funções de chat
 
@@ -150,49 +117,12 @@ export const criarChamadoController = async (req, res) => {
     if (dadosChamado[key] === undefined) {
       dadosChamado[key] = null;
     }
-  });
-  const resultado = await criarChamado(dadosChamado);
-  res.status(201).json({ ...dadosChamado, id: resultado, status_chamado: "pendente", criado_em: new Date() });  
-      assunto,
-      tipo_id: tipo_id || null,
-      descricao,
-      prioridade: prioridade || 'none',
-      imagem: imagem || null,
-      usuario_id: usuario_id || null,
-      patrimonio: patrimonio || null,
-      data_limite
-    };
-    Object.keys(dadosChamado).forEach((key) => {
-      if (dadosChamado[key] === undefined) {
-        dadosChamado[key] = null;
-      }
-    });
-    await criarChamado(dadosChamado);
-    res.status(201).json({ mensagem: 'Chamado criado com sucesso.' });
-  } catch (error) {
-    console.error('Erro ao criar chamado:', error);
-    res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
-  }
-};
-
-
-
-export function calcularDataLimite(prioridade) {
-  const agora = new Date();
-
-  switch (prioridade) {
-    case "baixa":
-      return new Date(agora.getTime() + 72 * 60 * 60 * 1000); // +72h
-    case "média":
-      return new Date(agora.getTime() + 24 * 60 * 60 * 1000); // +24h
-    case "alta":
-      return new Date(agora.getTime() + 8 * 60 * 60 * 1000);  // +8h
-    case "urgente":
-      return new Date(agora.getTime() + 4 * 60 * 60 * 1000);  // +4h
-    default:
-      return null;
-  }
-}
+});  const resultado = await criarChamado(dadosChamado);
+res.status(201).json({ ...dadosChamado, id: resultado, status_chamado: "pendente", criado_em: new Date() });  
+} catch (error) {
+  console.error('Erro ao criar chamado:', error);
+  res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
+}};
 
 export const listarChamadosController = async (req, res) => {
   try {
@@ -285,7 +215,7 @@ export const contarChamadosPorStatusController = async (req, res) => {
       return {
         tipo: status,
         qtd: encontrado ? encontrado.qtd : 0,
-        link: `/chamados?status=${status}`, // link genérico, você pode ajustar
+        link: `/chamados?status=${status}`, 
       };
     });
 
@@ -293,6 +223,48 @@ export const contarChamadosPorStatusController = async (req, res) => {
   } catch (error) {
     console.error('Erro ao contar chamados por status:', error);
     res.status(500).json({ erro: 'Erro interno ao contar chamados por status.' });
+  }
+};
+
+
+const extrairFiltros = (query) => ({
+  inicio: query.inicio || null,
+  fim: query.fim || null,
+  tipo_id: query.tipo_id || null,
+  tecnico_id: query.tecnico_id || null,
+  status_chamado: query.status_chamado || null,
+});
+
+export const relatorioStatusController = async (req, res) => {
+  try {
+    const filtros = extrairFiltros(req.query);
+    const dados = await obterChamadosPorStatus(filtros);
+    res.json(dados);
+  } catch (error) {
+    console.error('Erro ao gerar relatório de status:', error);
+    res.status(500).json({ erro: 'Erro ao gerar relatório de status' });
+  }
+};
+
+export const relatorioTipoController = async (req, res) => {
+  try {
+    const filtros = extrairFiltros(req.query);
+    const dados = await obterChamadosPorTipo(filtros);
+    res.json(dados);
+  } catch (error) {
+    console.error('Erro ao gerar relatório de tipo:', error);
+    res.status(500).json({ erro: 'Erro ao gerar relatório de tipo' });
+  }
+};
+
+export const relatorioTecnicosController = async (req, res) => {
+  try {
+    const filtros = extrairFiltros(req.query);
+    const dados = await obterAtividadesTecnicos(filtros);
+    res.json(dados);
+  } catch (error) {
+    console.error('Erro ao gerar relatório de técnicos:', error);
+    res.status(500).json({ erro: 'Erro ao gerar relatório de técnicos' });
   }
 };
 
@@ -364,21 +336,23 @@ export const chamadosConcluidoController = async (req, res) => {
 
 export const listarChamadosFuncionarioController = async (req, res) => {
   const usuario_id = req.user?.id;
-  const status = req.query.status; // Ex: 'pendente', 'em andamento', etc.
+   const statusParam = req.query.status?.replace('-', ' '); // transforma "em-andamento" em "em andamento"
+console.log("Status recebido:", statusParam);
 
-  if (!usuario_id || !status) {
+  if (!usuario_id || !statusParam) {
     return res.status(400).json({ erro: 'Parâmetros ausentes.' });
   }
 
   try {
-    const chamados = await listarChamadosPorStatusEFunção(usuario_id, status);
+    const chamados = await listarChamadosPorStatusEFunção(usuario_id, statusParam);
+    console.log("Chamados encontrados:", chamados);
     res.json(chamados);
   } catch (error) {
     res.status(500).json({ erro: 'Erro ao buscar chamados por status.' });
   }
 };
 
-export const listarApontamentosController = async (req, res) => { ///////
+export const listarApontamentosController = async (req, res) => { 
   try {
     const chamado_id = req.params.chamado_id;
     const apontamentos = await listarApontamentosPorChamado(chamado_id);
@@ -393,16 +367,19 @@ export const criarApontamentoController = async (req, res) => {
     const { chamado_id, descricao } = req.body;
     const tecnico_id = req.user?.id;
 
-    if (!descricao || !chamado_id) {
-      return res.status(400).json({ erro: 'Descrição e chamado_id são obrigatórios' });
+    if (!descricao || !chamado_id || !tecnico_id) {
+      return res.status(400).json({ erro: 'Descrição, chamado_id e tecnico_id são obrigatórios' });
     }
 
-    await criarApontamento({ chamado_id, tecnico_id, descricao });
-    res.status(201).json({ mensagem: 'Apontamento iniciado com sucesso' });
+    const novo = await criarApontamento({ chamado_id, tecnico_id, descricao });
+
+    return res.status(201).json({ mensagem: 'Apontamento criado com sucesso', id: novo });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao criar apontamento' });
+    console.error("Erro no controller criarApontamento:", error);
+    return res.status(500).json({ erro: 'Erro interno ao criar apontamento' });
   }
 };
+
 
 export const finalizarApontamentoController = async (req, res) => {
   try {
@@ -415,5 +392,6 @@ export const finalizarApontamentoController = async (req, res) => {
 };
 
 
+
 // msgUsuarioTecnico
-export { lerMensagensController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, criarPrioridadeController, criarRelatorioController, verRelatoriosController };
+export { lerMensagensController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController };

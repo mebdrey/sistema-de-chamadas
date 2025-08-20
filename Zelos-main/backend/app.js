@@ -23,7 +23,7 @@ try {
   app.use(express.json());
   
   app.use(session({
-    secret: '64f2389797442630e3942bb18f0127363031079caebabbf3493d02608ab40acc5861f6645b8c5dfb2fcc9dca21719dadc265facfadbf4df7f3c4c139d7bbf33b',
+    secret: process.env.SESSION_SECRET,
     resave: false,
   saveUninitialized: false,
   cookie: {

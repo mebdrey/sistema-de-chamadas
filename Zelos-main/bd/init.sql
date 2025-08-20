@@ -278,3 +278,10 @@ select *from usuarios;
 select *from chamados;
 select *from usuario_servico;
 
+SELECT c.*, u.nome AS nome_usuario
+FROM chamados c
+INNER JOIN usuario_servico us ON us.servico_id = c.tipo_id
+INNER JOIN usuarios u ON u.id = c.usuario_id
+WHERE us.usuario_id = 4 AND c.status_chamado = 'em andamento' AND c.tecnico_id = 4
+ORDER BY c.criado_em DESC;
+

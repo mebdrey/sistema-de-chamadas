@@ -74,7 +74,7 @@ export default function ChamadosCliente() {
     }
 
     // STATUS DOS CHAMAFOS
-    const statusAbas = ['todos', 'pendente', 'em andamento', 'concluído'];
+    const statusAbas = ['todos', 'pendente', 'em andamento', 'concluido'];
     // funcao p normalizar id
     const normalizarId = (texto) =>
         typeof texto === 'string' ? texto.toLowerCase().replace(/\s+/g, '-') : '';

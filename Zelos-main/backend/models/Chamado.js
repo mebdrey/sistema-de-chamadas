@@ -1,26 +1,6 @@
 
 import { create, readAll, read, readQuery, update, deleteRecord } from '../config/database.js';
 
-//prioridade do chamado - técnico -- não esta funcionando, não esta recebendo as informaçoes do id(quando tento enviar o id pelo body ele junta no set)
-const criarPrioridade = async (dados, id) => {
-    try {
-        return await update('chamados', dados, `id = 1`)
-        // return await update('chamados',dados,`id = ${id}` ) --  seria o funcional com o id de login(eu acho)
-    } catch (err) {
-        console.error('erro ao inserir prioridade no chamado!', err);
-        throw err;
-    }};
-
-//criar relatório - técnico -- funcionando
-const criarRelatorio = async (dados) => {
-    try {
-        return await create('apontamentos', dados)
-    } catch (err) {
-        console.error('Erro ao criar relatório!!!', err);
-        throw err;
-    }
-};
-
 export async function criarNotificacao({ usuario_id, tipo, titulo, descricao, chamado_id = null }) {
     const query = `
         INSERT INTO notificacoes (usuario_id, tipo, titulo, descricao, chamado_id)
@@ -35,6 +15,7 @@ export async function criarNotificacao({ usuario_id, tipo, titulo, descricao, ch
     }
 }
 
+// busca o nome do usuario pelo seu id
 export const buscarChamadoComNomeUsuario = async (chamadoId) => {
   const sql = `
     SELECT c.*, u.nome AS nome_usuario
@@ -49,15 +30,6 @@ export const buscarChamadoComNomeUsuario = async (chamadoId) => {
     throw err;
   }
 };
-
-//ver relatórios do técnico
-const verRelatorios = async (table, where) => {
-    try {
-        return await readAll('apontamentos', 'usuario_id = ?')
-    } catch (err) {
-        console.error('Erro ao listar relatórios!!!', err);
-        throw err;
-    }}
 
 //funções para o chat -------------------------------------------------------------------------------------
 
@@ -185,6 +157,104 @@ export const contarChamadosPorStatus = async (modo) => {
   }
 };
 
+// relatorio 1 - chamados p status
+export const obterChamadosPorStatus = async (filtros) => {
+  const { inicio, fim, tipo_id, tecnico_id } = filtros;
+
+  const condicoes = [];
+  const params = [];
+
+  if (inicio && fim) {
+    condicoes.push("c.criado_em BETWEEN ? AND ?");
+    params.push(inicio, fim);
+  }
+  if (tipo_id) {
+    condicoes.push("c.tipo_id = ?");
+    params.push(tipo_id);
+  }
+  if (tecnico_id) {
+    condicoes.push("c.tecnico_id = ?");
+    params.push(tecnico_id);
+  }
+
+  const where = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
+
+  const sql = `
+    SELECT c.status_chamado, COUNT(*) AS total
+    FROM chamados c
+    ${where}
+    GROUP BY c.status_chamado
+  `;
+  return await readQuery(sql, params);
+};
+
+// relatorio 2 - chamados p tipo
+export const obterChamadosPorTipo = async (filtros) => {
+  const { inicio, fim, status_chamado, tecnico_id } = filtros;
+
+  const condicoes = [];
+  const params = [];
+
+  if (inicio && fim) {
+    condicoes.push("c.criado_em BETWEEN ? AND ?");
+    params.push(inicio, fim);
+  }
+  if (status_chamado) {
+    condicoes.push("c.status_chamado = ?");
+    params.push(status_chamado);
+  }
+  if (tecnico_id) {
+    condicoes.push("c.tecnico_id = ?");
+    params.push(tecnico_id);
+  }
+
+  const where = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
+
+  const sql = `
+    SELECT p.titulo AS tipo_chamado, COUNT(*) AS total
+    FROM chamados c
+    JOIN pool p ON c.tipo_id = p.id
+    ${where}
+    GROUP BY p.titulo
+  `;
+  return await readQuery(sql, params);
+};
+
+// relatorio 3 - atividades dos tecnicos
+export const obterAtividadesTecnicos = async (filtros) => {
+  const { inicio, fim, status_chamado, tipo_id } = filtros;
+
+  const condicoes = ["c.tecnico_id IS NOT NULL"];
+  const params = [];
+
+  if (inicio && fim) {
+    condicoes.push("c.criado_em BETWEEN ? AND ?");
+    params.push(inicio, fim);
+  }
+  if (status_chamado) {
+    condicoes.push("c.status_chamado = ?");
+    params.push(status_chamado);
+  }
+  if (tipo_id) {
+    condicoes.push("c.tipo_id = ?");
+    params.push(tipo_id);
+  }
+
+  const where = `WHERE ${condicoes.join(" AND ")}`;
+
+  const sql = `
+    SELECT u.nome AS tecnico,
+           COUNT(*) AS total_chamados,
+           ROUND(AVG(TIMESTAMPDIFF(HOUR, c.criado_em, c.atualizado_em)), 1) AS tempo_medio_resolucao_horas,
+           MAX(c.status_chamado) AS status_mais_recente
+    FROM chamados c
+    JOIN usuarios u ON c.tecnico_id = u.id
+    ${where}
+    GROUP BY u.id
+  `;
+  return await readQuery(sql, params);
+};
+
 // funções utilizadas para TECNICOS E AUXILIARES DE LIMPEZA ------------------------------------------------------------------------------------------------------------------------------------
 export const listarChamadosDisponiveis = async (usuario_id) => {
     const sql = ` SELECT c.* FROM chamados c INNER JOIN usuario_servico us ON us.servico_id = c.tipo_id WHERE us.usuario_id = ? AND c.status_chamado = 'pendente' AND c.tecnico_id IS NULL `;
@@ -308,50 +378,33 @@ export const listarApontamentosPorChamado = async (chamado_id) => {
   return await readQuery(sql, [chamado_id]);
 };
 
-// criar um novo apontamento
-export const criarApontamento = async ({ chamado_id, tecnico_id, descricao }) => {
-  const data = {
+export const criarApontamento = async ({ chamado_id, descricao, tecnico_id }) => {
+  const agora = new Date();
+  agora.setHours(agora.getHours() - 3); // Ajusta para UTC-3
+  const comeco = agora.toISOString().slice(0, 19).replace('T', ' ');
+
+  return await create('apontamentos', {
     chamado_id,
     tecnico_id,
     descricao,
-    comeco: new Date().toISOString().slice(0, 19).replace('T', ' ')
-  };
-
-  return await create('apontamentos', data);
+    comeco
+  });
 };
 
-// finalizar um apontamento
 export const finalizarApontamento = async (apontamento_id) => {
-  const data = {
-    fim: new Date().toISOString().slice(0, 19).replace('T', ' ')
-  };
+  const agora = new Date();
+  agora.setHours(agora.getHours() - 3);
 
-  return await update('apontamentos', data, `id = ${apontamento_id} AND fim IS NULL`);
+  const fim = agora.toISOString().slice(0, 19).replace('T', ' ');
+
+//   console.log("Encerrando apontamento:", apontamento_id, "fim:", fim);
+
+  const result = await update('apontamentos', { fim }, `id = ${apontamento_id} AND fim IS NULL`);
+
+//   console.log("Update result:", result);
+  return result;
 };
+
+
  
-//técnico ler as mensagens enviadas para ele - usar esse quando a autenticação estiver funcionando
-// const receberMensagensDoUsuario = async (usuarioId) => {
-//     try {
-//         return await readAll('mensagens_usuario_tecnico', `id_destinatario = ${usuarioId}`)
-//     }
-//     catch (err) {
-//         console.error('Erro ao receber mensagens do usuário: ', err);
-//         throw err;
-//     };
-// }
-
-//ver mensagens (chat identificado pelo id do chamado)
-// const lerMensagens = async (idChamado) => {
-//     try {
-//         return await readAll('mensagens', `id_chamado = ${idChamado}`)
-//     }
-//     catch (err) {
-//         console.error('Erro ao ler mensagens do chamado especificado :', err);
-//         throw err;
-//     };
-// }
-
-//contar  a quantidade total de chamados ativos
-
-//criarUsuarioMensagem
-export { lerMsg, escreverMensagem, criarPrioridade, criarRelatorio, verRelatorios };
+export { lerMsg, escreverMensagem };

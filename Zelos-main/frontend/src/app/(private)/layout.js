@@ -2,6 +2,7 @@
 import "../globals.css";
 import { useState, useEffect } from 'react';
 import SideBar from '../../components/NavBar/NavBar.jsx';
+import ProtectedRoute from "@/components/ProtectedRoute/ProtectedRoute.jsx";
 import { initFlowbite } from 'flowbite'
 import 'flowbite/dist/flowbite.css';
 import { usePathname } from "next/navigation";
@@ -35,41 +36,43 @@ export default function PrivateLayout({ children }) {
 
   // Busca dados do usuário logado via API
 
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await fetch("http://localhost:8080/auth/check-auth", {
-          credentials: "include",
-        });
+  // useEffect(() => {
+  //   async function fetchUser() {
+  //     try {
+  //       const res = await fetch("http://localhost:8080/auth/check-auth", {
+  //         credentials: "include",
+  //       });
 
-        if (!res.ok) throw new Error("Não autenticado");
+  //       if (!res.ok) throw new Error("Não autenticado");
 
-        const data = await res.json();
-        setUser(data.user);
-        setUserType(data.user.funcao);
-      } catch (error) {
-        setUser(null);
-        setUserType(null);
-        router.push("/login");
-      } finally {
-        setLoading(false); 
-      }
-    }
+  //       const data = await res.json();
+  //       setUser(data.user);
+  //       setUserType(data.user.funcao);
+  //     } catch (error) {
+  //       setUser(null);
+  //       setUserType(null);
+  //       router.push("/login");
+  //     } finally {
+  //       setLoading(false); 
+  //     }
+  //   }
 
-    fetchUser();
-  }, [router]);
+  //   fetchUser();
+  // }, [router]);
 
-  // bloqueia renderização enquanto checa autenticação
-  if (loading) return null;
+  // // bloqueia renderização enquanto checa autenticação
+  // if (loading) return null;
 
   return (
     <>
+    <ProtectedRoute>
       <SideBar user={user} setUser={setUser} userType={user?.funcao} navFechada={navFechada} setNavFechada={setNavFechada} />
       <main className="w-full justify-items-end">
         <section className="h-fit transition-all duration-300" style={{ width: mainWidth }}>
           {children}
         </section>
       </main>
+      </ProtectedRoute>
     </>
   );
 }

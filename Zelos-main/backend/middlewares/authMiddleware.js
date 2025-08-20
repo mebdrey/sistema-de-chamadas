@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/jwt.js'; // Importar a chave secreta
 
-const authMiddleware = (req, res, next) => {
+export const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -19,4 +19,10 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-export default authMiddleware;
+//middleware de autenticação com Passport (via sessão)
+export function garantirAutenticado(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  return res.status(401).json({ erro: 'Usuário não autenticado' });
+}

@@ -12,7 +12,7 @@ export default function ChamadosTecnico() {
   const [abaAtiva, setAbaAtiva] = useState('pendente')
   const [tiposServico, setTiposServico] = useState([]); // mostra os tipos de servicos/setores
   const [setoresSelecionados, setSetoresSelecionados] = useState([]); // guarda o tipo de servico selecionado
-  const [busca, setBusca] = useState(""); // armazena o que for digitado no campo de busca
+  const [busca, setBusca] = useState(""); // armazena o que htmlFor digitado no campo de busca
   const [dropdownSetorAberto, setDropdownSetorAberto] = useState(false);
   const [dropdownPrioridadeAberto, setDropdownPrioridadeAberto] = useState(false);
   const [prioridadesSelecionadas, setPrioridadesSelecionadas] = useState([]); // 
@@ -23,8 +23,18 @@ export default function ChamadosTecnico() {
   const [descricao, setDescricao] = useState('');
   const [apontamentoAtivo, setApontamentoAtivo] = useState(null);
 
-  const [conteudo, setConteudo] = useState('');
 
+  useEffect(() => {
+    setIsMounted(true);
+    initFlowbite(); // inicializa dropdowns, modais, etc.
+  }, []);
+
+  useEffect(() => {
+    atualizarChamados();
+  }, [abaAtiva]);
+
+
+  // ----------------------------------------- APONTAMENTOS -----------------------------------------------------
   // Buscar apontamentos 
   useEffect(() => {
     const buscarApontamentos = async () => {
@@ -33,9 +43,9 @@ export default function ChamadosTecnico() {
       try {
         const response = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
         const data = await response.json();
-
-        setApontamentos(data);
-        setApontamentoAtivo(data.find((a) => !a.fim));
+        const lista = Array.isArray(data) ? data : data.apontamentos || [];
+        setApontamentos(lista);
+        setApontamentoAtivo(lista.find((a) => !a.fim));
       } catch (error) {
         console.error('Erro ao buscar apontamentos:', error);
       }
@@ -59,41 +69,21 @@ export default function ChamadosTecnico() {
         })
       });
 
+      const resultado = await response.json();
+      console.log('Resposta do servidor:', resultado);
       if (!response.ok) throw new Error('Erro ao criar apontamento');
 
       // Atualiza a lista após criar
       const res = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
       const data = await res.json();
-      setApontamentos(data);
-      setApontamentoAtivo(data.find((a) => !a.fim));
+      const lista = Array.isArray(data) ? data : data.apontamentos || [];
+      setApontamentos(lista);
+      setApontamentoAtivo(lista.find((a) => !a.fim));
       setDescricao('');
     } catch (error) {
       console.error('Erro ao criar apontamento:', error);
     }
   };
-
-  //envia mensagem - tecnico
-  const enviarMsg = async() =>{
-    try{
-      const response = await fetch('http://localhost:8080/tecnico-enviar-msg', {
-        method: 'POST',
-        headers: {'Content-Type' : 'application/json'},
-        credentials: 'include',
-        body: JSON.stringify({
-          idChamado: chamadoSelecionado.id,
-          conteudoMsg: conteudo
-        })
-      });
-      if (!response.ok) throw new Error('Erro ao enviar mensagem');
-
-      const res = await axios.get(`http://localhost:8080/chat?idChamado=${chamadoSelecionado.id}`);
-      
-
-    } catch(error){
-      console.error('Erro ao enviar mensagem: ', error);
-    }
-  }
-
   // finalizar apontamento
   const finalizarApontamento = async (id) => {
     try {
@@ -108,81 +98,119 @@ export default function ChamadosTecnico() {
       // Atualiza a lista após finalizar
       const res = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
       const data = await res.json();
-      setApontamentos(data);
+      const lista = Array.isArray(data) ? data : data.apontamentos || [];
+      setApontamentos(lista);
       setApontamentoAtivo(null);
     } catch (error) {
       console.error('Erro ao finalizar apontamento:', error);
     }
   };
 
+  // ------------------------------------------------------------- CHAT ----------------------------------------------------------------
+  const enviarMsg = async (tipo = 'tecnico') => {
+    if (!conteudo.trim()) return; // evita enviar mensagem sem nada
+    try {
+      const endpoint =
+        tipo === 'tecnico'
+          ? 'http://localhost:8080/tecnico-enviar-msg'
+          : 'http://localhost:8080/enviar-msg';
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          idChamado: chamadoSelecionado.id,
+          conteudoMsg: conteudo,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Erro ao enviar mensagem');
+
+      // Atualiza mensagens
+      const res = await fetch(`http://localhost:8080/chat?idChamado=${chamadoSelecionado.id}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!res.ok) throw new Error('Erro ao atualizar mensagens');
+      const data = await res.json();
+      setMensagens(data.mensagens);
+      setConteudo('');
+    } catch (error) {
+      console.error('Erro ao enviar mensagem: ', error);
+    }
+  };
+
+
+  // const [mensagens, setMensagens] = useState([]);
+  const [mensagens, setMensagens] = useState(null); // null = ainda não carregou
+
+  const [conteudo, setConteudo] = useState('');
+  const [loadingMensagens, setLoadingMensagens] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    initFlowbite(); // inicializa dropdowns, modais, etc.
-  }, []);
+    const fetchMensagens = async () => {
+      if (!chamadoSelecionado?.id) return;
 
-  // useEffect(() => {
-  //     setIsMounted(true);
-  // }, []);
+      setLoadingMensagens(true);
+      try {
+        const response = await fetch(`http://localhost:8080/chat?idChamado=${chamadoSelecionado.id}`, {
+          method: 'GET',
+          credentials: 'include',
+        });
 
-  // // verifica se esta logado/autorizado
-  // useEffect(() => {
-  //     fetch('http://localhost:8080/auth/check-auth', { credentials: 'include' })
-  //         .then(res => {
-  //             if (!res.ok) throw new Error();
-  //             return res.json();
-  //         })
-  //         .then(data => {
-  //             console.log('Usuário autenticado:', data.user);
-  //         })
-  //         .catch(() => {
-  //             router.push('/login');
-  //         });
-  // }, []);
+        if (!response.ok) throw new Error('Erro ao buscar mensagens');
 
-  // busca os chamados feitos pelo usuario
-  // useEffect(() => {
-  //   fetch('http://localhost:8080/todos-chamados', { credentials: 'include' })
-  //     .then(res => {
-  //       if (!res.ok) throw new Error('Erro ao buscar chamados');
-  //       return res.json();
-  //     })
-  //     .then(data => {
-  //       console.log('Chamados recebidos:', data);
-  //       setChamados(Array.isArray(data) ? data : data.chamados || []);
-  //     })
-  //     .catch(err => {
-  //       console.error('Erro ao carregar chamados:', err);
-  //       setChamados([]);
-  //     });
-  // }, []);
+        const data = await response.json();
+        if (JSON.stringify(data.mensagens) !== JSON.stringify(mensagens)) {
+          setMensagens(data.mensagens);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar mensagens do chamado", err);
+      } finally {
+        setLoadingMensagens(false); // só marca como carregado no fim
+      }
+    };
+    fetchMensagens();
+
+    const interval = setInterval(fetchMensagens, 5000); // atualiza a cada 5s
+    return () => clearInterval(interval);
+  }, [chamadoSelecionado]);
+
 
   const atualizarChamados = async () => {
     try {
+      const fetchChamados = async (status) => {
+        const res = await fetch(`http://localhost:8080/chamados-funcionario?status=${status}`, {
+          credentials: 'include',
+        });
+
+        if (!res.ok) {
+          console.error(`Erro ao buscar chamados com status "${status}":`, res.status);
+          return []; // Retorna array vazio se der erro
+        }
+
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+      };
+
       if (abaAtiva === 'todos') {
         const [pendente, andamento, concluido] = await Promise.all([
-          fetch('http://localhost:8080/chamados-funcionario?status=pendente', { credentials: 'include' }).then(res => res.json()),
-          fetch('http://localhost:8080/chamados-funcionario?status=em andamento', { credentials: 'include' }).then(res => res.json()),
-          fetch('http://localhost:8080/chamados-funcionario?status=concluido', { credentials: 'include' }).then(res => res.json()),
+          fetchChamados('pendente'),
+          fetchChamados('em-andamento'),
+          fetchChamados('concluido'),
         ]);
         setChamados([...pendente, ...andamento, ...concluido]);
       } else {
-        const response = await fetch(
-          `http://localhost:8080/chamados-funcionario?status=${abaAtiva.replace('-', ' ')}`,
-          { credentials: 'include' }
-        );
-        const data = await response.json();
-        setChamados(Array.isArray(data) ? data : []);
+        const data = await fetchChamados(abaAtiva.replace('-', ' '));
+        setChamados(data);
       }
     } catch (err) {
       console.error('Erro ao carregar chamados:', err);
       setChamados([]);
     }
   };
-
-  useEffect(() => {
-    atualizarChamados();
-  }, [abaAtiva]);
 
 
   function primeiraLetraMaiuscula(str) {
@@ -191,7 +219,7 @@ export default function ChamadosTecnico() {
   }
 
   // STATUS DOS CHAMAFOS
-  const statusAbas = ['pendente', 'em andamento', 'concluído', 'todos'];
+  const statusAbas = ['pendente', 'em andamento', 'concluido', 'todos'];
   // funcao p normalizar id
   const normalizarId = (texto) =>
     typeof texto === 'string' ? texto.toLowerCase().replace(/\s+/g, '-') : '';
@@ -252,28 +280,6 @@ export default function ChamadosTecnico() {
       alert(err.message);
     }
   };
-
-  // ver mensagens
-  const [mensagens, setMensagens] = useState([]);
-  const [loadingMensagens, setLoadingMensagens] = useState(false)
-
-  useEffect(() => {
-    const fetchMensagens = async () => {
-      if (!chamadoSelecionado?.id) return;
-
-      setLoadingMensagens(true);
-      try {
-        const res = await axios.get(`http://localhost:8080/chat?idChamado=${chamadoSelecionado.id}`);
-        setMensagens(res.data.mensagens);
-      } catch (err) {
-        console.error("Erro ao buscar mensagens do chamado", err);
-      } finally {
-        setLoadingMensagens(false);
-      }
-    };
-
-    fetchMensagens();
-  }, [chamadoSelecionado]);
 
   return (
     <>
@@ -442,7 +448,7 @@ export default function ChamadosTecnico() {
                               <p className="text-sm font-bold text-gray-800 dark:text-white">#{chamado.id}</p>
                             </div>
                           </div>
-                          {/* botão para pegar chamado, só se aba for pendente */}
+                          {/* botão para pegar chamado, só se aba htmlFor pendente */}
                           {chamado.status_chamado === 'pendente' && (
                             <button onClick={(e) => {
                               e.stopPropagation(); // evitar que abra o modal
@@ -568,72 +574,59 @@ export default function ChamadosTecnico() {
 
 
                   {/**mensagem */}
-                  {loadingMensagens ? (
+                  {mensagens === null ? (
                     <p className="text-gray-500">Carregando mensagens...</p>
-                  ) : (
-                    mensagens.map((msg, index) => {
-                      const isTecnico = msg.id_tecnico !== null;
-                      const data = new Date(msg.data_envio).toLocaleString();
+                  ) : (mensagens.map((msg, index) => {
+                    const isTecnico = msg.id_tecnico !== null;
+                    const data = new Date(msg.data_envio).toLocaleString();
 
-                      return (
-                        <div key={index} className={`flex items-start gap-2.5 ${isTecnico ? "justify-end" : ""}`}>
-                          {!isTecnico && (
-                            <img className="w-8 h-8 rounded-full" src="/images/usuario.png" alt="Usuário" />
-                          )}
-                          <div className={`flex flex-col gap-1 w-2/3 ${isTecnico ? "items-end text-right" : ""}`}>
-                            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                              <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                                {isTecnico ? "Técnico" : "Usuário"}
-                              </span>
-                              <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{data}</span>
-                            </div>
-                            <div className={`flex flex-col leading-1.5 p-4 border-gray-200 rounded-xl dark:bg-gray-700 ${isTecnico ? "bg-[#E6DAFF] rounded-s-xl rounded-ss-xl" : "bg-white rounded-e-xl rounded-es-xl"}`}>
-                              <p className="text-sm font-normal text-gray-900 dark:text-white">{msg.conteudo}</p>
-                            </div>
+                    return (
+                      <div key={index} className={`flex items-start gap-2.5 ${isTecnico ? "justify-end" : ""}`}>
+                        {!isTecnico && (
+                          <img className="w-8 h-8 rounded-full" src="/images/usuario.png" alt="Usuário" />
+                        )}
+                        <div className={`flex flex-col mb-4 gap-1 w-2/3 ${isTecnico ? "items-end text-right" : ""}`}>
+                          <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                              {isTecnico ? "Técnico" : "Usuário"}
+                            </span>
+                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{data}</span>
                           </div>
-                          {isTecnico && (
-                            <img className="w-8 h-8 rounded-full" src="/images/tecnico.png" alt="Técnico" />
-                          )}
+                          <div className={`flex flex-col leading-1.5 max-w-full p-4 border-gray-200 rounded-xl dark:bg-gray-700 ${isTecnico ? "bg-[#E6DAFF] rounded-s-xl rounded-ss-xl" : "bg-white rounded-e-xl rounded-es-xl"}`}>
+                            <p className="text-sm max-w-full font-normal text-left text-gray-900 dark:text-white break-all">{msg.conteudo}</p>
+                          </div>
                         </div>
-                      );
-                    })
+                        {isTecnico && (
+                          <img className="w-8 h-8 rounded-full" src="/images/tecnico.png" alt="Técnico" />
+                        )}
+                      </div>
+                    );
+                  })
                   )}
 
                   {/**input de mensagens */}
 
-                  <label htmlFor="conteudo" value={conteudo} onChange={(e) => setConteudo(e.target.value)} className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enviar mensagem</label>
-                  <textarea  id="conteudo" aria-describedby="helper-text-explanation" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Escrever Mensagem">
-                    
-                  </textarea>
-                  <button onClick={enviarMsg} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" >Enviar Mensagem</button>
-                  {/* <div class="flex items-start gap-2.5">
-                    <img class="w-8 h-8 rounded-full" src="/docs/images/people/profile-picture-3.jpg" alt="Jese image" />
-                    <div class="flex flex-col gap-1 w-2/3 ">
-                      <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                        <span class="text-sm font-semibold text-gray-900 dark:text-white">Bonnie Green</span>
-                        <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{chamadoSelecionado?.criado_em}</span>
-                      </div>
-                      <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-white rounded-e-xl rounded-es-xl dark:bg-gray-700">
-                        <p class="text-sm font-normal text-gray-900 dark:text-white">{chamadoSelecionado?.descricao}</p>
-                        <div>
-                          {chamadoSelecionado?.imagem ? (<img src={chamadoSelecionado.imagem} alt="Imagem do chamado" className="mt-6 rounded-lg w-full max-w-md" />) : (<p className="mt-6 text-sm font-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
-                        </div>
-                      </div>
+                  <label htmlFor="conteudo" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"></label>
+                  <form>
+                    <label htmlFor="chat" className="sr-only">Mensagem</label>
+                    <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
+                      <button type="button" className="inline-flex justify-center p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
+                        <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
+                          <path fill="currentColor" d="M13 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM7.565 7.423 4.5 14h11.518l-2.516-3.71L11 13 7.565 7.423Z" />
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 1H2a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z" />
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM7.565 7.423 4.5 14h11.518l-2.516-3.71L11 13 7.565 7.423Z" />
+                        </svg>
+                        <span className="sr-only">Enviar imagem</span>
+                      </button>
+                      <textarea id="conteudo" value={conteudo} onChange={(e) => setConteudo(e.target.value)} rows="1" className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Mensagem"></textarea>
+                      <button type="button" onClick={() => enviarMsg('tecnico')} className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-[#E6DAFF] dark:text-blue-500 dark:hover:bg-gray-600">
+                        <svg className="w-5 h-5 rotate-90 rtl:-rotate-90" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
+                          <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
+                        </svg>
+                        <span className="sr-only">Enviar mensagem</span>
+                      </button>
                     </div>
-                  </div>
-
-                  <div class="flex items-start gap-2.5 justify-end">
-                    <img class="w-8 h-8 rounded-full order-2" src="/docs/images/people/profile-picture-3.jpg" alt="Jese image" />
-                    <div class="flex flex-col gap-1 w-2/3 items-end text-right">
-                      <div class="flex items-center space-x-2 rtl:space-x-reverse flex-row">
-                        <span class="text-sm font-semibold text-gray-900 dark:text-white">Bonnie Green</span>
-                        <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{chamadoSelecionado?.criado_em}</span>
-                      </div>
-                      <div class="flex flex-col leading-1.5 p-4 border-gray-200 bg-[#E6DAFF] rounded-s-xl rounded-ss-xl dark:bg-gray-700">
-                        <p class="text-sm font-normal text-gray-900 dark:text-white">Resposta do tecnico</p>
-                      </div>
-                    </div>
-                  </div> */}
+                  </form>
                 </div>
 
                 {/* apontamentos */}
