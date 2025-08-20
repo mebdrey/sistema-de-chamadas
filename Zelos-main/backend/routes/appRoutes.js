@@ -1,6 +1,6 @@
 import express from "express";
 
-import { criarChamadoController, listarChamadosController, listarUsuariosPorSetorController, listarTiposServicoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, buscarChamadoComNomeUsuarioController, gerarRelatorioChamadosController, relatorioTipoController, relatorioTecnicosController, chamadosPorMesController } from "../controllers/ChamadoController.js";
+import { criarChamadoController, listarChamadosController, listarUsuariosPorSetorController, listarTiposServicoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, buscarChamadoComNomeUsuarioController, chamadosPorMesController, atribuirTecnicoController } from "../controllers/ChamadoController.js";
 import { obterPerfilUsuarioController, editarPerfilController } from "../controllers/PerfilController.js";
 import { upload } from '../middlewares/uploadMiddleware.js';
 import { garantirAutenticado } from '../middlewares/authMiddleware.js';
@@ -19,10 +19,11 @@ router.get('/usuarios-por-setor', garantirAutenticado, listarUsuariosPorSetorCon
 router.delete('/usuarios/:id', garantirAutenticado, excluirUsuarioController); // adm- excluir usuarios
 router.get('/todos-chamados', garantirAutenticado, listarTodosChamadosController) // ver todos os chamados registrados
 router.get('/contar-por-status', garantirAutenticado, contarChamadosPorStatusController);
-router.post('/relatorio-grafico', garantirAutenticado, gerarRelatorioChamadosController); // relatorio - chamamdos por mes
-router.get('/relatorios/chamados-por-tipo', garantirAutenticado, relatorioTipoController);
-router.get('/relatorios/atividades-tecnicos', garantirAutenticado, relatorioTecnicosController);
+// router.post('/relatorio-grafico', garantirAutenticado, gerarRelatorioChamadosController); // relatorio - chamamdos por mes
+// router.get('/relatorios/chamados-por-tipo', garantirAutenticado, relatorioTipoController);
+// router.get('/relatorios/atividades-tecnicos', garantirAutenticado, relatorioTecnicosController);
 router.get('/chamados-por-mes', garantirAutenticado, chamadosPorMesController);
+router.put("/atribuir-tecnico", garantirAutenticado, atribuirTecnicoController);
 
 // rotas usadas para tecnicos e auxiliares ------------------------------------------------------------------------------------------------------------------------------------------------
 // router.get('/chamados-disponiveis', listarChamadosDisponiveisController); 

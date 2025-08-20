@@ -28,7 +28,19 @@ export default function PrivateLayout({ children }) {
   // sidebar  fechada = true: largura 64px, aberta = false: largura 256px
   const [navFechada, setNavFechada] = useState(true);
   const sidebarWidth = navFechada ? 64 : 256; // valores em px correspondentes ao Tailwind
-  const mainWidth = `calc(100% - ${sidebarWidth}px)`;
+   // pega se está em tela grande (desktop) ou pequena (tablet pra baixo)
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 768); // md breakpoint
+    };
+    handleResize(); // roda na montagem
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const mainWidth = isDesktop ? `calc(100% - ${sidebarWidth}px)` : "100%";
 
   useEffect(() => {
     import('flowbite'); // garante que o JS rode só no cliente
@@ -36,38 +48,38 @@ export default function PrivateLayout({ children }) {
 
   // Busca dados do usuário logado via API
 
-  // useEffect(() => {
-  //   async function fetchUser() {
-  //     try {
-  //       const res = await fetch("http://localhost:8080/auth/check-auth", {
-  //         credentials: "include",
-  //       });
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch("http://localhost:8080/auth/check-auth", {
+          credentials: "include",
+        });
 
-  //       if (!res.ok) throw new Error("Não autenticado");
+        if (!res.ok) throw new Error("Não autenticado");
 
-  //       const data = await res.json();
-  //       setUser(data.user);
-  //       setUserType(data.user.funcao);
-  //     } catch (error) {
-  //       setUser(null);
-  //       setUserType(null);
-  //       router.push("/login");
-  //     } finally {
-  //       setLoading(false); 
-  //     }
-  //   }
+        const data = await res.json();
+        setUser(data.user);
+        setUserType(data.user.funcao);
+      } catch (error) {
+        setUser(null);
+        setUserType(null);
+        router.push("/login");
+      } finally {
+        setLoading(false); 
+      }
+    }
 
-  //   fetchUser();
-  // }, [router]);
+    fetchUser();
+  }, [router]);
 
-  // // bloqueia renderização enquanto checa autenticação
-  // if (loading) return null;
+  // bloqueia renderização enquanto checa autenticação
+  if (loading) return null;
 
   return (
     <>
     <ProtectedRoute>
       <SideBar user={user} setUser={setUser} userType={user?.funcao} navFechada={navFechada} setNavFechada={setNavFechada} />
-      <main className="w-full justify-items-end">
+      <main className="w-full bg-[#F8FAFB] justify-items-end">
         <section className="h-fit transition-all duration-300" style={{ width: mainWidth }}>
           {children}
         </section>

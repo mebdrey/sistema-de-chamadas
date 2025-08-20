@@ -148,7 +148,7 @@ const gerarRelatorio = async () => {
     <>
       <div className="flex justify-between">
         <div>
-          <p className="text-base poppins-regular text-gray-500">
+          <p className="text-lg poppins-medium text-gray-500 mb-3">
             Quantidade de chamados neste ano
           </p>
         </div>

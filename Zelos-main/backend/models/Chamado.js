@@ -107,7 +107,7 @@ export const excluirUsuario = async (usuarioId) => {
 
 // Técnicos (externo, apoio técnico, manutenção)
 export const verTecnicos = async () => {
-  const consulta = ` SELECT * FROM usuarios WHERE funcao = "tecnico" OR funcao = "apoio tecnico" OR funcao = "manutencao" `;
+  const consulta = ` SELECT * FROM usuarios WHERE funcao = "tecnico" OR funcao = "apoio_tecnico" OR funcao = "manutencao" `;
   try {
     return await readQuery(consulta);
   } catch (err) {
@@ -117,7 +117,7 @@ export const verTecnicos = async () => {
 
 // Auxiliares de limpeza
 export const verAuxiliaresLimpeza = async () => {
-  const consulta = 'SELECT * FROM usuarios WHERE funcao = "auxiliar de limpeza"';
+  const consulta = 'SELECT * FROM usuarios WHERE funcao = "auxiliar_limpeza"';
   try {
     return await readQuery(consulta);
   } catch (err) {
@@ -135,14 +135,53 @@ export const verClientes = async () => {
   }
 };
 
+// export const verChamados = async () => {
+//   try {
+//     return await readAll('chamados')
+//   } catch (error) {
+//     console.error('Erro ao listar chamados:', error);
+//     throw error;
+//   }
+// }
+
 export const verChamados = async () => {
+  const consulta = `
+    SELECT
+      c.*,
+      usuario.nome AS usuario_nome,
+      tecnico.nome AS tecnico_nome,
+      p.titulo AS tipo_titulo
+    FROM chamados c
+    LEFT JOIN usuarios usuario ON c.usuario_id = usuario.id
+    LEFT JOIN usuarios tecnico ON c.tecnico_id = tecnico.id
+    LEFT JOIN pool p ON c.tipo_id = p.id
+    ORDER BY c.criado_em DESC
+  `;
+
   try {
-    return await readAll('chamados')
+    const resultados = await readQuery(consulta);
+    return Array.isArray(resultados) ? resultados : [];
   } catch (error) {
-    console.error('Erro ao listar chamados:', error);
+    console.error("Erro ao listar chamados (verChamados):", error);
     throw error;
   }
-}
+};
+
+// Atualizar técnico/auxiliar em um chamado
+export const atribuirTecnico = async (chamadoId, tecnicoId) => {
+  try {
+    const affectedRows = await update(
+      "chamados",
+      { tecnico_id: tecnicoId },
+      `id = ${chamadoId}`
+    );
+
+    return affectedRows;
+  } catch (err) {
+    console.error("Erro no model atribuirTecnico:", err);
+    throw err;
+  }
+};
 
 export const contarChamadosPorStatus = async (modo) => {
   let sql = `
@@ -165,129 +204,129 @@ export const contarChamadosPorStatus = async (modo) => {
 };
 
 // relatorio 1 - chamados p mes
-export const gerarRelatorioChamados = async ({ options, series, prioridade }) => {
-  try {
-    const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
-    const page = await browser.newPage();
+// export const gerarRelatorioChamados = async ({ options, series, prioridade }) => {
+//   try {
+//     const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
+//     const page = await browser.newPage();
 
-    const html = `
-      <html>
-      <head>
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-          h1 { font-size: 20px; margin-bottom: 10px; }
-          p { font-size: 12px; margin: 4px 0; }
-        </style>
-      </head>
-      <body>
-        <h1>Relatório de Chamados por Mês</h1>
-        <p>Data de geração: ${new Date().toLocaleString('pt-BR')}</p>
-        <p>Prioridade selecionada: ${prioridade || 'Todas'}</p>
-        <div id="chart" style="width: 800px; height: 400px;"></div>
-        <script>
-          const options = ${JSON.stringify({ ...options, series })};
-          const chart = new ApexCharts(document.querySelector("#chart"), options);
-          chart.render();
-        </script>
-      </body>
-      </html>
-    `;
+//     const html = `
+//       <html>
+//       <head>
+//         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+//         <style>
+//           body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+//           h1 { font-size: 20px; margin-bottom: 10px; }
+//           p { font-size: 12px; margin: 4px 0; }
+//         </style>
+//       </head>
+//       <body>
+//         <h1>Relatório de Chamados por Mês</h1>
+//         <p>Data de geração: ${new Date().toLocaleString('pt-BR')}</p>
+//         <p>Prioridade selecionada: ${prioridade || 'Todas'}</p>
+//         <div id="chart" style="width: 800px; height: 400px;"></div>
+//         <script>
+//           const options = ${JSON.stringify({ ...options, series })};
+//           const chart = new ApexCharts(document.querySelector("#chart"), options);
+//           chart.render();
+//         </script>
+//       </body>
+//       </html>
+//     `;
 
-    await page.setContent(html, { waitUntil: 'domcontentloaded' });
+//     await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
-    // Espera até o gráfico estar presente no DOM
-    await page.waitForSelector('#chart svg', { timeout: 10000 });
+//     // Espera até o gráfico estar presente no DOM
+//     await page.waitForSelector('#chart svg', { timeout: 10000 });
 
-    // Captura screenshot do gráfico
-    const chartElement = await page.$('#chart');
-    const chartImage = await chartElement.screenshot({ type: 'png' });
+//     // Captura screenshot do gráfico
+//     const chartElement = await page.$('#chart');
+//     const chartImage = await chartElement.screenshot({ type: 'png' });
 
-    await browser.close();
+//     await browser.close();
 
-    // Gera PDF
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text('Relatório de Chamados por Mês', 10, 20);
-    doc.setFontSize(10);
-    doc.text(`Data de geração: ${new Date().toLocaleString('pt-BR')}`, 10, 28);
-    doc.text(`Prioridade selecionada: ${prioridade || 'Todas'}`, 10, 34);
-    doc.addImage(chartImage, 'PNG', 10, 40, 190, 100);
+//     // Gera PDF
+//     const doc = new jsPDF();
+//     doc.setFontSize(16);
+//     doc.text('Relatório de Chamados por Mês', 10, 20);
+//     doc.setFontSize(10);
+//     doc.text(`Data de geração: ${new Date().toLocaleString('pt-BR')}`, 10, 28);
+//     doc.text(`Prioridade selecionada: ${prioridade || 'Todas'}`, 10, 34);
+//     doc.addImage(chartImage, 'PNG', 10, 40, 190, 100);
 
-    return Buffer.from(doc.output('arraybuffer'));
-  } catch (err) {
-    console.error('Erro ao gerar relatorio de chamados:', err);
-    throw err;
-  }
-};
+//     return Buffer.from(doc.output('arraybuffer'));
+//   } catch (err) {
+//     console.error('Erro ao gerar relatorio de chamados:', err);
+//     throw err;
+//   }
+// };
 
 
-// relatorio 2 - chamados p tipo
-export const obterChamadosPorTipo = async (filtros) => {
-  const { inicio, fim, status_chamado, tecnico_id } = filtros;
+// // relatorio 2 - chamados p tipo
+// export const obterChamadosPorTipo = async (filtros) => {
+//   const { inicio, fim, status_chamado, tecnico_id } = filtros;
 
-  const condicoes = [];
-  const params = [];
+//   const condicoes = [];
+//   const params = [];
 
-  if (inicio && fim) {
-    condicoes.push("c.criado_em BETWEEN ? AND ?");
-    params.push(inicio, fim);
-  }
-  if (status_chamado) {
-    condicoes.push("c.status_chamado = ?");
-    params.push(status_chamado);
-  }
-  if (tecnico_id) {
-    condicoes.push("c.tecnico_id = ?");
-    params.push(tecnico_id);
-  }
+//   if (inicio && fim) {
+//     condicoes.push("c.criado_em BETWEEN ? AND ?");
+//     params.push(inicio, fim);
+//   }
+//   if (status_chamado) {
+//     condicoes.push("c.status_chamado = ?");
+//     params.push(status_chamado);
+//   }
+//   if (tecnico_id) {
+//     condicoes.push("c.tecnico_id = ?");
+//     params.push(tecnico_id);
+//   }
 
-  const where = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
+//   const where = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
 
-  const sql = `
-    SELECT p.titulo AS tipo_chamado, COUNT(*) AS total
-    FROM chamados c
-    JOIN pool p ON c.tipo_id = p.id
-    ${where}
-    GROUP BY p.titulo
-  `;
-  return await readQuery(sql, params);
-};
+//   const sql = `
+//     SELECT p.titulo AS tipo_chamado, COUNT(*) AS total
+//     FROM chamados c
+//     JOIN pool p ON c.tipo_id = p.id
+//     ${where}
+//     GROUP BY p.titulo
+//   `;
+//   return await readQuery(sql, params);
+// };
 
-// relatorio 3 - atividades dos tecnicos
-export const obterAtividadesTecnicos = async (filtros) => {
-  const { inicio, fim, status_chamado, tipo_id } = filtros;
+// // relatorio 3 - atividades dos tecnicos
+// export const obterAtividadesTecnicos = async (filtros) => {
+//   const { inicio, fim, status_chamado, tipo_id } = filtros;
 
-  const condicoes = ["c.tecnico_id IS NOT NULL"];
-  const params = [];
+//   const condicoes = ["c.tecnico_id IS NOT NULL"];
+//   const params = [];
 
-  if (inicio && fim) {
-    condicoes.push("c.criado_em BETWEEN ? AND ?");
-    params.push(inicio, fim);
-  }
-  if (status_chamado) {
-    condicoes.push("c.status_chamado = ?");
-    params.push(status_chamado);
-  }
-  if (tipo_id) {
-    condicoes.push("c.tipo_id = ?");
-    params.push(tipo_id);
-  }
+//   if (inicio && fim) {
+//     condicoes.push("c.criado_em BETWEEN ? AND ?");
+//     params.push(inicio, fim);
+//   }
+//   if (status_chamado) {
+//     condicoes.push("c.status_chamado = ?");
+//     params.push(status_chamado);
+//   }
+//   if (tipo_id) {
+//     condicoes.push("c.tipo_id = ?");
+//     params.push(tipo_id);
+//   }
 
-  const where = `WHERE ${condicoes.join(" AND ")}`;
+//   const where = `WHERE ${condicoes.join(" AND ")}`;
 
-  const sql = `
-    SELECT u.nome AS tecnico,
-           COUNT(*) AS total_chamados,
-           ROUND(AVG(TIMESTAMPDIFF(HOUR, c.criado_em, c.atualizado_em)), 1) AS tempo_medio_resolucao_horas,
-           MAX(c.status_chamado) AS status_mais_recente
-    FROM chamados c
-    JOIN usuarios u ON c.tecnico_id = u.id
-    ${where}
-    GROUP BY u.id
-  `;
-  return await readQuery(sql, params);
-};
+//   const sql = `
+//     SELECT u.nome AS tecnico,
+//            COUNT(*) AS total_chamados,
+//            ROUND(AVG(TIMESTAMPDIFF(HOUR, c.criado_em, c.atualizado_em)), 1) AS tempo_medio_resolucao_horas,
+//            MAX(c.status_chamado) AS status_mais_recente
+//     FROM chamados c
+//     JOIN usuarios u ON c.tecnico_id = u.id
+//     ${where}
+//     GROUP BY u.id
+//   `;
+//   return await readQuery(sql, params);
+// };
 
 export async function obterChamadosPorMesAno(prioridade = null) {
   let sql = `

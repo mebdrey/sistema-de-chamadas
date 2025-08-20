@@ -1,6 +1,6 @@
 
 
-import { criarNotificacao, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorTipo, obterAtividadesTecnicos, obterChamadosPorMesAno, gerarRelatorioChamados } from "../models/Chamado.js";
+import { criarNotificacao, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico } from "../models/Chamado.js";
 
 // busca nome do usuario com base no ID
 export const buscarChamadoComNomeUsuarioController = async (req, res) => {
@@ -199,6 +199,27 @@ export const listarTodosChamadosController = async (req, res) => {
   }
 }
 
+export const atribuirTecnicoController = async (req, res) => {
+  const { chamadoId, tecnicoId } = req.body;
+
+  if (!chamadoId || !tecnicoId) {
+    return res.status(400).json({ error: "chamadoId e tecnicoId são obrigatórios" });
+  }
+
+  try {
+    const affectedRows = await atribuirTecnico(chamadoId, tecnicoId);
+
+    if (affectedRows === 0) {
+      return res.status(404).json({ error: "Chamado não encontrado" });
+    }
+
+    res.status(200).json({ message: "Técnico/Auxiliar atribuído com sucesso" });
+  } catch (err) {
+    console.error("Erro no controller atribuirTecnicoController:", err);
+    res.status(500).json({ error: "Erro ao atribuir técnico/auxiliar" });
+  }
+};
+
 export const contarChamadosPorStatusController = async (req, res) => {
   const { modo } = req.query;
 
@@ -233,60 +254,60 @@ export const contarChamadosPorStatusController = async (req, res) => {
 };
 
 
-const extrairFiltros = (query) => ({
-  inicio: query.inicio || null,
-  fim: query.fim || null,
-  tipo_id: query.tipo_id || null,
-  tecnico_id: query.tecnico_id || null,
-  status_chamado: query.status_chamado || null,
-});
+// const extrairFiltros = (query) => ({
+//   inicio: query.inicio || null,
+//   fim: query.fim || null,
+//   tipo_id: query.tipo_id || null,
+//   tecnico_id: query.tecnico_id || null,
+//   status_chamado: query.status_chamado || null,
+// });
 
-export const gerarRelatorioChamadosController = async (req, res) => {
-  const { options, series, prioridade } = req.body;
-
-
-  if (!options || !series) {
-    return res.status(400).json({ erro: 'Dados insuficientes para gerar o relatório.' });
-  }
+// export const gerarRelatorioChamadosController = async (req, res) => {
+//   const { options, series, prioridade } = req.body;
 
 
-  try {
-    const pdfBuffer = await gerarRelatorioChamados({ options, series, prioridade });
+//   if (!options || !series) {
+//     return res.status(400).json({ erro: 'Dados insuficientes para gerar o relatório.' });
+//   }
 
 
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename="relatorio-chamados.pdf"',
-    });
+//   try {
+//     const pdfBuffer = await gerarRelatorioChamados({ options, series, prioridade });
 
 
-    res.send(pdfBuffer);
-  } catch (error) {
-    res.status(500).json({ erro: 'Erro interno ao gerar o relatório.' });
-  }
-};
+//     res.set({
+//       'Content-Type': 'application/pdf',
+//       'Content-Disposition': 'attachment; filename="relatorio-chamados.pdf"',
+//     });
 
-export const relatorioTipoController = async (req, res) => {
-  try {
-    const filtros = extrairFiltros(req.query);
-    const dados = await obterChamadosPorTipo(filtros);
-    res.json(dados);
-  } catch (error) {
-    console.error('Erro ao gerar relatório de tipo:', error);
-    res.status(500).json({ erro: 'Erro ao gerar relatório de tipo' });
-  }
-};
 
-export const relatorioTecnicosController = async (req, res) => {
-  try {
-    const filtros = extrairFiltros(req.query);
-    const dados = await obterAtividadesTecnicos(filtros);
-    res.json(dados);
-  } catch (error) {
-    console.error('Erro ao gerar relatório de técnicos:', error);
-    res.status(500).json({ erro: 'Erro ao gerar relatório de técnicos' });
-  }
-};
+//     res.send(pdfBuffer);
+//   } catch (error) {
+//     res.status(500).json({ erro: 'Erro interno ao gerar o relatório.' });
+//   }
+// };
+
+// export const relatorioTipoController = async (req, res) => {
+//   try {
+//     const filtros = extrairFiltros(req.query);
+//     const dados = await obterChamadosPorTipo(filtros);
+//     res.json(dados);
+//   } catch (error) {
+//     console.error('Erro ao gerar relatório de tipo:', error);
+//     res.status(500).json({ erro: 'Erro ao gerar relatório de tipo' });
+//   }
+// };
+
+// export const relatorioTecnicosController = async (req, res) => {
+//   try {
+//     const filtros = extrairFiltros(req.query);
+//     const dados = await obterAtividadesTecnicos(filtros);
+//     res.json(dados);
+//   } catch (error) {
+//     console.error('Erro ao gerar relatório de técnicos:', error);
+//     res.status(500).json({ erro: 'Erro ao gerar relatório de técnicos' });
+//   }
+// };
 
 export const chamadosPorMesController = async (req, res) => {
   const { prioridade } = req.query;
