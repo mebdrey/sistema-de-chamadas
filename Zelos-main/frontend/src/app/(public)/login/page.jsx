@@ -55,8 +55,8 @@ export default function Login() {
         const funcao = data.user.funcao?.toLowerCase();
 
         if (funcao === 'admin') {
-          router.push('/admin/chamados');
-        } else if (funcao === 'tecnico' || funcao === 'auxiliar de limpeza') {
+          router.push('/admin/dashboard');
+        } else if (funcao === 'tecnico' || funcao === 'auxiliar_limpeza') {
           router.push('/tecnico/chamados');
         } else {
           router.push('/usuario/chamados');
@@ -92,12 +92,12 @@ export default function Login() {
             <form onSubmit={login}>
               <div className="relative z-0 w-full mb-5 group">
                 <input type="nuber" name="floating_num" id="floating_num" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-nonedark:focus:border-[#7F56D8] focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer poppins-regular my-9" placeholder=" " required />
-                <label htmlFor="floating_num" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-8 scale-75 top-2.5 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-[#7F56D8] peer-focus:dark:text-[#7F56D8] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 poppins-regular">Username</label>
+                <label htmlFor="floating_num" className="peer-focus:poppins-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-8 scale-75 top-2.5 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-[#7F56D8] peer-focus:dark:text-[#7F56D8] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 poppins-regular">Username</label>
               </div>
 
               <div className="relative z-0 w-full mb-5 group">
                 <input type="password" name="floating_password" id="floating_password" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:focus:border-[#7F56D8] focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer poppins-regular my-9" placeholder=" " required />
-                <label htmlFor="floating_password" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-8 scale-75 top-2.5 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-[#7F56D8] peer-focus:dark:text-[#7F56D8] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 poppins-regular" >Senha</label>
+                <label htmlFor="floating_password" className="peer-focus:poppins-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-8 scale-75 top-2.5 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-[#7F56D8] peer-focus:dark:text-[#7F56D8] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 poppins-regular" >Senha</label>
               </div>
               {erro && (
                 <p className="text-red-500 text-sm mb-10 poppins-regular">{erro}</p>
@@ -111,7 +111,7 @@ export default function Login() {
               </div>
 
               {/* botao de entrar */}
-              <button type="submit" disabled={loading} className="text-white bg-[#7F56D8] hover:bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm w-full px-5 py-4 text-center dark:bg-[#7F56D8] dark:hover:bg-[#7F56D8] dark:focus:ring-[#7F56D8] poppins-regular px-18"> {loading ? (
+              <button type="submit" disabled={loading} className="text-white bg-[#7F56D8] hover:bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-full text-sm w-full px-5 py-4 text-center dark:bg-[#7F56D8] dark:hover:bg-[#7F56D8] dark:focus:ring-[#7F56D8] poppins-regular px-18"> {loading ? (
                 <div className="flex items-center justify-center gap-1 h-4">
                   <div className="h-1 w-1 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></div>
                   <div className="h-1 w-1 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>

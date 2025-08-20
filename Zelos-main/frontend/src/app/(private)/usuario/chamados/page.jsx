@@ -171,7 +171,7 @@ export default function ChamadosCliente() {
                     </div>
                     <section>
                         <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700">
-                            <ul className="flex flex-wrap -mb-px text-sm font-medium text-center">
+                            <ul className="flex flex-wrap -mb-px text-sm poppins-medium text-center">
                                 {/* Tabs */}
                                 {statusAbas.map((status) => {
                                     const statusId = normalizarId(status)
@@ -185,12 +185,12 @@ export default function ChamadosCliente() {
                                 })}
                             </ul>
                             {/* modal - criar chamado*/}
-                            <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" className=" hidden md:flex flex-row items-center block text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 h-fit text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button"><svg className="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>Novo chamado</button>
+                            <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" className=" hidden md:flex flex-row items-center block text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-5 py-2.5 h-fit text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button"><svg className="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>Novo chamado</button>
                             <div id="crud-modal" tabIndex="-1" aria-hidden="true" className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
                                 <div className="relative p-4 w-full max-w-md max-h-full">
                                     <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
                                         <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
-                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Novo chamado</h3>
+                                            <h3 className="text-lg poppins-semibold text-gray-900 dark:text-white">Novo chamado</h3>
                                             <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal">
                                                 <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
@@ -201,11 +201,11 @@ export default function ChamadosCliente() {
                                         <form className="p-4 md:p-5" onSubmit={criarChamado}>
                                             <div className="grid gap-4 mb-4 grid-cols-2">
                                                 <div className="col-span-2">
-                                                    <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Assunto</label>
+                                                    <label htmlFor="name" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Assunto</label>
                                                     <input type="text" name="name" id="name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Digite o assunto" required="" value={assunto} onChange={(e) => setAssunto(e.target.value)} />
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="servico" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipo de serviço</label>
+                                                    <label htmlFor="servico" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Tipo de serviço</label>
                                                     <select id="servico" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" value={tipoSelecionadoId} onChange={(e) => setTipoSelecionadoId(e.target.value)} required>
                                                         <option value="">Selecione tipo de serviço</option>
                                                         {tiposServico.map(tipo => (
@@ -215,7 +215,7 @@ export default function ChamadosCliente() {
                                                         ))}
                                                     </select></div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="prioridade" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipo de prioridade</label>
+                                                    <label htmlFor="prioridade" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Tipo de prioridade</label>
                                                     <select id="prioridade" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" value={prioridade} onChange={(e) => setPrioridade(e.target.value)} required>
                                                         <option value="">Selecione tipo de prioridade</option>
                                                         {tiposPrioridade.map(tipo => (
@@ -226,15 +226,15 @@ export default function ChamadosCliente() {
                                                     </select>
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="patrimonio" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Patrimônio</label>
+                                                    <label htmlFor="patrimonio" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Patrimônio</label>
                                                     <input type="text" name="patrimonio" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Digite o número de patrimônio" required="" value={patrimonio} onChange={(e) => setPatrimonio(e.target.value)} />
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descrição</label>
+                                                    <label htmlFor="description" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Descrição</label>
                                                     <textarea id="description" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Escreva a descrição do chamado" value={descricao} onChange={(e) => setDescricao(e.target.value)}></textarea>
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="file" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enviar imagem</label>
+                                                    <label htmlFor="file" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Enviar imagem</label>
                                                     <div className="flex items-center justify-center w-1/2 h-50">
                                                         <label htmlFor="dropzone-file" className="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 overflow-hidden">
                                                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -246,7 +246,7 @@ export default function ChamadosCliente() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button type="submit" className="text-white inline-flex items-center bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Criar chamado</button>
+                                            <button type="submit" className="text-white inline-flex items-center bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Criar chamado</button>
                                         </form>
                                     </div>
                                 </div>
@@ -283,13 +283,13 @@ export default function ChamadosCliente() {
 
                                                 <div key={chamado.id || `${chamado.assunto}-${Math.random()}`} className="border-b last:border-0 bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
                                                     <div className="px-4 pt-4 md:px-5 md:pt-5">
-                                                        <h3 className="text-lg font-bold text-gray-800 dark:text-white">Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}</h3>
-                                                        <h6 className="text-base font-bold text-gray-800 dark:text-white">{chamado.assunto}</h6>
+                                                        <h3 className="text-lg poppins-bold text-gray-800 dark:text-white">Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}</h3>
+                                                        <h6 className="text-base poppins-bold text-gray-800 dark:text-white">{chamado.assunto}</h6>
                                                         <p className="mt-2 text-gray-500 dark:text-neutral-400">{chamado.descricao}</p>
                                                     </div>
                                                     <div className="flex flex-row md:flex-col justify-between items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 mt-4 dark:bg-neutral-900 dark:border-neutral-700">
                                                         <p className="text-sm text-gray-500 dark:text-neutral-500">Criado em {new Date(chamado.criado_em).toLocaleString("pt-BR")}</p>
-                                                        {/* <button className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600"
+                                                        {/* <button className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600"
                                                             href="#" >Ver relatório
                                                             <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
                                                                 <path d="m9 18 6-6-6-6"></path>
@@ -297,7 +297,7 @@ export default function ChamadosCliente() {
                                                         </button> */}
 
                                                         {chamado.status_chamado === "em andamento" ? (
-                                                            <button className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-[#7F56D8] decoration-2 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">
+                                                            <button className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-[#7F56D8] decoration-2 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">
                                                                 Acompanhar apontamentos
                                                                 <svg
                                                                     className="shrink-0 size-4"
@@ -315,7 +315,7 @@ export default function ChamadosCliente() {
                                                                 </svg>
                                                             </button>
                                                         ) : chamado.status_chamado === "concluido" ? (
-                                                            <button className="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">
+                                                            <button className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">
                                                                 Ver relatório
                                                                 <svg
                                                                     className="shrink-0 size-4"
@@ -404,7 +404,7 @@ export default function ChamadosCliente() {
                                 <div className="relative bg-white shadow-sm dark:bg-gray-700 h-full">
                                     {/* header */}
                                     <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
-                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                        <h3 className="text-lg poppins-semibold text-gray-900 dark:text-white">
                                             Novo chamado
                                         </h3>
                                         <button
@@ -437,11 +437,11 @@ export default function ChamadosCliente() {
                                         <form className="p-4 md:p-5" onSubmit={criarChamado}>
                                             <div className="grid gap-4 mb-4 grid-cols-2">
                                                 <div className="col-span-2">
-                                                    <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Assunto</label>
+                                                    <label htmlFor="name" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Assunto</label>
                                                     <input type="text" name="name" id="name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Digite o assunto" required="" value={assunto} onChange={(e) => setAssunto(e.target.value)} />
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="servico" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipo de serviço</label>
+                                                    <label htmlFor="servico" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Tipo de serviço</label>
                                                     <select id="servico" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" value={tipoSelecionadoId} onChange={(e) => setTipoSelecionadoId(e.target.value)} required>
                                                         <option value="">Selecione tipo de serviço</option>
                                                         {tiposServico.map(tipo => (
@@ -451,7 +451,7 @@ export default function ChamadosCliente() {
                                                         ))}
                                                     </select></div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="prioridade" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipo de prioridade</label>
+                                                    <label htmlFor="prioridade" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Tipo de prioridade</label>
                                                     <select id="prioridade" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" value={prioridade} onChange={(e) => setPrioridade(e.target.value)} required>
                                                         <option value="">Selecione tipo de prioridade</option>
                                                         {tiposPrioridade.map(tipo => (
@@ -462,15 +462,15 @@ export default function ChamadosCliente() {
                                                     </select>
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="patrimonio" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Patrimônio</label>
+                                                    <label htmlFor="patrimonio" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Patrimônio</label>
                                                     <input type="text" name="patrimonio" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Digite o número de patrimônio" required="" value={patrimonio} onChange={(e) => setPatrimonio(e.target.value)} />
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descrição</label>
+                                                    <label htmlFor="description" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Descrição</label>
                                                     <textarea id="description" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Escreva a descrição do chamado" value={descricao} onChange={(e) => setDescricao(e.target.value)}></textarea>
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="file" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enviar imagem</label>
+                                                    <label htmlFor="file" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Enviar imagem</label>
                                                     <div className="flex items-center justify-center w-1/2 h-50">
                                                         <label htmlFor="dropzone-file" className="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 overflow-hidden">
                                                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -482,7 +482,7 @@ export default function ChamadosCliente() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button type="submit" className="text-white inline-flex items-center bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Criar chamado</button>
+                                            <button type="submit" className="text-white inline-flex items-center bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Criar chamado</button>
                                         </form>
                                     </div>
 

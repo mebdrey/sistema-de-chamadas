@@ -95,7 +95,7 @@ return palavras
 
                 <div className="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 p-4 bg-white dark:bg-gray-900">
                     <div className="relative inline-block text-left">
-                        {/* <button onClick={() => setDropdownAberto(!dropdownAberto)} className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" >
+                        {/* <button onClick={() => setDropdownAberto(!dropdownAberto)} className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" >
                                 Action
                                 <svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
@@ -124,7 +124,7 @@ return palavras
                                 </div>
                             )} */}
 
-                        <button id="dropdownHelperButton" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
+                        <button id="dropdownHelperButton" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
                             <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" >
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                             </svg>
@@ -143,7 +143,7 @@ return palavras
                                                     />
                                                 </div>
                                                 <div className="ms-2 text-sm">
-                                                    <label htmlFor={`checkbox-${nomeSetor}`} className="font-medium text-gray-900 dark:text-gray-300 capitalize">
+                                                    <label htmlFor={`checkbox-${nomeSetor}`} className="poppins-medium text-gray-900 dark:text-gray-300 capitalize">
                                                         {nomeSetor}
                                                     </label>
                                                 </div>
@@ -178,7 +178,7 @@ return palavras
 
 
                 {/* Dropdown botão */}
-                {/* <button id="dropdownHelperButton" data-dropdown-toggle="dropdownHelper" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
+                {/* <button id="dropdownHelperButton" data-dropdown-toggle="dropdownHelper" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
         <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" >
           <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
         </svg>
@@ -208,7 +208,7 @@ return palavras
                   <div className="ms-2 text-sm">
                     <label
                       htmlFor={`checkbox-${nomeSetor}`}
-                      className="font-medium text-gray-900 dark:text-gray-300 capitalize"
+                      className="poppins-medium text-gray-900 dark:text-gray-300 capitalize"
                     >
                       {nomeSetor}
                     </label>
@@ -241,7 +241,7 @@ return palavras
                             )}
                             {usuariosFiltrados.map((usuario) => (
                                 <tr key={usuario.id} className="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600" >
-                                    <th scope="row" className="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white" >
+                                    <th scope="row" className="flex items-center px-6 py-4 poppins-medium text-gray-900 whitespace-nowrap dark:text-white" >
                                         <div className="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
                                             {usuario.foto_url ? (
                                                 <img className="w-10 h-10 rounded-full object-cover" src={usuario.foto_url} alt={usuario.nome} />
@@ -267,7 +267,7 @@ return palavras
                                     </td>
 
                                     <td className="relative">
-                                        <button onClick={() => setDropdownAbertoId((prev) => (prev === usuario.id ? null : usuario.id))} className="inline-flex items-center p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600" type="button" aria-expanded={dropdownAbertoId === usuario.id} aria-haspopup="true" >
+                                        <button onClick={() => setDropdownAbertoId((prev) => (prev === usuario.id ? null : usuario.id))} className="inline-flex items-center p-2 text-sm poppins-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600" type="button" aria-expanded={dropdownAbertoId === usuario.id} aria-haspopup="true" >
                                             <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3" >
                                                 <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
                                             </svg>

@@ -30,7 +30,7 @@
 //                             <button onClick={(e) => {
 //                                 e.stopPropagation(); // previne o fechamento imediato
 //                                 setShowDropdown(!showDropdown);
-//                             }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" > Ordenar por
+//                             }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" > Ordenar por
 //                                 <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" >
 //                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
 //                                 </svg>
@@ -40,7 +40,7 @@
 //                                 {opcoesOrdenacao.map((opcao, index) => (
 //                                     <div key={index} className="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
 //                                         <input id={`ordenar-radio-${index}`} type="radio" value={opcao.value} name="ordenar" checked={ordenarPor === opcao.value} onChange={() => setOrdenarPor(opcao.value)} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
-//                                         <label htmlFor={`ordenar-radio-${index}`} className="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">
+//                                         <label htmlFor={`ordenar-radio-${index}`} className="w-full ms-2 text-sm poppins-medium text-gray-900 rounded-sm dark:text-gray-300">
 //                                             {opcao.label}
 //                                         </label>
 //                                     </div>
@@ -79,7 +79,7 @@ const OrdenarPor = ({ ordenarPor, setOrdenarPor }) => {
           e.stopPropagation();
           setShowDropdown(!showDropdown);
         }}
-        className="text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        className="text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         type="button"
       >
         Ordenar por
@@ -102,7 +102,7 @@ const OrdenarPor = ({ ordenarPor, setOrdenarPor }) => {
             />
             <label
               htmlFor={`ordenar-radio-${index}`}
-              className="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300"
+              className="w-full ms-2 text-sm poppins-medium text-gray-900 rounded-sm dark:text-gray-300"
             >
               {opcao.label}
             </label>

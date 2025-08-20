@@ -299,7 +299,7 @@ export default function ChamadosTecnico() {
 
               {/* Dropdown de Prioridade */}
               <div className="relative inline-block">
-                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-8 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" id="dropdownPrioridadeButton">
+                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-8 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" id="dropdownPrioridadeButton">
                   Prioridade
                   <svg className="w-2.5 h-2.5 ms-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
@@ -327,7 +327,7 @@ export default function ChamadosTecnico() {
                                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
                             </div>
                             <div className="ms-2 text-sm">
-                              <label htmlFor={`prioridade-checkbox-${index}`} className="font-medium text-gray-900 dark:text-gray-300">
+                              <label htmlFor={`prioridade-checkbox-${index}`} className="poppins-medium text-gray-900 dark:text-gray-300">
                                 {prioridade.label}
                               </label>
                             </div>
@@ -356,7 +356,7 @@ export default function ChamadosTecnico() {
           </div>
           <section>
             <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700">
-              <ul className="flex flex-wrap -mb-px text-sm font-medium text-center">
+              <ul className="flex flex-wrap -mb-px text-sm poppins-medium text-center">
                 {/* Tabs */}
                 {statusAbas.map((status) => {
                   const statusId = normalizarId(status)
@@ -422,17 +422,17 @@ export default function ChamadosTecnico() {
                       chamadosFiltrados.map((chamado) => (
                         <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className=" p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:border-t-blue-500 dark:shadow-neutral-700/70 cursor-pointer">
                           <div className="flex items-center gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:border-neutral-700">
-                            <h3 className="text-base font-bold text-gray-800 dark:text-white">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
-                            <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-full text-sm px-5 py-1 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
+                            <h3 className="text-base poppins-bold text-gray-800 dark:text-white">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
+                            <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs text-gray-500 dark:text-neutral-500">Usuário</p>
-                              <p className="text-sm font-bold text-gray-800 dark:text-white">Nome usuario</p>
+                              <p className="text-sm poppins-bold text-gray-800 dark:text-white">Nome usuario</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 dark:text-neutral-500">Criado em</p>
-                              <p className="text-sm font-bold text-gray-800 dark:text-white">{" "} {new Date(chamado.criado_em).toLocaleDateString("pt-BR", {
+                              <p className="text-sm poppins-bold text-gray-800 dark:text-white">{" "} {new Date(chamado.criado_em).toLocaleDateString("pt-BR", {
                                 month: "short", // abreviação do mês
                                 day: "numeric", // dia
                                 year: "numeric", // ano
@@ -441,11 +441,11 @@ export default function ChamadosTecnico() {
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 dark:text-neutral-500">Prioridade</p>
-                              <p className="text-sm font-bold text-gray-800 dark:text-white">{chamado.prioridade}</p>
+                              <p className="text-sm poppins-bold text-gray-800 dark:text-white">{chamado.prioridade}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 dark:text-neutral-500">Chamado ID</p>
-                              <p className="text-sm font-bold text-gray-800 dark:text-white">#{chamado.id}</p>
+                              <p className="text-sm poppins-bold text-gray-800 dark:text-white">#{chamado.id}</p>
                             </div>
                           </div>
                           {/* botão para pegar chamado, só se aba htmlFor pendente */}
@@ -467,17 +467,17 @@ export default function ChamadosTecnico() {
             </div>
             <div className="flex flex-col items-center mt-15 mb-8">
               <span className="text-sm text-gray-700 dark:text-gray-400 mb-3">
-                Mostrando <span className="font-semibold text-gray-900 dark:text-white">1</span> a <span className="font-semibold text-gray-900 dark:text-white">10</span> de <span className="font-semibold text-gray-900 dark:text-white">100</span> registros
+                Mostrando <span className="poppins-semibold text-gray-900 dark:text-white">1</span> a <span className="poppins-semibold text-gray-900 dark:text-white">10</span> de <span className="poppins-semibold text-gray-900 dark:text-white">100</span> registros
               </span>
 
               <div className="flex">
-                <a href="#" className="flex items-center justify-center px-3 h-8 me-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                <a href="#" className="flex items-center justify-center px-3 h-8 me-3 text-sm poppins-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
                   <svg className="w-3.5 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5H1m0 0 4 4M1 5l4-4" />
                   </svg>
                   Anterior
                 </a>
-                <a href="#" className="flex items-center justify-center px-3 h-8 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                <a href="#" className="flex items-center justify-center px-3 h-8 text-sm poppins-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
                   Próximo
                   <svg className="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
@@ -489,7 +489,7 @@ export default function ChamadosTecnico() {
 
             {/* Drawer */}
             {/* <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen p-4 overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-white w-80 dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`}  tabIndex="-1" aria-labelledby="drawer-right-label" >
-              <h5 id="drawer-right-label" className="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400">
+              <h5 id="drawer-right-label" className="inline-flex items-center mb-4 text-base poppins-semibold text-gray-500 dark:text-gray-400">
                 <svg className="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
                 </svg>Detalhes do chamado</h5>
@@ -501,32 +501,32 @@ export default function ChamadosTecnico() {
               </button>
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Usuário</p>
-                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.nome_usuario || 'Nome não encontrado'}</p>
+                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.nome_usuario || 'Nome não encontrado'}</p>
               </div>
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Assunto</p>
-                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.assunto}</p>
+                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.assunto}</p>
               </div>
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Descrição</p>
-                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.descricao}</p>
+                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.descricao}</p>
               </div>
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
-                {chamadoSelecionado?.imagem ? ( <img src={chamadoSelecionado.imagem} alt="Imagem do chamado" className="mb-6 rounded-lg w-full max-w-md" /> ) : ( <p className="mb-6 text-sm font-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
+                {chamadoSelecionado?.imagem ? ( <img src={chamadoSelecionado.imagem} alt="Imagem do chamado" className="mb-6 rounded-lg w-full max-w-md" /> ) : ( <p className="mb-6 text-sm poppins-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
               </div>
              
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Prioridade</p>
-                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.prioridade}</p>
+                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.prioridade}</p>
               </div>
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Chamado ID</p>
-                <p className="mb-6 text-sm font-bold text-gray-800 dark:text-gray-400">#{chamadoSelecionado?.id}</p>
+                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">#{chamadoSelecionado?.id}</p>
               </div>
 
               <div className="">
-                <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Pegar chamado<svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                <button className="inline-flex items-center px-4 py-2 text-sm poppins-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Pegar chamado<svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
                   </svg>
                 </button>
@@ -536,7 +536,7 @@ export default function ChamadosTecnico() {
             {/**drawer */}
             <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-[#F8FAFB] w-full dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
               <div className="w-full p-4 bg-white">
-                <h5 id="drawer-right-label" className="inline-flex items-center text-base font-semibold text-gray-500 dark:text-gray-400">
+                <h5 id="drawer-right-label" className="inline-flex items-center text-base poppins-semibold text-gray-500 dark:text-gray-400">
                   <svg className="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
                   </svg>Detalhes do chamado
@@ -555,20 +555,20 @@ export default function ChamadosTecnico() {
                   <div className="grid grid-cols-2 mb-10">
                     <div>
                       <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Usuário</p>
-                      <p className="mb-6 text-lg font-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.nome_usuario || 'Nome não encontrado'}</p>
+                      <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.nome_usuario || 'Nome não encontrado'}</p>
                     </div>
                     <div>
                       <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Assunto</p>
-                      <p className="mb-6 text-lg font-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.assunto}</p>
+                      <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.assunto}</p>
                     </div>
 
                     <div>
                       <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Prioridade</p>
-                      <p className="mb-6 text-lg font-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.prioridade}</p>
+                      <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.prioridade}</p>
                     </div>
                     <div>
                       <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Chamado ID</p>
-                      <p className="mb-6 text-lg font-bold text-gray-800 dark:text-gray-400">#{chamadoSelecionado?.id}</p>
+                      <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">#{chamadoSelecionado?.id}</p>
                     </div>
                   </div>
 
@@ -587,13 +587,13 @@ export default function ChamadosTecnico() {
                         )}
                         <div className={`flex flex-col mb-4 gap-1 w-2/3 ${isTecnico ? "items-end text-right" : ""}`}>
                           <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                            <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                            <span className="text-sm poppins-semibold text-gray-900 dark:text-white">
                               {isTecnico ? "Técnico" : "Usuário"}
                             </span>
-                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{data}</span>
+                            <span className="text-sm poppins-regular text-gray-500 dark:text-gray-400">{data}</span>
                           </div>
                           <div className={`flex flex-col leading-1.5 max-w-full p-4 border-gray-200 rounded-xl dark:bg-gray-700 ${isTecnico ? "bg-[#E6DAFF] rounded-s-xl rounded-ss-xl" : "bg-white rounded-e-xl rounded-es-xl"}`}>
-                            <p className="text-sm max-w-full font-normal text-left text-gray-900 dark:text-white break-all">{msg.conteudo}</p>
+                            <p className="text-sm max-w-full poppins-regular text-left text-gray-900 dark:text-white break-all">{msg.conteudo}</p>
                           </div>
                         </div>
                         {isTecnico && (
@@ -606,7 +606,7 @@ export default function ChamadosTecnico() {
 
                   {/**input de mensagens */}
 
-                  <label htmlFor="conteudo" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"></label>
+                  <label htmlFor="conteudo" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white"></label>
                   <form>
                     <label htmlFor="chat" className="sr-only">Mensagem</label>
                     <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
@@ -632,7 +632,7 @@ export default function ChamadosTecnico() {
                 {/* apontamentos */}
                 <div className="w-1/3 bg-white p-10 h-full">
                   <div className="w-full px-4 py-8">
-                    <h1 className="text-2xl font-bold mb-6">Apontamentos do chamado #{chamadoSelecionado?.id}</h1>
+                    <h1 className="text-2xl poppins-bold mb-6">Apontamentos do chamado #{chamadoSelecionado?.id}</h1>
 
                     {/* Timeline */}
                     <ol className="relative border-s border-gray-300 mb-10">
@@ -642,7 +642,7 @@ export default function ChamadosTecnico() {
                           <time className="mb-1 text-sm text-gray-500">
                             {new Date(a.comeco).toLocaleString('pt-BR')}
                           </time>
-                          <h3 className="text-lg font-semibold">
+                          <h3 className="text-lg poppins-semibold">
                             {a.fim ? 'Apontamento finalizado' : 'Apontamento em andamento'}
                           </h3>
                           <p className="text-gray-700">{a.descricao}</p>
@@ -658,7 +658,7 @@ export default function ChamadosTecnico() {
                     {/* Formulário */}
                     {!apontamentoAtivo && (
                       <div className="mb-6">
-                        <label htmlFor="descricao" className="block mb-2 text-sm font-medium text-gray-900">
+                        <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900">
                           Nova atividade realizada
                         </label>
                         <textarea

@@ -1,6 +1,6 @@
 
 
-import { criarNotificacao, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorStatus, obterChamadosPorTipo, obterAtividadesTecnicos } from "../models/Chamado.js";
+import { criarNotificacao, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorTipo, obterAtividadesTecnicos, obterChamadosPorMesAno, gerarRelatorioChamados } from "../models/Chamado.js";
 
 // busca nome do usuario com base no ID
 export const buscarChamadoComNomeUsuarioController = async (req, res) => {
@@ -29,7 +29,7 @@ const UsuarioEnviarMensagemController = async (req, res) => {
   try {
     //coisas da autenticacao idUsuario
     const idUsuario = req.user?.id;
-    const {  conteudoMsg, idChamado } = req.body;
+    const { conteudoMsg, idChamado } = req.body;
     await escreverMensagem({
       id_usuario: idUsuario,
       id_tecnico: null, //o id do tecnico seria  o técnico que respondeu o chamado
@@ -81,20 +81,20 @@ const lerMensagensController = async (req, res) => {
 
 export function calcularDataLimite(prioridade) {
   const agora = new Date();
-   
-     switch (prioridade) {
-       case "baixa":
-         return new Date(agora.getTime() + 72 * 60 * 60 * 1000); // +72h
-       case "média":
-         return new Date(agora.getTime() + 24 * 60 * 60 * 1000); // +24h
-       case "alta":
-         return new Date(agora.getTime() + 8 * 60 * 60 * 1000);  // +8h
-       case "urgente":
-         return new Date(agora.getTime() + 4 * 60 * 60 * 1000);  // +4h
-       default:
-         return null;
-     }
-   }
+
+  switch (prioridade) {
+    case "baixa":
+      return new Date(agora.getTime() + 72 * 60 * 60 * 1000); // +72h
+    case "média":
+      return new Date(agora.getTime() + 24 * 60 * 60 * 1000); // +24h
+    case "alta":
+      return new Date(agora.getTime() + 8 * 60 * 60 * 1000);  // +8h
+    case "urgente":
+      return new Date(agora.getTime() + 4 * 60 * 60 * 1000);  // +4h
+    default:
+      return null;
+  }
+}
 
 export const criarChamadoController = async (req, res) => {
   const { assunto, tipo_id, descricao, prioridade, patrimonio } = req.body;
@@ -104,25 +104,26 @@ export const criarChamadoController = async (req, res) => {
   try {
     const data_limite = calcularDataLimite(prioridade);
     const dadosChamado = {
-    assunto,
-    tipo_id: tipo_id || null,
-    descricao,
-    prioridade: prioridade || 'none',
-    imagem: imagem || null,
-    usuario_id: usuario_id || null,
-    patrimonio: patrimonio || null,
-    data_limite
-  };
-  Object.keys(dadosChamado).forEach((key) => {
-    if (dadosChamado[key] === undefined) {
-      dadosChamado[key] = null;
-    }
-});  const resultado = await criarChamado(dadosChamado);
-res.status(201).json({ ...dadosChamado, id: resultado, status_chamado: "pendente", criado_em: new Date() });  
-} catch (error) {
-  console.error('Erro ao criar chamado:', error);
-  res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
-}};
+      assunto,
+      tipo_id: tipo_id || null,
+      descricao,
+      prioridade: prioridade || 'none',
+      imagem: imagem || null,
+      usuario_id: usuario_id || null,
+      patrimonio: patrimonio || null,
+      data_limite
+    };
+    Object.keys(dadosChamado).forEach((key) => {
+      if (dadosChamado[key] === undefined) {
+        dadosChamado[key] = null;
+      }
+    }); const resultado = await criarChamado(dadosChamado);
+    res.status(201).json({ ...dadosChamado, id: resultado, status_chamado: "pendente", criado_em: new Date() });
+  } catch (error) {
+    console.error('Erro ao criar chamado:', error);
+    res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
+  }
+};
 
 export const listarChamadosController = async (req, res) => {
   try {
@@ -211,11 +212,16 @@ export const contarChamadosPorStatusController = async (req, res) => {
     // Garante que sempre tenha todos os status, mesmo que contagem = 0
     const todosOsStatus = ['pendente', 'em andamento', 'concluido'];
     const respostaFinal = todosOsStatus.map((status) => {
-      const encontrado = resultado.find((r) => r.status_chamado === status);
+      const encontrado = resultado.find((r) => 
+  r.status_chamado.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() ===
+  status.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+);
+
+      // console.log('Resultado bruto do banco:', resultado);
       return {
         tipo: status,
         qtd: encontrado ? encontrado.qtd : 0,
-        link: `/chamados?status=${status}`, 
+        link: `/chamados?status=${status}`,
       };
     });
 
@@ -235,14 +241,28 @@ const extrairFiltros = (query) => ({
   status_chamado: query.status_chamado || null,
 });
 
-export const relatorioStatusController = async (req, res) => {
+export const gerarRelatorioChamadosController = async (req, res) => {
+  const { options, series, prioridade } = req.body;
+
+
+  if (!options || !series) {
+    return res.status(400).json({ erro: 'Dados insuficientes para gerar o relatório.' });
+  }
+
+
   try {
-    const filtros = extrairFiltros(req.query);
-    const dados = await obterChamadosPorStatus(filtros);
-    res.json(dados);
+    const pdfBuffer = await gerarRelatorioChamados({ options, series, prioridade });
+
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename="relatorio-chamados.pdf"',
+    });
+
+
+    res.send(pdfBuffer);
   } catch (error) {
-    console.error('Erro ao gerar relatório de status:', error);
-    res.status(500).json({ erro: 'Erro ao gerar relatório de status' });
+    res.status(500).json({ erro: 'Erro interno ao gerar o relatório.' });
   }
 };
 
@@ -267,6 +287,16 @@ export const relatorioTecnicosController = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao gerar relatório de técnicos' });
   }
 };
+
+export const chamadosPorMesController = async (req, res) => {
+  const { prioridade } = req.query;
+  try {
+    const dados = await obterChamadosPorMesAno(prioridade);
+    res.status(200).json(dados);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar dados dos chamados' });
+  }
+}
 
 // usado para TECNICOS E AUXILIARES ------------------------------------------------------------------------------------------------------------------------------------------------------------
 export const listarChamadosDisponiveisController = async (req, res) => {
@@ -336,8 +366,8 @@ export const chamadosConcluidoController = async (req, res) => {
 
 export const listarChamadosFuncionarioController = async (req, res) => {
   const usuario_id = req.user?.id;
-   const statusParam = req.query.status?.replace('-', ' '); // transforma "em-andamento" em "em andamento"
-console.log("Status recebido:", statusParam);
+  const statusParam = req.query.status?.replace('-', ' '); // transforma "em-andamento" em "em andamento"
+  console.log("Status recebido:", statusParam);
 
   if (!usuario_id || !statusParam) {
     return res.status(400).json({ erro: 'Parâmetros ausentes.' });
@@ -352,7 +382,7 @@ console.log("Status recebido:", statusParam);
   }
 };
 
-export const listarApontamentosController = async (req, res) => { 
+export const listarApontamentosController = async (req, res) => {
   try {
     const chamado_id = req.params.chamado_id;
     const apontamentos = await listarApontamentosPorChamado(chamado_id);

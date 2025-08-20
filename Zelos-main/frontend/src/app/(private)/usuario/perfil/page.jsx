@@ -135,7 +135,7 @@ export default function MeuPerfil() {
             </div>
             {/*NOME DO USUÁRIO E TIPO*/}
             <div className='user flex items-center gap-3 border-b border-[#D0D0D0]'>
-                <div className="font-medium">
+                <div className="poppins-medium">
                     <h3>{nomeSobrenome.primeiroNome} </h3>
                     <p className="text-sm text-gray-500">{nomeSobrenome.ultimoNome} </p>
                 </div>
