@@ -26,6 +26,7 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
             { label: 'Chamados', href: '/tecnico/chamados' },
             { label: 'Equipe', href: '/tecnico/equipe' },
             { label: 'Configurações', href: '/tecnico/configuracoes' },
+            {label: 'Perfil', href: '/tecnico/perfil'}
         ];
     } else if (userType === 'usuario') {
         links = [
@@ -94,6 +95,20 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
     };
 
     console.log("userType:", userType, "links:", links);
+
+    //link do perfil
+    let perfis = [];
+
+    if(userType === 'tecnico'){
+perfis =[{label: 'Perfil', href: '/tecnico/perfil'}]
+    }
+    else if (userType === 'usuario'){
+        perfis =[{label: 'Perfil', href: '/usuario/perfil'}]
+    }
+    else if (userType ==='admin'){
+        perfis =[{label: 'Perfil', href: '/admin/perfil'}]
+    }
+    
 
     return (
         <>
@@ -232,7 +247,12 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                                             </div>
                                             <ul className="py-1" role="none">
                                                 <li>
-                                                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 " role="menuitem">Perfil</a>
+                                                    {perfis.map((perfil) =>(
+                                                        <div key={perfil.href}>
+                                                            <a href={perfil.href} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 " role="menuitem">Perfil</a>
+                                                        </div>
+                                                    ))}
+                                                    
                                                 </li>
                                                 <li>
                                                     <button className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 " role="menuitem" onClick={(e) => {
