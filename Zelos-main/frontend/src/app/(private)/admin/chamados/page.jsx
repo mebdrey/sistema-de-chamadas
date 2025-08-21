@@ -22,7 +22,15 @@ export default function ChamadosAdmin() {
   const [tipoServico, setTipoServico] = useState(""); // recebe do chamado
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
   const [openAtribuirDropdown, setOpenAtribuirDropdown] = useState(false);
-
+ const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    prioridade: "",
+    tecnico_id: "",
+    tipo_id: "",
+    descricao: "",
+    assunto: "",
+    status_chamado: ""
+  });
 
   useEffect(() => {
     setIsMounted(true);
@@ -44,8 +52,6 @@ export default function ChamadosAdmin() {
         setChamados([]);
       });
   }, []);
-
-
 
   function primeiraLetraMaiuscula(str) {
     if (!str) return '';
@@ -196,25 +202,119 @@ export default function ChamadosAdmin() {
     }
   };
 
+// sempre que abrir/selecionar um chamado, preenche o formData
+  useEffect(() => {
+    if (chamadoSelecionado) {
+      setFormData({
+        prioridade: chamadoSelecionado.prioridade ?? 'none',
+        tecnico_id: chamadoSelecionado.tecnico_id ?? "",
+        tipo_id: chamadoSelecionado.tipo_id ?? "",
+        descricao: chamadoSelecionado.descricao ?? "",
+        assunto: chamadoSelecionado.assunto ?? "",
+        status_chamado: chamadoSelecionado.status_chamado ?? "pendente"
+      });
+      setIsEditing(false); // start in read mode
+    } else {
+      setIsEditing(false);
+      setFormData({
+        prioridade: "",
+        tecnico_id: "",
+        tipo_id: "",
+        descricao: "",
+        assunto: "",
+        status_chamado: ""
+      });
+    }
+  }, [chamadoSelecionado]);
+
+  // handle change genérico
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // salvar (PATCH)
+  const handleSave = async () => {
+    if (!chamadoSelecionado) return;
+    const id = chamadoSelecionado.id;
+
+    // construir payload com apenas os campos que mudaram (ou que tenham valor)
+    const payload = {};
+    const permitidos = ['prioridade', 'tecnico_id', 'tipo_id', 'descricao', 'assunto', 'status_chamado'];
+    for (const campo of permitidos) {
+      // conversão para number em tecnico_id/tipo_id quando necessário
+      const val = formData[campo];
+      if (val !== undefined && val !== null && String(val) !== String(chamadoSelecionado[campo])) {
+        if ((campo === 'tecnico_id' || campo === 'tipo_id') && val !== "") {
+          payload[campo] = Number(val);
+        } else {
+          payload[campo] = val;
+        }
+      }
+    }
+
+    if (Object.keys(payload).length === 0) {
+      alert('Nenhuma alteração detectada.');
+      setIsEditing(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:8080/chamado/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`Falha ao salvar: ${res.status} ${res.statusText} ${text}`);
+      }
+
+      // atualizar o estado local com os novos valores
+      setChamados((prev) => prev.map(c => c.id === id ? { ...c, ...payload } : c));
+      setChamadoSelecionado((prev) => ({ ...prev, ...payload }));
+      setIsEditing(false);
+      alert('Chamado atualizado com sucesso!');
+    } catch (err) {
+      console.error('Erro ao salvar chamado:', err);
+      alert('Erro ao salvar alterações. Veja o console para detalhes.');
+    }
+  };
+
+  // cancelar edição (recarrega os valores originais do chamado)
+  const handleCancel = () => {
+    if (chamadoSelecionado) {
+      setFormData({
+        prioridade: chamadoSelecionado.prioridade ?? 'none',
+        tecnico_id: chamadoSelecionado.tecnico_id ?? "",
+        tipo_id: chamadoSelecionado.tipo_id ?? "",
+        descricao: chamadoSelecionado.descricao ?? "",
+        assunto: chamadoSelecionado.assunto ?? "",
+        status_chamado: chamadoSelecionado.status_chamado ?? "pendente"
+      });
+    }
+    setIsEditing(false);
+  };
 
   return (
     <>
       {/* conteudo da pagina */}
       <div className="p-4 w-full">
-        <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg mt-14">
+        <div className="p-4 mt-14">
 
-          <div className='flex flex-row w-full justify-between mb-15'>
-            <div className="w-fit flex flex-row ">
+          <div className='flex flex-row flex-wrap gap-6 w-full justify-between mb-15'>
+            <div className="w-fit flex-wrap gap-4 flex flex-row ">
 
               {/* select */}
 
               <OrdenarPor ordenarPor={ordenarPor} setOrdenarPor={setOrdenarPor} />
 
-              <div className="mx-4 border-x border-gray-200"></div>
 
               {/* dropdown de Setor */}
               <div className="relative inline-block">
-                <button onClick={() => setDropdownSetorAberto(!dropdownSetorAberto)} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center" type="button" id="dropdownHelperButton">
+                <button onClick={() => setDropdownSetorAberto(!dropdownSetorAberto)} className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" id="dropdownHelperButton">
                   Setor
                   <svg className="w-2.5 h-2.5 ms-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
@@ -240,7 +340,7 @@ export default function ChamadosAdmin() {
                                     );
                                   }
                                 }}
-                                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 focus:ring-2" />
+                                  className="w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#E6DAFF] focus:ring-2" />
                               </div>
                               <div className="ms-2 text-sm">
                                 <label htmlFor={`helper-checkbox-${index}`} className="poppins-medium text-gray-900 ">
@@ -261,11 +361,9 @@ export default function ChamadosAdmin() {
                 )}
               </div>
 
-              <div className="mx-4 border-x border-gray-200"></div>
-
               {/* Dropdown de Prioridade */}
               <div className="relative inline-block">
-                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-8 py-2.5 text-center inline-flex items-center" type="button" id="dropdownPrioridadeButton">
+                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" id="dropdownPrioridadeButton">
                   Prioridade
                   <svg className="w-2.5 h-2.5 ms-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
@@ -299,7 +397,7 @@ export default function ChamadosAdmin() {
                                     );
                                   }
                                 }}
-                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 focus:ring-2 "
+                                className="w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#E6DAFF] focus:ring-2 "
                               />
                             </div>
                             <div className="ms-2 text-sm">
@@ -326,7 +424,7 @@ export default function ChamadosAdmin() {
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
                   </svg>
                 </div>
-                <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5" placeholder="Pesquisar chamado" value={busca} onChange={(e) => setBusca(e.target.value)} />
+                <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#7F56D8] focus:border-[#7F56D8] block w-full ps-10 p-2.5" placeholder="Pesquisar chamado" value={busca} onChange={(e) => setBusca(e.target.value)} />
               </div>
             </form>
           </div>
@@ -338,7 +436,7 @@ export default function ChamadosAdmin() {
                   const statusId = normalizarId(status)
                   return (
                     <li className="me-2" role="presentation" key={status}>
-                      <button onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 ${abaAtiva === statusId ? "active border-blue-500 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 "
+                      <button onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 ${abaAtiva === statusId ? "active border-[#7F56D8] text-[#7F56D8]" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 "
                         }`} type="button" >{primeiraLetraMaiuscula(status)}
                       </button>
                     </li>
@@ -424,27 +522,6 @@ export default function ChamadosAdmin() {
                 );
               })}
             </div>
-            <div className="flex flex-col items-center mt-15 mb-8">
-              <span className="text-sm text-gray-700 mb-3">
-                Mostrando <span className="poppins-semibold text-gray-900">1</span> a <span className="poppins-semibold text-gray-900 ">10</span> de <span className="poppins-semibold text-gray-900">100</span> registros
-              </span>
-
-              <div className="flex">
-                <a href="#" className="flex items-center justify-center px-3 h-8 me-3 text-sm poppins-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700">
-                  <svg className="w-3.5 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5H1m0 0 4 4M1 5l4-4" />
-                  </svg>
-                  Anterior
-                </a>
-                <a href="#" className="flex items-center justify-center px-3 h-8 text-sm poppins-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700">
-                  Próximo
-                  <svg className="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
-                  </svg>
-                </a>
-              </div>
-
-            </div>
 
             {/* Drawer */}
             <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen p-4 overflow-y-auto transition-transform border-l border-gray-200 bg-white w-80 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
@@ -462,22 +539,74 @@ export default function ChamadosAdmin() {
                 <p className="mb-2 text-sm text-gray-500 ">Usuário</p>
                 <p className="mb-6 text-sm poppins-bold text-gray-800">{getUsuarioNome(chamadoSelecionado?.usuario_id)}</p>
               </div>
-              <div>
-                <p className="mb-2 text-sm text-gray-500 ">Tipo de serviço</p>
+             {/* Tipo de serviço -> select se estiver editando, senão texto */}
+            <div>
+              <p className="mb-2 text-sm text-gray-500 ">Tipo de serviço</p>
+              {isEditing ? (
+                <>
+                  <select id="tipo_id" name="tipo_id" value={formData.tipo_id ?? ""} onChange={handleChange} className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50">
+                    <option value="">Selecione um tipo</option>
+                    {tiposServico.map((t) => (
+                      <option key={t.id} value={t.id}>{t.titulo.replace(/_/g, ' ')}</option>
+                    ))}
+                  </select>
+                </>
+              ) : (
                 <p className="mb-6 text-sm poppins-bold text-gray-800">{getTipoServicoTitulo(chamadoSelecionado?.tipo_id)}</p>
-              </div>
-              <div>
-                <p className="mb-2 text-sm text-gray-500 ">Prioridade</p>
+              )}
+            </div>
+
+            {/* Prioridade */}
+            <div>
+              <p className="mb-2 text-sm text-gray-500 ">Prioridade</p>
+              {isEditing ? (
+                <>
+                  <select id="prioridade" name="prioridade" value={formData.prioridade ?? "none"} onChange={handleChange} className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50">
+                    {prioridades.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                  </select>
+                </>
+              ) : (
                 <p className="mb-6 text-sm poppins-bold text-gray-800">{chamadoSelecionado?.prioridade}</p>
-              </div>
-              <div>
-                <p className="mb-2 text-sm text-gray-500 ">Assunto</p>
+              )}
+            </div>
+
+            {/* Assunto */}
+            <div>
+              <p className="mb-2 text-sm text-gray-500 ">Assunto</p>
+              {isEditing ? (
+                <div>
+                  <input
+                    type="text"
+                    id="assunto"
+                    name="assunto"
+                    value={formData.assunto ?? ""}
+                    onChange={handleChange}
+                    className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              ) : (
                 <p className="mb-6 text-sm poppins-bold text-gray-800">{chamadoSelecionado?.assunto}</p>
-              </div>
-              <div>
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Descrição</p>
+              )}
+            </div>
+
+            {/* Descrição */}
+            <div>
+              <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Descrição</p>
+              {isEditing ? (
+                <div>
+                  <textarea
+                    id="descricao"
+                    name="descricao"
+                    rows="4"
+                    value={formData.descricao ?? ""}
+                    onChange={handleChange}
+                    className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              ) : (
                 <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.descricao}</p>
-              </div>
+              )}
+            </div>
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
                 {chamadoSelecionado?.imagem ? (
@@ -497,19 +626,16 @@ export default function ChamadosAdmin() {
                 <p className="mb-2 text-sm text-gray-500 ">Identificador do item (n° de patrimônio)</p>
                 <p className="mb-6 text-sm poppins-bold text-gray-800">{chamadoSelecionado?.patrimonio}</p>
               </div>
-              <div>
+              {/* <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Técnico/Auxiliar</p>
                   <div className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">
                     {!chamadoSelecionado?.tecnico_id ? (
                       <>
                         <div>Nenhum técnico/auxiliar atribuído.</div>
 
-                        {/* botao que abre/fecha dropdown */}
+                         botao que abre/fecha dropdown
                         <button onClick={() => setOpenAtribuirDropdown((v) => !v)}
-                          aria-expanded={openAtribuirDropdown}
-                          aria-controls="dropdownUsers"
-                          className="mt-4 py-2 px-6 inline-flex items-center gap-x-1 text-xs poppins-medium rounded-full border border-dashed border-gray-200 bg-white text-gray-800 hover:bg-gray-50 focus:outline-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700"
-                        >
+                          aria-expanded={openAtribuirDropdown} aria-controls="dropdownUsers" className="mt-4 py-2 px-6 inline-flex items-center gap-x-1 text-xs poppins-medium rounded-full border border-dashed border-gray-200 bg-white text-gray-800 hover:bg-gray-50 focus:outline-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700">
                           <svg className="shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M5 12h14" />
                             <path d="M12 5v14" />
@@ -580,21 +706,123 @@ export default function ChamadosAdmin() {
                       <p>{getTecnicoNome(chamadoSelecionado?.tecnico_id)}</p>
                     )}
                   </div>
+              </div> */}
+               {/* Técnico / Atribuir */}
+            <div>
+              <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Técnico/Auxiliar</p>
+              <div className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">
+                {isEditing ? (
+                  <>
+                    <select id="tecnico_id" name="tecnico_id" value={formData.tecnico_id ?? ""} onChange={handleChange} className="block w-full p-2 mb-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:border-[#7F56D8]">
+                      <option value="">Nenhum técnico</option>
+                      {usuariosFiltrados.map(u => (
+                        <option key={u.id} value={u.id}>{u.nome}</option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500">Ou use o botão Atribuir para listar técnicos disponíveis.</p>
+                  </>
+                ) : (
+                  <>
+                    {!chamadoSelecionado?.tecnico_id ? (
+                      <>
+                        <div>Nenhum técnico/auxiliar atribuído.</div>
+                        <button onClick={() => setOpenAtribuirDropdown((v) => !v)} aria-expanded={openAtribuirDropdown} aria-controls="dropdownUsers" className="mt-4 py-2 px-6 inline-flex items-center gap-x-1 text-xs poppins-medium rounded-full border border-dashed border-gray-200 bg-white text-gray-800 hover:bg-gray-50">
+                          Adicionar
+                        </button>
+                        {/* dropdown users (mantido do seu código) */}
+                        {openAtribuirDropdown && (
+                          <div id="dropdownUsers" className="z-10 bg-white rounded-lg shadow-sm w-60 mt-2">
+                            <ul className="h-48 py-2 overflow-y-auto text-gray-700">
+                              {Array.isArray(usuariosFiltrados) && usuariosFiltrados.length > 0 ? (
+                                usuariosFiltrados.map((u) => {
+                                  const selected = usuarioSelecionado === u.id;
+                                  return (
+                                    <li key={u.id}>
+                                      <button
+                                        type="button"
+                                        onClick={() => setUsuarioSelecionado(u.id)}
+                                        className={`w-full text-left flex items-center px-4 py-2 focus:outline-none ${selected ? "bg-blue-100 text-blue-800" : "hover:bg-gray-100"}`}
+                                      >
+                                        <img className="w-6 h-6 me-2 rounded-full" src={u.ftPerfil ? `http://localhost:8080/${u.ftPerfil}` : "/default-avatar.png"} alt={u.nome} />
+                                        <span className="truncate">{u.nome}</span>
+                                      </button>
+                                    </li>
+                                  );
+                                })
+                              ) : (
+                                <li className="px-4 py-2 text-sm text-gray-500">Nenhum usuário disponível</li>
+                              )}
+                            </ul>
+                            <div className="border-t border-gray-200">
+                              <button type="button" onClick={async () => { await handleAtribuirChamado(usuarioSelecionado); setOpenAtribuirDropdown(false); setUsuarioSelecionado(null); }} disabled={!usuarioSelecionado} className={`w-full px-4 py-3 text-sm poppins-medium ${usuarioSelecionado ? "text-blue-600 bg-gray-50" : "text-gray-400 bg-gray-100 cursor-not-allowed"}`}>
+                                Atribuir
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <p>{getTecnicoNome(chamadoSelecionado?.tecnico_id)}</p>
+                    )}
+                  </>
+                )}
               </div>
+            </div>
               <div>
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Criado em</p>
+                <p className="mb-2 text-sm text-gray-500 ">Criado em</p>
                 <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.criado_em}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <a href="#" className="px-4 py-2 text-sm poppins-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg focus:outline-none hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Learn more</a>
-                <a href="#" className="inline-flex items-center px-4 py-2 text-sm poppins-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                  Get access
-                  <svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
-                  </svg>
-                </a>
-              </div>
+               {/* Status (select se editando) */}
+            <div className="mb-4">
+              {isEditing ? (
+                <>
+                  <label htmlFor="status_chamado" className="block mb-2 text-sm font-medium text-gray-900 ">Status</label>
+                  <select id="status_chamado" name="status_chamado" value={formData.status_chamado ?? "pendente"} onChange={handleChange} className="block w-full p-2 mb-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:border-[#7F56D8]">
+                    <option value="pendente">Pendente</option>
+                    <option value="em andamento">Em andamento</option>
+                    <option value="concluido">Concluído</option>
+                  </select>
+                </>
+              ) : (
+                <></>
+              )}
+            </div>
+
+            {/* Botões */}
+            <div className="grid grid-cols-2 gap-2">
+  {!isEditing ? (
+    <>
+      {["pendente", "em andamento"].includes(chamadoSelecionado?.status_chamado) ? (
+        <button
+          onClick={() => setIsEditing(true)}
+          className="px-4 py-2 text-sm poppins-medium text-center text-[#7F56D8] bg-white border border-gray-200 rounded-lg hover:bg-gray-100"
+        >
+          Editar chamado
+        </button>
+      ) : (
+        <p className="col-span-2 text-sm text-gray-500 italic">
+          Chamados concluídos não podem ser editados.
+        </p>
+      )}
+    </>
+  ) : (
+    <>
+      <button
+        onClick={handleSave}
+        className="px-4 py-2 text-sm poppins-medium text-center text-white bg-[#7F56D8] rounded-lg"
+      >
+        Salvar
+      </button>
+      <button
+        onClick={handleCancel}
+        className="px-4 py-2 text-sm poppins-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-[#7F56D8]"
+      >
+        Cancelar
+      </button>
+    </>
+  )}
+</div>
             </div>
           </section>
         </div >

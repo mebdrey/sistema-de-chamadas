@@ -1,6 +1,5 @@
-
-
-import { criarNotificacao, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico } from "../models/Chamado.js";
+import bcrypt from 'bcryptjs';
+import { criarNotificacao, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, listarPrioridades, getPrazoPorNome, calcularDataLimite, atualizarPrazoPorChamado } from "../models/Chamado.js";
 
 // busca nome do usuario com base no ID
 export const buscarChamadoComNomeUsuarioController = async (req, res) => {
@@ -78,24 +77,6 @@ const lerMensagensController = async (req, res) => {
 };
 
 // usado para usuarios comuns ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-export function calcularDataLimite(prioridade) {
-  const agora = new Date();
-
-  switch (prioridade) {
-    case "baixa":
-      return new Date(agora.getTime() + 72 * 60 * 60 * 1000); // +72h
-    case "média":
-      return new Date(agora.getTime() + 24 * 60 * 60 * 1000); // +24h
-    case "alta":
-      return new Date(agora.getTime() + 8 * 60 * 60 * 1000);  // +8h
-    case "urgente":
-      return new Date(agora.getTime() + 4 * 60 * 60 * 1000);  // +4h
-    default:
-      return null;
-  }
-}
-
 export const criarChamadoController = async (req, res) => {
   const { assunto, tipo_id, descricao, prioridade, patrimonio } = req.body;
   const usuario_id = req.user?.id;
@@ -318,6 +299,165 @@ export const chamadosPorMesController = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao buscar dados dos chamados' });
   }
 }
+
+export const editarChamadoController = async (req, res) => {
+  try {
+    const chamadoId = req.params.id;
+    const dados = req.body;
+    const usuario = req.user; // vem do Passport
+
+    // Apenas admin pode editar qualquer chamado
+    if (usuario.funcao !== 'admin') {
+      return res.status(403).json({ message: 'Apenas administradores podem editar chamados' });
+    }
+
+    const linhasAfetadas = await editarChamado(chamadoId, dados);
+
+    if (linhasAfetadas === 0) {
+      return res.status(400).json({ message: 'Nenhuma alteração realizada' });
+    }
+
+    res.status(200).json({ message: 'Chamado atualizado com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao editar chamado:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const criarUsuarioController = async (req, res) => {
+  try {
+    const { nome, username, email, senha, funcao, ftPerfil } = req.body;
+    if (!nome || !email || !senha) {
+      return res.status(400).json({ message: 'nome, email e senha são obrigatórios' });
+    }
+
+    // verifica username
+    const desiredUsername = username || (nome.split(/\s+/)[0] || nome).toLowerCase();
+    const existing = await buscarUsuarioPorUsername(desiredUsername);
+    if (existing) {
+      const sugestões = await gerarSugestoesUsername(nome);
+      return res.status(409).json({ message: 'username já existe', sugestões });
+    }
+
+    const userId = await criarUsuario({ nome, username: desiredUsername, email, senha, funcao: funcao || 'user', ftPerfil: ftPerfil || null });
+    res.status(201).json({ id: userId, nome, username: desiredUsername, email, funcao: funcao || 'user' });
+  } catch (err) {
+    console.error('Erro criar usuário:', err);
+    res.status(500).json({ message: 'Erro interno ao criar usuário' });
+  }
+};
+
+// endpoint para sugerir usernames com base em nome (sem criar)
+export const sugerirUsernameController = async (req, res) => {
+  try {
+    const { nome } = req.body;
+    if (!nome) return res.status(400).json({ message: 'nome obrigatório' });
+    const sugestões = await gerarSugestoesUsername(nome);
+    res.status(200).json({ sugestões });
+  } catch (err) {
+    console.error('Erro ao sugerir username:', err);
+    res.status(500).json({ message: 'Erro interno' });
+  }
+};
+
+export const criarSetorController = async (req, res) => {
+  try {
+    const { titulo, descricao } = req.body;
+    const created_by = req.user?.id || null;
+
+    if (!titulo) return res.status(400).json({ message: 'titulo obrigatório' });
+    // opcional: validar titulo contra enum do DB (se desejar)
+
+    const id = await criarSetor({ titulo, descricao: descricao || null, created_by });
+    res.status(201).json({ id, titulo, descricao });
+  } catch (err) {
+    console.error('Erro criar setor:', err);
+    res.status(500).json({ message: 'Erro interno' });
+  }
+};
+
+export const listarSetoresController = async (req, res) => {
+  try {
+    const setores = await listarSetores();
+    res.status(200).json(setores);
+  } catch (err) {
+    console.error('Erro listar setores:', err);
+    res.status(500).json({ message: 'Erro interno' });
+  }
+};
+
+export const excluirSetorController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const rows = await excluirSetor(id);
+    if (rows === 0) return res.status(404).json({ message: 'Setor não encontrado ou já excluído' });
+    res.status(200).json({ message: 'Setor excluído' });
+  } catch (err) {
+    console.error('Erro excluir setor:', err);
+    res.status(500).json({ message: 'Erro interno' });
+  }
+};
+
+export const atualizarSetorController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const dados = req.body;
+    const affected = await atualizarSetor(id, dados);
+    if (affected === 0) return res.status(404).json({ message: 'Setor não encontrado' });
+    res.status(200).json({ message: 'Setor atualizado' });
+  } catch (err) {
+    console.error('Erro atualizar setor:', err);
+    res.status(500).json({ message: 'Erro interno' });
+  }
+};
+
+export const criarPrioridadeController = async (req, res) => {
+  try {
+    const { nome, prazo_dias } = req.body;
+    if (!nome) return res.status(400).json({ message: 'nome obrigatório' });
+    const created_by = req.user?.id || null;
+    const id = await criarPrioridade({ nome, prazo_dias: prazo_dias || 0, created_by });
+    res.status(201).json({ id, nome, prazo_dias: prazo_dias || 0 });
+  } catch (err) {
+    console.error('Erro criar prioridade:', err);
+    res.status(500).json({ message: 'Erro interno' });
+  }
+};
+
+export const listarPrioridadesController = async (_req, res) => {
+  try {
+    const list = await listarPrioridades();
+    res.status(200).json(list);
+  } catch (err) {
+    console.error('Erro listar prioridades:', err);
+    res.status(500).json({ message: 'Erro interno' });
+  }
+};
+
+//endpoint que recalcula e atualiza prazo de um chamado
+export const atualizarPrazoController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const affected = await atualizarPrazoPorChamado(id);
+    if (affected === 0) return res.status(404).json({ message: 'Chamado não encontrado' });
+    res.status(200).json({ message: 'Prazo atualizado com sucesso' });
+  } catch (err) {
+    console.error('Erro atualizar prazo:', err);
+    res.status(500).json({ message: err.message || 'Erro interno' });
+  }
+};
+
+//utilitário p calcular sem atualizar
+export const calcularDataLimiteController = async (req, res) => {
+  try {
+    const { prioridade } = req.body;
+    const dt = await calcularDataLimite(prioridade);
+    res.status(200).json({ data_limite: dt ? dt.toISOString() : null });
+  } catch (err) {
+    console.error('Erro calcular data limite:', err);
+    res.status(500).json({ message: 'Erro interno' });
+  }
+};
 
 // usado para TECNICOS E AUXILIARES ------------------------------------------------------------------------------------------------------------------------------------------------------------
 export const listarChamadosDisponiveisController = async (req, res) => {

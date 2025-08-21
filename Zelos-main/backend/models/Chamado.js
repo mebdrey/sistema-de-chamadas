@@ -1,6 +1,7 @@
 
 import puppeteer from 'puppeteer';
 import { jsPDF } from 'jspdf';
+import bcrypt from 'bcryptjs';
 import { create, readAll, read, readQuery, update, deleteRecord } from '../config/database.js';
 
 export async function criarNotificacao({ usuario_id, tipo, titulo, descricao, chamado_id = null }) {
@@ -201,6 +202,218 @@ export const contarChamadosPorStatus = async (modo) => {
   } catch (err) {
     throw err;
   }
+};
+
+// Buscar chamado específico
+export const buscarChamado = async (id) => {
+  return await read('chamados', `id = ${id}`);
+};
+
+// Atualizar chamado (parcialmente)
+export const editarChamado = async (id, data) => {
+  // Busca o chamado no banco
+  const chamado = await buscarChamado(id);
+  if (!chamado) {
+    throw new Error('Chamado não encontrado');
+  }
+
+  // Só pode editar se for pendente ou em andamento
+  if (!['pendente', 'em andamento'].includes(chamado.status_chamado)) {
+    throw new Error('Chamado não pode ser editado. Apenas chamados pendentes ou em andamento podem ser alterados.');
+  }
+
+  // Campos permitidos para atualização
+  const camposPermitidos = [
+    'prioridade',
+    'tecnico_id',
+    'tipo_id',
+    'descricao',
+    'assunto',
+    'status_chamado'
+  ];
+
+  // Filtra só os campos permitidos que vieram no body
+  const dadosAtualizar = {};
+  for (const campo of camposPermitidos) {
+    if (data[campo] !== undefined) {
+      dadosAtualizar[campo] = data[campo];
+    }
+  }
+
+  if (Object.keys(dadosAtualizar).length === 0) {
+    throw new Error('Nenhum campo válido informado para atualização');
+  }
+
+  const linhasAfetadas = await update('chamados', dadosAtualizar, `id = ${id}`);
+  return linhasAfetadas;
+};
+export const criarUsuario = async (dados) => {
+  try {
+    // hash da senha antes de criar )
+    const copy = { ...dados };
+    if (copy.senha) {
+      const salt = await bcrypt.genSalt(10);
+      copy.senha = await bcrypt.hash(copy.senha, salt);
+    }
+    const id = await create('usuarios', copy);
+    return id;
+  } catch (err) {
+    console.error('Erro ao criar usuário!', err);
+    throw err;
+  }
+};
+
+export const buscarUsuarioPorUsername = async (username) => {
+  return await read('usuarios', `username = ${JSON.stringify(username)}`);
+};
+
+// retorna array de usernames semelhantes (prefix)
+export const buscarUsernamesSemelhantes = async (base) => {
+  const sql = `SELECT username FROM usuarios WHERE username LIKE ? LIMIT 50`;
+  const rows = await readQuery(sql, [`${base}%`]);
+  return rows.map(r => r.username);
+};
+
+// gera sugestões a partir de um nome (ex: João Silva -> joaosilva, joaosilva1, joaosilva2), verifica no banco e retorna um array de opções (max 5)
+export const gerarSugestoesUsername = async (nome) => {
+  if (!nome) return [];
+  const normalize = (s) => s.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+  const parts = nome.split(/\s+/).filter(Boolean);
+  let base = normalize(parts.join('')); 
+  if (!base) base = `user${Date.now().toString().slice(-4)}`;
+
+  const existentes = await buscarUsernamesSemelhantes(base);
+  const setExist = new Set(existentes);
+
+  const suggestions = [];
+  if (!setExist.has(base)) suggestions.push(base);
+  let i = 1;
+  while (suggestions.length < 5) {
+    const cand = `${base}${i}`;
+    if (!setExist.has(cand)) suggestions.push(cand);
+    i++;
+    if (i > 2000) break;
+  }
+  return suggestions;
+};
+
+export const criarSetor = async (dados) => {
+  try {
+    // dados: { titulo, descricao, created_by }
+    const id = await create('pool', dados);
+    return id;
+  } catch (err) {
+    console.error('Erro ao criar setor!', err);
+    throw err;
+  }
+};
+
+export const listarSetores = async (where = null) => {
+  try {
+    return await readAll('pool', where);
+  } catch (err) {
+    console.error('Erro ao listar setores', err);
+    throw err;
+  }
+};
+
+export const excluirSetor = async (id) => {
+  try {
+    const rows = await deleteRecord('pool', `id = ${id}`);
+    return rows;
+  } catch (err) {
+    console.error('Erro ao excluir setor', err);
+    throw err;
+  }
+};
+
+export const atualizarSetor = async (id, dados) => {
+  try {
+    const affected = await update('pool', dados, `id = ${id}`);
+    return affected;
+  } catch (err) {
+    console.error('Erro ao atualizar setor', err);
+    throw err;
+  }
+};
+
+// adiciona uma prioridade 
+export const criarPrioridade = async (dados) => {
+  try {
+    // dados: { nome, prazo_dias, created_by }
+    const id = await create('prioridades', dados);
+    return id;
+  } catch (err) {
+    console.error('Erro ao criar prioridade', err);
+    throw err;
+  }
+};
+
+export const listarPrioridades = async () => {
+  try {
+    return await readAll('prioridades');
+  } catch (err) {
+    console.error('Erro listar prioridades', err);
+    throw err;
+  }
+};
+
+export const getPrazoPorNome = async (nome) => {
+  try {
+    const row = await read('prioridades', `nome = ${JSON.stringify(nome)}`);
+    return row ? Number(row.prazo_dias) : null;
+  } catch (err) {
+    console.error('Erro getPrazoPorNome', err);
+    throw err;
+  }
+};
+
+// calcula data limite com base em prioridade
+export const calcularDataLimite = async (prioridade) => {
+  if (!prioridade) return null;
+
+  // tenta consultar tabela prioridades
+  try {
+    const prazo = await getPrazoPorNome(prioridade);
+    if (prazo !== null && prazo !== undefined) {
+      if (Number(prazo) <= 0) return null;
+      const dt = new Date();
+      dt.setDate(dt.getDate() + Number(prazo));
+      return dt;
+    }
+  } catch (err) {
+    // ignora e usa fallback
+    console.warn('Não foi possível consultar tabela prioridades, usando fallback', err);
+  }
+
+  // fallback
+  const mapa = {
+    'alta': 1,
+    'media': 3,
+    'baixa': 7,
+    'none': 0
+  };
+  const dias = mapa[prioridade] ?? 0;
+  if (!dias) return null;
+  const dt = new Date();
+  dt.setDate(dt.getDate() + dias);
+  return dt;
+};
+
+/**
+ * Atualiza o data_limite de um chamado conforme sua prioridade atual.
+ * Retorna affectedRows.
+ */
+export const atualizarPrazoPorChamado = async (chamadoId) => {
+  const chamado = await read('chamados', `id = ${chamadoId}`);
+  if (!chamado) throw new Error('Chamado não encontrado');
+
+  const novaData = await calcularDataLimite(chamado.prioridade);
+  const payload = { data_limite: novaData ? novaData.toISOString().slice(0,19).replace('T',' ') : null };
+  const affected = await update('chamados', payload, `id = ${chamadoId}`);
+  return affected;
 };
 
 // relatorio 1 - chamados p mes

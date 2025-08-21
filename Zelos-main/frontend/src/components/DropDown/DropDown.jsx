@@ -74,12 +74,10 @@ const OrdenarPor = ({ ordenarPor, setOrdenarPor }) => {
 
   return (
     <div id="ordenarDropdownWrapper" className="relative inline-block">
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
+      <button onClick={(e) => { e.stopPropagation();
           setShowDropdown(!showDropdown);
         }}
-        className="text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-8 py-2.5 h-fit text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5"
         type="button"
       >
         Ordenar por
@@ -88,9 +86,9 @@ const OrdenarPor = ({ ordenarPor, setOrdenarPor }) => {
         </svg>
       </button>
 
-      <div className={`absolute mt-2 z-10 ${showDropdown ? 'block' : 'hidden'} w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600`}>
+      <div className={`absolute mt-2 z-10 ${showDropdown ? 'block' : 'hidden'} w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm `}>
         {opcoesOrdenacao.map((opcao, index) => (
-          <div key={index} className="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+          <div key={index} className="flex items-center p-2 rounded-sm hover:bg-gray-100 ">
             <input
               id={`ordenar-radio-${index}`}
               type="radio"
@@ -98,7 +96,7 @@ const OrdenarPor = ({ ordenarPor, setOrdenarPor }) => {
               name="ordenar"
               checked={ordenarPor === opcao.value}
               onChange={() => setOrdenarPor(opcao.value)}
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+              className="w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 focus:ring-[#E6DAFF] focus:ring-2"
             />
             <label
               htmlFor={`ordenar-radio-${index}`}
