@@ -101,6 +101,21 @@ UPDATE usuarios SET ftPerfil = 'uploads/anacosta.jpg' WHERE username = 'anacosta
 UPDATE usuarios SET ftPerfil = 'uploads/lucianapereira.jpg' WHERE username = 'lucianapereira';
 UPDATE usuarios SET ftPerfil = 'uploads/carlosmendes.jpg' WHERE username = 'carlosmendes';
 
+CREATE TABLE prioridades (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(50) NOT NULL UNIQUE,
+  horas_limite INT NOT NULL,
+  descricao VARCHAR(255) DEFAULT NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- valores iniciais (ajustáveis pelo admin depois)
+INSERT INTO prioridades (nome, horas_limite, descricao) VALUES
+('baixa', 72, 'Prazo de 72 horas para resolução'),
+('media', 24, 'Prazo de 24 horas para resolução'),
+('alta', 8,  'Prazo de 8 horas para resolução');
+
 CREATE TABLE chamados (
   id INT AUTO_INCREMENT PRIMARY KEY,
   assunto VARCHAR(255) NOT NULL,
@@ -111,120 +126,78 @@ CREATE TABLE chamados (
   data_limite DATETIME NULL,
   patrimonio int,
   imagem VARCHAR(255),
-  prioridade ENUM ('none','baixa', 'media', 'alta') DEFAULT 'none',
+  prioridade_id int,
   status_chamado ENUM('pendente', 'em andamento', 'concluido') DEFAULT 'pendente',
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   finalizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (tipo_id) REFERENCES pool(id) ON DELETE CASCADE,
+  FOREIGN KEY (prioridade_id) REFERENCES prioridades(id) ON DELETE CASCADE,
   FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE,
   FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
-INSERT INTO chamados (assunto, descricao, tipo_id, tecnico_id, usuario_id, imagem, prioridade, status_chamado, criado_em, finalizado_em) VALUES
-('Limpeza de banheiros', 'Higienização completa dos banheiros do térreo.', 4, NULL, 1, NULL, 'media', 'pendente', '2025-08-01 09:00:00', NULL),
-('Limpeza do refeitório', 'Solicita-se limpeza pós-almoço.', 4, 11, 1, NULL, 'media', 'concluido', '2025-08-03 11:00:00', '2025-08-03 12:00:00'),
-('Desinfecção de estações', 'Limpeza com álcool nas estações de trabalho do 2º andar.', 4, NULL, 1, NULL, 'baixa', 'pendente', '2025-08-04 08:30:00', NULL),
-('Limpeza após reunião', 'Sala de reunião 3 precisa de limpeza após uso.', 4, 13, 1, NULL, 'baixa', 'concluido', '2025-08-05 14:00:00', '2025-08-05 15:00:00'),
-('Limpeza de carpetes', 'Carpetes da recepção precisam de aspiração.', 4, 9, 1, NULL, 'media', 'em andamento', '2025-08-06 15:45:00', NULL),
-('Limpeza da copa', 'Solicita-se limpeza da copa no fim do expediente.', 4, NULL, 1, NULL, 'baixa', 'pendente', '2025-08-07 17:00:00', NULL),
-('Limpeza da área externa', 'Área próxima ao estacionamento precisa de varrição.', 4, 11, 1, NULL, 'media', 'em andamento', '2025-08-08 13:20:00', NULL),
-('Reposição de materiais', 'Faltando papel toalha nos banheiros femininos.', 4, 12, 1, NULL, 'alta', 'concluido', '2025-08-09 09:10:00', '2025-08-09 09:25:00'),
-('Problema na impressora', 'Impressora não está imprimindo.', 3, NULL, 2, NULL, 'media', 'pendente', '2025-08-10 08:00:00', NULL),
-('Computador lento', 'PC demora muito para iniciar.', 3, NULL, 3, NULL, 'baixa', 'pendente', '2025-08-10 08:30:00', NULL),
-('Sem acesso à internet', 'Conexão caiu repentinamente.', 3, NULL, 4, NULL, 'alta', 'pendente', '2025-08-10 09:00:00', NULL),
-('Monitor apagado', 'Tela do monitor não acende.', 2, NULL, 5, NULL, 'baixa', 'pendente', '2025-08-10 09:30:00', NULL),
-('Limpeza dos vidros da recepção', 'Vidros da entrada precisam ser limpos.', 4, NULL, 1, NULL, 'media', 'pendente', '2025-08-10 10:00:00', NULL),
-('Limpeza das janelas da TI', 'Janelas da sala de TI estão com muita poeira.', 4, 10, 1, NULL, 'baixa', 'em andamento', '2025-08-02 10:00:00', NULL),
-('Teclado com teclas falhando', 'Algumas teclas não funcionam.', 2, NULL, 6, NULL, 'none', 'pendente', '2025-08-11 08:00:00', NULL),
-('Erro no sistema', 'Sistema trava ao abrir módulo de vendas.', 3, NULL, 7, NULL, 'alta', 'pendente', '2025-08-11 08:30:00', NULL),
-('Telefone sem linha', 'Telefone fixo não recebe chamadas.', 3, NULL, 8, NULL, 'media', 'pendente', '2025-08-11 09:00:00', NULL),
-('Queda de energia', 'Sala ficou sem luz após curto-circuito.', 2, NULL, 9, NULL, 'alta', 'pendente', '2025-08-11 09:30:00', NULL),
-('Atendimento externo para manutenção de impressora', 'Técnico deverá se deslocar até a unidade do cliente para manutenção da impressora.', 1, 4, 1, NULL, 'alta', 'em andamento', '2025-08-11 11:00:00', NULL),
-('Câmera de segurança inoperante', 'Câmera não transmite imagem.', 2, NULL, 10, NULL, 'media', 'pendente', '2025-08-12 08:00:00', NULL),
-('Problema no projetor', 'Imagem do projetor está desfocada.', 2, NULL, 2, NULL, 'baixa', 'pendente', '2025-08-12 08:30:00', NULL),
-('Troca de HD', 'HD com setores defeituosos, troca em andamento.', 2, 1, 3, NULL, 'alta', 'em andamento', '2025-08-12 09:00:00', NULL),
-('Manutenção externa de roteador', 'Técnico deverá visitar cliente para manutenção do roteador.', 1, 5, 1, NULL, 'alta', 'em andamento', '2025-08-12 09:30:00', NULL),
-('Instalação de software', 'Instalando novo sistema de gestão.', 3, 2, 4, NULL, 'media', 'em andamento', '2025-08-12 09:30:00', NULL),
-('Troca de equipamento no cliente', 'Substituição de hardware defeituoso no local do cliente.', 1, 6, 1, NULL, 'media', 'pendente', '2025-08-12 10:00:00', NULL),
-('Atualização remota de software', 'Atualização do sistema via acesso remoto.', 1, NULL, 1, NULL, 'baixa', 'pendente', '2025-08-13 11:00:00', NULL),
-('Ajuste na rede', 'Reconfigurando roteadores e switches.', 3, 3, 5, NULL, 'alta', 'em andamento', '2025-08-13 08:00:00', NULL),
-('Limpeza interna do PC', 'Retirando poeira e trocando pasta térmica.', 4, 4, 6, NULL, 'baixa', 'em andamento', '2025-08-13 08:30:00', NULL),
-('Atualização de drivers', 'Atualizando drivers de vídeo e áudio.', 3, 5, 7, NULL, 'media', 'em andamento', '2025-08-13 09:00:00', NULL),
-('Substituição de cabo', 'Trocando cabo HDMI defeituoso.', 2, 6, 8, NULL, 'baixa', 'em andamento', '2025-08-13 09:30:00', NULL),
-('Correção de bug', 'Ajustando falha no sistema interno.', 3, 7, 9, NULL, 'alta', 'em andamento', '2025-08-14 08:00:00', NULL),
-('Backup de dados', 'Realizando cópia de segurança.', 3, 8, 10, NULL, 'media', 'em andamento', '2025-08-14 08:30:00', NULL),
-('Reparo de sistema de segurança', 'Correção de falhas no sistema de segurança instalado externamente.', 1, 7, 1, NULL, 'alta', 'em andamento', '2025-08-14 14:20:00', NULL),
-('Troca de memória RAM', 'Instalando pentes novos de RAM.', 2, 1, 2, NULL, 'alta', 'em andamento', '2025-08-14 09:00:00', NULL),
-('Testes de rede', 'Executando testes de estabilidade.', 3, 2, 3, NULL, 'baixa', 'em andamento', '2025-08-14 09:30:00', NULL),
-('Inspeção preventiva em equipamento', 'Visita para inspeção preventiva e manutenção.', 1, 8, 1, NULL, 'media', 'concluido', '2025-08-15 08:00:00', '2025-08-15 10:00:00'),
-('Troca de mouse', 'Mouse defeituoso substituído.', 2, 3, 4, NULL, 'baixa', 'concluido', '2025-08-15 08:00:00', '2025-08-15 08:10:00'),
-('Formatação de PC', 'Computador formatado com sucesso.', 3, 4, 5, NULL, 'media', 'concluido', '2025-08-15 08:30:00', '2025-08-15 09:30:00'),
-('Troca de monitor', 'Novo monitor instalado.', 2, 5, 6, NULL, 'alta', 'concluido', '2025-08-15 09:00:00', '2025-08-15 09:30:00'),
-('Reparo de teclado', 'Teclado com teclas substituídas.', 2, 6, 7, NULL, 'media', 'concluido', '2025-08-15 09:30:00', '2025-08-15 10:00:00'),
-('Configuração de rede externa', 'Configuração de rede no cliente.', 1, NULL, 1, NULL, 'baixa', 'pendente', '2025-08-15 09:45:00', NULL),
-('Instalação de impressora', 'Nova impressora configurada.', 3, 7, 8, NULL, 'baixa', 'concluido', '2025-08-16 08:00:00', '2025-08-16 08:45:00'),
-('Configuração de rede', 'Rede ajustada e funcionando.', 3, 8, 9, NULL, 'alta', 'concluido', '2025-08-16 08:30:00', '2025-08-16 09:15:00'),
-('Reparo de projetor', 'Imagem ajustada e projetor funcional.', 2, 1, 10, NULL, 'media', 'concluido', '2025-08-16 09:00:00', '2025-08-16 09:45:00'),
-('Limpeza de gabinete', 'Limpeza interna concluída.', 4, 2, 2, NULL, 'baixa', 'concluido', '2025-08-16 09:30:00', '2025-08-16 10:15:00'),
-('Suporte técnico externo', 'Atendimento remoto e presencial para suporte técnico.', 1, 4, 1, NULL, 'media', 'em andamento', '2025-08-16 10:30:00', NULL),
-('Atualização de sistema', 'Sistema atualizado para última versão.', 3, 3, 3, NULL, 'alta', 'concluido', '2025-08-17 08:00:00', '2025-08-17 09:30:00'),
-('Troca de fonte de PC', 'Fonte de alimentação substituída.', 2, 4, 4, NULL, 'media', 'concluido', '2025-08-17 08:30:00', '2025-08-17 09:00:00'),
-('Reparo de equipamento de comunicação', 'Correção de falha em equipamento de comunicação.', 1, 5, 1, NULL, 'alta', 'concluido', '2025-08-17 13:00:00', '2025-08-17 14:30:00'),
-('Manutenção corretiva em servidor externo', 'Correção urgente no servidor do cliente.', 1, NULL, 1, NULL, 'alta', 'pendente', '2025-08-17 15:00:00', NULL),
-('Limpeza de vidros externos', 'Limpeza completa dos vidros da fachada.', 4, 11, 1, NULL, 'media', 'concluido', '2025-03-10 09:00:00', '2025-03-10 12:00:00'),
-('Aspiração de carpetes', 'Limpeza do setor administrativo.', 4, 9, 1, NULL, 'baixa', 'concluido', '2025-04-15 10:00:00', '2025-04-15 12:00:00'),
-('Limpeza de garagem', 'Remoção de resíduos da garagem subterrânea.', 4, 12, 1, NULL, 'media', 'concluido', '2025-05-20 13:00:00', '2025-05-20 15:00:00'),
-('Higienização de elevadores', 'Limpeza dos elevadores principais.', 4, 13, 1, NULL, 'alta', 'concluido', '2025-06-05 08:45:00', '2025-06-05 10:00:00'),
-('Limpeza de salas de reunião', 'Revisão nas salas do 1º andar.', 4, 10, 1, NULL, 'media', 'concluido', '2025-06-18 14:30:00', '2025-06-18 16:00:00'),
-('Limpeza das janelas internas', 'Limpeza geral das janelas dos corredores.', 4, 11, 1, NULL, 'baixa', 'concluido', '2025-05-11 16:00:00', '2025-05-11 18:00:00'),
-('Limpeza do depósito', 'Organização e limpeza do almoxarifado.', 4, 13, 1, NULL, 'media', 'concluido', '2025-04-03 09:15:00', '2025-04-03 11:30:00'),
-('Desinfecção de refeitório', 'Limpeza pesada com produtos bactericidas.', 4, 12, 1, NULL, 'alta', 'concluido', '2025-03-22 10:30:00', '2025-03-22 12:00:00'),
-('Higienização de cadeiras', 'Limpeza das cadeiras do auditório.', 4, 9, 1, NULL, 'baixa', 'concluido', '2025-07-01 12:00:00', '2025-07-01 14:00:00'),
-('Faxina geral do prédio', 'Faxina nos andares 1 a 3.', 4, 10, 1, NULL, 'alta', 'concluido', '2025-07-25 17:00:00', '2025-07-25 20:00:00');
-
-
-/*  after insert -> serve para definir a data_limite logo no momento da criação, com base na prioridade informada.
-after update -> util caso a prioridade seja mudada depois da criação.
-DELIMITER $$
-
--- Quando INSERE um chamado
-CREATE TRIGGER trg_chamados_sla_insert
-AFTER INSERT ON chamados
-FOR EACH ROW
-BEGIN
-    UPDATE chamados
-    SET data_limite = CASE NEW.prioridade
-        WHEN 'baixa'   THEN DATE_ADD(NEW.criado_em, INTERVAL 72 HOUR)
-        WHEN 'media'   THEN DATE_ADD(NEW.criado_em, INTERVAL 24 HOUR)
-        WHEN 'alta'    THEN DATE_ADD(NEW.criado_em, INTERVAL 8 HOUR)
-        WHEN 'urgente' THEN DATE_ADD(NEW.criado_em, INTERVAL 4 HOUR)
-        ELSE NULL
-    END
-    WHERE id = NEW.id;
-END$$
-
--- Quando ATUALIZA a prioridade
-CREATE TRIGGER trg_chamados_sla_update
-AFTER UPDATE ON chamados
-FOR EACH ROW
-BEGIN
-    -- recalcula só se a prioridade mudou
-    IF NEW.prioridade <> OLD.prioridade THEN
-        UPDATE chamados
-        SET data_limite = CASE NEW.prioridade
-            WHEN 'baixa'   THEN DATE_ADD(NEW.criado_em, INTERVAL 72 HOUR)
-            WHEN 'media'   THEN DATE_ADD(NEW.criado_em, INTERVAL 24 HOUR)
-            WHEN 'alta'    THEN DATE_ADD(NEW.criado_em, INTERVAL 8 HOUR)
-            WHEN 'urgente' THEN DATE_ADD(NEW.criado_em, INTERVAL 4 HOUR)
-            ELSE NULL
-        END
-        WHERE id = NEW.id;
-    END IF;
-END$$
-
-DELIMITER ;
-*/
+INSERT INTO chamados (patrimonio, assunto, descricao, tipo_id, tecnico_id, usuario_id, imagem, prioridade_id, status_chamado, criado_em, finalizado_em) VALUES
+(1000001, 'Limpeza de banheiros', 'Higienização completa dos banheiros do térreo.', 4, NULL, 1, NULL, '2', 'pendente', '2025-08-01 09:00:00', NULL),
+(1000002, 'Limpeza do refeitório', 'Solicita-se limpeza pós-almoço.', 4, 11, 1, NULL, '2', 'concluido', '2025-08-03 11:00:00', '2025-08-03 12:00:00'),
+(1000003, 'Desinfecção de estações', 'Limpeza com álcool nas estações de trabalho do 2º andar.', 4, NULL, 1, NULL, '1', 'pendente', '2025-08-04 08:30:00', NULL),
+(1000004, 'Limpeza após reunião', 'Sala de reunião 3 precisa de limpeza após uso.', 4, 13, 1, NULL, '1', 'concluido', '2025-08-05 14:00:00', '2025-08-05 15:00:00'),
+(1000005, 'Limpeza de carpetes', 'Carpetes da recepção precisam de aspiração.', 4, 9, 1, NULL, '2', 'em andamento', '2025-08-06 15:45:00', NULL),
+(1000006, 'Limpeza da copa', 'Solicita-se limpeza da copa no fim do expediente.', 4, NULL, 1, NULL, '1', 'pendente', '2025-08-07 17:00:00', NULL),
+(1000007, 'Limpeza da área externa', 'Área próxima ao estacionamento precisa de varrição.', 4, 11, 1, NULL, '2', 'em andamento', '2025-08-08 13:20:00', NULL),
+(1000008, 'Reposição de materiais', 'Faltando papel toalha nos banheiros femininos.', 4, 12, 1, NULL, '3', 'concluido', '2025-08-09 09:10:00', '2025-08-09 09:25:00'),
+(1000009, 'Problema na impressora', 'Impressora não está imprimindo.', 3, NULL, 2, NULL, '3', 'pendente', '2025-08-10 08:00:00', NULL),
+(1000010, 'Computador lento', 'PC demora muito para iniciar.', 3, NULL, 3, NULL, '1', 'pendente', '2025-08-10 08:30:00', NULL),
+(1000011, 'Sem acesso à internet', 'Conexão caiu repentinamente.', 3, NULL, 4, NULL, '3', 'pendente', '2025-08-10 09:00:00', NULL),
+(1000012, 'Monitor apagado', 'Tela do monitor não acende.', 2, NULL, 5, NULL, '1', 'pendente', '2025-08-10 09:30:00', NULL),
+(1000013, 'Limpeza dos vidros da recepção', 'Vidros da entrada precisam ser limpos.', 4, NULL, 1, NULL, '2', 'pendente', '2025-08-10 10:00:00', NULL),
+(1000014, 'Limpeza das janelas da TI', 'Janelas da sala de TI estão com muita poeira.', 4, 10, 1, NULL, '1', 'em andamento', '2025-08-02 10:00:00', NULL),
+(1000015, 'Teclado com teclas falhando', 'Algumas teclas não funcionam.', 2, NULL, 6, NULL, '2', 'pendente', '2025-08-11 08:00:00', NULL),
+(1000016, 'Erro no sistema', 'Sistema trava ao abrir módulo de vendas.', 3, NULL, 7, NULL, '3', 'pendente', '2025-08-11 08:30:00', NULL),
+(1000017, 'Telefone sem linha', 'Telefone fixo não recebe chamadas.', 3, NULL, 8, NULL, '2', 'pendente', '2025-08-11 09:00:00', NULL),
+(1000018, 'Queda de energia', 'Sala ficou sem luz após curto-circuito.', 2, NULL, 9, NULL, '3', 'pendente', '2025-08-11 09:30:00', NULL),
+(1000019, 'Atendimento externo para manutenção de impressora', 'Técnico deverá se deslocar até a unidade do cliente para manutenção da impressora.', 1, 4, 1, NULL, '3', 'em andamento', '2025-08-11 11:00:00', NULL),
+(1000020, 'Câmera de segurança inoperante', 'Câmera não transmite imagem.', 2, NULL, 10, NULL, '2', 'pendente', '2025-08-12 08:00:00', NULL),
+(1000021, 'Problema no projetor', 'Imagem do projetor está desfocada.', 2, NULL, 2, NULL, '1', 'pendente', '2025-08-12 08:30:00', NULL),
+(1000022, 'Troca de HD', 'HD com setores defeituosos, troca em andamento.', 2, 1, 3, NULL, '3', 'em andamento', '2025-08-12 09:00:00', NULL),
+(1000023, 'Manutenção externa de roteador', 'Técnico deverá visitar cliente para manutenção do roteador.', 1, 5, 1, NULL, '3', 'em andamento', '2025-08-12 09:30:00', NULL),
+(1000024, 'Instalação de software', 'Instalando novo sistema de gestão.', 3, 2, 4, NULL, '2', 'em andamento', '2025-08-12 09:30:00', NULL),
+(1000025, 'Troca de equipamento no cliente', 'Substituição de hardware defeituoso no local do cliente.', 1, 6, 1, NULL, '2', 'pendente', '2025-08-12 10:00:00', NULL),
+(1000026, 'Atualização remota de software', 'Atualização do sistema via acesso remoto.', 1, NULL, 1, NULL, '1', 'pendente', '2025-08-13 11:00:00', NULL),
+(1000027, 'Ajuste na rede', 'Reconfigurando roteadores e switches.', 3, 3, 5, NULL, '3', 'em andamento', '2025-08-13 08:00:00', NULL),
+(1000028, 'Limpeza interna do PC', 'Retirando poeira e trocando pasta térmica.', 4, 4, 6, NULL, '1', 'em andamento', '2025-08-13 08:30:00', NULL),
+(1000029, 'Atualização de drivers', 'Atualizando drivers de vídeo e áudio.', 3, 5, 7, NULL, '2', 'em andamento', '2025-08-13 09:00:00', NULL),
+(1000030, 'Substituição de cabo', 'Trocando cabo HDMI defeituoso.', 2, 6, 8, NULL, '1', 'em andamento', '2025-08-13 09:30:00', NULL),
+(1000031, 'Correção de bug', 'Ajustando falha no sistema interno.', 3, 7, 9, NULL, '3', 'em andamento', '2025-08-14 08:00:00', NULL),
+(1000032, 'Backup de dados', 'Realizando cópia de segurança.', 3, 8, 10, NULL, '2', 'em andamento', '2025-08-14 08:30:00', NULL),
+(1000033, 'Reparo de sistema de segurança', 'Correção de falhas no sistema de segurança instalado externamente.', 1, 7, 1, NULL, '3', 'em andamento', '2025-08-14 14:20:00', NULL),
+(1000034, 'Troca de memória RAM', 'Instalando pentes novos de RAM.', 2, 1, 2, NULL, '3', 'em andamento', '2025-08-14 09:00:00', NULL),
+(1000035, 'Testes de rede', 'Executando testes de estabilidade.', 3, 2, 3, NULL, '1', 'em andamento', '2025-08-14 09:30:00', NULL),
+(1000036, 'Inspeção preventiva em equipamento', 'Visita para inspeção preventiva e manutenção.', 1, 8, 1, NULL, '2', 'concluido', '2025-08-15 08:00:00', '2025-08-15 10:00:00'),
+(1000037, 'Troca de mouse', 'Mouse defeituoso substituído.', 2, 3, 4, NULL, '1', 'concluido', '2025-08-15 08:00:00', '2025-08-15 08:10:00'),
+(1000038, 'Formatação de PC', 'Computador formatado com sucesso.', 3, 4, 5, NULL, '2', 'concluido', '2025-08-15 08:30:00', '2025-08-15 09:30:00'),
+(1000039, 'Troca de monitor', 'Novo monitor instalado.', 2, 5, 6, NULL, '3', 'concluido', '2025-08-15 09:00:00', '2025-08-15 09:30:00'),
+(1000040, 'Reparo de teclado', 'Teclado com teclas substituídas.', 2, 6, 7, NULL, '2', 'concluido', '2025-08-15 09:30:00', '2025-08-15 10:00:00'),
+(1000041, 'Configuração de rede externa', 'Configuração de rede no cliente.', 1, NULL, 1, NULL, '1', 'pendente', '2025-08-15 09:45:00', NULL),
+(1000042, 'Instalação de impressora', 'Nova impressora configurada.', 3, 7, 8, NULL, '1', 'concluido', '2025-08-16 08:00:00', '2025-08-16 08:45:00'),
+(1000043, 'Configuração de rede', 'Rede ajustada e funcionando.', 3, 8, 9, NULL, '3', 'concluido', '2025-08-16 08:30:00', '2025-08-16 09:15:00'),
+(1000044, 'Reparo de projetor', 'Imagem ajustada e projetor funcional.', 2, 1, 10, NULL, '2', 'concluido', '2025-08-16 09:00:00', '2025-08-16 09:45:00'),
+(1000045, 'Limpeza de gabinete', 'Limpeza interna concluída.', 4, 2, 2, NULL, '1', 'concluido', '2025-08-16 09:30:00', '2025-08-16 10:15:00'),
+(1000046, 'Suporte técnico externo', 'Atendimento remoto e presencial para suporte técnico.', 1, 4, 1, NULL, '2', 'em andamento', '2025-08-16 10:30:00', NULL),
+(1000047, 'Atualização de sistema', 'Sistema atualizado para última versão.', 3, 3, 3, NULL, '3', 'concluido', '2025-08-17 08:00:00', '2025-08-17 09:30:00'),
+(1000048, 'Troca de fonte de PC', 'Fonte de alimentação substituída.', 2, 4, 4, NULL, '2', 'concluido', '2025-08-17 08:30:00', '2025-08-17 09:00:00'),
+(1000049, 'Reparo de equipamento de comunicação', 'Correção de falha em equipamento de comunicação.', 1, 5, 1, NULL, '3', 'concluido', '2025-08-17 13:00:00', '2025-08-17 14:30:00'),
+(1000050, 'Manutenção corretiva em servidor externo', 'Correção urgente no servidor do cliente.', 1, NULL, 1, NULL, '3', 'pendente', '2025-08-17 15:00:00', NULL),
+(1000051, 'Limpeza de vidros externos', 'Limpeza completa dos vidros da fachada.', 4, 11, 1, NULL, '2', 'concluido', '2025-03-10 09:00:00', '2025-03-10 12:00:00'),
+(1000052, 'Aspiração de carpetes', 'Limpeza do setor administrativo.', 4, 9, 1, NULL, '1', 'concluido', '2025-04-15 10:00:00', '2025-04-15 12:00:00'),
+(1000053, 'Limpeza de garagem', 'Remoção de resíduos da garagem subterrânea.', 4, 12, 1, NULL, '2', 'concluido', '2025-05-20 13:00:00', '2025-05-20 15:00:00'),
+(1000054, 'Higienização de elevadores', 'Limpeza dos elevadores principais.', 4, 13, 1, NULL, '3', 'concluido', '2025-06-05 08:45:00', '2025-06-05 10:00:00'),
+(1000055, 'Limpeza de salas de reunião', 'Revisão nas salas do 1º andar.', 4, 10, 1, NULL, '2', 'concluido', '2025-06-18 14:30:00', '2025-06-18 16:00:00'),
+(1000056, 'Limpeza das janelas internas', 'Limpeza geral das janelas dos corredores.', 4, 11, 1, NULL, '1', 'concluido', '2025-05-11 16:00:00', '2025-05-11 18:00:00'),
+(1000057, 'Limpeza do depósito', 'Organização e limpeza do almoxarifado.', 4, 13, 1, NULL, '2', 'concluido', '2025-04-03 09:15:00', '2025-04-03 11:30:00'),
+(1000058, 'Desinfecção de refeitório', 'Limpeza pesada com produtos bactericidas.', 4, 12, 1, NULL, '3', 'concluido', '2025-03-22 10:30:00', '2025-03-22 12:00:00'),
+(1000059, 'Higienização de cadeiras', 'Limpeza das cadeiras do auditório.', 4, 9, 1, NULL, '1', 'concluido', '2025-07-01 12:00:00', '2025-07-01 14:00:00'),
+(1000060, 'Faxina geral do prédio', 'Faxina nos andares 1 a 3.', 4, 10, 1, NULL, '3', 'concluido', '2025-07-25 17:00:00', '2025-07-25 20:00:00');
 
 -- Criação da tabela `apontamentos`
 CREATE TABLE apontamentos (
@@ -283,15 +256,3 @@ CREATE TABLE notificacoes (
 CREATE INDEX idx_usuarios_email ON usuarios(email);
 CREATE INDEX idx_chamados_status ON chamados(status_chamado);
 CREATE INDEX idx_apontamentos_comeco_fim ON apontamentos(comeco, fim);
-
-select *from usuarios;
-select *from chamados;
-select *from usuario_servico;
-
-SELECT c.*, u.nome AS nome_usuario
-FROM chamados c
-INNER JOIN usuario_servico us ON us.servico_id = c.tipo_id
-INNER JOIN usuarios u ON u.id = c.usuario_id
-WHERE us.usuario_id = 4 AND c.status_chamado = 'em andamento' AND c.tecnico_id = 4
-ORDER BY c.criado_em DESC;
-

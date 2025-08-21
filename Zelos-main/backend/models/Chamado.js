@@ -67,10 +67,21 @@ const lerMsg = async (idChamado) => {
 //criar chamado usuário -- funcionando
 export const criarChamado = async (dados) => {
   try {
-    const resultado = await create('chamados', dados);
+    const resultado = await create("chamados", dados);
     return resultado;
   } catch (err) {
     console.error("Erro ao criar chamado!", err);
+    throw err;
+  }
+};
+
+// Buscar todas as prioridades
+export const getPrioridades = async () => {
+  try {
+    const resultado = await readAll("prioridades"); // SELECT * FROM prioridades
+    return resultado;
+  } catch (err) {
+    console.error("Erro ao buscar prioridades:", err);
     throw err;
   }
 };
@@ -81,6 +92,31 @@ export const listarChamados = async (usuarioId) => {
   } catch (err) {
     console.error("Erro ao listar chamados!", err);
     throw err;
+  }
+};
+
+export const calcularDataLimiteUsuario = async (prioridade_id) => {
+  try {
+    if (!prioridade_id) return null; // caso não tenha prioridade
+
+    // buscar a prioridade pelo id
+    const resultado = await read("prioridades", { id: prioridade_id });
+
+    if (!resultado || resultado.length === 0) {
+      return null; // prioridade não encontrada
+    }
+
+    const prioridade = resultado[0];
+
+    // pegar horas_limite e calcular data limite
+    const agora = new Date();
+    const data_limite = new Date(agora.getTime() + prioridade.horas_limite * 60 * 60 * 1000);
+
+    return data_limite;
+
+  } catch (error) {
+    console.error("Erro ao calcular data limite:", error);
+    return null;
   }
 };
 
@@ -372,34 +408,16 @@ export const getPrazoPorNome = async (nome) => {
 
 // calcula data limite com base em prioridade
 export const calcularDataLimite = async (prioridade) => {
-  if (!prioridade) return null;
-
-  // tenta consultar tabela prioridades
   try {
-    const prazo = await getPrazoPorNome(prioridade);
-    if (prazo !== null && prazo !== undefined) {
-      if (Number(prazo) <= 0) return null;
-      const dt = new Date();
-      dt.setDate(dt.getDate() + Number(prazo));
-      return dt;
+    const [row] = await read('prioridades', '*', 'nome = ?', [prioridade]);
+    if (row && row.horas_limite) {
+      return new Date(Date.now() + row.horas_limite * 60 * 60 * 1000);
     }
+    return null;
   } catch (err) {
-    // ignora e usa fallback
-    console.warn('Não foi possível consultar tabela prioridades, usando fallback', err);
+    console.error("Erro ao buscar prioridade:", err);
+    return null;
   }
-
-  // fallback
-  const mapa = {
-    'alta': 1,
-    'media': 3,
-    'baixa': 7,
-    'none': 0
-  };
-  const dias = mapa[prioridade] ?? 0;
-  if (!dias) return null;
-  const dt = new Date();
-  dt.setDate(dt.getDate() + dias);
-  return dt;
 };
 
 // Atualiza o data_limite de um chamado conforme sua prioridade atual.

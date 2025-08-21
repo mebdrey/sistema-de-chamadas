@@ -11,10 +11,10 @@
 }
 
 @media screen and (max-width: 550px){
-    .principal-container{
+    /* .principal-container{
      
     background-color: #8a2be2; 
-    }
+    } */
 
     .form-login{
         width: 100%;
@@ -29,11 +29,11 @@
         justify-content: center;
     }
 
-    nav{
+    /* nav{
         height: 15vh;
         background-color: blueviolet;
         align-content: center;
-    }
+    } */
 
     .zelos-name{
         color: #fff;

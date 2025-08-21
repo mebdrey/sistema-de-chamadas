@@ -1,6 +1,6 @@
 import PDFDocument from 'pdfkit';
 import { stringify } from 'csv-stringify/sync';
-import { criarNotificacao, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, listarPrioridades, getPrazoPorNome, calcularDataLimite, atualizarPrazoPorChamado, finalizarChamado, getApontamentosByChamado, getChamadoById, contarChamadosPorPool } from "../models/Chamado.js";
+import { criarNotificacao, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, getPrazoPorNome, calcularDataLimite, atualizarPrazoPorChamado, finalizarChamado, getApontamentosByChamado, getChamadoById, contarChamadosPorPool, getPrioridades, calcularDataLimiteUsuario } from "../models/Chamado.js";
 
 // busca nome do usuario com base no ID
 export const buscarChamadoComNomeUsuarioController = async (req, res) => {
@@ -77,33 +77,54 @@ const lerMensagensController = async (req, res) => {
   };
 };
 
-// usado para usuarios comuns ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+// usado para usuarios comuns ----------------------------------------------------------------------------------------------------------------------------------------------------------
 export const criarChamadoController = async (req, res) => {
-  const { assunto, tipo_id, descricao, prioridade, patrimonio } = req.body;
+  const { assunto, tipo_id, descricao, prioridade_id, patrimonio } = req.body;
   const usuario_id = req.user?.id;
-
   const imagem = req.file?.filename || null;
+
   try {
-    const data_limite = calcularDataLimite(prioridade);
+    // resolver a Promise corretamente
+    const data_limite = await calcularDataLimiteUsuario(prioridade_id);
+
     const dadosChamado = {
       assunto,
       tipo_id: tipo_id || null,
       descricao,
-      prioridade: prioridade || 'none',
+      prioridade_id: prioridade_id || null,
       imagem: imagem || null,
       usuario_id: usuario_id || null,
       patrimonio: patrimonio || null,
       data_limite
     };
-    Object.keys(dadosChamado).forEach((key) => {
-      if (dadosChamado[key] === undefined) {
-        dadosChamado[key] = null;
-      }
-    }); const resultado = await criarChamado(dadosChamado);
-    res.status(201).json({ ...dadosChamado, id: resultado, status_chamado: "pendente", criado_em: new Date() });
+
+    // Garantir que nenhum valor undefined vá para o DB
+    Object.keys(dadosChamado).forEach(key => {
+      if (dadosChamado[key] === undefined) dadosChamado[key] = null;
+    });
+
+    const resultado = await criarChamado(dadosChamado);
+
+    res.status(201).json({
+      ...dadosChamado,
+      id: resultado,
+      status_chamado: "pendente",
+      criado_em: new Date()
+    });
+
   } catch (error) {
-    console.error('Erro ao criar chamado:', error);
-    res.status(500).json({ erro: 'Erro interno ao criar chamado.' });
+    console.error("Erro ao criar chamado:", error);
+    res.status(500).json({ erro: "Erro interno ao criar chamado." });
+  }
+};
+
+// Controller para listar prioridades
+export const listarPrioridadesController = async (req, res) => {
+  try {
+    const prioridades = await getPrioridades();
+    res.json(prioridades);
+  } catch (error) {
+    res.status(500).json({ erro: "Erro ao buscar prioridades." });
   }
 };
 
@@ -369,15 +390,15 @@ export const criarPrioridadeController = async (req, res) => {
   }
 };
 
-export const listarPrioridadesController = async (_req, res) => {
-  try {
-    const list = await listarPrioridades();
-    res.status(200).json(list);
-  } catch (err) {
-    console.error('Erro listar prioridades:', err);
-    res.status(500).json({ message: 'Erro interno' });
-  }
-};
+// export const listarPrioridadesController = async (_req, res) => {
+//   try {
+//     const list = await listarPrioridades();
+//     res.status(200).json(list);
+//   } catch (err) {
+//     console.error('Erro listar prioridades:', err);
+//     res.status(500).json({ message: 'Erro interno' });
+//   }
+// };
 
 //endpoint que recalcula e atualiza prazo de um chamado
 export const atualizarPrazoController = async (req, res) => {
