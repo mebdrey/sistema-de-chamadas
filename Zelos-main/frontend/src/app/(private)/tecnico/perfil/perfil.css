@@ -1,88 +1,99 @@
 @layer base {
+
     button:not(:disabled),
     [role="button"]:not(:disabled) {
-      cursor: pointer;
-    }}
-    @import "tailwindcss";
-    
-  /* Defaults hover styles on all devices */
-  @custom-variant hover (&:hover);
-section h1{
+        cursor: pointer;
+    }
+}
+
+@import "tailwindcss";
+
+/* Defaults hover styles on all devices */
+@custom-variant hover (&:hover);
+
+section h1 {
     font-family: "Plus Jakarta Sans SemiBold";
     font-size: 2rem;
     width: max-content;
     height: fit-content;
 }
-section{ 
-    margin-left: 20%;
-}
-.infos{
-     background-color: #674fa027;
-     width: 50%;
-     padding: 3%;
-     align-items: center;
-     margin-left: 8%;
-     border-radius: 10%;
-     margin-top: 8%;
+
+.infos {
+
+
+    margin-top: 56px;
+    align-items: center;
+    padding: 2%
+
+
 }
 
-.page-indicador, .sec-indicador{
+* {
+    background-color: #fff;
+}
+
+.foto-usuario{
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.page-indicador,
+.sec-indicador {
     width: min-content;
     white-space: nowrap;
 }
 
-.perfil-img-nome div{
+.perfil-img-nome div {
     height: fit-content;
 }
 
-.perfil-img-nome div p{
+.perfil-img-nome div p {
     margin: 0;
 }
 
-.ft-up{
+.ft-up {
     width: 100px;
 }
 
-.user{
+.user {
     padding-bottom: 3vh;
 
 }
 
-.user h3{
+.user h3 {
     font-size: 1.5rem;
     font-family: "Plus Jakarta Sans Regular";
 }
 
-.user p{
-    font-size: 1rem;
-    color: #384D6C;
-    font-family: "Plus Jakarta Sans SemiBold";
-}
 
-.sec-indicador h4{
+
+.sec-indicador h4 {
     font-family: "Plus Jakarta Sans SemiBold";
     font-size: 1.4rem;
     width: max-content;
     height: fit-content;
 }
-.sec-container{
+
+.sec-container {
     margin-bottom: 5%;
 }
 
-.sec-campos{
+.sec-campos {
     height: fit-content;
 }
 
-.sec-campos h6{
+.sec-campos h6 {
     font-family: "Plus Jakarta Sans Regular";
 }
 
-.sec-campos p{
+.sec-campos p {
     font-family: "Plus Jakarta Sans SemiBold";
     margin: 0;
 }
 
-.btn-add{
+.btn-add {
     padding: 1vh 2vw;
     background-color: #7F56D8;
     color: #fff;
@@ -90,19 +101,30 @@ section{
     font-family: "Plus Jakarta Sans Medium";
 }
 
-.btn-edit{
-    color: #596780;
+.botao-editar {
+    color: white;
+    background-color: #7F56D8;
+    border-radius: 8px;
+    padding: 10px 20px ;
     font-family: "Plus Jakarta Sans Medium";
 }
 
-.sec{
-    margin-top: 5vh;
+.botao-editar:hover{
+    background-color: #5e39af;
 }
 
-.btn-perfil{
+/*.btn-edit {
+    color: #596780;
+    font-family: "Plus Jakarta Sans Medium";
+}*/
+
+
+
+.btn-perfil {
     margin-top: 2vh;
 }
-.botaoModal {
+
+/*.botaoModal {
     padding: 10px;
     font-size: 16px;
     cursor: pointer;
@@ -117,9 +139,11 @@ section{
     left: 0;
     background-color: rgba(0, 0, 0, 0.5);
 }
-.modal .label{
+
+.modal .label {
     width: 40%;
 }
+
 .modal-content {
     background: white;
     padding: 20px;
@@ -127,9 +151,9 @@ section{
     width: 50%;
     border-radius: 5px;
     text-align: center;
-}
+}*/
 
-.fecharModal{
+.fecharModal {
     width: 2%;
     margin-left: 97%;
     float: center;
