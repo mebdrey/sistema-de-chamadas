@@ -56,20 +56,20 @@ export default function GraficoChamadosPorAno() {
       enabled: true,
       x: { show: false },
     },
-fill: {
-  type: 'gradient',
-  gradient: {
-    shadeIntensity: 1,
-    opacityFrom: 0.55,
-    opacityTo: 0,
-    stops: [0, 100],
-  },
-},
-stroke: {
-  curve: 'smooth',
-  width: 6,
-  colors: ['#7F56D8']
-},
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shadeIntensity: 1,
+        opacityFrom: 0.55,
+        opacityTo: 0,
+        stops: [0, 100],
+      },
+    },
+    stroke: {
+      curve: 'smooth',
+      width: 6,
+      colors: ['#7F56D8']
+    },
     dataLabels: { enabled: false },
     grid: {
       show: false,
@@ -85,122 +85,103 @@ stroke: {
     yaxis: { show: false },
   };
 
-const series = useMemo(() => {
-  return dados && dados.length > 0 ? [{
-    name: 'Chamados',
-    data: [...dados],
-    color: '#7F56D8',
-  }] : [];
-}, [dados]);
-
+  const series = useMemo(() => {
+    return dados && dados.length > 0 ? [{
+      name: 'Chamados',
+      data: [...dados],
+      color: '#7F56D8',
+    }] : [];
+  }, [dados]);
 
   // gera csv
-const gerarCSV = () => {
-  const prioridade = prioridadeSelecionada || 'Todas';
-  const dataAtual = new Date().toLocaleString('pt-BR');
+  const gerarCSV = () => {
+    const prioridade = prioridadeSelecionada || 'Todas';
+    const dataAtual = new Date().toLocaleString('pt-BR');
 
-  const linhas = [
-    ['Relatório de Chamados por Mês'],
-    ['Prioridade:', prioridade],
-    ['Gerado em:', dataAtual],
-    [], // linha em branco
-    ['Mês', 'Quantidade de Chamados'],
-    ...categorias.map((mes, i) => [mes, dados[i]])
-  ];
+    const linhas = [
+      ['Relatório de Chamados por Mês'],
+      ['Prioridade:', prioridade],
+      ['Gerado em:', dataAtual],
+      [], // linha em branco
+      ['Mês', 'Quantidade de Chamados'],
+      ...categorias.map((mes, i) => [mes, dados[i]])
+    ];
 
-  // usa ponto e vírgula para ficar igual ao Excel
-  const csvContent = linhas
-    .map(row => row.join(';'))
-    .join('\n');
+    // usa ponto e vírgula para ficar igual ao Excel
+    const csvContent = linhas
+      .map(row => row.join(';'))
+      .join('\n');
 
-  const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
-  saveAs(blob, 'relatorio-chamados.csv');
-};
+    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, 'relatorio-chamados.csv');
+  };
 
   // pdf
-const gerarPDF = async () => {
-  const prioridade = prioridadeSelecionada || "Todas";
-  const dataAtual = new Date().toLocaleString("pt-BR");
-  const totalChamados = dados.reduce((acc, qtd) => acc + qtd, 0);
+  const gerarPDF = async () => {
+    const prioridade = prioridadeSelecionada || "Todas";
+    const dataAtual = new Date().toLocaleString("pt-BR");
+    const totalChamados = dados.reduce((acc, qtd) => acc + qtd, 0);
 
-  const doc = new jsPDF();
+    const doc = new jsPDF();
 
-  // --- TÍTULO ---
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.text("Relatório de Chamados por Mês", 105, 40, { align: "center" });
+    // --- TÍTULO ---
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("Relatório de Chamados por Mês", 105, 40, { align: "center" });
 
-  // --- SUBTÍTULO ---
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(80, 80, 80);
-  doc.text(`Prioridade: ${prioridade}`, 105, 48, { align: "center" });
-  doc.text(`Gerado em: ${dataAtual}`, 105, 54, { align: "center" });
+    // --- SUBTÍTULO ---
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(80, 80, 80);
+    doc.text(`Prioridade: ${prioridade}`, 105, 48, { align: "center" });
+    doc.text(`Gerado em: ${dataAtual}`, 105, 54, { align: "center" });
 
-  // --- INFO EXTRA ---
-  doc.setFontSize(11);
-  doc.setTextColor(50, 50, 50);
-  doc.text(`Total de Chamados: ${totalChamados}`, 14, 65);
+    // --- INFO EXTRA ---
+    doc.setFontSize(11);
+    doc.setTextColor(50, 50, 50);
+    doc.text(`Total de Chamados: ${totalChamados}`, 14, 65);
 
-  // --- TABELA ---
-  const linhas = categorias.map((mes, i) => [mes, dados[i]]);
-autoTable(doc, {
-  startY: 75,
-  head: [["Mês", "Quantidade de Chamados"]],
-  body: linhas,
-  styles: {
-    fontSize: 11,
-    cellPadding: 5,
-    halign: "center",
-    valign: "middle",
-  },
-  headStyles: {
-    fillColor: [127, 86, 216],
-    textColor: [255, 255, 255],
-    fontStyle: "bold",
-  },
-  alternateRowStyles: {
-    fillColor: [245, 240, 255],
-  },
-  bodyStyles: {
-    textColor: [50, 50, 50],
-  },
-});
+    // --- TABELA ---
+    const linhas = categorias.map((mes, i) => [mes, dados[i]]);
+    autoTable(doc, {
+      startY: 75,
+      head: [["Mês", "Quantidade de Chamados"]],
+      body: linhas,
+      styles: {
+        fontSize: 11,
+        cellPadding: 5,
+        halign: "center",
+        valign: "middle",
+      },
+      headStyles: {
+        fillColor: [127, 86, 216],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      alternateRowStyles: { fillColor: [245, 240, 255], },
+      bodyStyles: { textColor: [50, 50, 50], },
+    });
 
-  // --- RODAPÉ ---
-  const pageCount = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(9);
-    doc.setTextColor(120);
-    doc.text(`Página ${i} de ${pageCount}`, 200, 290, { align: "right" });
-    doc.text("Relatório gerado automaticamente pelo sistema", 14, 290);
-  }
+    // --- RODAPÉ ---
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(9);
+      doc.setTextColor(120);
+      doc.text(`Página ${i} de ${pageCount}`, 200, 290, { align: "right" });
+      doc.text("Relatório gerado automaticamente pelo sistema", 14, 290);
+    }
 
-  // --- SALVAR ---
-  doc.save("relatorio-chamados-por-mes.pdf");
-};
+    // --- SALVAR ---
+    doc.save("relatorio-chamados-por-mes.pdf");
+  };
 
   return (
     <>
-      <div className="flex justify-between">
-        <div>
-          <p className="text-lg poppins-medium text-gray-500 mb-3">
-            Quantidade de chamados neste ano
-          </p>
-        </div>
-      </div>
-
+      <div className="flex justify-between"><div><p className="text-lg poppins-medium text-gray-500 mb-3"> Quantidade de chamados neste ano</p></div></div>
       <div id="grafico-pdf" className="bg-white p-4 rounded-lg shadow">
-  <ApexChart
-    options={options}
-    series={series}
-    type="area"
-    height={200}
-  />
-</div>
-
-
+        <ApexChart options={options} series={series} type="area" height={200} />
+      </div>
       <div className="grid grid-cols-1 border-t border-gray-200 pt-5">
         <div className="flex justify-between items-center">
           <div className="relative">
@@ -215,16 +196,9 @@ autoTable(doc, {
                     }} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
                   </svg>
-
                 </span>
-              ) : (
-                <>
-                  Selecionar prioridade
-                  <ChevronDown className="w-4 h-4 ml-1.5" />
-                </>
-              )}
+              ) : (<> Selecionar prioridade <ChevronDown className="w-4 h-4 ml-1.5" /></>)}
             </button>
-
             {dropdownPrioridadeOpen && (
               <div className="absolute z-10 mt-2 bg-white border border-gray-200 rounded-lg shadow-sm w-44">
                 <ul className="py-2 text-sm text-gray-700">
@@ -232,11 +206,7 @@ autoTable(doc, {
                     <li key={label}>
                       <button
                         className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                        onClick={() => {
-                          setPrioridadeSelecionada(label);
-                          setDropdownPrioridadeOpen(false);
-                        }}
-                      >
+                        onClick={() => { setPrioridadeSelecionada(label); setDropdownPrioridadeOpen(false); }}>
                         {label}
                       </button>
                     </li>
@@ -246,32 +216,30 @@ autoTable(doc, {
             )}
           </div>
 
-<div className="relative">
-  <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-[#7F56D8] hover:bg-[#E6DAFF] px-3 py-2" onClick={() => setDropdownRelatorioOpen(prev => !prev)}>Gerar relatório
-    <svg className="w-3.5 h-3.5 text-[#7F56D8] me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
-      <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" />
-      <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
-    </svg>
-  </button>
+          <div className="relative">
+            <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-[#7F56D8] hover:bg-[#E6DAFF] px-3 py-2" onClick={() => setDropdownRelatorioOpen(prev => !prev)}>Gerar relatório
+              <svg className="w-3.5 h-3.5 text-[#7F56D8] me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+                <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" />
+                <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
+              </svg>
+            </button>
 
-  {/* Mostrar o dropdown só quando aberto */}
-  {dropdownRelatorioOpen && (
-    <div className="absolute z-10 mt-2 bg-white border border-gray-200 rounded-lg shadow-sm w-40">
-      <ul className="py-2 text-sm text-gray-700">
-        <li>
-          <button onClick={() => { gerarCSV(); setDropdownRelatorioOpen(false);}} className="w-full text-left px-4 py-2 hover:bg-gray-100" >Exportar CSV
-          </button>
-        </li>
-        <li>
-          <button  onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF
-          </button>
-        </li>
-      </ul>
-    </div>
-  )}
-</div>
-
-
+            {/* Mostrar o dropdown só quando aberto */}
+            {dropdownRelatorioOpen && (
+              <div className="absolute z-10 mt-2 bg-white border border-gray-200 rounded-lg shadow-sm w-40">
+                <ul className="py-2 text-sm text-gray-700">
+                  <li>
+                    <button onClick={() => { gerarCSV(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100" >Exportar CSV
+                    </button>
+                  </li>
+                  <li>
+                    <button onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>
