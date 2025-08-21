@@ -453,7 +453,7 @@ export default function ChamadosTecnico({
   }, [chamadoSelecionado, effectiveCurrentUserId, podeFinalizar, podeGerarRelatorio]);
 
 
-  return (
+  return ( //PÁGINA
     <>
       {/* conteudo da pagina */}
       <div className="p-4 h-screen w-full">
@@ -471,7 +471,7 @@ export default function ChamadosTecnico({
 
               {/* Dropdown de Prioridade */}
               <div className="relative inline-block">
-                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-8 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" id="dropdownPrioridadeButton">
+                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="text-white bg-violet-700 hover:bg-violet-800 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-8 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" id="dropdownPrioridadeButton">
                   Prioridade
                   <svg className="w-2.5 h-2.5 ms-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
@@ -534,7 +534,7 @@ export default function ChamadosTecnico({
                   const statusId = normalizarId(status)
                   return (
                     <li className="me-2" role="presentation" key={status}>
-                      <button onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === statusId ? "active border-blue-500 text-blue-600 dark:text-blue-400" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-neutral-400 dark:hover:text-neutral-300"
+                      <button onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === statusId ? "active border-violet-500 text-violet-600 dark:text-violet-400" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-neutral-400 dark:hover:text-neutral-300"
                         }`} type="button" >{primeiraLetraMaiuscula(status)}
                       </button>
                     </li>
@@ -591,7 +591,7 @@ export default function ChamadosTecnico({
                         </p>
                       </div>
                     ) : (
-                      chamadosFiltrados.map((chamado) => (
+                      chamadosFiltrados.map((chamado) => ( //CARD DOS CHAMADOS
                         <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:border-t-blue-500 dark:shadow-neutral-700/70 cursor-pointer">
                           <div className="flex items-center gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:border-neutral-700">
                             <h3 className="text-base poppins-bold text-gray-800 dark:text-white">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
@@ -625,7 +625,7 @@ export default function ChamadosTecnico({
                             <button onClick={(e) => {
                               e.stopPropagation(); // evitar que abra o modal
                               pegarChamado(chamado.id);
-                            }} className="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg" >
+                            }} className="mt-4 bg-violet-500 hover:bg-violet-600 text-white text-sm px-4 py-2 rounded-lg" >
                               Pegar chamado
                             </button>
                           )}
@@ -822,8 +822,8 @@ export default function ChamadosTecnico({
                             <span className="sr-only">Enviar imagem</span>
                           </button>
                           <textarea id="conteudo" value={conteudo} onChange={(e) => setConteudo(e.target.value)} rows="1" className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Mensagem"></textarea>
-                          <button type="button" onClick={() => enviarMsg('tecnico')} className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-[#E6DAFF] dark:text-blue-500 dark:hover:bg-gray-600">
-                            <svg className="w-5 h-5 rotate-90 rtl:-rotate-90" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
+                          <button type="button" onClick={() => enviarMsg('tecnico')} className="inline-flex justify-center p-2 text-violet-600 rounded-full cursor-pointer hover:bg-[#E6DAFF] dark:text-blue-500 dark:hover:bg-gray-600">
+                            <svg className="w-5 h-5 rotate-90 rtl:-rotate-90" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="#7F56D8" viewBox="0 0 18 20">
                               <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
                             </svg>
                             <span className="sr-only">Enviar mensagem</span>
@@ -869,10 +869,10 @@ export default function ChamadosTecnico({
                               rows="4"
                               value={descricao}
                               onChange={(e) => setDescricao(e.target.value)}
-                              className="w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                              className="w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-violet-500"
                               placeholder="Descreva o que foi feito..."
                             />
-                            <button onClick={iniciarApontamento} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Adicionar apontamento</button>
+                            <button onClick={iniciarApontamento} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-purple-700 transition">Adicionar apontamento</button>
                           </div>
                         )}
 
@@ -984,8 +984,8 @@ export default function ChamadosTecnico({
                         </svg>
                         <span className="sr-only">Enviar imagem</span>
                       </button>
-                      <textarea id="conteudo" value={conteudo} onChange={(e) => setConteudo(e.target.value)} rows="1" className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Mensagem"></textarea>
-                      <button type="button" onClick={() => enviarMsg('tecnico')} className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-[#E6DAFF] dark:text-blue-500 dark:hover:bg-gray-600">
+                      <textarea id="conteudo" value={conteudo} onChange={(e) => setConteudo(e.target.value)} rows="1" className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-violet-500 dark:focus:border-violet-500" placeholder="Mensagem"></textarea>
+                      <button type="button" onClick={() => enviarMsg('tecnico')} className="inline-flex justify-center p-2 text-violet-600 rounded-full cursor-pointer hover:bg-[#E6DAFF] dark:text-violet-500 dark:hover:bg-gray-600">
                         <svg className="w-5 h-5 rotate-90 rtl:-rotate-90" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
                           <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
                         </svg>
@@ -1032,10 +1032,10 @@ export default function ChamadosTecnico({
                           rows="4"
                           value={descricao}
                           onChange={(e) => setDescricao(e.target.value)}
-                          className="w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-violet-500 focus:border-violet-500"
                           placeholder="Descreva o que foi feito..."
                         />
-                        <button onClick={iniciarApontamento} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Adicionar apontamento</button>
+                        <button onClick={iniciarApontamento} className="mt-4 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition">Adicionar apontamento</button>
                       </div>
                     )}
 
