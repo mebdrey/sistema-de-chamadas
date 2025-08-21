@@ -1,20 +1,20 @@
 import PDFDocument from 'pdfkit';
 import { stringify } from 'csv-stringify/sync';
-import { criarNotificacao, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, getPrazoPorNome, calcularDataLimite, atualizarPrazoPorChamado, finalizarChamado, getApontamentosByChamado, getChamadoById, contarChamadosPorPool, getPrioridades, calcularDataLimiteUsuario } from "../models/Chamado.js";
+
+// import { criarNotificacao, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, getPrazoPorNome, calcularDataLimite, atualizarPrazoPorChamado, finalizarChamado, getApontamentosByChamado, getChamadoById, contarChamadosPorPool, getPrioridades, calcularDataLimiteUsuario } from "../models/Chamado.js";
+
+
+import { criarNotificacao, contarChamadosPorPrioridade, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, listarPrioridades, getPrazoPorNome, calcularDataLimite, atualizarPrazoPorChamado, finalizarChamado, getApontamentosByChamado, getChamadoById, contarChamadosPorPool } from "../models/Chamado.js";
+
 
 // busca nome do usuario com base no ID
 export const buscarChamadoComNomeUsuarioController = async (req, res) => {
   const { id } = req.params;
-
-  if (!id) {
-    return res.status(400).json({ erro: "ID do chamado é obrigatório." });
-  }
+  if (!id) { return res.status(400).json({ erro: "ID do chamado é obrigatório." });}
 
   try {
     const chamado = await buscarChamadoComNomeUsuario(id);
-    if (!chamado) {
-      return res.status(404).json({ erro: "Chamado não encontrado." });
-    }
+    if (!chamado) { return res.status(404).json({ erro: "Chamado não encontrado." }) }
     res.json(chamado);
   } catch (error) {
     console.error("Erro ao buscar chamado com nome do usuário:", error);
@@ -23,21 +23,16 @@ export const buscarChamadoComNomeUsuarioController = async (req, res) => {
 };
 
 //funções de chat
-
 //msg usuario para técnico - ta funcionando mas é preciso resolver a autenticação (usar o user logado), automatizar o id do chamado e o id do destinatário, para que puxe os valores do técnico e do chamado relacionado ao técnico.
 const UsuarioEnviarMensagemController = async (req, res) => {
   try {
     //coisas da autenticacao idUsuario
     const idUsuario = req.user?.id;
     const { conteudoMsg, idChamado } = req.body;
-    await escreverMensagem({
-      id_usuario: idUsuario,
-      id_tecnico: null, //o id do tecnico seria  o técnico que respondeu o chamado
-      conteudo: conteudoMsg,
-      id_chamado: idChamado
+    await escreverMensagem({id_usuario: idUsuario,id_tecnico: null, //o id do tecnico seria  o técnico que respondeu o chamado
+      conteudo: conteudoMsg, id_chamado: idChamado
     })
     res.status(201).json({ mensagem: 'Mensagem enviada com sucesso!' });
-
   }
   catch (error) {
     console.error(error);
@@ -131,14 +126,9 @@ export const listarPrioridadesController = async (req, res) => {
 export const listarChamadosController = async (req, res) => {
   try {
     const usuarioId = req.user?.id; // pegando do Passport
-    if (!usuarioId) {
-      return res.status(401).json({ message: 'Usuário não autenticado' });
-    }
+    if (!usuarioId) { return res.status(401).json({ message: 'Usuário não autenticado' });}
     const chamados = await listarChamados(usuarioId);
-    res.status(200).json({
-      mensagem: 'Chamados listados com sucesso!',
-      chamados
-    });
+    res.status(200).json({ mensagem: 'Chamados listados com sucesso!',chamados});
   } catch (error) {
     console.error('Erro ao listar chamados:', error);
     res.status(500).json({ message: 'Erro ao listar chamados' });
@@ -161,29 +151,19 @@ export const listarUsuariosPorSetorController = async (req, res) => {
   try {
     const tecnicos = await verTecnicos();
     const auxiliares = await verAuxiliaresLimpeza();
-
-    res.status(200).json({
-      tecnicos,
-      auxiliares
-    });
-  } catch (err) {
-    res.status(500).json({ erro: err.message });
-  }
+    res.status(200).json({tecnicos, auxiliares });
+  } catch (err) { res.status(500).json({ erro: err.message }); }
 };
 
 export const excluirUsuarioController = async (req, res) => {
   const usuarioId = parseInt(req.params.id, 10);
 
-  if (isNaN(usuarioId)) {
-    return res.status(400).json({ erro: 'ID do usuário inválido.' });
-  }
+  if (isNaN(usuarioId)) {return res.status(400).json({ erro: 'ID do usuário inválido.' });}
 
   try {
     const affectedRows = await excluirUsuario(usuarioId);
 
-    if (affectedRows === 0) {
-      return res.status(404).json({ erro: 'Usuário não encontrado.' });
-    }
+    if (affectedRows === 0) {return res.status(404).json({ erro: 'Usuário não encontrado.' }); }
 
     return res.status(200).json({ mensagem: 'Usuário excluído com sucesso.' });
   } catch (error) {
@@ -205,16 +185,11 @@ export const listarTodosChamadosController = async (req, res) => {
 export const atribuirTecnicoController = async (req, res) => {
   const { chamadoId, tecnicoId } = req.body;
 
-  if (!chamadoId || !tecnicoId) {
-    return res.status(400).json({ error: "chamadoId e tecnicoId são obrigatórios" });
-  }
+  if (!chamadoId || !tecnicoId) { return res.status(400).json({ error: "chamadoId e tecnicoId são obrigatórios" });}
 
   try {
     const affectedRows = await atribuirTecnico(chamadoId, tecnicoId);
-
-    if (affectedRows === 0) {
-      return res.status(404).json({ error: "Chamado não encontrado" });
-    }
+    if (affectedRows === 0) {return res.status(404).json({ error: "Chamado não encontrado" });}
 
     res.status(200).json({ message: "Técnico/Auxiliar atribuído com sucesso" });
   } catch (err) {
@@ -226,12 +201,9 @@ export const atribuirTecnicoController = async (req, res) => {
 export const contarChamadosPorStatusController = async (req, res) => {
   const { modo } = req.query;
 
-  if (!modo || (modo !== 'mensal' && modo !== 'anual')) {
-    return res.status(400).json({ erro: 'Modo inválido. Use "mensal" ou "anual".' });
-  }
+  if (!modo || (modo !== 'mensal' && modo !== 'anual')) {return res.status(400).json({ erro: 'Modo inválido. Use "mensal" ou "anual".' });}
 
-  try {
-    const resultado = await contarChamadosPorStatus(modo);
+  try { const resultado = await contarChamadosPorStatus(modo);
 
     // Garante que sempre tenha todos os status, mesmo que contagem = 0
     const todosOsStatus = ['pendente', 'em andamento', 'concluido'];
@@ -240,13 +212,8 @@ export const contarChamadosPorStatusController = async (req, res) => {
   r.status_chamado.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() ===
   status.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
 );
-
       // console.log('Resultado bruto do banco:', resultado);
-      return {
-        tipo: status,
-        qtd: encontrado ? encontrado.qtd : 0,
-        link: `/chamados?status=${status}`,
-      };
+      return { tipo: status, qtd: encontrado ? encontrado.qtd : 0, link: `/chamados?status=${status}`,};
     });
 
     res.json(respostaFinal);
@@ -256,14 +223,60 @@ export const contarChamadosPorStatusController = async (req, res) => {
   }
 };
 
+// export const contarChamadosPorPrioridadeController = async (req, res) => {
+//   try {
+//     const resultadoDoBanco = await contarChamadosPorPrioridade();
+//     const todasAsPrioridades = ['alta', 'média', 'baixa', 'none'];
+
+//     // 3. Mapeia a lista de prioridades para formatar a resposta final
+//     const respostaFinal = todasAsPrioridades.map((prioridade) => {
+//       // const prioridadeNormalizada = prioridade .normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      
+//       const encontrado = resultadoDoBanco.find( (r) => r.prioridade.toLowerCase() === prioridadeNormalizada);// Procura o resultado correspondente que veio do banco
+
+//       // 4. Monta o objeto de resposta para cada prioridade
+//       return { tipo: prioridade, // Usa o nome com acento para exibição no gráfico (ex: "média")
+//         qtd: encontrado ? encontrado.qtd : 0, // Se não encontrou, a quantidade é 0
+//       };
+//     });
+//     res.json(respostaFinal);// 5. Envia a resposta final em formato JSON
+
+//   } catch (error) {
+//     console.error('Erro ao contar chamados por prioridade:', error);
+//     res.status(500).json({ erro: 'Erro interno ao contar chamados por prioridade.' });
+//   }
+// };
+export const contarChamadosPorPrioridadeController = async (req, res) => {
+  try {
+    const resultadoDoBanco = await contarChamadosPorPrioridade();
+    const todasAsPrioridades = ['alta', 'média', 'baixa', 'none'];
+
+    const respostaFinal = todasAsPrioridades.map((prioridade) => {
+      // Compara diretamente com a prioridade original, mantendo acentos
+      const encontrado = resultadoDoBanco.find(
+        (r) => r.prioridade.toLowerCase() === prioridade.toLowerCase()
+      );
+
+      return {
+        tipo: prioridade, // Mantém o nome original com acento
+        qtd: encontrado ? encontrado.qtd : 0,
+      };
+    });
+
+    res.json(respostaFinal);
+  } catch (error) {
+    console.error('Erro ao contar chamados por prioridade:', error);
+    res.status(500).json({ erro: 'Erro interno ao contar chamados por prioridade.' });
+  }
+};
+
+
 export const chamadosPorMesController = async (req, res) => {
   const { prioridade } = req.query;
   try {
     const dados = await obterChamadosPorMesAno(prioridade);
     res.status(200).json(dados);
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao buscar dados dos chamados' });
-  }
+  } catch (err) {res.status(500).json({ erro: 'Erro ao buscar dados dos chamados' });}
 }
 
 export const editarChamadoController = async (req, res) => {
@@ -273,15 +286,11 @@ export const editarChamadoController = async (req, res) => {
     const usuario = req.user; // vem do Passport
 
     // Apenas admin pode editar qualquer chamado
-    if (usuario.funcao !== 'admin') {
-      return res.status(403).json({ message: 'Apenas administradores podem editar chamados' });
-    }
+    if (usuario.funcao !== 'admin') {return res.status(403).json({ message: 'Apenas administradores podem editar chamados' }); }
 
     const linhasAfetadas = await editarChamado(chamadoId, dados);
 
-    if (linhasAfetadas === 0) {
-      return res.status(400).json({ message: 'Nenhuma alteração realizada' });
-    }
+    if (linhasAfetadas === 0) {return res.status(400).json({ message: 'Nenhuma alteração realizada' });}
 
     res.status(200).json({ message: 'Chamado atualizado com sucesso!' });
   } catch (error) {
@@ -293,9 +302,7 @@ export const editarChamadoController = async (req, res) => {
 export const criarUsuarioController = async (req, res) => {
   try {
     const { nome, username, email, senha, funcao, ftPerfil } = req.body;
-    if (!nome || !email || !senha) {
-      return res.status(400).json({ message: 'nome, email e senha são obrigatórios' });
-    }
+    if (!nome || !email || !senha) {return res.status(400).json({ message: 'nome, email e senha são obrigatórios' });}
 
     // verifica username
     const desiredUsername = username || (nome.split(/\s+/)[0] || nome).toLowerCase();
@@ -429,15 +436,11 @@ export async function contarChamadosPorPoolController(req, res) {
     const setorRaw = req.query.setor;
     const modo = (req.query.modo || 'anual').toLowerCase();
 
-    if (!setorRaw || String(setorRaw).trim() === '') {
-      return res.status(400).json({ erro: 'Parâmetro "setor" (pool.titulo) é obrigatório.' });
-    }
+    if (!setorRaw || String(setorRaw).trim() === '') { return res.status(400).json({ erro: 'Parâmetro "setor" (pool.titulo) é obrigatório.' });}
     const setor = String(setorRaw);
 
     const permitModo = ['anual', 'todos'];
-    if (!permitModo.includes(modo)) {
-      return res.status(400).json({ erro: 'modo inválido — use "anual" ou "todos"' });
-    }
+    if (!permitModo.includes(modo)) {return res.status(400).json({ erro: 'modo inválido — use "anual" ou "todos"' });}
 
     // chama model (que já garante que só traga usuarios ligados a tecnico_id e com funcao adequada)
     const dados = await contarChamadosPorPool({ setor, modo });
@@ -468,41 +471,29 @@ export const listarChamadosDisponiveisController = async (req, res) => {
     const usuario_id = req.user?.id;
     const chamados = await listarChamadosDisponiveis(usuario_id);
     res.json(chamados);
-  } catch (error) {
-    res.status(500).json({ erro: 'Erro ao listar chamados disponíveis.' });
-  }
+  } catch (error) {res.status(500).json({ erro: 'Erro ao listar chamados disponíveis.' });}
 };
 
 // export const pegarChamadoController = async (req, res) => {
 //   const usuario_id = req.user?.id;
 //   const { chamado_id } = req.body;
-
-//   if (!chamado_id) {
-//     return res.status(400).json({ erro: 'ID do chamado é obrigatório.' });
-//   }
-
+//   if (!chamado_id) { return res.status(400).json({ erro: 'ID do chamado é obrigatório.' });}
 //   try {
 //     await pegarChamado(chamado_id, usuario_id);
 //     res.status(200).json({ mensagem: 'Chamado atribuído com sucesso.' });
-//   } catch (error) {
-//     res.status(400).json({ erro: error.message });
-//   }
+//   } catch (error) {res.status(400).json({ erro: error.message });}
 // };
 export const pegarChamadoController = async (req, res) => {
   const usuario_id = req.user?.id;
   const { chamado_id } = req.body;
 
-  if (!chamado_id) {
-    return res.status(400).json({ erro: 'ID do chamado é obrigatório.' });
-  }
+  if (!chamado_id) { return res.status(400).json({ erro: 'ID do chamado é obrigatório.' });}
 
   try {
     const chamadoAtualizado = await pegarChamado(chamado_id, usuario_id);
     // devolve mensagem e chamado atualizado (contendo data_limite)
     res.status(200).json({ mensagem: 'Chamado atribuído com sucesso.', chamado: chamadoAtualizado });
-  } catch (error) {
-    res.status(400).json({ erro: error.message });
-  }
+  } catch (error) {res.status(400).json({ erro: error.message });}
 };
 
 export const contarChamadosController = async (req, res) => {
@@ -550,17 +541,13 @@ export const listarChamadosFuncionarioController = async (req, res) => {
   const statusParam = req.query.status?.replace('-', ' '); // transforma "em-andamento" em "em andamento"
   console.log("Status recebido:", statusParam);
 
-  if (!usuario_id || !statusParam) {
-    return res.status(400).json({ erro: 'Parâmetros ausentes.' });
-  }
+  if (!usuario_id || !statusParam) {return res.status(400).json({ erro: 'Parâmetros ausentes.' });}
 
   try {
     const chamados = await listarChamadosPorStatusEFunção(usuario_id, statusParam);
     console.log("Chamados encontrados:", chamados);
     res.json(chamados);
-  } catch (error) {
-    res.status(500).json({ erro: 'Erro ao buscar chamados por status.' });
-  }
+  } catch (error) {res.status(500).json({ erro: 'Erro ao buscar chamados por status.' });}
 };
 
 export const listarApontamentosController = async (req, res) => {
@@ -568,9 +555,7 @@ export const listarApontamentosController = async (req, res) => {
     const chamado_id = req.params.chamado_id;
     const apontamentos = await listarApontamentosPorChamado(chamado_id);
     res.json(apontamentos);
-  } catch (error) {
-    res.status(500).json({ erro: 'Erro ao listar apontamentos' });
-  }
+  } catch (error) {res.status(500).json({ erro: 'Erro ao listar apontamentos' });}
 };
 
 export const criarApontamentoController = async (req, res) => {
@@ -578,9 +563,7 @@ export const criarApontamentoController = async (req, res) => {
     const { chamado_id, descricao } = req.body;
     const tecnico_id = req.user?.id;
 
-    if (!descricao || !chamado_id || !tecnico_id) {
-      return res.status(400).json({ erro: 'Descrição, chamado_id e tecnico_id são obrigatórios' });
-    }
+    if (!descricao || !chamado_id || !tecnico_id) {return res.status(400).json({ erro: 'Descrição, chamado_id e tecnico_id são obrigatórios' });}
 
     const novo = await criarApontamento({ chamado_id, tecnico_id, descricao });
 
@@ -597,9 +580,7 @@ export const finalizarApontamentoController = async (req, res) => {
     const { apontamento_id } = req.body;
     await finalizarApontamento(apontamento_id);
     res.json({ mensagem: 'Apontamento encerrado com sucesso' });
-  } catch (error) {
-    res.status(500).json({ erro: 'Erro ao finalizar apontamento' });
-  }
+  } catch (error) {res.status(500).json({ erro: 'Erro ao finalizar apontamento' });}
 };
 
 export const finalizarChamadoController = async (req, res) => {
@@ -607,9 +588,7 @@ export const finalizarChamadoController = async (req, res) => {
     const tecnico_id = req.user?.id;
     const { chamado_id } = req.body;
 
-    if (!chamado_id) {
-      return res.status(400).json({ erro: 'ID do chamado é obrigatório.' });
-    }
+    if (!chamado_id) {return res.status(400).json({ erro: 'ID do chamado é obrigatório.' });}
 
     const dadosRelatorio = await finalizarChamado(chamado_id, tecnico_id);
 
@@ -647,11 +626,8 @@ const chamadaPrioridade = (p) => { if (!p) return ''; return p === 'alta' ? 'Alt
 function formatIdHash(chamado, opts = { zeros: 0 }) {
   // retorna "#50" ou com zero-pad se opts.zeros > 0 -> "#00050"
   const id = String(chamado.id);
-  if (opts.zeros && Number(opts.zeros) > 0) {
-    return `#${id.padStart(opts.zeros, '0')}`;
-  }
-  return `#${id}`;
-}
+  if (opts.zeros && Number(opts.zeros) > 0) {return `#${id.padStart(opts.zeros, '0')}`;}
+  return `#${id}`;}
 
 export const gerarRelatorioChamadoController = async (req, res) => {
   try {
@@ -711,9 +687,7 @@ if (formato === 'csv') {
   if (apontLines.length) {
     // coloca todos os apontamentos numa única célula (com quebras de linha)
     rows.push(['Apontamentos', apontLines.join('\n')]);
-  } else {
-    rows.push(['Apontamentos', 'Descreva aqui o procedimento realizado.']);
-  }
+  } else {rows.push(['Apontamentos', 'Descreva aqui o procedimento realizado.']);}
 
   rows.push([]); // linha em branco
 
@@ -852,9 +826,7 @@ doc.moveDown(0);
     if (rel.anexos && rel.anexos.length) {
       doc.fontSize(12).text('Anexos', { underline: true });
       doc.moveDown(0.2);
-      rel.anexos.forEach(a => {
-        doc.fontSize(11).text(`${a}`);
-      });
+      rel.anexos.forEach(a => { doc.fontSize(11).text(`${a}`); });
       doc.moveDown(0.4);
     }
 
