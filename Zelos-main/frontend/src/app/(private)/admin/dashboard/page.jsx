@@ -115,44 +115,7 @@ const exportarCsvChamadosPorStatus = () => {
     );
 
     const doc = new jsPDF();
-    // Carregar a imagem como Base64
-    const loadImageAsBase64 = (url) =>
-      fetch(url)
-        .then(res => res.blob())
-        .then(blob => new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.readAsDataURL(blob);
-        }));
-
-    const icon = '/img/icon-zelos.png'
-    // Função auxiliar para adicionar imagem mantendo proporção
-    const addLogo = (doc, base64Img, maxWidth, maxHeight) => {
-      const imgProps = doc.getImageProperties(base64Img);
-      const ratio = imgProps.width / imgProps.height;
-
-      let w = maxWidth;
-      let h = w / ratio;
-
-      if (h > maxHeight) {
-        h = maxHeight;
-        w = h * ratio;
-      }
-
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const x = (pageWidth - w) / 2; // centraliza
-      const y = 10; // margem do topo
-
-      doc.addImage(base64Img, "PNG", x, y, w, h);
-
-      return { x, y, w, h }; // retorna posição e tamanho, útil para alinhar o título depois
-    };
-
-    // --- LOGO  ---
-    const logoBase64 = await loadImageAsBase64(icon);
-    const { y, h } = addLogo(doc, logoBase64, 25, 25); // define largura/altura máximas
-
-    // título 10pt abaixo da logo
+    
     doc.setFontSize(18);
     doc.setTextColor(0, 0, 0);
     doc.text("Relatório de Chamados", pageWidth / 2, y + h + 10, { align: "center" });

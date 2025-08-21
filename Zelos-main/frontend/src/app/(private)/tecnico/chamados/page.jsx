@@ -3,9 +3,11 @@ import { useEffect, useState, useMemo } from "react";
 import { initFlowbite } from 'flowbite'
 import { useRouter } from 'next/navigation';
 import OrdenarPor from '@/components/DropDown/DropDown.jsx'
-import axios from "axios";
-
-export default function ChamadosTecnico() {
+import { useContext } from 'react';
+import { UserContext } from '@/components/ProtectedRoute/ProtectedRoute.jsx';
+export default function ChamadosTecnico({
+  downloadMode = 'open' // 'open' ou 'download'
+}) {
   const [isOpen, setIsOpen] = useState(false); // p drawer abrir e fechar
   const [isMounted, setIsMounted] = useState(false); // espera o componente estar carregado no navegador p evitar erros de renderizacao
   const [chamados, setChamados] = useState([]) // p selecionar os chamados com base no status
@@ -23,6 +25,11 @@ export default function ChamadosTecnico() {
   const [descricao, setDescricao] = useState('');
   const [apontamentoAtivo, setApontamentoAtivo] = useState(null);
   const [toasts, setToasts] = useState([]); // { id, type: 'success'|'danger'|'warning', message }
+  const { user, userId } = useContext(UserContext); // 
+  // effectiveCurrentUserId: string ou undefined
+  const effectiveCurrentUserId = userId ? String(userId) : undefined;
+  // alias para showToast 
+  const showToastLocal = (type, message, timeout = 5000) => showToast(type, message, timeout);
 
   const removeToast = (id) => {
     setToasts((prev) => prev.filter(t => t.id !== id));
@@ -54,7 +61,7 @@ export default function ChamadosTecnico() {
       if (!chamadoSelecionado?.id) return;
 
       try {
-        const response = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
+        const response = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`, { credentials: 'include' });
         const data = await response.json();
         const lista = Array.isArray(data) ? data : data.apontamentos || [];
         setApontamentos(lista);
@@ -87,7 +94,7 @@ export default function ChamadosTecnico() {
       if (!response.ok) throw new Error('Erro ao criar apontamento');
 
       // Atualiza a lista após criar
-      const res = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
+      const res = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`, { credentials: 'include' });
       const data = await res.json();
       const lista = Array.isArray(data) ? data : data.apontamentos || [];
       setApontamentos(lista);
@@ -103,13 +110,14 @@ export default function ChamadosTecnico() {
       const response = await fetch('http://localhost:8080/finalizar-apontamento', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ apontamento_id: id })
       });
 
       if (!response.ok) throw new Error('Erro ao finalizar apontamento');
 
       // Atualiza a lista após finalizar
-      const res = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`);
+      const res = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`, { credentials: 'include' });
       const data = await res.json();
       const lista = Array.isArray(data) ? data : data.apontamentos || [];
       setApontamentos(lista);
@@ -272,23 +280,51 @@ export default function ChamadosTecnico() {
     return mapa;
   }, [tiposServico]);
 
+  // const pegarChamado = async (chamadoId) => {
+  //   try {
+  //     const response = await fetch('http://localhost:8080/pegar-chamado', {
+  //       method: 'POST',
+  //       credentials: 'include',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ chamado_id: chamadoId }),
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) throw new Error(data.erro || 'Erro ao pegar chamado');
+
+  //     showToast('success', data.mensagem || 'Chamado pego com sucesso');
+  //     atualizarChamados();
+  //   } catch (err) {
+  //     showToast('danger', err.message || 'Erro desconhecido');
+  //   }
+  // };
+
   const pegarChamado = async (chamadoId) => {
     try {
       const response = await fetch('http://localhost:8080/pegar-chamado', {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chamado_id: chamadoId }),
       });
 
       const data = await response.json();
 
-      if (!response.ok) throw new Error(data.erro || 'Erro ao pegar chamado');
+      if (!response.ok) {
+        throw new Error(data.erro || 'Erro ao pegar chamado');
+      }
 
+      // data.chamado contém o chamado atualizado com data_limite
+      const atualizado = data.chamado || data;
+      // atualiza a seleção para abrir drawer com prazo
+      setChamadoSelecionado(atualizado);
       showToast('success', data.mensagem || 'Chamado pego com sucesso');
-      atualizarChamados();
+
+      // atualiza listas (mantém comportamento atual)
+      await atualizarChamados();
     } catch (err) {
       showToast('danger', err.message || 'Erro desconhecido');
     }
@@ -302,6 +338,119 @@ export default function ChamadosTecnico() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+
+  // ------------------ ações: finalizar e baixar relatorio ------------------
+  const [finalizando, setFinalizando] = useState(false);
+  const [baixando, setBaixando] = useState(false);
+
+  const finalizarChamado = async () => {
+    if (!chamadoSelecionado?.id) {
+      showToastLocal('danger', 'Nenhum chamado selecionado.');
+      return;
+    }
+    if (chamadoSelecionado.status_chamado !== 'em andamento') {
+      showToastLocal('warning', 'Somente chamados em andamento podem ser finalizados.');
+      return;
+    }
+    if (String(chamadoSelecionado.tecnico_id) !== String(effectiveCurrentUserId)) {
+      showToastLocal('danger', 'Você não tem permissão para finalizar este chamado.');
+      return;
+    }
+
+    try {
+      setFinalizando(true);
+      const resp = await fetch('http://localhost:8080/finalizar-chamado', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ chamado_id: chamadoSelecionado.id })
+      });
+      const body = await resp.json();
+      if (!resp.ok) throw new Error(body.erro || 'Erro ao finalizar chamado.');
+
+      showToastLocal('success', body.mensagem || 'Chamado finalizado com sucesso.');
+
+      // atualiza UI local para refletir conclusão imediata
+      setChamadoSelecionado(prev => ({ ...prev, status_chamado: 'concluido', finalizado_em: (new Date()).toISOString() }));
+
+      // e atualiza lista (recarrega back)
+      await atualizarChamados();
+    } catch (err) {
+      console.error('finalizarChamado:', err);
+      showToastLocal('danger', err.message || 'Erro ao finalizar chamado.');
+    } finally {
+      setFinalizando(false);
+    }
+  };
+
+  const baixarRelatorioPdf = async (format = 'pdf') => {
+    if (!chamadoSelecionado?.id) {
+      showToastLocal('danger', 'Nenhum chamado selecionado.');
+      return;
+    }
+    if (chamadoSelecionado.status_chamado !== 'concluido') {
+      showToastLocal('warning', 'Relatório disponível apenas para chamados concluídos.');
+      return;
+    }
+    if (String(chamadoSelecionado.tecnico_id) !== String(effectiveCurrentUserId)) {
+      showToastLocal('danger', 'Você não tem permissão para gerar este relatório.');
+      return;
+    }
+
+    const url = `http://localhost:8080/relatorio-chamado/${chamadoSelecionado.id}?format=${encodeURIComponent(format)}`;
+    try {
+      setBaixando(true);
+      if (downloadMode === 'open') {
+        window.open(url, '_blank');
+        showToastLocal('success', 'Relatório aberto em nova aba.');
+      } else {
+        const resp = await fetch(url, { method: 'GET', credentials: 'include' });
+        if (!resp.ok) {
+          let errText = 'Erro ao baixar relatório';
+          try { const json = await resp.json(); errText = json.erro || errText; } catch (e) { }
+          throw new Error(errText);
+        }
+        const blob = await resp.blob();
+        const cd = resp.headers.get('content-disposition') || '';
+        let filename = `relatorio_chamado_${chamadoSelecionado.id}.${format === 'csv' ? 'csv' : 'pdf'}`;
+        const match = /filename="?(.+?)"?($|;)/i.exec(cd);
+        if (match && match[1]) filename = match[1];
+        const link = document.createElement('a');
+        const href = URL.createObjectURL(blob);
+        link.href = href;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(href);
+        showToastLocal('success', 'Download iniciado.');
+      }
+    } catch (err) {
+      console.error('baixarRelatorioPdf:', err);
+      showToastLocal('danger', err.message || 'Erro ao gerar/baixar relatório.');
+    } finally {
+      setBaixando(false);
+    }
+  };
+
+  // visibilidade dos botões
+  const podeFinalizar = chamadoSelecionado &&
+    chamadoSelecionado.status_chamado === 'em andamento' &&
+    effectiveCurrentUserId &&
+    String(chamadoSelecionado.tecnico_id) === String(effectiveCurrentUserId);
+
+  const podeGerarRelatorio = chamadoSelecionado &&
+    chamadoSelecionado.status_chamado === 'concluido' &&
+    effectiveCurrentUserId &&
+    String(chamadoSelecionado.tecnico_id) === String(effectiveCurrentUserId);
+
+
+
+  // Para DEBUG: coloque estes logs somente no dev
+  useEffect(() => {
+    console.log('chamadoSelecionado (atual):', chamadoSelecionado);
+    console.log('effectiveCurrentUserId:', effectiveCurrentUserId, 'podeFinalizar:', podeFinalizar, 'podeGerarRelatorio:', podeGerarRelatorio);
+  }, [chamadoSelecionado, effectiveCurrentUserId, podeFinalizar, podeGerarRelatorio]);
 
 
   return (
@@ -615,6 +764,10 @@ export default function ChamadosTecnico() {
                           <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.prioridade}</p>
                         </div>
                         <div>
+                          <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Prazo (data limite)</p>
+                          <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.data_limite}</p>
+                        </div>
+                        <div>
                           <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Chamado ID</p>
                           <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">#{chamadoSelecionado?.id}</p>
                         </div>
@@ -775,6 +928,10 @@ export default function ChamadosTecnico() {
                       <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Prioridade</p>
                       <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.prioridade}</p>
                     </div>
+                        <div>
+                          <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Prazo (data limite)</p>
+                          <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.data_limite}</p>
+                        </div>
                     <div>
                       <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Chamado ID</p>
                       <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">#{chamadoSelecionado?.id}</p>
@@ -897,7 +1054,32 @@ export default function ChamadosTecnico() {
                   </div>
                 </div>
               </div>
+              {/* ---------- AÇÕES (Finalizar / Gerar Relatório) ---------- */}
+              <div className="flex items-center gap-3 mb-6">
+                {podeFinalizar && (
+                  <button onClick={async (e) => { e.stopPropagation(); await finalizarChamado(); }}
+                    disabled={finalizando}
+                    className="inline-flex items-center px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-60">
+                    {finalizando ? 'Finalizando...' : 'Finalizar Chamado'}
+                  </button>
+                )}
 
+                {podeGerarRelatorio && (
+                  <>
+                    <button onClick={(e) => { e.stopPropagation(); baixarRelatorioPdf('pdf'); }}
+                      disabled={baixando}
+                      className="inline-flex items-center px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60">
+                      {baixando ? 'Gerando PDF...' : 'Gerar / Baixar PDF'}
+                    </button>
+
+                    <button onClick={(e) => { e.stopPropagation(); baixarRelatorioPdf('csv'); }}
+                      disabled={baixando}
+                      className="inline-flex items-center px-3 py-2 text-sm text-white bg-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-60">
+                      {baixando ? 'Gerando CSV...' : 'Baixar CSV'}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </section>
         </div >
@@ -912,8 +1094,8 @@ export default function ChamadosTecnico() {
             role="alert"
           >
             <div className={`inline-flex items-center justify-center shrink-0 w-8 h-8 rounded-lg ${type === 'success' ? 'text-green-500 bg-green-100 dark:bg-green-800 dark:text-green-200' :
-                type === 'danger' ? 'text-red-500 bg-red-100 dark:bg-red-800 dark:text-red-200' :
-                  'text-orange-500 bg-orange-100 dark:bg-orange-700 dark:text-orange-200'
+              type === 'danger' ? 'text-red-500 bg-red-100 dark:bg-red-800 dark:text-red-200' :
+                'text-orange-500 bg-orange-100 dark:bg-orange-700 dark:text-orange-200'
               }`}
             >
               {type === 'success' && (

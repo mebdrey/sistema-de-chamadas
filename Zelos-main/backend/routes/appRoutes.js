@@ -1,6 +1,6 @@
 import express from "express";
 
-import { criarChamadoController, listarChamadosController, listarUsuariosPorSetorController, listarTiposServicoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, buscarChamadoComNomeUsuarioController, chamadosPorMesController, atribuirTecnicoController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, excluirSetorController, listarSetoresController, criarPrioridadeController, listarPrioridadesController, atualizarPrazoController, calcularDataLimiteController } from "../controllers/ChamadoController.js";
+import { criarChamadoController, listarChamadosController, listarUsuariosPorSetorController, listarTiposServicoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, buscarChamadoComNomeUsuarioController, chamadosPorMesController, atribuirTecnicoController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, excluirSetorController, listarSetoresController, criarPrioridadeController, listarPrioridadesController, atualizarPrazoController, calcularDataLimiteController, finalizarChamadoController, gerarRelatorioChamadoController, contarChamadosPorPoolController } from "../controllers/ChamadoController.js";
 import { obterPerfilUsuarioController, editarPerfilController } from "../controllers/PerfilController.js";
 import { upload } from '../middlewares/uploadMiddleware.js';
 import { garantirAutenticado } from '../middlewares/authMiddleware.js';
@@ -39,6 +39,8 @@ router.get('/prioridades', listarPrioridadesController);
 router.patch('/chamados/:id/prazo', garantirAutenticado, atualizarPrazoController);
 router.post('/chamados/calcular-prazo', calcularDataLimiteController);
 
+router.get("/relatorios/chamados-por-pool", garantirAutenticado, contarChamadosPorPoolController);
+
 
 // rotas usadas para tecnicos e auxiliares ------------------------------------------------------------------------------------------------------------------------------------------------
 // router.get('/chamados-disponiveis', listarChamadosDisponiveisController); 
@@ -47,6 +49,8 @@ router.get('/chamados-funcionario', garantirAutenticado, listarChamadosFuncionar
 router.get('/apontamentos/:chamado_id', garantirAutenticado, listarApontamentosController); // lista os apontamentos feitos para determinado chamamdo 
 router.post('/criar-apontamento', garantirAutenticado, criarApontamentoController); // tecnico cria apontamentos
 router.patch('/finalizar-apontamento', garantirAutenticado, finalizarApontamentoController); // tecnico finaliza apontamentos
+router.patch('/finalizar-chamado', garantirAutenticado, finalizarChamadoController);
+router.get('/relatorio-chamado/:chamado_id', garantirAutenticado, gerarRelatorioChamadoController); 
 
 
 //relacionados a perfil

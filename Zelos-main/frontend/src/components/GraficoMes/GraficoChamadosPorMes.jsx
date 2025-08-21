@@ -4,6 +4,8 @@ import dynamic from 'next/dynamic';
 import { ChevronDown } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import '@/app/globals.css'
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const ApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -93,55 +95,90 @@ const series = useMemo(() => {
 
 
   // gera csv
-  const gerarCSV = () => {
-    const prioridade = prioridadeSelecionada || 'Todas';
-    const dataAtual = new Date().toLocaleString('pt-BR');
+const gerarCSV = () => {
+  const prioridade = prioridadeSelecionada || 'Todas';
+  const dataAtual = new Date().toLocaleString('pt-BR');
 
-    const linhas = [
-      ['Relatório de Chamados por Mês'],
-      ['Prioridade:', prioridade],
-      ['Gerado em:', dataAtual],
-      [],
-      ['Mês', 'Quantidade de Chamados'],
-      ...categorias.map((mes, i) => [mes, dados[i]])
-    ];
+  const linhas = [
+    ['Relatório de Chamados por Mês'],
+    ['Prioridade:', prioridade],
+    ['Gerado em:', dataAtual],
+    [], // linha em branco
+    ['Mês', 'Quantidade de Chamados'],
+    ...categorias.map((mes, i) => [mes, dados[i]])
+  ];
 
-    const csvContent = linhas
-      .map(row => row.join(','))
-      .join('\n');
+  // usa ponto e vírgula para ficar igual ao Excel
+  const csvContent = linhas
+    .map(row => row.join(';'))
+    .join('\n');
 
-    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
-    saveAs(blob, 'relatorio-chamados.csv');
-  };
+  const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+  saveAs(blob, 'relatorio-chamados.csv');
+};
 
   // pdf
-const gerarRelatorio = async () => {
-  // cria cópia segura dos dados
-  const payloadSeries = [...series.map(s => ({ ...s, data: [...s.data] }))];
-  const payloadOptions = JSON.parse(JSON.stringify(options)); // clone profundo
+const gerarPDF = async () => {
+  const prioridade = prioridadeSelecionada || "Todas";
+  const dataAtual = new Date().toLocaleString("pt-BR");
+  const totalChamados = dados.reduce((acc, qtd) => acc + qtd, 0);
 
-  const res = await fetch("http://localhost:8080/relatorio-grafico", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: 'include',
-    body: JSON.stringify({
-      options: payloadOptions,
-      series: payloadSeries,
-      prioridade: prioridadeSelecionada
-    }),
-  });
+  const doc = new jsPDF();
 
-  if (!res.ok) {
-    console.error("Erro ao gerar relatório:", res.statusText);
-    return;
+  // --- TÍTULO ---
+  doc.setFontSize(18);
+  doc.setFont("helvetica", "bold");
+  doc.text("Relatório de Chamados por Mês", 105, 40, { align: "center" });
+
+  // --- SUBTÍTULO ---
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(80, 80, 80);
+  doc.text(`Prioridade: ${prioridade}`, 105, 48, { align: "center" });
+  doc.text(`Gerado em: ${dataAtual}`, 105, 54, { align: "center" });
+
+  // --- INFO EXTRA ---
+  doc.setFontSize(11);
+  doc.setTextColor(50, 50, 50);
+  doc.text(`Total de Chamados: ${totalChamados}`, 14, 65);
+
+  // --- TABELA ---
+  const linhas = categorias.map((mes, i) => [mes, dados[i]]);
+autoTable(doc, {
+  startY: 75,
+  head: [["Mês", "Quantidade de Chamados"]],
+  body: linhas,
+  styles: {
+    fontSize: 11,
+    cellPadding: 5,
+    halign: "center",
+    valign: "middle",
+  },
+  headStyles: {
+    fillColor: [127, 86, 216],
+    textColor: [255, 255, 255],
+    fontStyle: "bold",
+  },
+  alternateRowStyles: {
+    fillColor: [245, 240, 255],
+  },
+  bodyStyles: {
+    textColor: [50, 50, 50],
+  },
+});
+
+  // --- RODAPÉ ---
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(9);
+    doc.setTextColor(120);
+    doc.text(`Página ${i} de ${pageCount}`, 200, 290, { align: "right" });
+    doc.text("Relatório gerado automaticamente pelo sistema", 14, 290);
   }
 
-  const blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "grafico-chamados-por-mes.pdf";
-  a.click();
+  // --- SALVAR ---
+  doc.save("relatorio-chamados-por-mes.pdf");
 };
 
   return (
@@ -226,7 +263,7 @@ const gerarRelatorio = async () => {
           </button>
         </li>
         <li>
-          <button  onClick={() => { gerarRelatorio(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF
+          <button  onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF
           </button>
         </li>
       </ul>

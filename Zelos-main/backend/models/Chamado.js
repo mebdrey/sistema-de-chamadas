@@ -402,10 +402,7 @@ export const calcularDataLimite = async (prioridade) => {
   return dt;
 };
 
-/**
- * Atualiza o data_limite de um chamado conforme sua prioridade atual.
- * Retorna affectedRows.
- */
+// Atualiza o data_limite de um chamado conforme sua prioridade atual.
 export const atualizarPrazoPorChamado = async (chamadoId) => {
   const chamado = await read('chamados', `id = ${chamadoId}`);
   if (!chamado) throw new Error('Chamado não encontrado');
@@ -416,130 +413,6 @@ export const atualizarPrazoPorChamado = async (chamadoId) => {
   return affected;
 };
 
-// relatorio 1 - chamados p mes
-// export const gerarRelatorioChamados = async ({ options, series, prioridade }) => {
-//   try {
-//     const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
-//     const page = await browser.newPage();
-
-//     const html = `
-//       <html>
-//       <head>
-//         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-//         <style>
-//           body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-//           h1 { font-size: 20px; margin-bottom: 10px; }
-//           p { font-size: 12px; margin: 4px 0; }
-//         </style>
-//       </head>
-//       <body>
-//         <h1>Relatório de Chamados por Mês</h1>
-//         <p>Data de geração: ${new Date().toLocaleString('pt-BR')}</p>
-//         <p>Prioridade selecionada: ${prioridade || 'Todas'}</p>
-//         <div id="chart" style="width: 800px; height: 400px;"></div>
-//         <script>
-//           const options = ${JSON.stringify({ ...options, series })};
-//           const chart = new ApexCharts(document.querySelector("#chart"), options);
-//           chart.render();
-//         </script>
-//       </body>
-//       </html>
-//     `;
-
-//     await page.setContent(html, { waitUntil: 'domcontentloaded' });
-
-//     // Espera até o gráfico estar presente no DOM
-//     await page.waitForSelector('#chart svg', { timeout: 10000 });
-
-//     // Captura screenshot do gráfico
-//     const chartElement = await page.$('#chart');
-//     const chartImage = await chartElement.screenshot({ type: 'png' });
-
-//     await browser.close();
-
-//     // Gera PDF
-//     const doc = new jsPDF();
-//     doc.setFontSize(16);
-//     doc.text('Relatório de Chamados por Mês', 10, 20);
-//     doc.setFontSize(10);
-//     doc.text(`Data de geração: ${new Date().toLocaleString('pt-BR')}`, 10, 28);
-//     doc.text(`Prioridade selecionada: ${prioridade || 'Todas'}`, 10, 34);
-//     doc.addImage(chartImage, 'PNG', 10, 40, 190, 100);
-
-//     return Buffer.from(doc.output('arraybuffer'));
-//   } catch (err) {
-//     console.error('Erro ao gerar relatorio de chamados:', err);
-//     throw err;
-//   }
-// };
-
-
-// // relatorio 2 - chamados p tipo
-// export const obterChamadosPorTipo = async (filtros) => {
-//   const { inicio, fim, status_chamado, tecnico_id } = filtros;
-
-//   const condicoes = [];
-//   const params = [];
-
-//   if (inicio && fim) {
-//     condicoes.push("c.criado_em BETWEEN ? AND ?");
-//     params.push(inicio, fim);
-//   }
-//   if (status_chamado) {
-//     condicoes.push("c.status_chamado = ?");
-//     params.push(status_chamado);
-//   }
-//   if (tecnico_id) {
-//     condicoes.push("c.tecnico_id = ?");
-//     params.push(tecnico_id);
-//   }
-
-//   const where = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
-
-//   const sql = `
-//     SELECT p.titulo AS tipo_chamado, COUNT(*) AS total
-//     FROM chamados c
-//     JOIN pool p ON c.tipo_id = p.id
-//     ${where}
-//     GROUP BY p.titulo
-//   `;
-//   return await readQuery(sql, params);
-// };
-
-// // relatorio 3 - atividades dos tecnicos
-// export const obterAtividadesTecnicos = async (filtros) => {
-//   const { inicio, fim, status_chamado, tipo_id } = filtros;
-
-//   const condicoes = ["c.tecnico_id IS NOT NULL"];
-//   const params = [];
-
-//   if (inicio && fim) {
-//     condicoes.push("c.criado_em BETWEEN ? AND ?");
-//     params.push(inicio, fim);
-//   }
-//   if (status_chamado) {
-//     condicoes.push("c.status_chamado = ?");
-//     params.push(status_chamado);
-//   }
-//   if (tipo_id) {
-//     condicoes.push("c.tipo_id = ?");
-//     params.push(tipo_id);
-//   }
-
-//   const where = `WHERE ${condicoes.join(" AND ")}`;
-
-//   const sql = `
-//     SELECT u.nome AS tecnico,
-//            COUNT(*) AS total_chamados,
-//            ROUND(AVG(TIMESTAMPDIFF(HOUR, c.criado_em, c.atualizado_em)), 1) AS tempo_medio_resolucao_horas,
-//            MAX(c.status_chamado) AS status_mais_recente
-//     FROM chamados c
-//     JOIN usuarios u ON c.tecnico_id = u.id
-//     ${where}
-//     GROUP BY u.id
-//   `;
-//   return await readQuery(sql, params);
-// };
 
 export async function obterChamadosPorMesAno(prioridade = null) {
   let sql = `
@@ -559,6 +432,45 @@ export async function obterChamadosPorMesAno(prioridade = null) {
   return await readQuery(sql);
 }
 
+export async function contarChamadosPorPool({
+  setor,
+  modo = 'anual'
+} = {}) {
+  if (!setor) return [];
+
+  const params = [];
+
+  // Query: join direto com chamados (c) e pool (p) garantindo que só venham
+  // linhas onde c.tecnico_id está preenchido e correspondem à pool pedida.
+  // Também filtramos usuarios por funcao para garantir que sejam técnicos/auxiliares.
+  let sql = `
+    SELECT
+      u.id   AS funcionario_id,
+      u.nome AS funcionario_nome,
+      SUM(CASE WHEN c.status_chamado = 'em andamento' THEN 1 ELSE 0 END) AS em_andamento,
+      SUM(CASE WHEN c.status_chamado = 'concluido' THEN 1 ELSE 0 END)    AS concluido,
+      COUNT(*) AS total
+    FROM chamados c
+      JOIN pool p     ON p.id = c.tipo_id
+      JOIN usuarios u ON u.id = c.tecnico_id
+    WHERE c.tecnico_id IS NOT NULL
+      AND p.titulo = ?
+      AND u.funcao IN ('tecnico', 'auxiliar_limpeza')
+  `;
+  params.push(setor);
+
+  if (modo === 'anual') {
+    sql += ` AND YEAR(c.criado_em) = YEAR(CURDATE()) `;
+  }
+
+  sql += `
+    GROUP BY u.id, u.nome
+    ORDER BY total DESC, u.nome ASC
+  `;
+
+  const rows = await readQuery(sql, params);
+  return Array.isArray(rows) ? rows : [];
+}
 // funções utilizadas para TECNICOS E AUXILIARES DE LIMPEZA ------------------------------------------------------------------------------------------------------------------------------------
 export const listarChamadosDisponiveis = async (usuario_id) => {
   const sql = ` SELECT c.* FROM chamados c INNER JOIN usuario_servico us ON us.servico_id = c.tipo_id WHERE us.usuario_id = ? AND c.status_chamado = 'pendente' AND c.tecnico_id IS NULL `;
@@ -609,8 +521,45 @@ export const contarChamadosConcluido = async () => {
   }
 };
 
+// export const pegarChamado = async (chamado_id, usuario_id) => {
+//   // Verifica se o chamado existe e ainda não foi atribuído
+//   const consulta = `
+//     SELECT c.*
+//     FROM chamados c
+//     INNER JOIN usuario_servico us ON us.servico_id = c.tipo_id
+//     WHERE c.id = ? 
+//       AND us.usuario_id = ?
+//       AND c.status_chamado = 'pendente'
+//       AND c.tecnico_id IS NULL
+//     LIMIT 1;
+//   `;
+
+//   const resultados = await readQuery(consulta, [chamado_id, usuario_id]);
+//   const chamado = resultados[0];
+
+//   if (!chamado) {
+//     throw new Error('Chamado não encontrado, já atribuído ou não pertence à sua função.');
+//   }
+
+//   // Tenta atualizar o chamado para o técnico logado
+//   const sqlUpdate = `
+//     UPDATE chamados 
+//     SET tecnico_id = ?, status_chamado = 'em andamento' 
+//     WHERE id = ? AND tecnico_id IS NULL
+//   `;
+
+//   const result = await readQuery(sqlUpdate, [usuario_id, chamado_id]);
+
+//   if (result.affectedRows === 0) {
+//     throw new Error('Chamado já foi atribuído a outro usuário.');
+//   }
+
+//   return result.affectedRows;
+// };
+
+// --- modelo: pegarChamado (substituir a função existente) ---
 export const pegarChamado = async (chamado_id, usuario_id) => {
-  // Verifica se o chamado existe e ainda não foi atribuído
+  // busca chamado pendente e que pertence à função do usuário (mesma lógica anterior)
   const consulta = `
     SELECT c.*
     FROM chamados c
@@ -621,7 +570,6 @@ export const pegarChamado = async (chamado_id, usuario_id) => {
       AND c.tecnico_id IS NULL
     LIMIT 1;
   `;
-
   const resultados = await readQuery(consulta, [chamado_id, usuario_id]);
   const chamado = resultados[0];
 
@@ -629,20 +577,47 @@ export const pegarChamado = async (chamado_id, usuario_id) => {
     throw new Error('Chamado não encontrado, já atribuído ou não pertence à sua função.');
   }
 
-  // Tenta atualizar o chamado para o técnico logado
+  // --- calcula prazo com base na prioridade ---
+  const prazoHorasPorPrioridade = {
+    'alta': 2,
+    'media': 4,
+    'baixa': 8,
+    'none': 24
+  };
+  const prioridade = (chamado.prioridade || 'none').toLowerCase();
+  const horasPrazo = prazoHorasPorPrioridade[prioridade] ?? 24;
+
+  // cria data_limite (considerando o padrão UTC-3 usado no projeto)
+  const agora = new Date();
+  agora.setHours(agora.getHours() - 3); // manter padrão do resto do projeto
+  const dataLimiteDate = new Date(agora.getTime());
+  dataLimiteDate.setHours(dataLimiteDate.getHours() + horasPrazo);
+
+  const data_limite = dataLimiteDate.toISOString().slice(0, 19).replace('T', ' ');
+
+  // tenta atualizar o chamado: atribui tecnico, muda status e grava data_limite
   const sqlUpdate = `
     UPDATE chamados 
-    SET tecnico_id = ?, status_chamado = 'em andamento' 
+    SET tecnico_id = ?, status_chamado = 'em andamento', data_limite = ?
     WHERE id = ? AND tecnico_id IS NULL
   `;
-
-  const result = await readQuery(sqlUpdate, [usuario_id, chamado_id]);
+  const result = await readQuery(sqlUpdate, [usuario_id, data_limite, chamado_id]);
 
   if (result.affectedRows === 0) {
     throw new Error('Chamado já foi atribuído a outro usuário.');
   }
 
-  return result.affectedRows;
+  // busca o chamado atualizado (inclui nome do usuário, setor, técnico)
+  const sqlChamadoAtualizado = `
+    SELECT c.*, u.nome AS nome_usuario, t.nome AS tecnico_nome, p.titulo AS setor_titulo
+    FROM chamados c
+    LEFT JOIN usuarios u ON u.id = c.usuario_id
+    LEFT JOIN usuarios t ON t.id = c.tecnico_id
+    LEFT JOIN pool p ON p.id = c.tipo_id
+    WHERE c.id = ? LIMIT 1
+  `;
+  const rows = await readQuery(sqlChamadoAtualizado, [chamado_id]);
+  return rows[0];
 };
 
 
@@ -709,6 +684,90 @@ export const finalizarApontamento = async (apontamento_id) => {
   return result;
 };
 
+// encerra um chamado: só permite se status = 'em andamento' e tecnico_id = tecnico_id passado
+export const finalizarChamado = async (chamado_id, tecnico_id) => {
+  // pega o chamado
+  const sqlSelect = `SELECT * FROM chamados WHERE id = ? LIMIT 1`;
+  const rows = await readQuery(sqlSelect, [chamado_id]);
+  const chamado = rows[0];
 
+  if (!chamado) {
+    throw new Error('Chamado não encontrado.');
+  }
+
+  if (chamado.status_chamado !== 'em andamento') {
+    throw new Error('Só é possível finalizar chamados que estejam em andamento.');
+  }
+
+  if (chamado.tecnico_id !== tecnico_id) {
+    throw new Error('Você não tem permissão para finalizar este chamado.');
+  }
+
+  // encerra apontamentos abertos
+  const sqlCloseApont = `
+    UPDATE apontamentos
+    SET fim = ?
+    WHERE chamado_id = ? AND fim IS NULL
+  `;
+  const agora = new Date();
+  agora.setHours(agora.getHours() - 3); // conforme padrão UTC-3 
+  const fim = agora.toISOString().slice(0, 19).replace('T', ' ');
+  await readQuery(sqlCloseApont, [fim, chamado_id]);
+
+  // atualiza o chamado para concluído
+  const sqlUpdateChamado = `
+    UPDATE chamados
+    SET status_chamado = 'concluido', finalizado_em = ?
+    WHERE id = ? AND tecnico_id = ? AND status_chamado = 'em andamento'
+  `;
+  const result = await readQuery(sqlUpdateChamado, [fim, chamado_id, tecnico_id]);
+
+  if (result.affectedRows === 0) {
+    throw new Error('Não foi possível finalizar o chamado (condição não satisfeita).');
+  }
+
+  // retorna dados para relatório: chamado + apontamentos (inclui apontamentos agora com fim)
+  const sqlApont = `SELECT * FROM apontamentos WHERE chamado_id = ? ORDER BY comeco ASC`;
+  const apontamentos = await readQuery(sqlApont, [chamado_id]);
+
+  const sqlChamadoAtualizado = `SELECT c.*, u.nome AS nome_usuario FROM chamados c LEFT JOIN usuarios u ON u.id = c.usuario_id WHERE c.id = ? LIMIT 1`;
+  const chamadoRows = await readQuery(sqlChamadoAtualizado, [chamado_id]);
+
+  return {
+    chamado: chamadoRows[0],
+    apontamentos
+  };
+};
+
+// ----------------------------------- PARA RELATÓRIOS
+export const getChamadoById = async (chamado_id) => {
+  const sql = `
+    SELECT c.*,
+           u.nome AS nome_usuario,
+           t.nome AS tecnico_nome,
+           p.titulo AS setor_nome
+    FROM chamados c
+    LEFT JOIN usuarios u ON u.id = c.usuario_id
+    LEFT JOIN usuarios t ON t.id = c.tecnico_id
+    LEFT JOIN pool p ON p.id = c.tipo_id  -- POOL = tabela de setores/servicos
+    WHERE c.id = ?
+    LIMIT 1
+  `;
+  const rows = await readQuery(sql, [chamado_id]);
+  return rows && rows[0] ? rows[0] : null;
+};
+
+export const getApontamentosByChamado = async (chamado_id) => {
+  // retorna apenas os apontamentos do chamado, ordenados por inicio
+  const sql = `
+    SELECT a.*, u.nome AS tecnico_nome
+    FROM apontamentos a
+    LEFT JOIN usuarios u ON u.id = a.tecnico_id
+    WHERE a.chamado_id = ?
+    ORDER BY a.comeco ASC
+  `;
+  const rows = await readQuery(sql, [chamado_id]);
+  return Array.isArray(rows) ? rows : [];
+};
 
 export { lerMsg, escreverMensagem };
