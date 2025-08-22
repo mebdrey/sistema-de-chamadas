@@ -133,6 +133,16 @@ export default function MeuPerfil() {
     };
     const nomeSobrenome = pegarPrimeiroEUltimoNome(usuario.nome);
 
+
+    let imagem = [];
+
+    if (usuario.ftPerfil !=null ){
+        imagem = [{src: `http://localhost:8080/${usuario.ftPerfil}`}]
+    } 
+    else {
+        imagem = [{  src: './cao.png'}] //só falta arrumar aqui
+    }
+
     return (
         <section>
             <div className='infos'>
@@ -142,8 +152,14 @@ export default function MeuPerfil() {
                 </div>
 
                 {/*NOME DO USUÁRIO E TIPO*/}
-                <div className='user flex items-center gap-3 pt-8 border-b border-[#D0D0D0]'>
-                    <img className='foto-usuario' src='./cao.png'></img>
+                <div className='user flex items-center gap-7 pt-8 border-b border-[#D0D0D0]'>
+                    
+                    {imagem.map((img) =>(
+                        <div key={img}>
+                            <img className='foto-usuario' src={img.src}></img>
+                        </div>
+                    ))}
+                    
                     <h3>{nomeSobrenome.primeiroNome} {nomeSobrenome.ultimoNome}</h3>
                 </div>
 
