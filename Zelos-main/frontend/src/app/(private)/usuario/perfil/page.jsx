@@ -23,7 +23,8 @@ export default function MeuPerfil() {
         setFoto(file);
         if (file) {
             setPreview(URL.createObjectURL(file));
-        } };
+        }
+    };
 
     // const enviarFoto = async () => {
     //     if (!foto) return alert("Selecione uma foto");
@@ -53,7 +54,8 @@ export default function MeuPerfil() {
             .catch((err) => {
                 console.error("Erro ao buscar dados do usuário:", err.message);
                 setErro("Erro ao carregar perfil.");
-            })}, []);
+            })
+    }, []);
 
     // edicao do perfil
     const handleSubmit = async (e) => {
@@ -85,9 +87,11 @@ export default function MeuPerfil() {
             }
             else {
                 console.error('Erro ao atualizar perfil');
-            } } catch (error) {
+            }
+        } catch (error) {
             console.error('Erro:', error);
-        } };
+        }
+    };
 
     const [email, setEmail] = useState("");
 
@@ -95,7 +99,8 @@ export default function MeuPerfil() {
     useEffect(() => {
         if (usuario) {
             setEmail(usuario.email || "");
-        }}, [usuario]);
+        }
+    }, [usuario]);
 
     //volta para os valores originais
     const handleReset = () => {
@@ -118,111 +123,137 @@ export default function MeuPerfil() {
                     <span className="sr-only">Carregando...</span>
                 </div>
             </div>
-        )};
+        )
+    };
 
     function pegarPrimeiroEUltimoNome(nome) {
         if (!nome) return { primeiroNome: "", ultimoNome: "" };
         const nomes = nome.trim().split(" ");
-        return { primeiroNome: nomes[0], ultimoNome: nomes[nomes.length - 1] };};
+        return { primeiroNome: nomes[0], ultimoNome: nomes[nomes.length - 1] };
+    };
     const nomeSobrenome = pegarPrimeiroEUltimoNome(usuario.nome);
 
     return (
         <section>
             <div className='infos'>
-            <div className='page-indicador'>
-                <h1>Meu perfil</h1>
-                <hr />
-            </div>
-            {/*NOME DO USUÁRIO E TIPO*/}
-            <div className='user flex items-center gap-3 border-b border-[#D0D0D0]'>
-                <div className="poppins-medium">
-                    <h3>{nomeSobrenome.primeiroNome} </h3>
-                    <p className="text-sm text-gray-500">{nomeSobrenome.ultimoNome} </p>
+                <div className='page-indicador'>
+                    <h1>Meu perfil</h1>
+                    <hr />
                 </div>
-            </div>
-            {/*NOME DE USUÁRIO */}
-            <div className='sec'>
-                <div className='sec-indicador'><h4>Dados Pessoais</h4><hr /></div>
-                <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
-                    <div className='sec-campos'><h6>Nome completo:</h6><p>{usuario.nome}</p></div>
+
+                {/*NOME DO USUÁRIO E TIPO*/}
+                <div className='user flex items-center gap-3 pt-8 border-b border-[#D0D0D0]'>
+                    <img className='foto-usuario' src='./cao.png'></img>
+                    <h3>{nomeSobrenome.primeiroNome} {nomeSobrenome.ultimoNome}</h3>
                 </div>
-            </div>
-            <div className='sec'>
-                <div className='sec-indicador'><h4>Sobre</h4><hr/></div>
-                <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
-                    <div className='sec-campos'><h6>Departamento:</h6><p>{usuario.funcao}</p></div>
-                </div>
-                <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
-                    <div className='sec-campos'><h6>Status:</h6><p>Ativo</p></div>
-                </div>
-            </div>
-            {/*EMAIL, TELEFONE E TIPO DE TELEFONE DO USUÁRIO*/}
-            <div className='sec'>
-                <div className='sec-indicador'><h4>Contatos</h4><hr /></div>
-                <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
-                    <div className='sec-campos'><h6>Email pessoal:</h6><p>{usuario.email}</p></div>
-                    <div className='sec-campos flex gap-10'>
-                        <div className='sec-campos2'><h6></h6><p></p></div>
-                        <div className='sec-campos2'><h6></h6><p></p></div>
+
+                {/*infos do usuario*/}
+                <div className='pt-8 grid grid-cols-2'>
+
+
+
+
+                    <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
+                        <div className='sec-campos'><h6>Nome completo</h6><p>{usuario.nome}</p></div>
                     </div>
+
+
+
+                    <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
+                        <div className='sec-campos'><h6>Departamento</h6><p>{usuario.funcao}</p></div>
+                    </div>
+                    <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
+                        <div className='sec-campos'><h6>Status</h6><p>Ativo</p></div>
+                    </div>
+
+                    <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
+                        <div className='sec-campos'><h6>Email pessoal</h6><p>{usuario.email}</p></div>
+                    </div>
+
                 </div>
-            </div>
-            {/**Editar informações */}
-            <div className='flex flex-wrap gap-6'>
-                <button type="button" className="btn-add mt-5" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-                    Editar perfil
-                </button>
-                {/*MODAL*/}
-                <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h1 className="modal-title fs-5" id="staticBackdropLabel">Editar Perfil</h1>
-                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div className="modal-body">
-                                <form onSubmit={handleSubmit}>
-                                    <div className="mb-3">
-                                       
-                                        <label htmlFor="email" className='form-label'>Email</label>
-                                        <div className="flex items-center gap-2">
-                                            <input
-                                                type="email"
-                                                defaultValue={usuario.email}
-                                                ref={emailInputRef}
-                                                className="form-control"
-                                                readOnly={!emailEditando}
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setEmailEditando(true)}
-                                                title="Editar e-mail"
-                                                className="text-gray-500 hover:text-black"
-                                            ><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M14.3786 6.44975L4.96376 15.8648C4.68455 16.144 4.32895 16.3343 3.94177 16.4117L1.00003 17.0001L1.58838 14.0583C1.66582 13.6711 1.85612 13.3155 2.13532 13.0363L11.5502 3.62132M14.3786 6.44975L15.7929 5.03553C16.1834 4.64501 16.1834 4.01184 15.7929 3.62132L14.3786 2.20711C13.9881 1.81658 13.355 1.81658 12.9644 2.20711L11.5502 3.62132M14.3786 6.44975L11.5502 3.62132" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg></button>
+
+
+
+
+
+                {/** Editar informações */}
+                <div className="flex flex-wrap gap-6">
+                    <button
+                        type="button"
+                        className="bg-violet-600 h-10 text-white font-medium py-2 px-4 rounded hover:bg-violet-700 transition mt-5"
+                        data-bs-toggle="modal"
+                        data-bs-target="#staticBackdrop"
+                    >
+                        Editar perfil
+                    </button>
+
+                    {/* MODAL */}
+                    <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content  rounded-lg shadow-lg">
+                                <div className="modal-header flex p-2 items-center bg-gray-100 ">
+                                    <h5 className="titulo-modal modal-title  text-lg font-semibold" id="staticBackdropLabel">Editar Perfil</h5>
+                                    <button
+                                        type="button"
+                                        className="btn-close"
+                                        data-bs-dismiss="modal"
+                                        aria-label="Close"
+                                    ></button>
+                                </div>
+
+                                <div className="modal-body px-4 py-3">
+                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                        <div>
+                                            <label htmlFor="email" className="form-label font-medium text-gray-700">Email</label>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="email"
+                                                    defaultValue={usuario.email}
+                                                    ref={emailInputRef}
+                                                    className="form-control border rounded px-3 py-2"
+                                                    readOnly={!emailEditando}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setEmailEditando(true)}
+                                                    title="Editar e-mail"
+                                                    className="text-gray-500 hover:text-black transition"
+                                                >
+                                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M14.3786 6.44975L4.96376 15.8648C4.68455 16.144 4.32895 16.3343 3.94177 16.4117L1.00003 17.0001L1.58838 14.0583C1.66582 13.6711 1.85612 13.3155 2.13532 13.0363L11.5502 3.62132M14.3786 6.44975L15.7929 5.03553C16.1834 4.64501 16.1834 4.01184 15.7929 3.62132L14.3786 2.20711C13.9881 1.81658 13.355 1.81658 12.9644 2.20711L11.5502 3.62132M14.3786 6.44975L11.5502 3.62132" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div className='items-center mt-3 flex justify-center gap-3'>
-                                            <button type="submit" className="btn-add">Salvar alterações</button>
+
+                                        <div className="flex justify-center gap-3">
+                                            <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
+                                                Salvar alterações
+                                            </button>
                                         </div>
-                                    </div>
-                                    <div><p>
-                                        {(() => {
-                                            try {
-                                                if (!resposta) return null; // evita parse de string vazia
-                                                const parsed = JSON.parse(resposta);
-                                                return parsed.mensagem || 'Resposta recebida';
-                                            } catch (e) {
-                                                return resposta; // mostra como texto cru se nn for json
-                                            }
-                                        })()}
-                                    </p></div>
-                                </form>
+
+                                        {/* Mensagem de resposta */}
+                                        {resposta && (
+                                            <div className="mt-2 text-sm text-center text-gray-600 bg-gray-100 px-3 py-2 rounded">
+                                                {(() => {
+                                                    try {
+                                                        const parsed = JSON.parse(resposta);
+                                                        return parsed.mensagem || 'Resposta recebida';
+                                                    } catch {
+                                                        return resposta;
+                                                    }
+                                                })()}
+                                            </div>
+                                        )}
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+
+
+                {/**teste modal */}
             </div>
         </section>)
 }

@@ -177,80 +177,80 @@ export default function MeuPerfil() {
 
 
                 {/** Editar informações */}
-<div className="flex flex-wrap gap-6">
-    <button
-        type="button"
-        className="bg-blue-600 text-white font-medium py-2 px-4 rounded hover:bg-blue-700 transition mt-5"
-        data-bs-toggle="modal"
-        data-bs-target="#staticBackdrop"
-    >
-        Editar perfil
-    </button>
-
-    {/* MODAL */}
-    <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content rounded-lg shadow-lg">
-                <div className="modal-header bg-gray-100 border-b">
-                    <h5 className="modal-title text-lg font-semibold" id="staticBackdropLabel">Editar Perfil</h5>
+                <div className="flex flex-wrap gap-6">
                     <button
                         type="button"
-                        className="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                    ></button>
-                </div>
+                        className="bg-violet-600 h-10 text-white font-medium py-2 px-4 rounded hover:bg-violet-700 transition mt-5"
+                        data-bs-toggle="modal"
+                        data-bs-target="#staticBackdrop"
+                    >
+                        Editar perfil
+                    </button>
 
-                <div className="modal-body px-4 py-3">
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <label htmlFor="email" className="form-label font-medium text-gray-700">Email</label>
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="email"
-                                    defaultValue={usuario.email}
-                                    ref={emailInputRef}
-                                    className="form-control border rounded px-3 py-2"
-                                    readOnly={!emailEditando}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setEmailEditando(true)}
-                                    title="Editar e-mail"
-                                    className="text-gray-500 hover:text-black transition"
-                                >
-                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M14.3786 6.44975L4.96376 15.8648C4.68455 16.144 4.32895 16.3343 3.94177 16.4117L1.00003 17.0001L1.58838 14.0583C1.66582 13.6711 1.85612 13.3155 2.13532 13.0363L11.5502 3.62132M14.3786 6.44975L15.7929 5.03553C16.1834 4.64501 16.1834 4.01184 15.7929 3.62132L14.3786 2.20711C13.9881 1.81658 13.355 1.81658 12.9644 2.20711L11.5502 3.62132M14.3786 6.44975L11.5502 3.62132" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </button>
+                    {/* MODAL */}
+                    <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content  rounded-lg shadow-lg">
+                                <div className="modal-header flex p-2 items-center bg-gray-100 ">
+                                    <h5 className="titulo-modal modal-title  text-lg font-semibold" id="staticBackdropLabel">Editar Perfil</h5>
+                                    <button
+                                        type="button"
+                                        className="btn-close"
+                                        data-bs-dismiss="modal"
+                                        aria-label="Close"
+                                    ></button>
+                                </div>
+
+                                <div className="modal-body px-4 py-3">
+                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                        <div>
+                                            <label htmlFor="email" className="form-label font-medium text-gray-700">Email</label>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="email"
+                                                    defaultValue={usuario.email}
+                                                    ref={emailInputRef}
+                                                    className="form-control border rounded px-3 py-2"
+                                                    readOnly={!emailEditando}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setEmailEditando(true)}
+                                                    title="Editar e-mail"
+                                                    className="text-gray-500 hover:text-black transition"
+                                                >
+                                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M14.3786 6.44975L4.96376 15.8648C4.68455 16.144 4.32895 16.3343 3.94177 16.4117L1.00003 17.0001L1.58838 14.0583C1.66582 13.6711 1.85612 13.3155 2.13532 13.0363L11.5502 3.62132M14.3786 6.44975L15.7929 5.03553C16.1834 4.64501 16.1834 4.01184 15.7929 3.62132L14.3786 2.20711C13.9881 1.81658 13.355 1.81658 12.9644 2.20711L11.5502 3.62132M14.3786 6.44975L11.5502 3.62132" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex justify-center gap-3">
+                                            <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
+                                                Salvar alterações
+                                            </button>
+                                        </div>
+
+                                        {/* Mensagem de resposta */}
+                                        {resposta && (
+                                            <div className="mt-2 text-sm text-center text-gray-600 bg-gray-100 px-3 py-2 rounded">
+                                                {(() => {
+                                                    try {
+                                                        const parsed = JSON.parse(resposta);
+                                                        return parsed.mensagem || 'Resposta recebida';
+                                                    } catch {
+                                                        return resposta;
+                                                    }
+                                                })()}
+                                            </div>
+                                        )}
+                                    </form>
+                                </div>
                             </div>
                         </div>
-
-                        <div className="flex justify-center gap-3">
-                            <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
-                                Salvar alterações
-                            </button>
-                        </div>
-
-                        {/* Mensagem de resposta */}
-                        {resposta && (
-                            <div className="mt-2 text-sm text-center text-gray-600 bg-gray-100 px-3 py-2 rounded">
-                                {(() => {
-                                    try {
-                                        const parsed = JSON.parse(resposta);
-                                        return parsed.mensagem || 'Resposta recebida';
-                                    } catch {
-                                        return resposta;
-                                    }
-                                })()}
-                            </div>
-                        )}
-                    </form>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 
                 {/**teste modal */}
