@@ -23,19 +23,10 @@ export default function ChamadosAdmin() {
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
   const [openAtribuirDropdown, setOpenAtribuirDropdown] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    prioridade: "",
-    tecnico_id: "",
-    tipo_id: "",
-    descricao: "",
-    assunto: "",
-    status_chamado: ""
-  });
+  const [formData, setFormData] = useState({ prioridade: "", tecnico_id: "", tipo_id: "", descricao: "", assunto: "", status_chamado: ""});
 
-  useEffect(() => {
-    setIsMounted(true);
-    initFlowbite(); // inicializa dropdowns, modais, etc.
-  }, []);
+  useEffect(() => {setIsMounted(true);initFlowbite(); }, []);// inicializa dropdowns, modais, etc.
+  
   // busca os chamados feitos pelo usuario
   useEffect(() => {
     fetch('http://localhost:8080/todos-chamados', { credentials: 'include' })
@@ -73,7 +64,7 @@ export default function ChamadosAdmin() {
   const prioridadeMap = {
     1: { label: 'Baixa', value: 'baixa' },
     2: { label: 'Média', value: 'media' },
-    3: { label: 'Alta', value: 'alta' }
+    3: { label: 'Alta', value: 'alta' },
   };
   const getPrioridadeLabel = (id) => {
     return prioridadeMap[id] ? prioridadeMap[id].label : 'Não definida';

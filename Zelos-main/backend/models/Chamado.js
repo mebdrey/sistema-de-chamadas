@@ -87,8 +87,8 @@ export const calcularDataLimiteUsuario = async (prioridade_id) => {
     // buscar a prioridade pelo id
     const resultado = await read("prioridades", { id: prioridade_id });
 
-    if (!resultado || resultado.length === 0) {return null;} // prioridade não encontrada
-    
+    if (!resultado || resultado.length === 0) { return null; } // prioridade não encontrada
+
 
     const prioridade = resultado[0];
 
@@ -203,13 +203,6 @@ export const contarChamadosPorStatus = async (modo) => {
 
 //contar chamados por prioridade
 export const contarChamadosPorPrioridade = async () => {
-  // const sql = ` SELECT prioridade_id, COUNT(*) AS qtd FROM chamados WHERE  prioridade_id IN ('3', '2', '1') GROUP BY  prioridade_id `;
-
-  // try {return await readQuery(sql);  
-  // } catch (err) {
-  //   console.error('Erro no model ao contar chamados por prioridade:', err);
-  //   throw err;
-  // }
   const sql = `SELECT
       p.nome AS tipo,
       COUNT(c.id) AS qtd
@@ -226,13 +219,9 @@ export const contarChamadosPorPrioridade = async () => {
 
   try {
     const result = await readQuery(sql);
-    // Transforma o nome para ter a primeira letra maiúscula
-    return result.map(item => ({
-        ...item,
-        tipo: item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)
-    }));
+    return result.map(item => ({ ...item, tipo: item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1) }));
   } catch (err) {
-    console.error('Erro no model ao contar chamados por prioridade:', err);
+    console.error('Erro ao contar chamados', err);
     throw err;
   }
 };
@@ -242,15 +231,15 @@ export const buscarChamado = async (id) => { return await read('chamados', `id =
 
 // Atualizar chamado (parcialmente)
 export const editarChamado = async (id, data) => {
- 
+
   const chamado = await buscarChamado(id); // Busca o chamado no banco
   if (!chamado) { throw new Error('Chamado não encontrado'); }
 
   // Só pode editar se for pendente ou em andamento
   if (!['pendente', 'em andamento'].includes(chamado.status_chamado)) { throw new Error('Chamado não pode ser editado. Apenas chamados pendentes ou em andamento podem ser alterados.'); }
-  
+
   const camposPermitidos = ['prioridade', 'tecnico_id', 'tipo_id', 'descricao', 'assunto', 'status_chamado'];// Campos permitidos para atualização
-  
+
   const dadosAtualizar = {};// Filtra só os campos permitidos que vieram no body
   for (const campo of camposPermitidos) { if (data[campo] !== undefined) { dadosAtualizar[campo] = data[campo]; } }
 
@@ -408,8 +397,7 @@ export const atualizarPrazoPorChamado = async (chamadoId) => {
 
 
 export async function obterChamadosPorMesAno(prioridade = null) {
-  let sql = `SELECT 
-            MONTH(criado_em) as mes, 
+  let sql = `SELECT MONTH(criado_em) as mes, 
             COUNT(*) as total 
         FROM chamados
         WHERE YEAR(criado_em) = YEAR(CURDATE())`;
@@ -432,9 +420,7 @@ export async function contarChamadosPorPool({
   // Query: join direto com chamados (c) e pool (p) garantindo que só venham
   // linhas onde c.tecnico_id está preenchido e correspondem à pool pedida.
   // Também filtramos usuarios por funcao para garantir que sejam técnicos/auxiliares.
-  let sql = `SELECT
-      u.id   AS funcionario_id,
-      u.nome AS funcionario_nome,
+  let sql = `SELECT u.id   AS funcionario_id, u.nome AS funcionario_nome,
       SUM(CASE WHEN c.status_chamado = 'em andamento' THEN 1 ELSE 0 END) AS em_andamento,
       SUM(CASE WHEN c.status_chamado = 'concluido' THEN 1 ELSE 0 END)    AS concluido,
       COUNT(*) AS total
