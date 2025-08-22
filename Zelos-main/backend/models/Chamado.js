@@ -84,18 +84,18 @@ export const calcularDataLimiteUsuario = async (prioridade_id) => {
   try {
     if (!prioridade_id) return null; // caso não tenha prioridade
 
-    // buscar a prioridade pelo id
-    const resultado = await read("prioridades", { id: prioridade_id });
+    // buscar a prioridade pelo id (read retorna só uma linha, não array)
+    const prioridade = await read("prioridades", `id = ${prioridade_id}`);
 
-    if (!resultado || resultado.length === 0) {
+    if (!prioridade) {
       return null; // prioridade não encontrada
     }
 
-    const prioridade = resultado[0];
-
-    // pegar horas_limite e calcular data limite
+    // calcular data limite com base em horas_limite
     const agora = new Date();
-    const data_limite = new Date(agora.getTime() + prioridade.horas_limite * 60 * 60 * 1000);
+    const data_limite = new Date(
+      agora.getTime() + prioridade.horas_limite * 60 * 60 * 1000
+    );
 
     return data_limite;
 

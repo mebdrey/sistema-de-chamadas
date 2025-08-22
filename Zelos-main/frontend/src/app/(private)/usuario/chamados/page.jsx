@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { initFlowbite } from 'flowbite'
 import { useRouter } from 'next/navigation';
 import OrdenarPor from '@/components/DropDown/DropDown.jsx'
@@ -24,6 +24,9 @@ export default function ChamadosCliente() {
     const [openModal, setOpenModal] = useState(false)
     const [erroCampos, setErroCampos] = useState(false);
     const [camposInvalidos, setCamposInvalidos] = useState({});
+    const [tiposPrioridade, setTiposPrioridade] = useState([]);
+    const [openAbas, setOpenAbas] = useState(false);
+    const dropdownRef = useRef(null);
 
     useEffect(() => {
         setIsMounted(true);
@@ -33,11 +36,6 @@ export default function ChamadosCliente() {
         initFlowbite();
     }, []);
 
-    const tiposPrioridade = [
-        { id: 'alta', titulo: 'Alta' },
-        { id: 'media', titulo: 'Média' },
-        { id: 'baixa', titulo: 'Baixa' },
-    ];
     // verifica se esta logado/autorizado
     useEffect(() => {
         fetch('http://localhost:8080/auth/check-auth', { credentials: 'include' })
@@ -70,6 +68,18 @@ export default function ChamadosCliente() {
             });
     }, []);
 
+    useEffect(() => {
+        fetch("http://localhost:8080/prioridades", { credentials: "include" })
+            .then(res => {
+                if (!res.ok) throw new Error("Erro ao buscar prioridades");
+                return res.json();
+            })
+            .then(data => setTiposPrioridade(data))
+            .catch(err => {
+                console.error("Erro ao carregar prioridades:", err);
+                setTiposPrioridade([]);
+            });
+    }, []);
 
     function primeiraLetraMaiuscula(str) {
         if (!str) return '';
@@ -126,10 +136,17 @@ export default function ChamadosCliente() {
         });
 
         if (res.ok) {
+            // ✅ limpa os campos
+            setAssunto("");
+            setTipoSelecionadoId("");
+            setDescricao("");
+            setPrioridadeSelecionadaId("");
+            setPatrimonio("");
             setImagemPreview(null);
             setImagemArquivo(null);
             const novoChamado = await res.json();
             setChamados((prev) => [novoChamado, ...prev]);
+
         } else {
             alert("Erro ao criar chamado.");
         }
@@ -145,6 +162,7 @@ export default function ChamadosCliente() {
 
     // formata os tipos de servico
     function formatarLabel(str) {
+        if (!str) return ""
         const correcoes = {
             manutencao: "Manutenção",
             apoio_tecnico: "Apoio Técnico"
@@ -167,6 +185,18 @@ export default function ChamadosCliente() {
             return ordenarPor === 'mais_antigo' ? dataA - dataB : dataB - dataA;
         });
     }, [chamados, ordenarPor]);
+
+    // Fecha o dropdown ao clicar fora
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setOpenAbas(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     return (
         <>
             {/* conteudo da pagina */}
@@ -179,31 +209,61 @@ export default function ChamadosCliente() {
                         {/* barra de pesquisa */}
                         <form className="flex items-center" onSubmit={(e) => e.preventDefault()}>
                             <label htmlFor="simple-search" className="sr-only">Search</label>
-                            <div className="relative w-80">
+                            <div className="relative w-50 sm:w-80">
                                 <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                                     <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
                                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
                                     </svg>
                                 </div>
-                                <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#7F56D8] focus:border-[#7F56D8] block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Pesquisar chamado" value={busca} onChange={(e) => setBusca(e.target.value)} />
+                                <input type="text" id="simple-search" className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#7F56D8] focus:border-[#7F56D8] block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Pesquisar chamado" value={busca} onChange={(e) => setBusca(e.target.value)} />
                             </div>
                         </form>
                     </div>
                     <section>
-                        <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700">
-                            <ul className="flex flex-wrap -mb-px text-sm poppins-medium text-center">
-                                {/* Tabs */}
+                        <div className="flex flex-row items-center justify-between mb-4 md:border-b md:border-gray-200 dark:border-gray-700">
+                            {/* Tabs tradicionais: visível em desktop */}
+                            <ul className="hidden md:flex flex-wrap -mb-px text-sm poppins-medium text-center">
                                 {statusAbas.map((status) => {
-                                    const statusId = normalizarId(status)
+                                    const statusId = normalizarId(status);
                                     return (
                                         <li className="me-2" role="presentation" key={status}>
-                                            <button onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === statusId ? "active border-[#7F56D8] text-[#7F56D8] dark:text-blue-400" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-neutral-400 dark:hover:text-neutral-300"
-                                                }`} type="button" >{primeiraLetraMaiuscula(status)}
+                                            <button onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === statusId
+                                                ? "active border-[#7F56D8] text-[#7F56D8] dark:text-blue-400"
+                                                : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-neutral-400 dark:hover:text-neutral-300"
+                                                }`} type="button">
+                                                {primeiraLetraMaiuscula(status)}
                                             </button>
                                         </li>
-                                    )
+                                    );
                                 })}
                             </ul>
+
+                            {/* Select responsivo: visível em tablet/móvel */}
+                            <div className="md:hidden relative" ref={dropdownRef}>
+                                {/* Botão do dropdown */}
+                                <button onClick={() => setOpenAbas(!openAbas)} className="text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 w-full justify-between" type="button">
+                                    {primeiraLetraMaiuscula(statusAbas.find(s => normalizarId(s) === abaAtiva))}
+                                    <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"
+                                    ><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                    </svg>
+                                </button>
+
+                                {/* Menu do dropdown */}
+                                {openAbas && (
+                                    <div className="z-10 absolute mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-36 min-w-max dark:bg-gray-700">
+                                        <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
+                                            {statusAbas.map((status) => {
+                                                const statusId = normalizarId(status);
+                                                return (
+                                                    <li key={status} >
+                                                        <button onClick={() => { setAbaAtiva(statusId); setOpenAbas(false); }} className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{primeiraLetraMaiuscula(status)}</button>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
                             {/* modal - criar chamado*/}
                             <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" className=" hidden md:flex flex-row items-center block text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-5 py-2.5 h-fit text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button"><svg className="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>Novo chamado</button>
 
@@ -212,8 +272,8 @@ export default function ChamadosCliente() {
                                     <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
                                         <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
                                             <h3 className="inline-flex items-center gap-2 text-base poppins-semibold text-gray-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
-                                                    <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm.75-10.25v2.5h2.5a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-1.5 0v-2.5h-2.5a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 1.5 0Z" clip-rule="evenodd" />
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
+                                                    <path fillRule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm.75-10.25v2.5h2.5a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-1.5 0v-2.5h-2.5a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 1.5 0Z" clipRule="evenodd" />
                                                 </svg>Novo chamado</h3>
                                             <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal">
                                                 <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -225,12 +285,18 @@ export default function ChamadosCliente() {
                                         <form className="p-4 md:p-5" onSubmit={criarChamado}>
                                             <div className="grid gap-4 mb-4 grid-cols-2">
                                                 <div className="col-span-2">
-                                                    <label htmlFor="name" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Assunto</label>
-                                                    <input type="text" name="name" id="name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Digite o assunto" required="" value={assunto} onChange={(e) => setAssunto(e.target.value)} />
+                                                    <label htmlFor="name" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Assunto<span className="text-red-500">*</span></label>
+                                                    <input type="text" name="name" id="name" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.assunto
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                                        : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
+                                                        }`} placeholder="Digite o assunto" required="" value={assunto} onChange={(e) => { setAssunto(e.target.value); setCamposInvalidos({ ...camposInvalidos, assunto: false }); }} />
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="servico" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Tipo de serviço</label>
-                                                    <select id="servico" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" value={tipoSelecionadoId} onChange={(e) => setTipoSelecionadoId(e.target.value)} required>
+                                                    <label htmlFor="servico" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Tipo de serviço<span className="text-red-500">*</span></label>
+                                                    <select id="servico" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.tipo
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                                        : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
+                                                        }`} value={tipoSelecionadoId} onChange={(e) => { setTipoSelecionadoId(e.target.value); setCamposInvalidos({ ...camposInvalidos, tipo: false }); }} required>
                                                         <option value="">Selecione tipo de serviço</option>
                                                         {tiposServico.map(tipo => (
                                                             <option key={tipo.id} value={tipo.id}>
@@ -239,38 +305,63 @@ export default function ChamadosCliente() {
                                                         ))}
                                                     </select></div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="prioridade" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Tipo de prioridade</label>
-                                                    <select id="prioridade" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" value={prioridadeSelecionadaId} onChange={(e) => setPrioridadeSelecionadaId(e.target.value)} required>
-                                                        <option value="">Selecione tipo de prioridade</option>
+                                                    <label htmlFor="prioridade" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Prioridade<span className="text-red-500">*</span></label>
+                                                    <select id="prioridade" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.prioridade ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
+                                                        }`} value={prioridadeSelecionadaId} onChange={(e) => { setPrioridadeSelecionadaId(e.target.value); setCamposInvalidos({ ...camposInvalidos, prioridade: false }); }} required>
+                                                        <option value="">Selecione prioridade</option>
                                                         {tiposPrioridade.map(tipo => (
                                                             <option key={tipo.id} value={tipo.id}>
-                                                                {formatarLabel(tipo.titulo)}
+                                                                {formatarLabel(tipo.nome)}
                                                             </option>
                                                         ))}
                                                     </select>
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="patrimonio" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Patrimônio</label>
-                                                    <input type="text" name="patrimonio" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Digite o número de patrimônio" required="" value={patrimonio} onChange={(e) => setPatrimonio(e.target.value)} />
+                                                    <label htmlFor="patrimonio" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Patrimônio<span className="text-red-500">*</span></label>
+                                                    <input type="text" name="patrimonio" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.patrimonio
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                                        : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
+                                                        }`} placeholder="Digite o número de patrimônio" required="" value={patrimonio} onChange={(e) => { setPatrimonio(e.target.value.replace(/\D/g, "")); setCamposInvalidos({ ...camposInvalidos, patrimonio: false }); }} maxLength={7} pattern="\d{7}" />
                                                 </div>
                                                 <div className="col-span-2">
-                                                    <label htmlFor="description" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Descrição</label>
-                                                    <textarea id="description" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Escreva a descrição do chamado" value={descricao} onChange={(e) => setDescricao(e.target.value)}></textarea>
+                                                    <label htmlFor="description" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Descrição<span className="text-red-500">*</span></label>
+                                                    <textarea id="description" rows="4" className={`block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:border-[#7F56D8] dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 ${camposInvalidos.descricao
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                                        : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
+                                                        }`} placeholder="Escreva a descrição do chamado" value={descricao} onChange={(e) => { setDescricao(e.target.value); setCamposInvalidos({ ...camposInvalidos, descricao: false }); }}></textarea>
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="file" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Enviar imagem</label>
                                                     <div className="flex items-center justify-center w-1/2 h-50">
                                                         <label htmlFor="dropzone-file" className="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 overflow-hidden">
-                                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                                <svg className="me-1 -ms-1 w-8 h-8 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>
-                                                            </div>
+                                                            {!imagemPreview && (
+                                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                                    <svg className="me-1 -ms-1 w-8 h-8 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                        <path
+                                                                            fillRule="evenodd"
+                                                                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                                                            clipRule="evenodd"
+                                                                        ></path>
+                                                                    </svg>
+                                                                </div>
+                                                            )}
                                                             <input id="dropzone-file" type="file" className="hidden" accept="image/*" onChange={subirImagem} />
-                                                            {imagemPreview && (<img src={imagemPreview} alt="Pré-visualização" className="rounded-lg absolute inset-0 w-full h-full object-cover" />)}
+                                                            {imagemPreview && (
+                                                                <img
+                                                                    src={imagemPreview}
+                                                                    alt="Pré-visualização"
+                                                                    className="rounded-lg absolute inset-0 w-full h-full object-cover"
+                                                                />
+                                                            )}
                                                         </label>
                                                     </div>
                                                 </div>
+
                                             </div>
-                                            <button type="submit" className="text-white inline-flex items-center bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Criar chamado</button>
+                                            {erroCampos && (
+                                                <p className="text-red-500 mb-2">Preencha todos os campos obrigatórios</p>
+                                            )}
+                                            <button type="submit" className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Criar chamado</button>
                                         </form>
                                     </div>
                                 </div>
@@ -298,54 +389,30 @@ export default function ChamadosCliente() {
                                     });
 
                                 return (
-                                    <div key={statusId} className={`${abaAtiva === statusId ? "block" : "hidden"} flex flex-col bg-white rounded-xl dark:bg-neutral-900 gap-6 `}>
+                                    <div key={statusId} className={`${abaAtiva === statusId ? "block" : "hidden"} flex flex-col  rounded-xl dark:bg-neutral-900 gap-6 `}>
                                         {chamadosFiltrados.length === 0 ? (
-                                            <div className="p-4 md:p-5">
+                                            <div className="p-4 md:p-5 bg-white rounded-xl">
                                                 <p className="text-gray-500 dark:text-neutral-400">Nenhum chamado encontrado. </p>
                                             </div>) : (
                                             chamadosFiltrados.map((chamado) => (
 
-                                                <div key={chamado.id || `${chamado.assunto}-${Math.random()}`} className="border-b last:border-0 bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
+                                                <div key={chamado.id || `${chamado.assunto}-${Math.random()}`} className="border-b bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
                                                     <div className="px-4 pt-4 md:px-5 md:pt-5">
                                                         <h3 className="text-lg poppins-bold text-gray-800 dark:text-white">Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}</h3>
                                                         <h6 className="text-base poppins-bold text-gray-800 dark:text-white">{chamado.assunto}</h6>
                                                         <p className="mt-2 text-gray-500 dark:text-neutral-400">{chamado.descricao}</p>
                                                     </div>
-                                                    <div className="flex flex-row md:flex-col justify-between items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 mt-4 dark:bg-neutral-900 dark:border-neutral-700">
+                                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 mt-4 dark:bg-neutral-900 dark:border-neutral-700">
                                                         <p className="text-sm text-gray-500 dark:text-neutral-500">Criado em {new Date(chamado.criado_em).toLocaleString("pt-BR")}</p>
 
-
                                                         {chamado.status_chamado === "em andamento" ? (
-                                                            <button className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-[#7F56D8] decoration-2 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">
-                                                                Acompanhar apontamentos
-                                                                <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                                    viewBox="0 0 24 24"
-                                                                    fill="none"
-                                                                    stroke="currentColor"
-                                                                    strokeWidth="2"
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                >
-                                                                    <path d="m9 18 6-6-6-6"></path>
-                                                                </svg>
+                                                            <button className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-[#7F56D8] decoration-2 hover:underline focus:underline focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">Acompanhar apontamentos
+                                                                <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
                                                             </button>
                                                         ) : chamado.status_chamado === "concluido" ? (
                                                             <button className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">
                                                                 Ver relatório
-                                                                <svg
-                                                                    className="shrink-0 size-4"
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    width="24"
-                                                                    height="24"
-                                                                    viewBox="0 0 24 24"
-                                                                    fill="none"
-                                                                    stroke="currentColor"
-                                                                    strokeWidth="2"
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                >
-                                                                    <path d="m9 18 6-6-6-6"></path>
-                                                                </svg>
+                                                                <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
                                                             </button>
                                                         ) : null}
                                                     </div>
@@ -392,143 +459,18 @@ export default function ChamadosCliente() {
                     </div>
 
                     {/* ---------- MODAL ---------- */}
-                    {/* {openModal && (
-                        <div id="crud-modal" tabIndex="-1" aria-hidden={!openModal} className="fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black bg-opacity-50">
-                            <div className="relative w-full h-full">
-                                <div className="relative bg-white shadow-sm dark:bg-gray-700 h-full">
-                                    <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
-                                        <h3 className="inline-flex items-center gap-2 text-base poppins-semibold text-gray-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
-                                            <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm.75-10.25v2.5h2.5a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-1.5 0v-2.5h-2.5a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 1.5 0Z" clip-rule="evenodd" />
-                                        </svg>Novo chamado</h3>
-                                        <button type="button"
-                                            onClick={() => setOpenModal(false)} // <-- fecha modal
-                                            className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" >
-                                            <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                                <path
-                                                    stroke="currentColor"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-                                                />
-                                            </svg>
-                                            <span className="sr-only">Close modal</span>
-                                        </button>
-                                    </div>
-
-                                    <div className="relative w-full">
-
-                                        <form className="p-4 md:p-5" onSubmit={criarChamado}>
-                                            <div className="grid gap-4 mb-4 grid-cols-2">
-                                                <div className="col-span-2">
-                                                    <label htmlFor="name" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Assunto<span className="text-red-500">*</span></label>
-                                                    <input type="text" name="name" id="name" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.assunto
-                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                                                        : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
-                                                        }`} placeholder="Digite o assunto" required="" value={assunto} onChange={(e) => { setAssunto(e.target.value); setCamposInvalidos({ ...camposInvalidos, assunto: false }); }} />
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <label htmlFor="servico" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Tipo de serviço<span className="text-red-500">*</span></label>
-                                                    <select id="servico" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.tipo
-                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                                                        : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
-                                                        }`} value={tipoSelecionadoId} onChange={(e) => { setTipoSelecionadoId(e.target.value); setCamposInvalidos({ ...camposInvalidos, tipo: false }); }} required>
-                                                        <option value="">Selecione tipo de serviço</option>
-                                                        {tiposServico.map(tipo => (
-                                                            <option key={tipo.id} value={tipo.id}>
-                                                                {formatarLabel(tipo.titulo)}
-                                                            </option>
-                                                        ))}
-                                                    </select></div>
-                                                <div className="col-span-2">
-                                                    <label htmlFor="prioridade" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Prioridade<span className="text-red-500">*</span></label>
-                                                    <select id="prioridade" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.prioridade ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
-                                                        }`} value={prioridadeSelecionadaId} onChange={(e) => { setPrioridadeSelecionadaId(e.target.value); setCamposInvalidos({ ...camposInvalidos, prioridade: false }); }} required>
-                                                        <option value="">Selecione prioridade</option>
-                                                        {tiposPrioridade.map(tipo => (
-                                                            <option key={tipo.id} value={tipo.id}>
-                                                                {formatarLabel(tipo.titulo)}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <label htmlFor="patrimonio" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Patrimônio<span className="text-red-500">*</span></label>
-                                                    <input type="text" name="patrimonio" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.patrimonio
-                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                                                        : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
-                                                        }`} placeholder="Digite o número de patrimônio" required="" value={patrimonio} onChange={(e) => { setPatrimonio(e.target.value); setCamposInvalidos({ ...camposInvalidos, patrimonio: false }); }} />
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <label htmlFor="description" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Descrição<span className="text-red-500">*</span></label>
-                                                    <textarea id="description" rows="4" className={`block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:border-[#7F56D8] dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 ${camposInvalidos.descricao
-                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                                                        : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
-                                                        }`} placeholder="Escreva a descrição do chamado" value={descricao} onChange={(e) => { setDescricao(e.target.value); setCamposInvalidos({ ...camposInvalidos, descricao: false }); }}></textarea>
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <label htmlFor="file" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Enviar imagem</label>
-                                                    <div className="flex items-center justify-center w-1/2 h-50">
-                                                        <label htmlFor="dropzone-file" className="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 overflow-hidden">
-                                                            {!imagemPreview && (
-                                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                                    <svg className="me-1 -ms-1 w-8 h-8 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path
-                                                                            fillRule="evenodd"
-                                                                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                                                            clipRule="evenodd"
-                                                                        ></path>
-                                                                    </svg>
-                                                                </div>
-                                                            )}
-                                                            <input id="dropzone-file" type="file" className="hidden" accept="image/*" onChange={subirImagem} />
-                                                            {imagemPreview && (
-                                                                <img
-                                                                    src={imagemPreview}
-                                                                    alt="Pré-visualização"
-                                                                    className="rounded-lg absolute inset-0 w-full h-full object-cover"
-                                                                />
-                                                            )}
-                                                        </label>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                            {erroCampos && (
-                                                <p className="text-red-500 mb-2">Preencha todos os campos obrigatórios</p>
-                                            )}
-                                            <button type="button" class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Criar chamado</button>
-                                        </form>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div> 
-                    )} */}
-
-                    {/* ---------- MODAL ---------- */}
                     {openModal && (
-                        <div
-                            id="crud-modal"
-                            tabIndex="-1"
-                            aria-hidden={!openModal}
-                            className="fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black bg-opacity-50"
-                        >
+                        <div id="crud-modal" tabIndex="-1" aria-hidden={!openModal} className="fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black bg-opacity-50">
                             <div className="relative w-full max-w-3xl h-full">
                                 <div className="relative bg-white shadow-sm dark:bg-gray-700 h-full flex flex-col rounded-lg">
 
                                     {/* header */}
                                     <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
                                         <h3 className="inline-flex items-center gap-2 text-base poppins-semibold text-gray-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
-                                                <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm.75-10.25v2.5h2.5a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-1.5 0v-2.5h-2.5a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 1.5 0Z" clip-rule="evenodd" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
+                                                <path fillRule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm.75-10.25v2.5h2.5a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-1.5 0v-2.5h-2.5a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 1.5 0Z" clipRule="evenodd" />
                                             </svg>Novo chamado</h3>
-                                        <button
-                                            type="button"
-                                            onClick={() => setOpenModal(false)}
-                                            className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                                        >
+                                        <button type="button" onClick={() => setOpenModal(false)} className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
                                             <span className="sr-only">Close modal</span>
                                             <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
@@ -568,7 +510,7 @@ export default function ChamadosCliente() {
                                                         <option value="">Selecione prioridade</option>
                                                         {tiposPrioridade.map(tipo => (
                                                             <option key={tipo.id} value={tipo.id}>
-                                                                {formatarLabel(tipo.titulo)}
+                                                                {formatarLabel(tipo.nome)}
                                                             </option>
                                                         ))}
                                                     </select>
@@ -578,7 +520,7 @@ export default function ChamadosCliente() {
                                                     <input type="text" name="patrimonio" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.patrimonio
                                                         ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                                                         : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
-                                                        }`} placeholder="Digite o número de patrimônio" required="" value={patrimonio} onChange={(e) => { setPatrimonio(e.target.value); setCamposInvalidos({ ...camposInvalidos, patrimonio: false }); }} />
+                                                        }`} placeholder="Digite o número de patrimônio" required="" value={patrimonio} onChange={(e) => { setPatrimonio(e.target.value.replace(/\D/g, "")); setCamposInvalidos({ ...camposInvalidos, patrimonio: false }); }} maxLength={7} pattern="\d{7}" />
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="description" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Descrição<span className="text-red-500">*</span></label>
@@ -594,21 +536,13 @@ export default function ChamadosCliente() {
                                                             {!imagemPreview && (
                                                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                                     <svg className="me-1 -ms-1 w-8 h-8 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path
-                                                                            fillRule="evenodd"
-                                                                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                                                            clipRule="evenodd"
-                                                                        ></path>
+                                                                        <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path>
                                                                     </svg>
                                                                 </div>
                                                             )}
                                                             <input id="dropzone-file" type="file" className="hidden" accept="image/*" onChange={subirImagem} />
                                                             {imagemPreview && (
-                                                                <img
-                                                                    src={imagemPreview}
-                                                                    alt="Pré-visualização"
-                                                                    className="rounded-lg absolute inset-0 w-full h-full object-cover"
-                                                                />
+                                                                <img src={imagemPreview} alt="Pré-visualização" className="rounded-lg absolute inset-0 w-full h-full object-cover" />
                                                             )}
                                                         </label>
                                                     </div>
@@ -618,21 +552,16 @@ export default function ChamadosCliente() {
                                             {erroCampos && (
                                                 <p className="text-red-500 mb-2">Preencha todos os campos obrigatórios</p>
                                             )}
-                                            <button type="button" class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Criar chamado</button>
+                                            {/* footer */}
+                                    <div className="flex justify-end items-center gap-x-2 py-3 px-4 border-t border-gray-200 dark:border-neutral-700">
+                                    <button type="button" className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Criar chamado</button>
+                                    </div>
                                         </form>
                                         {/* </form> */}
                                     </div>
 
-                                    {/* footer */}
-                                    <div className="flex justify-end items-center gap-x-2 py-3 px-4 border-t border-gray-200 dark:border-neutral-700">
+                                    
 
-                                        <button
-                                            type="submit"
-                                            className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700"
-                                        >
-                                            Criar chamado
-                                        </button>
-                                    </div>
 
                                 </div>
                             </div>

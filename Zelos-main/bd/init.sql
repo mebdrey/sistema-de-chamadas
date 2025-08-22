@@ -78,9 +78,9 @@ END$$
 DELIMITER ;
 
 insert usuarios (nome, senha, username, email, funcao) values
-("Julia Alves de Oliveira", "Senai@123", 'juliaalves', "julia@gmail.com", "admin"), /* administrador*/
-("Maria de Brito Del Rey", "Senai@123", "mariabrito", "maria@gmail.com", "admin"), /* administrador*/
-("Lorena Oshiro do Carmo", "Senai@123", "lorenaoshiro", "lorena@gmail.com", "admin"), /* administrador*/
+("Julia Alves de Oliveira", "Senai@123", 'juliaalves', "juliaalvesdeo447@gmail.com", "admin"), /* administrador*/
+("Maria de Brito Del Rey", "Senai@123", "mariabrito", "mebdelrey@gmail.com", "admin"), /* administrador*/
+("Lorena Oshiro do Carmo", "Senai@123", "lorenaoshiro", "lorenaoshiro2007@gmail.com", "admin"), /* administrador*/
 ("Elias Coca Velloso", "Senai@123", "eliascoca", "elias@gmail.com", "tecnico"), /* externo */ 
 ("Eduardo de Oliveira", "Senai@123", "eduardooliveira", "eduardo@gmail.com", "tecnico"), /* externo */
 ("Henrique Lima", "Senai@123", "henriquealves", "henrique@gmail.com", "tecnico"), /* externo */
@@ -252,7 +252,18 @@ CREATE TABLE notificacoes (
   FOREIGN KEY (chamado_id) REFERENCES chamados(id)
 );
 
+CREATE TABLE redefinir_tokens (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  token VARCHAR(255) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  usado BOOLEAN DEFAULT FALSE
+);
+
 -- Índices adicionais para otimização
 CREATE INDEX idx_usuarios_email ON usuarios(email);
 CREATE INDEX idx_chamados_status ON chamados(status_chamado);
 CREATE INDEX idx_apontamentos_comeco_fim ON apontamentos(comeco, fim);
+
+select *from chamados;
+select *from apontamentos;
