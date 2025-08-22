@@ -70,6 +70,38 @@ export default function ChamadosAdmin() {
     return prioridadeMap[id] ? prioridadeMap[id].label : 'Não definida';
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const form = e.target;
+
+    // Pegando os dados do formulário
+    const formData = req.body ;
+{/*ENVIO PARA O BACK*/}
+    try {
+      const response = await fetch("http://localhost:8080/pool", {
+        method: "POST",
+        headers: {"Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+        credentials: "include",
+      });
+
+      const data = await response.json();
+      setResposta(JSON.stringify(data, null, 2));
+
+      //alert 
+      if (response.ok) {
+      alert("Setor cadastrada com sucesso!");
+      setResposta(JSON.stringify(data, null, 2));
+      form.reset(); // limpa o formulário
+    } else {
+        alert("Erro ao cadastrar setor.");
+      } } catch (error) {
+      console.error("Erro:", error);
+      setResposta("Erro ao enviar os dados.");
+    }};
+
+
   // busca os tipos de servico
   useEffect(() => {
     fetch('http://localhost:8080/servicos', { credentials: 'include' })

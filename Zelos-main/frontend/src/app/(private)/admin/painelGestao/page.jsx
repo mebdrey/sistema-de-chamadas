@@ -27,19 +27,9 @@ export default function ChamadosAdminToolsPage() {
   // mensagens / feedback
   const [msg, setMsg] = useState(null);
 
-  const API = {
-    criarUsuario: '/usuarios',
-    sugerirUsername: '/usuarios/sugerir-username',
-    pool: '/pool',
-    prioridades: '/prioridades',
-    recalcularPrazo: (id) => `/chamados/${id}/prazo`,
-    calcularPrazo: '/chamados/calcular-prazo'
-  };
+  const API = { criarUsuario: '/usuarios',sugerirUsername: '/usuarios/sugerir-username', pool: '/pool', prioridades: '/prioridades', recalcularPrazo: (id) => `/chamados/${id}/prazo`, calcularPrazo: '/chamados/calcular-prazo'};
 
-  useEffect(() => {
-    fetchSetores();
-    fetchPrioridades();
-  }, []);
+  useEffect(() => { fetchSetores(); fetchPrioridades();}, []);
 
   async function fetchSetores() {
     try {

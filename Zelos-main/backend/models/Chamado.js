@@ -301,6 +301,7 @@ export const gerarSugestoesUsername = async (nome) => {
   return suggestions;
 };
 
+//SETORES
 export const criarSetor = async (dados) => {
   try {
     // dados: { titulo, descricao, created_by }
@@ -374,9 +375,7 @@ export const getPrazoPorNome = async (nome) => {
 export const calcularDataLimite = async (prioridade) => {
   try {
     const [row] = await read('prioridades', '*', 'nome = ?', [prioridade]);
-    if (row && row.horas_limite) {
-      return new Date(Date.now() + row.horas_limite * 60 * 60 * 1000);
-    }
+    if (row && row.horas_limite) {return new Date(Date.now() + row.horas_limite * 60 * 60 * 1000); }
     return null;
   } catch (err) {
     console.error("Erro ao buscar prioridade:", err);

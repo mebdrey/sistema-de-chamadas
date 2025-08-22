@@ -95,74 +95,22 @@
 //   //     import("apexcharts").then(({ default: ApexCharts }) => {
 //   //       const options = {
 //   //         colors: ["#1A56DB", "#FDBA8C"],
-//   //         series: [
-//   //           {
-//   //             name: "Em andamento",
-//   //             color: "#1A56DB",
-//   //             data: [
-//   //               { x: "funcionario 1", y: 231 },
-//   //               { x: "Tue", y: 122 },
-//   //               { x: "Wed", y: 63 },
-//   //               { x: "Thu", y: 421 },
-//   //               { x: "Fri", y: 122 },
-//   //               { x: "Sat", y: 323 },
-//   //               { x: "Sun", y: 111 },
-//   //             ],
-//   //           },
+//   //         series: [{ name: "Em andamento", color: "#1A56DB", data: [ { x: "funcionario 1", y: 231 }, { x: "Tue", y: 122 },{ x: "Wed", y: 63 }, { x: "Thu", y: 421 }, { x: "Fri", y: 122 },{ x: "Sat", y: 323 }, { x: "Sun", y: 111 }, ],},
 //   //           {
 //   //             name: "Concluido",
 //   //             color: "#FDBA8C",
-//   //             data: [
-//   //               { x: "Mon", y: 232 },
-//   //               { x: "Tue", y: 113 },
-//   //               { x: "Wed", y: 341 },
-//   //               { x: "Thu", y: 224 },
-//   //               { x: "Fri", y: 522 },
-//   //               { x: "Sat", y: 411 },
-//   //               { x: "Sun", y: 243 },
-//   //             ],
+//   //             data: [ { x: "Mon", y: 232 }, { x: "Tue", y: 113 }, { x: "Wed", y: 341 }, { x: "Thu", y: 224 },{ x: "Fri", y: 522 }, { x: "Sat", y: 411 },{ x: "Sun", y: 243 } ],
 //   //           },
 //   //         ],
-//   //         chart: {
-//   //           type: "bar",
-//   //           height: "320px",
-//   //           fontFamily: "Inter, sans-serif",
-//   //           toolbar: { show: false },
-//   //         },
-//   //         plotOptions: {
-//   //           bar: {
-//   //             horizontal: false,
-//   //             columnWidth: "70%",
-//   //             borderRadiusApplication: "end",
-//   //             borderRadius: 8,
-//   //           },
-//   //         },
-//   //         tooltip: {
-//   //           shared: true,
-//   //           intersect: false,
-//   //           style: { fontFamily: "Inter, sans-serif" },
-//   //         },
+//   //         chart: { type: "bar", height: "320px", fontFamily: "Inter, sans-serif",toolbar: { show: false },},
+//   //         plotOptions: { bar: { horizontal: false, columnWidth: "70%", borderRadiusApplication: "end", borderRadius: 8,},},
+//   //         tooltip: { shared: true, intersect: false, style: { fontFamily: "Inter, sans-serif" }, },
 //   //         states: { hover: { filter: { type: "darken", value: 1 } } },
 //   //         stroke: { show: true, width: 0, colors: ["transparent"] },
-//   //         grid: {
-//   //           show: false,
-//   //           strokeDashArray: 4,
-//   //           padding: { left: 2, right: 2, top: -14 },
-//   //         },
+//   //         grid: { show: false, strokeDashArray: 4, padding: { left: 2, right: 2, top: -14 }, },
 //   //         dataLabels: { enabled: false },
 //   //         legend: { show: false },
-//   //         xaxis: {
-//   //           floating: false,
-//   //           labels: {
-//   //             show: true,
-//   //             style: {
-//   //               fontFamily: "Inter, sans-serif",
-//   //               cssClass: "text-xs font-normal fill-gray-500 dark:fill-gray-400",
-//   //             },
-//   //           },
-//   //           axisBorder: { show: false },
-//   //           axisTicks: { show: false },
-//   //         },
+//   //         xaxis: { floating: false, labels: {show: true, style: {fontFamily: "Inter, sans-serif", cssClass: "text-xs font-normal fill-gray-500 dark:fill-gray-400" },}, axisBorder: { show: false }, axisTicks: { show: false },},
 //   //         yaxis: { show: false },
 //   //         fill: { opacity: 1 },
 //   //       };
@@ -172,11 +120,7 @@
 //   //     });
 
 //       // Cleanup correto → evita duplicação
-//   //     return () => {
-//   //       if (chart) {
-//   //         chart.destroy();
-//   //       }
-//   //     };
+//   //     return () => { if (chart) { chart.destroy(); } };
 //   //   }
 //   // }, []);
 
@@ -196,50 +140,29 @@
 //           </div>
 //         </div>
 //       </div>
-
 //       <div className="grid grid-cols-1">
 //         <dl className="flex items-center">
 //           <dt className="text-gray-500 dark:text-gray-400 text-sm font-normal me-1">Total de chamados:</dt>
 //           <dd className="text-gray-900 text-sm dark:text-white font-semibold">Qtd total de chamados do setor</dd>
 //         </dl>
 //       </div>
-
 //       {/* container do gráfico */}
 //       <div id="column-chart"></div>
-
 //       {/* dropdown */}
 //       <div className="grid grid-cols-1 items-center border-gray-200 border-t dark:border-gray-700 justify-between" ref={dropdownRef}>
 //         <div className="flex justify-between items-center pt-5">
-//           <button
-//             onClick={() => setOpen((prev) => !prev)}
-//             className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 text-center inline-flex items-center dark:hover:text-white"
-//             type="button"
-//           ><svg className="w-2.5 m-2.5 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+//           <button onClick={() => setOpen((prev) => !prev)} className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 text-center inline-flex items-center dark:hover:text-white" type="button"><svg className="w-2.5 m-2.5 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
 //               <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4"/>
 //             </svg>
 //           </button>
-
 //          {open && (
 //   <div className="absolute bottom-full mb-2 z-10 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700">
 //     <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
-//       <li>
-//         <button
-//           onClick={() => { setPerfil("tecnicos"); setOpen(false); }}
-//           className="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-//         >
-//           Técnicos
-//         </button>
-//       </li>
-//       <li>
-//         <button onClick={() => { setPerfil("auxiliares"); setOpen(false); }} className="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-//           Auxiliares
-//         </button>
-//       </li>
+//       <li> <button onClick={() => { setPerfil("tecnicos"); setOpen(false); }} className="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Técnicos</button></li>
+//       <li><button onClick={() => { setPerfil("auxiliares"); setOpen(false); }} className="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Auxiliares</button></li>
 //     </ul>
 //   </div>
 // )}
-
-
 //           <div className="relative">
 //   <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-[#7F56D8] hover:bg-[#E6DAFF] px-3 py-2" onClick={() => setDropdownRelatorioOpen(prev => !prev)}>Gerar relatório
 //     <svg className="w-3.5 h-3.5 text-[#7F56D8] me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
@@ -252,14 +175,8 @@
 //   {dropdownRelatorioOpen && (
 //     <div className="absolute z-10 mt-2 bg-white border border-gray-200 rounded-lg shadow-sm w-40">
 //       <ul className="py-2 text-sm text-gray-700">
-//         <li>
-//           <button onClick={() => { gerarCSV(); setDropdownRelatorioOpen(false);}} className="w-full text-left px-4 py-2 hover:bg-gray-100" >Exportar CSV
-//           </button>
-//         </li>
-//         <li>
-//           <button  onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF
-//           </button>
-//         </li>
+//         <li> <button onClick={() => { gerarCSV(); setDropdownRelatorioOpen(false);}} className="w-full text-left px-4 py-2 hover:bg-gray-100" >Exportar CSV </button></li>
+//         <li> <button  onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF </button> </li>
 //       </ul>
 //     </div>
 //   )}
@@ -267,8 +184,7 @@
 //         </div>
 //       </div>
 //     </div>
-//   );
-// }
+//   );}
 "use client";
 
 import { useEffect, useState, useRef } from "react";

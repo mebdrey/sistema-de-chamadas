@@ -13,28 +13,24 @@ export default function admDashboard() {
   const [modo, setModo] = useState('mensal'); // 'mensal' ou 'anual'
   const [qndtChamados, setQndtChamados] = useState([]);
   const [dropdownChamadosStatusOpen, setDropdownChamadosStatusOpen] = useState(false);
+  const [setorForm, setSetorForm] = useState({ titulo: '', descricao: '' });
+  const [setores, setSetores] = useState([]);
+  const API = {pool: '/pool'};
 
   // Função para buscar dados do backend
   const fetchChamados = async () => {
-    try {
-      const res = await fetch(`http://localhost:8080/contar-por-status?modo=${modo}`, { credentials: 'include' });
+    try {const res = await fetch(`http://localhost:8080/contar-por-status?modo=${modo}`, { credentials: 'include' });
       const data = await res.json();
       setQndtChamados(data);
-    } catch (error) {
-      console.error('Erro ao buscar dados dos chamados:', error);
-    }
+    } catch (error) { console.error('Erro ao buscar dados dos chamados:', error); }
   };
 
-  useEffect(() => {
-    fetchChamados();
-  }, [modo]);
+  useEffect(() => { fetchChamados(); }, [modo]);
 
   // Função para alternar entre mensal/anual
-  const handleToggle = () => {
-    setModo((prev) => (prev === 'mensal' ? 'anual' : 'mensal'));
-  };
+  const handleToggle = () => {setModo((prev) => (prev === 'mensal' ? 'anual' : 'mensal')); };
 
-  // ---------------------------------------------------------- chamado por status (pendente, am andamento, concluido) ----------------------------------------------------------
+  // ---------------- chamado por status (pendente, am andamento, concluido) -------------------
   // CSV
   const exportarCsvChamadosPorStatus = () => {
     const dataAtual = new Date().toLocaleDateString("pt-BR");
@@ -45,34 +41,16 @@ export default function admDashboard() {
       if (!str) return "";
       return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
     };
-
-    // Cabeçalho informativo
-    const cabecalhoInfo = [
-      `Relatório de Chamados por Status`,
-      `Gerado em: ${dataAtual}`,
-      `Modo: ${modoTexto}`,
-      ""
-    ];
-
-    // Cabeçalho da tabela
-    const cabecalhoTabela = ["Tipo de Chamado", "Quantidade"];
-
-    // Linhas da tabela com nomes capitalizados
-    const linhasTabela = qndtChamados.map((item) => [
-      capitalizar(
-        item.tipo.normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove acentos se precisar
-      ),
-      item.qtd
-    ]);
+    
+    const cabecalhoInfo = [`Relatório de Chamados por Status`, `Gerado em: ${dataAtual}`, `Modo: ${modoTexto}`, ""];// Cabeçalho informativo
+    
+    const cabecalhoTabela = ["Tipo de Chamado", "Quantidade"];// Cabeçalho da tabela
+    
+    const linhasTabela = qndtChamados.map((item) => [ capitalizar( item.tipo.normalize("NFD").replace(/[\u0300-\u036f]/g, "")  ), item.qtd]);// Linhas da tabela com nomes capitalizados
 
     const separador = ";";
-
-    // Junta tudo (cabeçalho + tabela)
-    const conteudoCsv = [
-      ...cabecalhoInfo,
-      cabecalhoTabela.join(separador),
-      ...linhasTabela.map((linha) => linha.join(separador))
-    ].join("\n");
+    
+    const conteudoCsv = [ ...cabecalhoInfo, cabecalhoTabela.join(separador), ...linhasTabela.map((linha) => linha.join(separador))].join("\n");// Junta tudo (cabeçalho + tabela)
 
     // Para resolver problema de acentuação → adiciona BOM no início
     const BOM = "\uFEFF";
@@ -85,28 +63,16 @@ export default function admDashboard() {
     link.download = `relatorio_chamados_status_${modoTexto.toLowerCase()}.csv`;
     link.click();
 
-    // Libera memória
-    URL.revokeObjectURL(url);
-  };
+    URL.revokeObjectURL(url);}; // Libera memória
 
   // PDF
   const gerarRelatorioChamadoPorStatus = async () => {
-    const dataHoraAtual = new Date().toLocaleString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit"
-    });
+    const dataHoraAtual = new Date().toLocaleString("pt-BR", { day: "2-digit",month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit"});
     const modoTexto = modo === "mensal" ? "Mensal" : "Anual";
 
     const totalChamados = qndtChamados.reduce((acc, item) => acc + item.qtd, 0);
-
-    // Pega o status mais recorrente
-    const statusMaisFrequente = qndtChamados.reduce((prev, curr) =>
-      curr.qtd > prev.qtd ? curr : prev
-    );
+    
+    const statusMaisFrequente = qndtChamados.reduce((prev, curr) => curr.qtd > prev.qtd ? curr : prev);// Pega o status mais recorrente
 
     const doc = new jsPDF();
 
@@ -134,24 +100,17 @@ export default function admDashboard() {
     autoTable(doc, {
       startY: 70,
       head: [["Tipo de Chamado", "Quantidade"]],
-      body: qndtChamados.map(item => [
-        item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1).toLowerCase(),
-        item.qtd
-      ]),
+      body: qndtChamados.map(item => [item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1).toLowerCase(), item.qtd]),
       styles: { fontSize: 11, cellPadding: 5, halign: "center", valign: "middle" },
-      headStyles: {
-        fillColor: [127, 86, 216], // Roxo
-        textColor: [255, 255, 255], fontStyle: "bold"
-      },
+      headStyles: { fillColor: [127, 86, 216], textColor: [255, 255, 255], fontStyle: "bold"},
       alternateRowStyles: { fillColor: [245, 240, 255] }, // Roxinho claro
       bodyStyles: { textColor: [50, 50, 50] }
     });
 
     // --- RESUMO AUTOMÁTICO ---
     const finalY = doc.lastAutoTable.finalY || 80; // pega o fim da tabela
-
-    // Espaçamento extra entre tabela e título do resumo
-    const marginTop = 20;
+   
+    const marginTop = 20; // Espaçamento extra entre tabela e título do resumo
 
     doc.setFontSize(15);
     doc.setTextColor(40, 40, 40);
@@ -166,13 +125,9 @@ export default function admDashboard() {
     const margin = 14;
     const maxWidth = pageWidth - margin * 2;
 
-    doc.text(
-      `Neste período foram registrados ${totalChamados} chamados. O status mais recorrente foi "${statusMaisFrequente.tipo}" com ${statusMaisFrequente.qtd} ocorrências, representando aproximadamente ${Math.round((statusMaisFrequente.qtd / totalChamados) * 100)}% do total. 
+    doc.text(`Neste período foram registrados ${totalChamados} chamados. O status mais recorrente foi "${statusMaisFrequente.tipo}" com ${statusMaisFrequente.qtd} ocorrências, representando aproximadamente ${Math.round((statusMaisFrequente.qtd / totalChamados) * 100)}% do total. 
 Esse resultado demonstra uma tendência relevante no comportamento dos chamados, permitindo identificar pontos de atenção e possíveis gargalos no atendimento. Além disso, a distribuição observada pode auxiliar na definição de prioridades e no planejamento de recursos da equipe responsável.`,
-      margin,
-      finalY + marginTop + 10,
-      { maxWidth, align: 'justify' }
-    );
+      margin, finalY + marginTop + 10, { maxWidth, align: 'justify' });
 
     // --- RODAPÉ ---
     const pageCount = doc.internal.getNumberOfPages();
@@ -180,15 +135,8 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
       doc.setPage(i);
       doc.setFontSize(9);
       doc.setTextColor(120);
-      doc.text(
-        `Página ${i} de ${pageCount}`,
-        200,
-        290,
-        { align: "right" }
-      );
-      doc.text("Relatório gerado automaticamente pelo sistema", 14, 290);
-    }
-
+      doc.text( `Página ${i} de ${pageCount}`,200,290, { align: "right" } );
+      doc.text("Relatório gerado automaticamente pelo sistema", 14, 290);}
     // --- SALVAR ---
     doc.save(`relatorio_chamados_status_${modoTexto.toLowerCase()}.pdf`);
   };
@@ -200,9 +148,7 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
           {qndtChamados.map((nChamados, index) => (
             <div key={index} className="flex items-center justify-center h-fit ">
               <div className="w-full p-6 border border-gray-100 rounded-xl bg-white">
-                <p className="mb-3 poppins-regular text-gray-500 ">
-                  Chamados {nChamados.tipo}
-                </p>
+                <p className="mb-3 poppins-regular text-gray-500 "> Chamados {nChamados.tipo}</p>
                 <div className="flex flex-row gap-3">
                   <svg className="w-7 h-7 text-gray-500  mb-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
@@ -224,12 +170,8 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
               {dropdownChamadosStatusOpen && (
                 <div className="absolute z-10 mt-2 bg-white border border-gray-200 rounded-lg shadow-sm w-40">
                   <ul className="py-2 text-sm text-gray-700">
-                    <li>
-                      <button onClick={() => { exportarCsvChamadosPorStatus(); setDropdownChamadosStatusOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar CSV</button>
-                    </li>
-                    <li>
-                      <button onClick={() => { gerarRelatorioChamadoPorStatus(); setDropdownChamadosStatusOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF</button>
-                    </li>
+                    <li><button onClick={() => { exportarCsvChamadosPorStatus(); setDropdownChamadosStatusOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar CSV</button></li>
+                    <li><button onClick={() => { gerarRelatorioChamadoPorStatus(); setDropdownChamadosStatusOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF</button></li>
                   </ul>
                 </div>
               )}
@@ -249,21 +191,12 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
       </div>
       { /*CARDS DA QUANTIDADE DE CHAMADOS p mes*/}
       <div className="grid grid-cols-3 gap-4 mb-4 items-start">
-        <div className="col-span-2 bg-white rounded-lg shadow-sm p-4 md:p-6"><GraficoChamadosPorAno /></div>
+        <div className="col-span-2 bg-white rounded-lg shadow-sm p-4 md:p-6"><GraficoChamadosPorAno/></div>
         <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6"><KpiSla /></div>
       </div>
-
       {/* <div className="grid grid-cols-3 gap-1 mb-4">
-                    <div className="col-span-2 flex items-center justify-center h-fit mb-4 rounded-sm">
-                        <div className="w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
-                            <GraficoChamadosPorAno />
-                        </div>
-                    </div>
-                    <div className="col-span-1 flex items-center justify-center h-fit mb-4 rounded-sm">
-                        <div className="w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
-                            <GraficoPorStatus />
-                        </div>
-                    </div>
+                    <div className="col-span-2 flex items-center justify-center h-fit mb-4 rounded-sm"> <div className="w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6"><GraficoChamadosPorAno/></div></div>
+                    <div className="col-span-1 flex items-center justify-center h-fit mb-4 rounded-sm"><div className="w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6"><GraficoPorStatus/></div></div>
                 </div> */}
       <div className="grid grid-cols-2 gap-1 mb-4">
         <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 mb-4 g-700">
