@@ -14,7 +14,7 @@ export default function ChamadosAdmin() {
   const [busca, setBusca] = useState(""); // armazena o que for digitado no campo de busca
   const [dropdownSetorAberto, setDropdownSetorAberto] = useState(false);
   const [dropdownPrioridadeAberto, setDropdownPrioridadeAberto] = useState(false);
-  const [prioridadesSelecionadas, setPrioridadesSelecionadas] = useState([]); // 
+  const [prioridadesSelecionadas, setPrioridadesSelecionadas] = useState([]); 
   const [ordenarPor, setOrdenarPor] = useState('mais_recente'); // ordenar por mais recente ou mais antigo, por padrao ele mostra os mais recentes primeiro
   const [chamadoSelecionado, setChamadoSelecionado] = useState(null);
   const [usuarios, setUsuarios] = useState([]);
@@ -22,7 +22,7 @@ export default function ChamadosAdmin() {
   const [tipoServico, setTipoServico] = useState(""); // recebe do chamado
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
   const [openAtribuirDropdown, setOpenAtribuirDropdown] = useState(false);
- const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     prioridade: "",
     tecnico_id: "",
@@ -66,10 +66,18 @@ export default function ChamadosAdmin() {
 
   // array com prioridade
   const prioridades = [
-    { label: 'Alta', value: 'alta' },
+    { label: 'Baixa', value: 'baixa' },
     { label: 'Média', value: 'media' },
-    { label: 'Baixa', value: 'baixa' }
-  ];
+    { label: 'Alta', value: 'alta' }
+];
+  const prioridadeMap = {
+    1: { label: 'Baixa', value: 'baixa' },
+    2: { label: 'Média', value: 'media' },
+    3: { label: 'Alta', value: 'alta' }
+  };
+  const getPrioridadeLabel = (id) => {
+    return prioridadeMap[id] ? prioridadeMap[id].label : 'Não definida';
+  };
 
   // busca os tipos de servico
   useEffect(() => {
@@ -173,10 +181,7 @@ export default function ChamadosAdmin() {
       const res = await fetch("http://localhost:8080/atribuir-tecnico", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chamadoId: chamadoSelecionado.id,
-          tecnicoId,
-        }),
+        body: JSON.stringify({ chamadoId: chamadoSelecionado.id, tecnicoId, }),
         credentials: "include",
       });
 
@@ -184,16 +189,11 @@ export default function ChamadosAdmin() {
 
       // Atualiza o chamado no estado
       setChamados((prev) =>
-        prev.map((c) =>
-          c.id === chamadoSelecionado.id ? { ...c, tecnico_id: tecnicoId } : c
-        )
+        prev.map((c) => c.id === chamadoSelecionado.id ? { ...c, tecnico_id: tecnicoId } : c)
       );
 
       // Atualiza também o chamadoSelecionado
-      setChamadoSelecionado((prev) => ({
-        ...prev,
-        tecnico_id: tecnicoId,
-      }));
+      setChamadoSelecionado((prev) => ({ ...prev, tecnico_id: tecnicoId, }));
 
       alert("Chamado atribuído com sucesso!");
     } catch (err) {
@@ -202,7 +202,7 @@ export default function ChamadosAdmin() {
     }
   };
 
-// sempre que abrir/selecionar um chamado, preenche o formData
+  // sempre que abrir/selecionar um chamado, preenche o formData
   useEffect(() => {
     if (chamadoSelecionado) {
       setFormData({
@@ -246,7 +246,7 @@ export default function ChamadosAdmin() {
       const val = formData[campo];
       if (val !== undefined && val !== null && String(val) !== String(chamadoSelecionado[campo])) {
         if ((campo === 'tecnico_id' || campo === 'tipo_id') && val !== "") { payload[campo] = Number(val); }
-        else { payload[campo] = val;}
+        else { payload[campo] = val; }
       }
     }
 
@@ -325,13 +325,8 @@ export default function ChamadosAdmin() {
                                 <input id={`helper-checkbox-${index}`} type="checkbox" name="setor" value={setor.titulo} checked={setoresSelecionados.includes(setor.titulo)} onChange={(e) => {
                                   const checked = e.target.checked;
                                   const valor = setor.titulo;
-                                  if (checked) {
-                                    setSetoresSelecionados((prev) => [...prev, valor]);
-                                  } else {
-                                    setSetoresSelecionados((prev) =>
-                                      prev.filter((s) => s !== valor)
-                                    );
-                                  }
+                                  if (checked) { setSetoresSelecionados((prev) => [...prev, valor]); }
+                                  else { setSetoresSelecionados((prev) => prev.filter((s) => s !== valor)); }
                                 }}
                                   className="w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#E6DAFF] focus:ring-2" />
                               </div>
@@ -375,9 +370,9 @@ export default function ChamadosAdmin() {
                                   const checked = e.target.checked;
                                   const valor = prioridade.value;
                                   if (checked) { setPrioridadesSelecionadas((prev) => [...prev, valor]); }
-                                   else { setPrioridadesSelecionadas((prev) => prev.filter((p) => p !== valor)); }
+                                  else { setPrioridadesSelecionadas((prev) => prev.filter((p) => p !== valor)); }
                                 }}
-                                className="w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#E6DAFF] focus:ring-2 "/>
+                                className="w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#E6DAFF] focus:ring-2 " />
                             </div>
                             <div className="ms-2 text-sm">
                               <label htmlFor={`prioridade-checkbox-${index}`} className="poppins-medium text-gray-900">
@@ -420,7 +415,6 @@ export default function ChamadosAdmin() {
                   )
                 })}
               </ul>
-
             </div>
             <div id="default-tab-content">
               {statusAbas.map((status) => {
@@ -442,9 +436,14 @@ export default function ChamadosAdmin() {
                       setoresSelecionados.length === 0 ||
                       setoresSelecionados.includes(mapaTipoIdParaTitulo[c.tipo_id]);
 
+                    // const correspondePrioridade =
+                    //   prioridadesSelecionadas.length === 0 ||
+                    //   prioridadesSelecionadas.includes(c.prioridade);
+                    const prioridadeDoChamado = prioridadeMap[c.prioridade_id];
                     const correspondePrioridade =
                       prioridadesSelecionadas.length === 0 ||
-                      prioridadesSelecionadas.includes(c.prioridade);
+                      (prioridadeDoChamado && prioridadesSelecionadas.includes(prioridadeDoChamado.value));
+
 
                     return correspondeBusca && correspondeSetor && correspondePrioridade;
                   })
@@ -484,7 +483,8 @@ export default function ChamadosAdmin() {
                             </div>
                             <div>
                               <p className="text-xs text-gray-500">Prioridade</p>
-                              <p className="text-sm poppins-bold text-gray-800">{chamado.prioridade}</p>
+                              {/* <p className="text-sm poppins-bold text-gray-800">{chamado.prioridade_id}</p> */}
+                              <p className="text-sm poppins-bold text-gray-800">{getPrioridadeLabel(chamado.prioridade_id)}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 ">Chamado ID</p>
@@ -515,65 +515,61 @@ export default function ChamadosAdmin() {
                 <p className="mb-2 text-sm text-gray-500 ">Usuário</p>
                 <p className="mb-6 text-sm poppins-bold text-gray-800">{getUsuarioNome(chamadoSelecionado?.usuario_id)}</p>
               </div>
-             {/* Tipo de serviço -> select se estiver editando, senão texto */}
-            <div>
-              <p className="mb-2 text-sm text-gray-500 ">Tipo de serviço</p>
-              {isEditing ? (
-                <>
-                  <select id="tipo_id" name="tipo_id" value={formData.tipo_id ?? ""} onChange={handleChange} className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50">
-                    <option value="">Selecione um tipo</option>
-                    {tiposServico.map((t) => (
-                      <option key={t.id} value={t.id}>{t.titulo.replace(/_/g, ' ')}</option>
-                    ))}
-                  </select>
-                </>
-              ) : (
-                <p className="mb-6 text-sm poppins-bold text-gray-800">{getTipoServicoTitulo(chamadoSelecionado?.tipo_id)}</p>
-              )}
-            </div>
+              {/* Tipo de serviço -> select se estiver editando, senão texto */}
+              <div>
+                <p className="mb-2 text-sm text-gray-500 ">Tipo de serviço</p>
+                {isEditing ? (
+                  <>
+                    <select id="tipo_id" name="tipo_id" value={formData.tipo_id ?? ""} onChange={handleChange} className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50">
+                      <option value="">Selecione um tipo</option>
+                      {tiposServico.map((t) => (
+                        <option key={t.id} value={t.id}>{t.titulo.replace(/_/g, ' ')}</option>
+                      ))}
+                    </select>
+                  </>) : (
+                  <p className="mb-6 text-sm poppins-bold text-gray-800">{getTipoServicoTitulo(chamadoSelecionado?.tipo_id)}</p>
+                )}
+              </div>
 
-            {/* Prioridade */}
-            <div>
-              <p className="mb-2 text-sm text-gray-500 ">Prioridade</p>
-              {isEditing ? (
-                <>
+              {/* Prioridade */}
+              <div>
+                <p className="mb-2 text-sm text-gray-500 ">Prioridade</p>
+                {isEditing ? (<>
                   <select id="prioridade" name="prioridade" value={formData.prioridade ?? "none"} onChange={handleChange} className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50">
                     {prioridades.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
                   </select>
-                </>
-              ) : (
-                <p className="mb-6 text-sm poppins-bold text-gray-800">{chamadoSelecionado?.prioridade}</p>
-              )}
-            </div>
+                </>) : (
+                  // <p className="mb-6 text-sm poppins-bold text-gray-800">{chamadoSelecionado?.prioridade_id}</p>
+                  <p className="mb-6 text-sm poppins-bold text-gray-800">{getPrioridadeLabel(chamadoSelecionado?.prioridade_id)}</p>
+                )}
+              </div>
 
-            {/* Assunto */}
-            <div>
-              <p className="mb-2 text-sm text-gray-500 ">Assunto</p>
-              {isEditing ? (
-                <div>
-                  <input type="text" id="assunto" name="assunto" value={formData.assunto ?? ""} onChange={handleChange} className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500"/>
-                </div>
-              ) : (
-                <p className="mb-6 text-sm poppins-bold text-gray-800">{chamadoSelecionado?.assunto}</p>
-              )}
-            </div>
+              {/* Assunto */}
+              <div>
+                <p className="mb-2 text-sm text-gray-500 ">Assunto</p>
+                {isEditing ? (
+                  <div>
+                    <input type="text" id="assunto" name="assunto" value={formData.assunto ?? ""} onChange={handleChange} className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500" />
+                  </div>
+                ) : (
+                  <p className="mb-6 text-sm poppins-bold text-gray-800">{chamadoSelecionado?.assunto}</p>
+                )}
+              </div>
 
-            {/* Descrição */}
-            <div>
-              <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Descrição</p>
-              {isEditing ? (
-                <div>
-                  <textarea id="descricao" name="descricao" rows="4" value={formData.descricao ?? ""} onChange={handleChange} className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500"/>
-                </div>
-              ) : (
-                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.descricao}</p>
-              )}
-            </div>
+              {/* Descrição */}
+              <div>
+                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Descrição</p>
+                {isEditing ? (
+                  <div> <textarea id="descricao" name="descricao" rows="4" value={formData.descricao ?? ""} onChange={handleChange} className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500" /></div>
+                ) : (
+                  <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.descricao}</p>
+                )}
+              </div>
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
                 {chamadoSelecionado?.imagem ? (
                   <div className="mb-6">
-                    <img src={chamadoSelecionado.imagem} alt={`Anexo chamado #${chamadoSelecionado?.id}`} className="max-w-full max-h-48 object-contain rounded-md" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/default-anexo.png"; }}/>
+                    <img src={chamadoSelecionado.imagem} alt={`Anexo chamado #${chamadoSelecionado?.id}`} className="max-w-full max-h-48 object-contain rounded-md" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/default-anexo.png"; }} />
                   </div>
                 ) : (
                   <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">Nenhum anexo foi enviado para o chamado</p>
@@ -589,7 +585,6 @@ export default function ChamadosAdmin() {
                     {!chamadoSelecionado?.tecnico_id ? (
                       <>
                         <div>Nenhum técnico/auxiliar atribuído.</div>
-
                          botao que abre/fecha dropdown
                         <button onClick={() => setOpenAtribuirDropdown((v) => !v)}
                           aria-expanded={openAtribuirDropdown} aria-controls="dropdownUsers" className="mt-4 py-2 px-6 inline-flex items-center gap-x-1 text-xs poppins-medium rounded-full border border-dashed border-gray-200 bg-white text-gray-800 hover:bg-gray-50 focus:outline-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700">
@@ -599,8 +594,6 @@ export default function ChamadosAdmin() {
                           </svg>
                           Adicionar
                         </button>
-
-
                         {openAtribuirDropdown && (
                           <div id="dropdownUsers" className="z-10 bg-white rounded-lg shadow-sm w-60 dark:bg-gray-700 mt-2">
                             <ul className="h-48 py-2 overflow-y-auto text-gray-700 dark:text-gray-200">
@@ -609,177 +602,143 @@ export default function ChamadosAdmin() {
                                   const selected = usuarioSelecionado === u.id;
                                   return (
                                     <li key={u.id}>
-                                      <button
-                                        type="button"
-                                        onClick={() => setUsuarioSelecionado(u.id)}
-                                        className={`w-full text-left flex items-center px-4 py-2 focus:outline-none ${selected
-                                            ? "bg-blue-100 dark:bg-blue-600 text-blue-800 dark:text-white"
-                                            : "hover:bg-gray-100 dark:hover:bg-gray-600"
-                                          }`}
-                                      >
-                                        <img className="w-6 h-6 me-2 rounded-full"
-                                          src={u.ftPerfil ? `http://localhost:8080/${u.ftPerfil}` : "/default-avatar.png"}
-                                          alt={u.nome}
-                                        />
-                                        <span className="truncate">{u.nome}</span>
-                                      </button>
-                                    </li>
-                                  );
-                                })
-                              ) : (
-                                <li className="px-4 py-2 text-sm text-gray-500">Nenhum usuário disponível</li>
-                              )}
-                            </ul>
+                                      <button type="button" onClick={() => setUsuarioSelecionado(u.id)} className={`w-full text-left flex items-center px-4 py-2 focus:outline-none ${selected ? "bg-blue-100 dark:bg-blue-600 text-blue-800 dark:text-white": "hover:bg-gray-100 dark:hover:bg-gray-600" }`}>
+                                        <img className="w-6 h-6 me-2 rounded-full" src={u.ftPerfil ? `http://localhost:8080/${u.ftPerfil}` : "/default-avatar.png"}alt={u.nome}/>
+                                        <span className="truncate">{u.nome}</span> </button></li>
+                                  ); })
+                              ) : ( <li className="px-4 py-2 text-sm text-gray-500">Nenhum usuário disponível</li> )} </ul>
 
                             <div className="border-t border-gray-200">
-                              <button
-                                type="button"
-                                onClick={async () => {
+                              <button type="button" onClick={async () => {
                                   // chama a função existente para atribuir e depois faz reset/fechamento
                                   await handleAtribuirChamado(usuarioSelecionado);
-
                                   // se atribuição bem-sucedida, handleAtribuirChamado já atualizou estados do chamado,
                                   // mas vamos garantir que dropdown fecha e seleção é limpa
-                                  setOpenAtribuirDropdown(false);
-                                  setUsuarioSelecionado(null);
-                                }}
-                                disabled={!usuarioSelecionado}
-                                className={`w-full flex items-center justify-center gap-x-2 px-4 py-3 text-sm poppins-medium rounded-b-lg
-                  ${usuarioSelecionado
-                                    ? "text-blue-600 border-gray-200 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-blue-500"
-                                    : "text-gray-400 border-gray-200 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 cursor-not-allowed"
-                                  }`}
-                              >
+                                  setOpenAtribuirDropdown(false); setUsuarioSelecionado(null);
+                                }} disabled={!usuarioSelecionado} className={`w-full flex items-center justify-center gap-x-2 px-4 py-3 text-sm poppins-medium rounded-b-lg
+                  ${usuarioSelecionado ? "text-blue-600 border-gray-200 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-blue-500"
+                                    : "text-gray-400 border-gray-200 bg-gray-100 dark:border-gray-600 dark:bg-gray-800 cursor-not-allowed" }`} >
                                 <svg className="w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
                                   <path d="M6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Zm11-3h-2V5a1 1 0 0 0-2 0v2h-2a1 1 0 1 0 0 2h2v2a1 1 0 0 0 2 0V9h2a1 1 0 1 0 0-2Z" />
-                                </svg>
-                                Atribuir
-                              </button>
+                                </svg> Atribuir</button> </div> </div>
+                        )} </> ) : ( <p>{getTecnicoNome(chamadoSelecionado?.tecnico_id)}</p>
+                    )} </div></div> */}
+              {/* Técnico / Atribuir */}
+              <div>
+                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Técnico/Auxiliar</p>
+                <div className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">
+                  {isEditing ? (
+                    <>
+                      <select id="tecnico_id" name="tecnico_id" value={formData.tecnico_id ?? ""} onChange={handleChange} className="block w-full p-2 mb-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:border-[#7F56D8]">
+                        <option value="">Nenhum técnico</option>
+                        {usuariosFiltrados.map(u => (
+                          <option key={u.id} value={u.id}>{u.nome}</option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500">Ou use o botão Atribuir para listar técnicos disponíveis.</p>
+                    </>
+                  ) : (
+                    <>
+                      {!chamadoSelecionado?.tecnico_id ? (
+                        <>
+                          <div>Nenhum técnico/auxiliar atribuído.</div>
+                          <button onClick={() => setOpenAtribuirDropdown((v) => !v)} aria-expanded={openAtribuirDropdown} aria-controls="dropdownUsers" className="mt-4 py-2 px-6 inline-flex items-center gap-x-1 text-xs poppins-medium rounded-full border border-dashed border-gray-200 bg-white text-gray-800 hover:bg-gray-50">
+                            Adicionar
+                          </button>
+                          {/* dropdown users (mantido do seu código) */}
+                          {openAtribuirDropdown && (
+                            <div id="dropdownUsers" className="z-10 bg-white rounded-lg shadow-sm w-60 mt-2">
+                              <ul className="h-48 py-2 overflow-y-auto text-gray-700">
+                                {Array.isArray(usuariosFiltrados) && usuariosFiltrados.length > 0 ? (
+                                  usuariosFiltrados.map((u) => {
+                                    const selected = usuarioSelecionado === u.id;
+                                    return (
+                                      <li key={u.id}>
+                                        <button
+                                          type="button"
+                                          onClick={() => setUsuarioSelecionado(u.id)}
+                                          className={`w-full text-left flex items-center px-4 py-2 focus:outline-none ${selected ? "bg-blue-100 text-blue-800" : "hover:bg-gray-100"}`}
+                                        >
+                                          <img className="w-6 h-6 me-2 rounded-full" src={u.ftPerfil ? `http://localhost:8080/${u.ftPerfil}` : "/default-avatar.png"} alt={u.nome} />
+                                          <span className="truncate">{u.nome}</span>
+                                        </button>
+                                      </li>
+                                    );
+                                  })
+                                ) : (
+                                  <li className="px-4 py-2 text-sm text-gray-500">Nenhum usuário disponível</li>
+                                )}
+                              </ul>
+                              <div className="border-t border-gray-200">
+                                <button type="button" onClick={async () => { await handleAtribuirChamado(usuarioSelecionado); setOpenAtribuirDropdown(false); setUsuarioSelecionado(null); }} disabled={!usuarioSelecionado} className={`w-full px-4 py-3 text-sm poppins-medium ${usuarioSelecionado ? "text-blue-600 bg-gray-50" : "text-gray-400 bg-gray-100 cursor-not-allowed"}`}>
+                                  Atribuir
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <p>{getTecnicoNome(chamadoSelecionado?.tecnico_id)}</p>
-                    )}
-                  </div>
-              </div> */}
-               {/* Técnico / Atribuir */}
-            <div>
-              <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Técnico/Auxiliar</p>
-              <div className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">
-                {isEditing ? (
-                  <>
-                    <select id="tecnico_id" name="tecnico_id" value={formData.tecnico_id ?? ""} onChange={handleChange} className="block w-full p-2 mb-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:border-[#7F56D8]">
-                      <option value="">Nenhum técnico</option>
-                      {usuariosFiltrados.map(u => (
-                        <option key={u.id} value={u.id}>{u.nome}</option>
-                      ))}
-                    </select>
-                    <p className="text-xs text-gray-500">Ou use o botão Atribuir para listar técnicos disponíveis.</p>
-                  </>
-                ) : (
-                  <>
-                    {!chamadoSelecionado?.tecnico_id ? (
-                      <>
-                        <div>Nenhum técnico/auxiliar atribuído.</div>
-                        <button onClick={() => setOpenAtribuirDropdown((v) => !v)} aria-expanded={openAtribuirDropdown} aria-controls="dropdownUsers" className="mt-4 py-2 px-6 inline-flex items-center gap-x-1 text-xs poppins-medium rounded-full border border-dashed border-gray-200 bg-white text-gray-800 hover:bg-gray-50">
-                          Adicionar
-                        </button>
-                        {/* dropdown users (mantido do seu código) */}
-                        {openAtribuirDropdown && (
-                          <div id="dropdownUsers" className="z-10 bg-white rounded-lg shadow-sm w-60 mt-2">
-                            <ul className="h-48 py-2 overflow-y-auto text-gray-700">
-                              {Array.isArray(usuariosFiltrados) && usuariosFiltrados.length > 0 ? (
-                                usuariosFiltrados.map((u) => {
-                                  const selected = usuarioSelecionado === u.id;
-                                  return (
-                                    <li key={u.id}>
-                                      <button
-                                        type="button"
-                                        onClick={() => setUsuarioSelecionado(u.id)}
-                                        className={`w-full text-left flex items-center px-4 py-2 focus:outline-none ${selected ? "bg-blue-100 text-blue-800" : "hover:bg-gray-100"}`}
-                                      >
-                                        <img className="w-6 h-6 me-2 rounded-full" src={u.ftPerfil ? `http://localhost:8080/${u.ftPerfil}` : "/default-avatar.png"} alt={u.nome} />
-                                        <span className="truncate">{u.nome}</span>
-                                      </button>
-                                    </li>
-                                  );
-                                })
-                              ) : (
-                                <li className="px-4 py-2 text-sm text-gray-500">Nenhum usuário disponível</li>
-                              )}
-                            </ul>
-                            <div className="border-t border-gray-200">
-                              <button type="button" onClick={async () => { await handleAtribuirChamado(usuarioSelecionado); setOpenAtribuirDropdown(false); setUsuarioSelecionado(null); }} disabled={!usuarioSelecionado} className={`w-full px-4 py-3 text-sm poppins-medium ${usuarioSelecionado ? "text-blue-600 bg-gray-50" : "text-gray-400 bg-gray-100 cursor-not-allowed"}`}>
-                                Atribuir
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <p>{getTecnicoNome(chamadoSelecionado?.tecnico_id)}</p>
-                    )}
-                  </>
-                )}
+                          )}
+                        </>
+                      ) : (
+                        <p>{getTecnicoNome(chamadoSelecionado?.tecnico_id)}</p>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
               <div>
                 <p className="mb-2 text-sm text-gray-500 ">Criado em</p>
                 <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.criado_em}</p>
               </div>
 
-               {/* Status (select se editando) */}
-            <div className="mb-4">
-              {isEditing ? (
-                <>
-                  <label htmlFor="status_chamado" className="block mb-2 text-sm font-medium text-gray-900 ">Status</label>
-                  <select id="status_chamado" name="status_chamado" value={formData.status_chamado ?? "pendente"} onChange={handleChange} className="block w-full p-2 mb-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:border-[#7F56D8]">
-                    <option value="pendente">Pendente</option>
-                    <option value="em andamento">Em andamento</option>
-                    <option value="concluido">Concluído</option>
-                  </select>
-                </>
-              ) : (
-                <></>
-              )}
-            </div>
+              {/* Status (select se editando) */}
+              <div className="mb-4">
+                {isEditing ? (
+                  <>
+                    <label htmlFor="status_chamado" className="block mb-2 text-sm font-medium text-gray-900 ">Status</label>
+                    <select id="status_chamado" name="status_chamado" value={formData.status_chamado ?? "pendente"} onChange={handleChange} className="block w-full p-2 mb-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:border-[#7F56D8]">
+                      <option value="pendente">Pendente</option>
+                      <option value="em andamento">Em andamento</option>
+                      <option value="concluido">Concluído</option>
+                    </select>
+                  </>
+                ) : (
+                  <></>
+                )}
+              </div>
 
-            {/* Botões */}
-            <div className="grid grid-cols-2 gap-2">
-  {!isEditing ? (
-    <>
-      {["pendente", "em andamento"].includes(chamadoSelecionado?.status_chamado) ? (
-        <button
-          onClick={() => setIsEditing(true)}
-          className="px-4 py-2 text-sm poppins-medium text-center text-[#7F56D8] bg-white border border-gray-200 rounded-lg hover:bg-gray-100"
-        >
-          Editar chamado
-        </button>
-      ) : (
-        <p className="col-span-2 text-sm text-gray-500 italic">
-          Chamados concluídos não podem ser editados.
-        </p>
-      )}
-    </>
-  ) : (
-    <>
-      <button
-        onClick={handleSave}
-        className="px-4 py-2 text-sm poppins-medium text-center text-white bg-[#7F56D8] rounded-lg"
-      >
-        Salvar
-      </button>
-      <button
-        onClick={handleCancel}
-        className="px-4 py-2 text-sm poppins-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-[#7F56D8]"
-      >
-        Cancelar
-      </button>
-    </>
-  )}
-</div>
+              {/* Botões */}
+              <div className="grid grid-cols-2 gap-2">
+                {!isEditing ? (
+                  <>
+                    {["pendente", "em andamento"].includes(chamadoSelecionado?.status_chamado) ? (
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="px-4 py-2 text-sm poppins-medium text-center text-[#7F56D8] bg-white border border-gray-200 rounded-lg hover:bg-gray-100"
+                      >
+                        Editar chamado
+                      </button>
+                    ) : (
+                      <p className="col-span-2 text-sm text-gray-500 italic">
+                        Chamados concluídos não podem ser editados.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleSave}
+                      className="px-4 py-2 text-sm poppins-medium text-center text-white bg-[#7F56D8] rounded-lg"
+                    >
+                      Salvar
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      className="px-4 py-2 text-sm poppins-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-[#7F56D8]"
+                    >
+                      Cancelar
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </section>
         </div >
