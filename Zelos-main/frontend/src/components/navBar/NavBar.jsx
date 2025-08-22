@@ -24,7 +24,6 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
     } else if (userType === 'tecnico') {
         links = [
             { label: 'Chamados', href: '/tecnico/chamados' },
-            { label: 'Equipe', href: '/tecnico/equipe' },
             { label: 'Configurações', href: '/tecnico/configuracoes' },
             {label: 'Perfil', href: '/tecnico/perfil'}
         ];
@@ -36,35 +35,25 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
     }
 
     // pra sidebar "abrir" e "fechar"
-    const sidebar = () => {
-        setNavFechada(prev => !prev);
-    };
+    const sidebar = () => { setNavFechada(prev => !prev); };
 
     const [mounted, setMounted] = useState(false);
     const [dropdownUserOpen, setDropdownUserOpen] = useState(false);
     const [dropdownNotificationOpen, setDropdownNotificationOpen] = useState(false);
 
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+    useEffect(() => { setMounted(true);}, []);
 
     useEffect(() => {
         function handleClickOutside(e) {
             // se clicar fora do avatar => fecha
-            if (dropdownUserOpen && !e.target.closest('#dropdown-user-button') && !e.target.closest('#dropdown-user')) {
-                setDropdownUserOpen(false);
-            }
+            if (dropdownUserOpen && !e.target.closest('#dropdown-user-button') && !e.target.closest('#dropdown-user')) {setDropdownUserOpen(false);}
 
             // se clicar fora do bell => fecha
-            if (dropdownNotificationOpen && !e.target.closest('#dropdown-notification-button') && !e.target.closest('#dropdownNotification')) {
-                setDropdownNotificationOpen(false);
-            }
+            if (dropdownNotificationOpen && !e.target.closest('#dropdown-notification-button') && !e.target.closest('#dropdownNotification')) {setDropdownNotificationOpen(false);}
 
             // se clicar fora do menu mobile => fecha
-            if (isMenuOpen && !e.target.closest('#mobile-menu') && !e.target.closest('#mobile-menu-button')) {
-                setIsMenuOpen(false);
-            }
+            if (isMenuOpen && !e.target.closest('#mobile-menu') && !e.target.closest('#mobile-menu-button')) {setIsMenuOpen(false);}
         }
 
         document.addEventListener('mousedown', handleClickOutside);
@@ -99,15 +88,9 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
     //link do perfil
     let perfis = [];
 
-    if(userType === 'tecnico'){
-perfis =[{label: 'Perfil', href: '/tecnico/perfil'}]
-    }
-    else if (userType === 'usuario'){
-        perfis =[{label: 'Perfil', href: '/usuario/perfil'}]
-    }
-    else if (userType ==='admin'){
-        perfis =[{label: 'Perfil', href: '/admin/perfil'}]
-    }
+    if(userType === 'tecnico'){perfis =[{label: 'Perfil', href: '/tecnico/perfil'}]}
+    else if (userType === 'usuario'){perfis =[{label: 'Perfil', href: '/usuario/perfil'}]}
+    else if (userType ==='admin'){perfis =[{label: 'Perfil', href: '/admin/perfil'}]}
     
 
     return (
@@ -130,7 +113,6 @@ perfis =[{label: 'Perfil', href: '/tecnico/perfil'}]
                                 <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 14 20">
                                     <path d="M12.133 10.632v-1.8A5.406 5.406 0 0 0 7.979 3.57.946.946 0 0 0 8 3.464V1.1a1 1 0 0 0-2 0v2.364a.946.946 0 0 0 .021.106 5.406 5.406 0 0 0-4.154 5.262v1.8C1.867 13.018 0 13.614 0 14.807 0 15.4 0 16 .538 16h12.924C14 16 14 15.4 14 14.807c0-1.193-1.867-1.789-1.867-4.175ZM3.823 17a3.453 3.453 0 0 0 6.354 0H3.823Z" />
                                 </svg>
-
                                 <div className="absolute block w-3 h-3 bg-red-500 border-2 border-white rounded-full -top-0.5 start-2.5 dark:border-gray-900"></div>
                             </button>
 
@@ -236,7 +218,6 @@ perfis =[{label: 'Perfil', href: '/tecnico/perfil'}]
                                                     </svg>
                                                 )}
                                             </div>
-
                                         </button>
                                     </div>
                                     {dropdownUserOpen && (

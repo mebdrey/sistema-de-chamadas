@@ -82,9 +82,7 @@ export default function PrivateLayout({ children }) {
         setUser(null);
         setUserType(null);
         router.push("/login");
-      } finally {
-        setLoading(false);
-      }
+      } finally {setLoading(false);}
     }
     fetchUser();
   }, [router]);
@@ -103,9 +101,8 @@ export default function PrivateLayout({ children }) {
       if (raw.startsWith?.('{')) {
         const obj = JSON.parse(raw);
         setCurrentUserId(obj?.id ? String(obj.id) : undefined);
-      } else {
-        setCurrentUserId(String(raw));
-      }
+      } 
+      else { setCurrentUserId(String(raw));}
     } catch (e) {
       console.warn('Erro ao ler currentUser do localStorage', e);
       setCurrentUserId(undefined);
@@ -123,9 +120,8 @@ export default function PrivateLayout({ children }) {
         if (raw.startsWith?.('{')) {
           const obj = JSON.parse(raw);
           setCurrentUserId(obj?.id ? String(obj.id) : undefined);
-        } else {
-          setCurrentUserId(String(raw));
         }
+        else { setCurrentUserId(String(raw)); }
       } catch (err) {
         console.warn('Erro no storage event', err);
       }
@@ -140,13 +136,7 @@ export default function PrivateLayout({ children }) {
   return (
     <>
       <ProtectedRoute>
-        <SideBar
-          user={user}
-          setUser={setUser}
-          userType={user?.funcao}
-          navFechada={navFechada}
-          setNavFechada={setNavFechada}
-        />
+        <SideBar user={user} setUser={setUser} userType={user?.funcao} navFechada={navFechada} setNavFechada={setNavFechada} />
         <main className="w-full bg-[#F8FAFB] justify-items-end">
           <section className="h-fit transition-all duration-300" style={{ width: mainWidth }}>
             {children}
