@@ -272,7 +272,6 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
         <div className="col-span-1 flex items-center justify-start mb-4 rounded-sm">
         <GraficoFuncionarios />
         </div>
-
       </div>
     </div>
   );

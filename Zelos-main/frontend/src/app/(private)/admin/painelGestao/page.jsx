@@ -363,9 +363,7 @@ export default function ChamadosAdminToolsPage() {
             <button onClick={() => setPrazoForm({ chamadoId: '', prioridade_id: '' })} className="px-4 py-2 border rounded">Limpar</button>
           </div>
         </div>
-
       </div>
-
       <footer className="mt-8 text-sm text-gray-500">
         <div>Observações: os endpoints esperados pelo backend (ex.: <code className="bg-gray-100 px-1 rounded">POST /usuarios</code>, <code className="bg-gray-100 px-1 rounded">POST /usuarios/sugerir-username</code>, <code className="bg-gray-100 px-1 rounded">/pool</code>, <code className="bg-gray-100 px-1 rounded">/prioridades</code>, <code className="bg-gray-100 px-1 rounded">PATCH /chamados/:id/prazo</code>) devem existir conforme combinamos.</div>
       </footer>

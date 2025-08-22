@@ -87,9 +87,8 @@ export const calcularDataLimiteUsuario = async (prioridade_id) => {
     // buscar a prioridade pelo id
     const resultado = await read("prioridades", { id: prioridade_id });
 
-    if (!resultado || resultado.length === 0) {
-      return null; // prioridade não encontrada
-    }
+    if (!resultado || resultado.length === 0) {return null;} // prioridade não encontrada
+    
 
     const prioridade = resultado[0];
 
@@ -157,9 +156,7 @@ export const verClientes = async () => {
 export const verChamados = async () => {
   const consulta = `SELECT
       c.*,
-      usuario.nome AS usuario_nome,
-      tecnico.nome AS tecnico_nome,
-      p.titulo AS tipo_titulo
+      usuario.nome AS usuario_nome, tecnico.nome AS tecnico_nome, p.titulo AS tipo_titulo
     FROM chamados c
     LEFT JOIN usuarios usuario ON c.usuario_id = usuario.id
     LEFT JOIN usuarios tecnico ON c.tecnico_id = tecnico.id
@@ -206,15 +203,35 @@ export const contarChamadosPorStatus = async (modo) => {
 
 //contar chamados por prioridade
 export const contarChamadosPorPrioridade = async () => {
-  // SQL para selecionar a coluna 'prioridade' e contar o número de ocorrências de cada uma.
-  // O WHERE filtra para contar apenas as prioridades relevantes, ignorando 'none'.
-  const sql = ` SELECT prioridade, COUNT(*) AS qtd 
-    FROM chamados WHERE  prioridade IN ('alta', 'média', 'baixa', 'none')
-    GROUP BY  prioridade `;
+  // const sql = ` SELECT prioridade_id, COUNT(*) AS qtd FROM chamados WHERE  prioridade_id IN ('3', '2', '1') GROUP BY  prioridade_id `;
 
-  try {return await readQuery(sql);  // Executa a consulta usando a sua função helper 'readQuery'
+  // try {return await readQuery(sql);  
+  // } catch (err) {
+  //   console.error('Erro no model ao contar chamados por prioridade:', err);
+  //   throw err;
+  // }
+  const sql = `SELECT
+      p.nome AS tipo,
+      COUNT(c.id) AS qtd
+    FROM prioridades p
+    LEFT JOIN chamados c ON p.id = c.prioridade_id
+    GROUP BY p.id, p.nome
+    ORDER BY
+      CASE
+        WHEN p.nome = 'alta' THEN 1
+        WHEN p.nome = 'media' THEN 2
+        WHEN p.nome = 'baixa' THEN 3
+        ELSE 4
+      END;`;
+
+  try {
+    const result = await readQuery(sql);
+    // Transforma o nome para ter a primeira letra maiúscula
+    return result.map(item => ({
+        ...item,
+        tipo: item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)
+    }));
   } catch (err) {
-    // Em caso de erro, lança a exceção para ser tratada pelo controller
     console.error('Erro no model ao contar chamados por prioridade:', err);
     throw err;
   }
@@ -225,18 +242,16 @@ export const buscarChamado = async (id) => { return await read('chamados', `id =
 
 // Atualizar chamado (parcialmente)
 export const editarChamado = async (id, data) => {
-  // Busca o chamado no banco
-  const chamado = await buscarChamado(id);
+ 
+  const chamado = await buscarChamado(id); // Busca o chamado no banco
   if (!chamado) { throw new Error('Chamado não encontrado'); }
 
   // Só pode editar se for pendente ou em andamento
   if (!['pendente', 'em andamento'].includes(chamado.status_chamado)) { throw new Error('Chamado não pode ser editado. Apenas chamados pendentes ou em andamento podem ser alterados.'); }
-
-  // Campos permitidos para atualização
-  const camposPermitidos = ['prioridade', 'tecnico_id', 'tipo_id', 'descricao', 'assunto', 'status_chamado'];
-
-  // Filtra só os campos permitidos que vieram no body
-  const dadosAtualizar = {};
+  
+  const camposPermitidos = ['prioridade', 'tecnico_id', 'tipo_id', 'descricao', 'assunto', 'status_chamado'];// Campos permitidos para atualização
+  
+  const dadosAtualizar = {};// Filtra só os campos permitidos que vieram no body
   for (const campo of camposPermitidos) { if (data[campo] !== undefined) { dadosAtualizar[campo] = data[campo]; } }
 
   if (Object.keys(dadosAtualizar).length === 0) { throw new Error('Nenhum campo válido informado para atualização'); }
@@ -244,6 +259,7 @@ export const editarChamado = async (id, data) => {
   const linhasAfetadas = await update('chamados', dadosAtualizar, `id = ${id}`);
   return linhasAfetadas;
 };
+
 export const criarUsuario = async (dados) => {
   try {
     // hash da senha antes de criar )

@@ -247,26 +247,36 @@ export const contarChamadosPorStatusController = async (req, res) => {
 //   }
 // };
 export const contarChamadosPorPrioridadeController = async (req, res) => {
+  // try {
+  //   const resultadoDoBanco = await contarChamadosPorPrioridade();
+  //   const todasAsPrioridades = ['alta', 'média', 'baixa', 'none'];
+
+  //   const respostaFinal = todasAsPrioridades.map((prioridade) => {
+  //     // Compara diretamente com a prioridade original, mantendo acentos
+  //     const encontrado = resultadoDoBanco.find(
+  //       (r) => r.prioridade.toLowerCase() === prioridade.toLowerCase()
+  //     );
+
+  //     return {
+  //       tipo: prioridade, // Mantém o nome original com acento
+  //       qtd: encontrado ? encontrado.qtd : 0,
+  //     };
+  //   });
+
+  //   res.json(respostaFinal);
+  // } catch (error) {
+  //   console.error('Erro ao contar chamados por prioridade:', error);
+  //   res.status(500).json({ erro: 'Erro interno ao contar chamados por prioridade.' });
+  // }
+  // A consulta agora une as tabelas e retorna o nome da prioridade diretamente.
   try {
-    const resultadoDoBanco = await contarChamadosPorPrioridade();
-    const todasAsPrioridades = ['alta', 'média', 'baixa', 'none'];
+    // O resultado do banco já vem no formato perfeito!
+    const resultadoFinal = await contarChamadosPorPrioridade();
+    res.json(resultadoFinal);
 
-    const respostaFinal = todasAsPrioridades.map((prioridade) => {
-      // Compara diretamente com a prioridade original, mantendo acentos
-      const encontrado = resultadoDoBanco.find(
-        (r) => r.prioridade.toLowerCase() === prioridade.toLowerCase()
-      );
-
-      return {
-        tipo: prioridade, // Mantém o nome original com acento
-        qtd: encontrado ? encontrado.qtd : 0,
-      };
-    });
-
-    res.json(respostaFinal);
   } catch (error) {
     console.error('Erro ao contar chamados por prioridade:', error);
-    res.status(500).json({ erro: 'Erro interno ao contar chamados por prioridade.' });
+    res.status(500).json({ erro: 'Erro ao contar chamados por prioridade.' });
   }
 };
 

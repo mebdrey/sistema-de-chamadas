@@ -27,78 +27,118 @@
 //   return <Chart options={options} series={series} type="bar" height={500}  />;
 // }
 
-"use client";
+// "use client";
 
+// import React, { useState, useEffect } from 'react';
+// import dynamic from 'next/dynamic';
+
+// const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
+
+// export default function ChamadosPorPrioridade() {
+//   // Começa com valores vazios para não dar erro.
+//   const [chartData, setChartData] = useState({
+//     series: [{ name: "Chamados", data: [] }],
+//     categories: []
+//   });
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       try {
+//         const response = await fetch('http://localhost:8080/chamadosPorPrioridade', {credentials: 'include' });
+
+//         if (!response.ok) { throw new Error('Falha ao contar chamados'); }
+
+//         const dataApi = await response.json();
+
+//         // Prepara os dados para o formato do gráfico
+//         const prioridade = dataApi.map(item => item.tipo); 
+//         const seriesData = dataApi.map(item => item.qtd);
+
+//         // Atualiza o estado com os dados recebidos
+//         setChartData({
+//           series: [{ name: "Chamados", data: seriesData }],
+//           prioridades: prioridade
+//         });
+
+//       } catch (error) {
+//         console.error("Erro ao buscar dados para o gráfico:", error);
+//       }
+//     };
+
+//     fetchData();
+//   }, []); 
+
+//   const options = {
+//     chart: { type: "bar", toolbar: { show: false }},
+//     plotOptions: { bar: { horizontal: false, borderRadius: 6, columnWidth: '40%'}},
+//     colors: ["#a78bfa", "#60a5fa", "#34d399"], // Roxo, Azul, Verde
+//     dataLabels: { enabled: false,},
+//     xaxis: { prioridades:' chartData.prioridades', },
+//     yaxis: { title: ''},
+//     legend: { show: false }
+//   };
+
+//   return (
+//     <div className="bg-white p-4 rounded-lg shadow">
+//         <h3 className="text-lg poppins-medium text-gray-600 mb-4">Chamados por Prioridade</h3>
+//         <Chart options={options} series={chartData.series} type="bar" height={500} />
+//     </div>
+//   );
+// }
+"use client";
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
-// É uma boa prática carregar bibliotecas de gráficos dinamicamente
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 export default function ChamadosPorPrioridade() {
-  // 2. Estado para guardar os dados que virão da API.
-  // Começa com valores vazios para não dar erro.
-  const [chartData, setChartData] = useState({
-    series: [{ name: "Chamados", data: [] }],
-    categories: []
+  // Estado inicial para as opções e séries do gráfico
+  const [chartOptions, setChartOptions] = useState({
+    chart: { type: "bar", toolbar: { show: false }},
+    plotOptions: { bar: { horizontal: false, borderRadius: 6, columnWidth: '40%' }},
+    colors: ["#a78bfa"],
+    dataLabels: { enabled: false },
+    xaxis: {categories: []}, // Será preenchido pela API
+    yaxis: { title: '' },
+    legend: { show: false }
   });
 
-  // 3. Hook para buscar os dados da API quando o componente carregar.
+  const [chartSeries, setChartSeries] = useState([{ name: "Chamados", data: [] }]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // A URL da sua rota no backend
-        const response = await fetch('http://localhost:8080/chamadosPorPrioridade', {
-          credentials: 'include' // Importante para enviar o cookie de autenticação
-        });
+        const response = await fetch('http://localhost:8080/chamadosPorPrioridade', { credentials: 'include' });
+        if (!response.ok) throw new Error('Falha ao buscar dados');
+        
+        const dataApi = await response.json();
 
-        if (!response.ok) { throw new Error('Falha na resposta da API'); }
+        const prioridades = dataApi.map(item => item.tipo); 
+        const seriesData = dataApi.map(item => item.qtd);  
 
-        const dataFromApi = await response.json();
-        // dataFromApi terá o formato: [{ tipo: 'alta', qtd: 40 }, { tipo: 'média', qtd: 70 }, ...]
-
-        // Prepara os dados para o formato do gráfico
-        const categories = dataFromApi.map(item => item.tipo); // Ex: ['Alta', 'Média', 'Baixa']
-        const seriesData = dataFromApi.map(item => item.qtd);   // Ex: [40, 70, 25]
-
-        // Atualiza o estado com os dados recebidos
-        setChartData({
-          series: [{ name: "Chamados", data: seriesData }],
-          categories: categories
-        });
+        // Atualiza as séries (barras do gráfico)
+        setChartSeries([{ name: "Chamados", data: seriesData }]);
+        
+        // Atualiza as opções, especificamente os rótulos do eixo X
+        setChartOptions(prevOptions => ({
+          ...prevOptions,
+          xaxis: {
+            ...prevOptions.xaxis,
+            categories: prioridades 
+          }
+        }));
 
       } catch (error) {
         console.error("Erro ao buscar dados para o gráfico:", error);
       }
     };
-
     fetchData();
-  }, []); // O array vazio [] faz com que este código rode apenas uma vez
-
-  // Opções de configuração do gráfico. As categorias serão injetadas dinamicamente.
-  const options = {
-    chart: {
-      type: "bar",
-      toolbar: { show: false }
-    },
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        borderRadius: 6,
-        columnWidth: '40%'
-      }
-    },
-    colors: ["#a78bfa", "#60a5fa", "#34d399"], // Roxo, Azul, Verde
-    dataLabels: { enabled: false,},
-    xaxis: { categories: chartData.categories, }, // As categorias virão do nosso estado (chartData.categories)
-    yaxis: { title: ''},
-    legend: { show: false }
-  };
+  }, []);
 
   return (
     <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-lg poppins-medium text-gray-600 mb-4">Chamados por Prioridade</h3>
-        <Chart options={options} series={chartData.series} type="bar" height={500} />
+      <h3 className="text-lg poppins-medium text-gray-600 mb-4">Chamados por Prioridade</h3>
+      <Chart options={chartOptions} series={chartSeries} type="bar" height={500} />
     </div>
   );
 }

@@ -13,9 +13,7 @@
 
 //     // Fecha ao clicar fora
 //     useEffect(() => {
-//         const handleClickOutside = (event) => {
-//             if (!event.target.closest('#ordenarDropdownWrapper')) {setShowDropdown(false);}
-//         };
+//         const handleClickOutside = (event) => { if (!event.target.closest('#ordenarDropdownWrapper')) {setShowDropdown(false);}};
 //         document.addEventListener('click', handleClickOutside);
 //         return () => document.removeEventListener('click', handleClickOutside);
 //     }, []);
@@ -66,12 +64,7 @@ const OrdenarPor = ({ ordenarPor, setOrdenarPor }) => {
 
   return (
     <div id="ordenarDropdownWrapper" className="relative inline-block">
-      <button onClick={(e) => { e.stopPropagation();
-          setShowDropdown(!showDropdown);
-        }}
-        className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5"
-        type="button"
-      >
+      <button onClick={(e) => { e.stopPropagation();setShowDropdown(!showDropdown);}} className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5" type="button">
         Ordenar por
         <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
           <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />

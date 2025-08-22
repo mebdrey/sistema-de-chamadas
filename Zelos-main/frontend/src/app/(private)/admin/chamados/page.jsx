@@ -245,11 +245,8 @@ export default function ChamadosAdmin() {
       // conversão para number em tecnico_id/tipo_id quando necessário
       const val = formData[campo];
       if (val !== undefined && val !== null && String(val) !== String(chamadoSelecionado[campo])) {
-        if ((campo === 'tecnico_id' || campo === 'tipo_id') && val !== "") {
-          payload[campo] = Number(val);
-        } else {
-          payload[campo] = val;
-        }
+        if ((campo === 'tecnico_id' || campo === 'tipo_id') && val !== "") { payload[campo] = Number(val); }
+        else { payload[campo] = val;}
       }
     }
 
@@ -303,15 +300,11 @@ export default function ChamadosAdmin() {
       {/* conteudo da pagina */}
       <div className="p-4 w-full">
         <div className="p-4 mt-14">
-
           <div className='flex flex-row flex-wrap gap-6 w-full justify-between mb-15'>
             <div className="w-fit flex-wrap gap-4 flex flex-row ">
 
               {/* select */}
-
               <OrdenarPor ordenarPor={ordenarPor} setOrdenarPor={setOrdenarPor} />
-
-
               {/* dropdown de Setor */}
               <div className="relative inline-block">
                 <button onClick={() => setDropdownSetorAberto(!dropdownSetorAberto)} className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" id="dropdownHelperButton">
@@ -371,34 +364,20 @@ export default function ChamadosAdmin() {
                 </button>
 
                 {dropdownPrioridadeAberto && (
-                  <div
-                    id="dropdownPrioridade"
-                    className="absolute z-10 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-48"
-                  >
+                  <div id="dropdownPrioridade" className="absolute z-10 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-48">
                     <ul className="p-3 space-y-1 text-sm text-gray-700" aria-labelledby="dropdownPrioridadeButton">
                       {prioridades.map((prioridade, index) => (
                         <li key={index}>
                           <div className="flex p-2 rounded-sm hover:bg-gray-100">
                             <div className="flex items-center h-5">
-                              <input
-                                id={`prioridade-checkbox-${index}`}
-                                type="checkbox"
-                                name="prioridade"
-                                value={prioridade.value}
-                                checked={prioridadesSelecionadas.includes(prioridade.value)}
+                              <input id={`prioridade-checkbox-${index}`} type="checkbox" name="prioridade" value={prioridade.value} checked={prioridadesSelecionadas.includes(prioridade.value)}
                                 onChange={(e) => {
                                   const checked = e.target.checked;
                                   const valor = prioridade.value;
-                                  if (checked) {
-                                    setPrioridadesSelecionadas((prev) => [...prev, valor]);
-                                  } else {
-                                    setPrioridadesSelecionadas((prev) =>
-                                      prev.filter((p) => p !== valor)
-                                    );
-                                  }
+                                  if (checked) { setPrioridadesSelecionadas((prev) => [...prev, valor]); }
+                                   else { setPrioridadesSelecionadas((prev) => prev.filter((p) => p !== valor)); }
                                 }}
-                                className="w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#E6DAFF] focus:ring-2 "
-                              />
+                                className="w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#E6DAFF] focus:ring-2 "/>
                             </div>
                             <div className="ms-2 text-sm">
                               <label htmlFor={`prioridade-checkbox-${index}`} className="poppins-medium text-gray-900">
@@ -412,11 +391,9 @@ export default function ChamadosAdmin() {
                   </div>
                 )}
               </div>
-
             </div>
             {/* Barra de pesquisa */}
-            <form className="flex items-center" onSubmit={(e) => e.preventDefault()} // evita recarregar a página
-            >
+            <form className="flex items-center" onSubmit={(e) => e.preventDefault()}> // evita recarregar a página
               <label htmlFor="simple-search" className="sr-only">Search</label>
               <div className="relative w-80">
                 <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -515,7 +492,6 @@ export default function ChamadosAdmin() {
                             </div>
                           </div>
                         </div>
-
                       ))
                     )}
                   </div>
@@ -575,14 +551,7 @@ export default function ChamadosAdmin() {
               <p className="mb-2 text-sm text-gray-500 ">Assunto</p>
               {isEditing ? (
                 <div>
-                  <input
-                    type="text"
-                    id="assunto"
-                    name="assunto"
-                    value={formData.assunto ?? ""}
-                    onChange={handleChange}
-                    className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500"
-                  />
+                  <input type="text" id="assunto" name="assunto" value={formData.assunto ?? ""} onChange={handleChange} className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500"/>
                 </div>
               ) : (
                 <p className="mb-6 text-sm poppins-bold text-gray-800">{chamadoSelecionado?.assunto}</p>
@@ -594,14 +563,7 @@ export default function ChamadosAdmin() {
               <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Descrição</p>
               {isEditing ? (
                 <div>
-                  <textarea
-                    id="descricao"
-                    name="descricao"
-                    rows="4"
-                    value={formData.descricao ?? ""}
-                    onChange={handleChange}
-                    className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500"
-                  />
+                  <textarea id="descricao" name="descricao" rows="4" value={formData.descricao ?? ""} onChange={handleChange} className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500"/>
                 </div>
               ) : (
                 <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.descricao}</p>
@@ -611,12 +573,7 @@ export default function ChamadosAdmin() {
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
                 {chamadoSelecionado?.imagem ? (
                   <div className="mb-6">
-                    <img
-                      src={chamadoSelecionado.imagem}
-                      alt={`Anexo chamado #${chamadoSelecionado?.id}`}
-                      className="max-w-full max-h-48 object-contain rounded-md"
-                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/default-anexo.png"; }}
-                    />
+                    <img src={chamadoSelecionado.imagem} alt={`Anexo chamado #${chamadoSelecionado?.id}`} className="max-w-full max-h-48 object-contain rounded-md" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/default-anexo.png"; }}/>
                   </div>
                 ) : (
                   <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">Nenhum anexo foi enviado para o chamado</p>
