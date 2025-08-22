@@ -157,9 +157,7 @@ export const verClientes = async () => {
 export const verChamados = async () => {
   const consulta = `SELECT
       c.*,
-      usuario.nome AS usuario_nome,
-      tecnico.nome AS tecnico_nome,
-      p.titulo AS tipo_titulo
+      usuario.nome AS usuario_nome, tecnico.nome AS tecnico_nome, p.titulo AS tipo_titulo
     FROM chamados c
     LEFT JOIN usuarios usuario ON c.usuario_id = usuario.id
     LEFT JOIN usuarios tecnico ON c.tecnico_id = tecnico.id
@@ -206,16 +204,25 @@ export const contarChamadosPorStatus = async (modo) => {
 
 //contar chamados por prioridade
 export const contarChamadosPorPrioridade = async () => {
-  // SQL para selecionar a coluna 'prioridade' e contar o número de ocorrências de cada uma.
-  // O WHERE filtra para contar apenas as prioridades relevantes, ignorando 'none'.
-  const sql = ` SELECT prioridade, COUNT(*) AS qtd 
-    FROM chamados WHERE  prioridade IN ('alta', 'média', 'baixa', 'none')
-    GROUP BY  prioridade `;
+  const sql = `SELECT
+      p.nome AS tipo,
+      COUNT(c.id) AS qtd
+    FROM prioridades p
+    LEFT JOIN chamados c ON p.id = c.prioridade_id
+    GROUP BY p.id, p.nome
+    ORDER BY
+      CASE
+        WHEN p.nome = 'alta' THEN 1
+        WHEN p.nome = 'media' THEN 2
+        WHEN p.nome = 'baixa' THEN 3
+        ELSE 4
+      END;`;
 
-  try {return await readQuery(sql);  // Executa a consulta usando a sua função helper 'readQuery'
+  try {
+    const result = await readQuery(sql);
+    return result.map(item => ({ ...item, tipo: item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1) }));
   } catch (err) {
-    // Em caso de erro, lança a exceção para ser tratada pelo controller
-    console.error('Erro no model ao contar chamados por prioridade:', err);
+    console.error('Erro ao contar chamados', err);
     throw err;
   }
 };
@@ -225,18 +232,16 @@ export const buscarChamado = async (id) => { return await read('chamados', `id =
 
 // Atualizar chamado (parcialmente)
 export const editarChamado = async (id, data) => {
-  // Busca o chamado no banco
-  const chamado = await buscarChamado(id);
+
+  const chamado = await buscarChamado(id); // Busca o chamado no banco
   if (!chamado) { throw new Error('Chamado não encontrado'); }
 
   // Só pode editar se for pendente ou em andamento
   if (!['pendente', 'em andamento'].includes(chamado.status_chamado)) { throw new Error('Chamado não pode ser editado. Apenas chamados pendentes ou em andamento podem ser alterados.'); }
 
-  // Campos permitidos para atualização
-  const camposPermitidos = ['prioridade', 'tecnico_id', 'tipo_id', 'descricao', 'assunto', 'status_chamado'];
+  const camposPermitidos = ['prioridade', 'tecnico_id', 'tipo_id', 'descricao', 'assunto', 'status_chamado'];// Campos permitidos para atualização
 
-  // Filtra só os campos permitidos que vieram no body
-  const dadosAtualizar = {};
+  const dadosAtualizar = {};// Filtra só os campos permitidos que vieram no body
   for (const campo of camposPermitidos) { if (data[campo] !== undefined) { dadosAtualizar[campo] = data[campo]; } }
 
   if (Object.keys(dadosAtualizar).length === 0) { throw new Error('Nenhum campo válido informado para atualização'); }
@@ -244,6 +249,7 @@ export const editarChamado = async (id, data) => {
   const linhasAfetadas = await update('chamados', dadosAtualizar, `id = ${id}`);
   return linhasAfetadas;
 };
+
 export const criarUsuario = async (dados) => {
   try {
     // hash da senha antes de criar )
@@ -296,6 +302,7 @@ export const gerarSugestoesUsername = async (nome) => {
   return suggestions;
 };
 
+//SETORES
 export const criarSetor = async (dados) => {
   try {
     // dados: { titulo, descricao, created_by }
@@ -369,9 +376,7 @@ export const getPrazoPorNome = async (nome) => {
 export const calcularDataLimite = async (prioridade) => {
   try {
     const [row] = await read('prioridades', '*', 'nome = ?', [prioridade]);
-    if (row && row.horas_limite) {
-      return new Date(Date.now() + row.horas_limite * 60 * 60 * 1000);
-    }
+    if (row && row.horas_limite) {return new Date(Date.now() + row.horas_limite * 60 * 60 * 1000); }
     return null;
   } catch (err) {
     console.error("Erro ao buscar prioridade:", err);
@@ -392,8 +397,7 @@ export const atualizarPrazoPorChamado = async (chamadoId) => {
 
 
 export async function obterChamadosPorMesAno(prioridade = null) {
-  let sql = `SELECT 
-            MONTH(criado_em) as mes, 
+  let sql = `SELECT MONTH(criado_em) as mes, 
             COUNT(*) as total 
         FROM chamados
         WHERE YEAR(criado_em) = YEAR(CURDATE())`;
@@ -416,9 +420,7 @@ export async function contarChamadosPorPool({
   // Query: join direto com chamados (c) e pool (p) garantindo que só venham
   // linhas onde c.tecnico_id está preenchido e correspondem à pool pedida.
   // Também filtramos usuarios por funcao para garantir que sejam técnicos/auxiliares.
-  let sql = `SELECT
-      u.id   AS funcionario_id,
-      u.nome AS funcionario_nome,
+  let sql = `SELECT u.id   AS funcionario_id, u.nome AS funcionario_nome,
       SUM(CASE WHEN c.status_chamado = 'em andamento' THEN 1 ELSE 0 END) AS em_andamento,
       SUM(CASE WHEN c.status_chamado = 'concluido' THEN 1 ELSE 0 END)    AS concluido,
       COUNT(*) AS total

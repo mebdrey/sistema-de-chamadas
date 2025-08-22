@@ -79,24 +79,12 @@ export const criarChamadoController = async (req, res) => {
   const imagem = req.file?.filename || null;
 
   try {
-    // resolver a Promise corretamente
-    const data_limite = await calcularDataLimiteUsuario(prioridade_id);
+    const data_limite = await calcularDataLimiteUsuario(prioridade_id); //resolver a Promise corretamente
 
-    const dadosChamado = {
-      assunto,
-      tipo_id: tipo_id || null,
-      descricao,
-      prioridade_id: prioridade_id || null,
-      imagem: imagem || null,
-      usuario_id: usuario_id || null,
-      patrimonio: patrimonio || null,
-      data_limite
-    };
+    const dadosChamado = {assunto, tipo_id: tipo_id || null, descricao, prioridade_id: prioridade_id || null, imagem: imagem || null, usuario_id: usuario_id || null, patrimonio: patrimonio || null, data_limite};
 
     // Garantir que nenhum valor undefined vá para o DB
-    Object.keys(dadosChamado).forEach(key => {
-      if (dadosChamado[key] === undefined) dadosChamado[key] = null;
-    });
+    Object.keys(dadosChamado).forEach(key => {if (dadosChamado[key] === undefined) dadosChamado[key] = null;});
 
     const resultado = await criarChamado(dadosChamado);
 
@@ -223,50 +211,15 @@ export const contarChamadosPorStatusController = async (req, res) => {
   }
 };
 
-// export const contarChamadosPorPrioridadeController = async (req, res) => {
-//   try {
-//     const resultadoDoBanco = await contarChamadosPorPrioridade();
-//     const todasAsPrioridades = ['alta', 'média', 'baixa', 'none'];
 
-//     // 3. Mapeia a lista de prioridades para formatar a resposta final
-//     const respostaFinal = todasAsPrioridades.map((prioridade) => {
-//       // const prioridadeNormalizada = prioridade .normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-      
-//       const encontrado = resultadoDoBanco.find( (r) => r.prioridade.toLowerCase() === prioridadeNormalizada);// Procura o resultado correspondente que veio do banco
-
-//       // 4. Monta o objeto de resposta para cada prioridade
-//       return { tipo: prioridade, // Usa o nome com acento para exibição no gráfico (ex: "média")
-//         qtd: encontrado ? encontrado.qtd : 0, // Se não encontrou, a quantidade é 0
-//       };
-//     });
-//     res.json(respostaFinal);// 5. Envia a resposta final em formato JSON
-
-//   } catch (error) {
-//     console.error('Erro ao contar chamados por prioridade:', error);
-//     res.status(500).json({ erro: 'Erro interno ao contar chamados por prioridade.' });
-//   }
-// };
 export const contarChamadosPorPrioridadeController = async (req, res) => {
   try {
-    const resultadoDoBanco = await contarChamadosPorPrioridade();
-    const todasAsPrioridades = ['alta', 'média', 'baixa', 'none'];
+    const resultadoFinal = await contarChamadosPorPrioridade();
+    res.json(resultadoFinal);
 
-    const respostaFinal = todasAsPrioridades.map((prioridade) => {
-      // Compara diretamente com a prioridade original, mantendo acentos
-      const encontrado = resultadoDoBanco.find(
-        (r) => r.prioridade.toLowerCase() === prioridade.toLowerCase()
-      );
-
-      return {
-        tipo: prioridade, // Mantém o nome original com acento
-        qtd: encontrado ? encontrado.qtd : 0,
-      };
-    });
-
-    res.json(respostaFinal);
   } catch (error) {
     console.error('Erro ao contar chamados por prioridade:', error);
-    res.status(500).json({ erro: 'Erro interno ao contar chamados por prioridade.' });
+    res.status(500).json({ erro: 'Erro ao contar chamados por prioridade.' });
   }
 };
 
@@ -333,6 +286,7 @@ export const sugerirUsernameController = async (req, res) => {
   }
 };
 
+//CRIAR SETOR
 export const criarSetorController = async (req, res) => {
   try {
     const { titulo, descricao } = req.body;

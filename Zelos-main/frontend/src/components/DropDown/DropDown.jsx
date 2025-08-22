@@ -3,7 +3,6 @@
 
 // const OrdenarPor = () => {
 
-
 // const [showDropdown, setShowDropdown] = useState(false); // mostrar o dropdown
 // const [ordenarPor, setOrdenarPor] = useState('mais_recente'); // ordenar por mais recente ou mais antigo, por padrao ele mostra os mais recentes primeiro
 
@@ -14,15 +13,10 @@
 
 //     // Fecha ao clicar fora
 //     useEffect(() => {
-//         const handleClickOutside = (event) => {
-//             if (!event.target.closest('#ordenarDropdownWrapper')) {
-//                 setShowDropdown(false);
-//             }
-//         };
+//         const handleClickOutside = (event) => { if (!event.target.closest('#ordenarDropdownWrapper')) {setShowDropdown(false);}};
 //         document.addEventListener('click', handleClickOutside);
 //         return () => document.removeEventListener('click', handleClickOutside);
 //     }, []);
-
 //     return(
 //         <>
 //         {/* select */}
@@ -35,7 +29,6 @@
 //                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
 //                                 </svg>
 //                             </button>
-
 //                             <div className={`absolute mt-2 z-10 ${showDropdown ? 'block' : 'hidden'} w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600`}>
 //                                 {opcoesOrdenacao.map((opcao, index) => (
 //                                     <div key={index} className="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
@@ -47,8 +40,7 @@
 //                                 ))}
 //                             </div>
 //                         </div>
-//         </>
-// )}
+//         </>)}
 // export default OrdenarPor;
 'use client';
 import React, { useState, useEffect } from 'react';
@@ -64,9 +56,7 @@ const OrdenarPor = ({ ordenarPor, setOrdenarPor }) => {
   // Fecha ao clicar fora
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!event.target.closest('#ordenarDropdownWrapper')) {
-        setShowDropdown(false);
-      }
+      if (!event.target.closest('#ordenarDropdownWrapper')) {setShowDropdown(false);}
     };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);

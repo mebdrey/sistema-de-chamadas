@@ -39,9 +39,7 @@ export default function ChamadosTecnico({
     const id = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     const newToast = { id, type, message };
     setToasts((prev) => [newToast, ...prev]); // newest em cima (pode inverter)
-    if (timeout > 0) {
-      setTimeout(() => removeToast(id), timeout);
-    }
+    if (timeout > 0) {setTimeout(() => removeToast(id), timeout);}
   };
 
   useEffect(() => {
@@ -49,9 +47,7 @@ export default function ChamadosTecnico({
     initFlowbite(); // inicializa dropdowns, modais, etc.
   }, []);
 
-  useEffect(() => {
-    atualizarChamados();
-  }, [abaAtiva]);
+  useEffect(() => { atualizarChamados(); }, [abaAtiva]);
 
 
   // ----------------------------------------- APONTAMENTOS -----------------------------------------------------
@@ -66,9 +62,7 @@ export default function ChamadosTecnico({
         const lista = Array.isArray(data) ? data : data.apontamentos || [];
         setApontamentos(lista);
         setApontamentoAtivo(lista.find((a) => !a.fim));
-      } catch (error) {
-        console.error('Erro ao buscar apontamentos:', error);
-      }
+      } catch (error) {console.error('Erro ao buscar apontamentos:', error);}
     };
 
     buscarApontamentos();
@@ -100,9 +94,7 @@ export default function ChamadosTecnico({
       setApontamentos(lista);
       setApontamentoAtivo(lista.find((a) => !a.fim));
       setDescricao('');
-    } catch (error) {
-      console.error('Erro ao criar apontamento:', error);
-    }
+    } catch (error) { console.error('Erro ao criar apontamento:', error);}
   };
   // finalizar apontamento
   const finalizarApontamento = async (id) => {
@@ -122,9 +114,7 @@ export default function ChamadosTecnico({
       const lista = Array.isArray(data) ? data : data.apontamentos || [];
       setApontamentos(lista);
       setApontamentoAtivo(null);
-    } catch (error) {
-      console.error('Erro ao finalizar apontamento:', error);
-    }
+    } catch (error) { console.error('Erro ao finalizar apontamento:', error);}
   };
 
   // ------------------------------------------------------------- CHAT ----------------------------------------------------------------
@@ -158,9 +148,7 @@ export default function ChamadosTecnico({
       const data = await res.json();
       setMensagens(data.mensagens);
       setConteudo('');
-    } catch (error) {
-      console.error('Erro ao enviar mensagem: ', error);
-    }
+    } catch (error) { console.error('Erro ao enviar mensagem: ', error); }
   };
 
 
@@ -184,14 +172,10 @@ export default function ChamadosTecnico({
         if (!response.ok) throw new Error('Erro ao buscar mensagens');
 
         const data = await response.json();
-        if (JSON.stringify(data.mensagens) !== JSON.stringify(mensagens)) {
-          setMensagens(data.mensagens);
-        }
-      } catch (err) {
-        console.error("Erro ao buscar mensagens do chamado", err);
-      } finally {
-        setLoadingMensagens(false); // só marca como carregado no fim
-      }
+        if (JSON.stringify(data.mensagens) !== JSON.stringify(mensagens)) { setMensagens(data.mensagens);}} 
+      catch (err) { console.error("Erro ao buscar mensagens do chamado", err);} 
+      finally { setLoadingMensagens(false);} // só marca como carregado no fim
+      
     };
     fetchMensagens();
 
@@ -285,9 +269,7 @@ export default function ChamadosTecnico({
   //     const response = await fetch('http://localhost:8080/pegar-chamado', {
   //       method: 'POST',
   //       credentials: 'include',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
+  //       headers: { 'Content-Type': 'application/json',},
   //       body: JSON.stringify({ chamado_id: chamadoId }),
   //     });
 
@@ -297,9 +279,7 @@ export default function ChamadosTecnico({
 
   //     showToast('success', data.mensagem || 'Chamado pego com sucesso');
   //     atualizarChamados();
-  //   } catch (err) {
-  //     showToast('danger', err.message || 'Erro desconhecido');
-  //   }
+  //   } catch (err) { showToast('danger', err.message || 'Erro desconhecido');}
   // };
 
   const pegarChamado = async (chamadoId) => {
@@ -313,9 +293,7 @@ export default function ChamadosTecnico({
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.erro || 'Erro ao pegar chamado');
-      }
+      if (!response.ok) { throw new Error(data.erro || 'Erro ao pegar chamado');}
 
       // data.chamado contém o chamado atualizado com data_limite
       const atualizado = data.chamado || data;
@@ -325,9 +303,7 @@ export default function ChamadosTecnico({
 
       // atualiza listas (mantém comportamento atual)
       await atualizarChamados();
-    } catch (err) {
-      showToast('danger', err.message || 'Erro desconhecido');
-    }
+    } catch (err) {showToast('danger', err.message || 'Erro desconhecido');}
   };
 
   // FECHAR O DRAWER COM ESC 
@@ -378,9 +354,8 @@ export default function ChamadosTecnico({
     } catch (err) {
       console.error('finalizarChamado:', err);
       showToastLocal('danger', err.message || 'Erro ao finalizar chamado.');
-    } finally {
-      setFinalizando(false);
     }
+    finally { setFinalizando(false);}
   };
 
   const baixarRelatorioPdf = async (format = 'pdf') => {
@@ -428,9 +403,8 @@ export default function ChamadosTecnico({
     } catch (err) {
       console.error('baixarRelatorioPdf:', err);
       showToastLocal('danger', err.message || 'Erro ao gerar/baixar relatório.');
-    } finally {
-      setBaixando(false);
     }
+    finally { setBaixando(false);}
   };
 
   // visibilidade dos botões
@@ -458,17 +432,13 @@ export default function ChamadosTecnico({
       {/* conteudo da pagina */}
       <div className="p-4 h-screen w-full">
         <div className="p-4 mt-14">
-
           <div className='flex flex-row w-full justify-between mb-15'>
             <div className="w-fit flex flex-row ">
 
               {/* select */}
-
               <OrdenarPor ordenarPor={ordenarPor} setOrdenarPor={setOrdenarPor} />
 
               <div className="mx-4 border-x border-gray-200"></div>
-
-
               {/* Dropdown de Prioridade */}
               <div className="relative inline-block">
                 <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="text-white bg-violet-700 hover:bg-violet-800 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-8 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" id="dropdownPrioridadeButton">
@@ -861,17 +831,8 @@ export default function ChamadosTecnico({
                         {/* Formulário */}
                         {!apontamentoAtivo && (
                           <div className="mb-6">
-                            <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900">
-                              Nova atividade realizada
-                            </label>
-                            <textarea
-                              id="descricao"
-                              rows="4"
-                              value={descricao}
-                              onChange={(e) => setDescricao(e.target.value)}
-                              className="w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-violet-500"
-                              placeholder="Descreva o que foi feito..."
-                            />
+                            <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900">Nova atividade realizada</label>
+                            <textarea id="descricao" rows="4" value={descricao} onChange={(e) => setDescricao(e.target.value)} className="w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-violet-500" placeholder="Descreva o que foi feito..."/>
                             <button onClick={iniciarApontamento} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-purple-700 transition">Adicionar apontamento</button>
                           </div>
                         )}
