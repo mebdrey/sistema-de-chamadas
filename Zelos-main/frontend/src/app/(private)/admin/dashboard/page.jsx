@@ -8,6 +8,7 @@ import AnimatedNumber from '@/components/AnimatedValue/AnimatedValue'
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import GraficoFuncionarios from '@/components/GraficoFuncionarios/GraficoFuncionarios'
+import ChatWidget from '@/components/ChatWidget/ChatWidget'
 
 export default function admDashboard() {
   const [modo, setModo] = useState('mensal'); // 'mensal' ou 'anual'
@@ -206,6 +207,7 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
         <GraficoFuncionarios />
         </div>
       </div>
+      <ChatWidget />
     </div>
   );
 }

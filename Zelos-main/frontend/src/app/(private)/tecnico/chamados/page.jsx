@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import OrdenarPor from '@/components/DropDown/DropDown.jsx'
 import { useContext } from 'react';
 import { UserContext } from '@/components/ProtectedRoute/ProtectedRoute.jsx';
-export default function ChamadosTecnico({
-  downloadMode = 'open' // 'open' ou 'download'
+
+export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'download'
 }) {
   const [isOpen, setIsOpen] = useState(false); // p drawer abrir e fechar
   const [isMounted, setIsMounted] = useState(false); // espera o componente estar carregado no navegador p evitar erros de renderizacao
@@ -18,6 +18,7 @@ export default function ChamadosTecnico({
   const [dropdownSetorAberto, setDropdownSetorAberto] = useState(false);
   const [dropdownPrioridadeAberto, setDropdownPrioridadeAberto] = useState(false);
   const [prioridadesSelecionadas, setPrioridadesSelecionadas] = useState([]); // 
+  const [tiposPrioridade, setTiposPrioridade] = useState([]);
   const [ordenarPor, setOrdenarPor] = useState('mais_recente'); // ordenar por mais recente ou mais antigo, por padrao ele mostra os mais recentes primeiro
   const [chamadoSelecionado, setChamadoSelecionado] = useState(null);
 
@@ -39,7 +40,7 @@ export default function ChamadosTecnico({
     const id = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     const newToast = { id, type, message };
     setToasts((prev) => [newToast, ...prev]); // newest em cima (pode inverter)
-    if (timeout > 0) {setTimeout(() => removeToast(id), timeout);}
+    if (timeout > 0) { setTimeout(() => removeToast(id), timeout); }
   };
 
   useEffect(() => {
@@ -62,7 +63,7 @@ export default function ChamadosTecnico({
         const lista = Array.isArray(data) ? data : data.apontamentos || [];
         setApontamentos(lista);
         setApontamentoAtivo(lista.find((a) => !a.fim));
-      } catch (error) {console.error('Erro ao buscar apontamentos:', error);}
+      } catch (error) { console.error('Erro ao buscar apontamentos:', error); }
     };
 
     buscarApontamentos();
@@ -94,7 +95,7 @@ export default function ChamadosTecnico({
       setApontamentos(lista);
       setApontamentoAtivo(lista.find((a) => !a.fim));
       setDescricao('');
-    } catch (error) { console.error('Erro ao criar apontamento:', error);}
+    } catch (error) { console.error('Erro ao criar apontamento:', error); }
   };
   // finalizar apontamento
   const finalizarApontamento = async (id) => {
@@ -114,7 +115,7 @@ export default function ChamadosTecnico({
       const lista = Array.isArray(data) ? data : data.apontamentos || [];
       setApontamentos(lista);
       setApontamentoAtivo(null);
-    } catch (error) { console.error('Erro ao finalizar apontamento:', error);}
+    } catch (error) { console.error('Erro ao finalizar apontamento:', error); }
   };
 
   // ------------------------------------------------------------- CHAT ----------------------------------------------------------------
@@ -172,10 +173,11 @@ export default function ChamadosTecnico({
         if (!response.ok) throw new Error('Erro ao buscar mensagens');
 
         const data = await response.json();
-        if (JSON.stringify(data.mensagens) !== JSON.stringify(mensagens)) { setMensagens(data.mensagens);}} 
-      catch (err) { console.error("Erro ao buscar mensagens do chamado", err);} 
-      finally { setLoadingMensagens(false);} // só marca como carregado no fim
-      
+        if (JSON.stringify(data.mensagens) !== JSON.stringify(mensagens)) { setMensagens(data.mensagens); }
+      }
+      catch (err) { console.error("Erro ao buscar mensagens do chamado", err); }
+      finally { setLoadingMensagens(false); } // só marca como carregado no fim
+
     };
     fetchMensagens();
 
@@ -229,12 +231,19 @@ export default function ChamadosTecnico({
   const normalizarId = (texto) =>
     typeof texto === 'string' ? texto.toLowerCase().replace(/\s+/g, '-') : '';
 
-  // array com prioridade
-  const prioridades = [
-    { label: 'Alta', value: 'alta' },
-    { label: 'Média', value: 'media' },
-    { label: 'Baixa', value: 'baixa' }
-  ];
+
+  useEffect(() => {
+    fetch("http://localhost:8080/prioridades", { credentials: "include" })
+      .then(res => {
+        if (!res.ok) throw new Error("Erro ao buscar prioridades");
+        return res.json();
+      })
+      .then(data => setTiposPrioridade(data))
+      .catch(err => {
+        console.error("Erro ao carregar prioridades:", err);
+        setTiposPrioridade([]);
+      });
+  }, []);
 
   // busca os tipos de servico
   useEffect(() => {
@@ -293,7 +302,7 @@ export default function ChamadosTecnico({
 
       const data = await response.json();
 
-      if (!response.ok) { throw new Error(data.erro || 'Erro ao pegar chamado');}
+      if (!response.ok) { throw new Error(data.erro || 'Erro ao pegar chamado'); }
 
       // data.chamado contém o chamado atualizado com data_limite
       const atualizado = data.chamado || data;
@@ -303,7 +312,7 @@ export default function ChamadosTecnico({
 
       // atualiza listas (mantém comportamento atual)
       await atualizarChamados();
-    } catch (err) {showToast('danger', err.message || 'Erro desconhecido');}
+    } catch (err) { showToast('danger', err.message || 'Erro desconhecido'); }
   };
 
   // FECHAR O DRAWER COM ESC 
@@ -355,7 +364,7 @@ export default function ChamadosTecnico({
       console.error('finalizarChamado:', err);
       showToastLocal('danger', err.message || 'Erro ao finalizar chamado.');
     }
-    finally { setFinalizando(false);}
+    finally { setFinalizando(false); }
   };
 
   const baixarRelatorioPdf = async (format = 'pdf') => {
@@ -404,7 +413,7 @@ export default function ChamadosTecnico({
       console.error('baixarRelatorioPdf:', err);
       showToastLocal('danger', err.message || 'Erro ao gerar/baixar relatório.');
     }
-    finally { setBaixando(false);}
+    finally { setBaixando(false); }
   };
 
   // visibilidade dos botões
@@ -417,16 +426,31 @@ export default function ChamadosTecnico({
     chamadoSelecionado.status_chamado === 'concluido' &&
     effectiveCurrentUserId &&
     String(chamadoSelecionado.tecnico_id) === String(effectiveCurrentUserId);
-
-
-
-  // Para DEBUG: coloque estes logs somente no dev
+  //debug
   useEffect(() => {
     console.log('chamadoSelecionado (atual):', chamadoSelecionado);
     console.log('effectiveCurrentUserId:', effectiveCurrentUserId, 'podeFinalizar:', podeFinalizar, 'podeGerarRelatorio:', podeGerarRelatorio);
   }, [chamadoSelecionado, effectiveCurrentUserId, podeFinalizar, podeGerarRelatorio]);
 
 
+  // formata os tipos de servico
+  function formatarLabel(str) {
+    if (!str) return ""
+    const correcoes = {
+      media: "Média",
+      manutencao: "Manutenção",
+      apoio_tecnico: "Apoio Técnico"
+    };
+
+    const palavras = str.replace(/_/g, " ").split(" ");
+
+    return palavras
+      .map(palavra => {
+        const semAcento = palavra.toLowerCase();
+        return correcoes[semAcento] || (palavra.charAt(0).toUpperCase() + palavra.slice(1));
+      })
+      .join(" ");
+  }
   return ( //PÁGINA
     <>
       {/* conteudo da pagina */}
@@ -451,27 +475,23 @@ export default function ChamadosTecnico({
                 {dropdownPrioridadeAberto && (
                   <div id="dropdownPrioridade" className="absolute z-10 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-48 dark:bg-gray-700 dark:divide-gray-600">
                     <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownPrioridadeButton">
-                      {prioridades.map((prioridade, index) => (
-                        <li key={index}>
+                      {tiposPrioridade.map((prioridade) => (
+                        <li key={prioridade.id}>
                           <div className="flex p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
                             <div className="flex items-center h-5">
-                              <input id={`prioridade-checkbox-${index}`} type="checkbox" name="prioridade" value={prioridade.value} checked={prioridadesSelecionadas.includes(prioridade.value)}
-                                onChange={(e) => {
-                                  const checked = e.target.checked; const valor = prioridade.value;
-                                  if (checked) {
-                                    setPrioridadesSelecionadas((prev) => [...prev, valor]);
-                                  } else {
-                                    setPrioridadesSelecionadas((prev) =>
-                                      prev.filter((p) => p !== valor)
-                                    );
-                                  }
-                                }}
+                              <input id={`prioridade-checkbox-${prioridade.id}`} type="checkbox" name="prioridade" value={prioridade.nome} checked={prioridadesSelecionadas.includes(prioridade.nome)} onChange={(e) => {
+                                const checked = e.target.checked;
+                                const valor = prioridade.nome;
+                                if (checked) {
+                                  setPrioridadesSelecionadas((prev) => [...prev, valor]);
+                                } else {
+                                  setPrioridadesSelecionadas((prev) => prev.filter((p) => p !== valor));
+                                }
+                              }}
                                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
                             </div>
                             <div className="ms-2 text-sm">
-                              <label htmlFor={`prioridade-checkbox-${index}`} className="poppins-medium text-gray-900 dark:text-gray-300">
-                                {prioridade.label}
-                              </label>
+                              <label htmlFor={`prioridade-checkbox-${prioridade.id}`} className="poppins-medium text-gray-900 dark:text-gray-300">{formatarLabel(prioridade.nome)}</label>
                             </div>
                           </div>
                         </li>
@@ -554,11 +574,10 @@ export default function ChamadosTecnico({
 
 
                 return (
-                  <div key={status} className={`${abaAtiva === statusId ? "block" : "hidden"} grid lg:grid-cols-5 gap-5`} >
+                  <div key={status} className={`${abaAtiva === statusId ? "grid" : "hidden"} grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5`} >
                     {chamadosFiltrados.length === 0 ? (
                       <div className="p-4 md:p-5">
-                        <p className="text-gray-500 dark:text-neutral-400"> Nenhum chamado encontrado.
-                        </p>
+                        <p className="text-gray-500 dark:text-neutral-400">Nenhum chamado encontrado.</p>
                       </div>
                     ) : (
                       chamadosFiltrados.map((chamado) => ( //CARD DOS CHAMADOS
@@ -570,7 +589,7 @@ export default function ChamadosTecnico({
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs text-gray-500 dark:text-neutral-500">Usuário</p>
-                              <p className="text-sm poppins-bold text-gray-800 dark:text-white">Nome usuario</p>
+                              <p className="text-sm poppins-bold text-gray-800 dark:text-white">{chamado.nome_usuario || "Nome não informado"}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 dark:text-neutral-500">Criado em</p>
@@ -583,7 +602,7 @@ export default function ChamadosTecnico({
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 dark:text-neutral-500">Prioridade</p>
-                              <p className="text-sm poppins-bold text-gray-800 dark:text-white">{chamado.prioridade}</p>
+                              <p className="text-sm poppins-bold text-gray-800 dark:text-white">{formatarLabel(tiposPrioridade.find(p => p.id === chamado.prioridade_id)?.nome || "Sem prioridade")}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 dark:text-neutral-500">Chamado ID</p>
@@ -609,51 +628,6 @@ export default function ChamadosTecnico({
             </div>
 
             {/* Drawer */}
-            {/* <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen p-4 overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-white w-80 dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`}  tabIndex="-1" aria-labelledby="drawer-right-label" >
-              <h5 id="drawer-right-label" className="inline-flex items-center mb-4 text-base poppins-semibold text-gray-500 dark:text-gray-400">
-                <svg className="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
-                </svg>Detalhes do chamado</h5>
-              <button type="button" onClick={() => setIsOpen(false)} className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white" >
-                <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                </svg>
-                <span className="sr-only">Close menu</span>
-              </button>
-              <div>
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Usuário</p>
-                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.nome_usuario || 'Nome não encontrado'}</p>
-              </div>
-              <div>
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Assunto</p>
-                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.assunto}</p>
-              </div>
-              <div>
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Descrição</p>
-                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.descricao}</p>
-              </div>
-              <div>
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
-                {chamadoSelecionado?.imagem ? ( <img src={chamadoSelecionado.imagem} alt="Imagem do chamado" className="mb-6 rounded-lg w-full max-w-md" /> ) : ( <p className="mb-6 text-sm poppins-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
-              </div>
-             
-              <div>
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Prioridade</p>
-                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.prioridade}</p>
-              </div>
-              <div>
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Chamado ID</p>
-                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">#{chamadoSelecionado?.id}</p>
-              </div>
-
-              <div className="">
-                <button className="inline-flex items-center px-4 py-2 text-sm poppins-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Pegar chamado<svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
-                  </svg>
-                </button>
-              </div>
-            </div> */}
-
             {isOpen && chamadoSelecionado && (
               (chamadoSelecionado.status_chamado === 'pendente') ? (
                 <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen p-4 overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-white w-80 dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
@@ -680,13 +654,17 @@ export default function ChamadosTecnico({
                     <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.descricao}</p>
                   </div>
                   <div>
+                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Tipo de serviço</p>
+                    <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{formatarLabel(tiposServico.find(p => p.id === chamadoSelecionado.tipo_id)?.titulo || "Serviço não informado")}</p>
+                  </div>
+                  <div>
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
-                    {chamadoSelecionado?.imagem ? (<img src={chamadoSelecionado.imagem} alt="Imagem do chamado" className="mb-6 rounded-lg w-full max-w-md" />) : (<p className="mb-6 text-sm poppins-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
+                    {chamadoSelecionado?.imagem ? (<img src={`http://localhost:8080/uploads/${chamadoSelecionado.imagem}`} alt="Imagem do chamado" className="mb-6 rounded-lg w-full max-w-md" />) : (<p className="mb-6 text-sm poppins-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
                   </div>
 
                   <div>
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Prioridade</p>
-                    <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.prioridade}</p>
+                    <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{formatarLabel(tiposPrioridade.find(p => p.id === chamadoSelecionado.prioridade_id)?.nome || "Sem prioridade")}</p>
                   </div>
                   <div>
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Chamado ID</p>
@@ -728,10 +706,26 @@ export default function ChamadosTecnico({
                           <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Assunto</p>
                           <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.assunto}</p>
                         </div>
-
+                        <div>
+                          <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Tipo de serviço</p>
+                          <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{formatarLabel(tiposServico.find(p => p.id === chamadoSelecionado.tipo_id)?.titulo || "Serviço não informado")}</p>
+                        </div>
+                        <div>
+                          <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Patrimônio</p>
+                          <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.patrimonio}</p>
+                        </div>
                         <div>
                           <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Prioridade</p>
-                          <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.prioridade}</p>
+                          <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{formatarLabel(tiposPrioridade.find(p => p.id === chamadoSelecionado.prioridade_id)?.nome || "Sem prioridade")}</p>
+                        </div>
+                        <div>
+                          <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Criado em</p>
+                          <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{" "} {new Date(chamadoSelecionado?.criado_em).toLocaleDateString("pt-BR", {
+                            month: "short", // abreviação do mês
+                            day: "numeric", // dia
+                            year: "numeric", // ano
+                          })}
+                          </p>
                         </div>
                         <div>
                           <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Prazo (data limite)</p>
@@ -742,7 +736,6 @@ export default function ChamadosTecnico({
                           <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">#{chamadoSelecionado?.id}</p>
                         </div>
                       </div>
-
 
                       {/**mensagem */}
                       {mensagens === null ? (
@@ -775,10 +768,7 @@ export default function ChamadosTecnico({
                       })
                       )}
 
-
-
                       {/**input de mensagens */}
-
                       <label htmlFor="conteudo" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white"></label>
                       <form>
                         <label htmlFor="chat" className="sr-only">Mensagem</label>
@@ -791,9 +781,9 @@ export default function ChamadosTecnico({
                             </svg>
                             <span className="sr-only">Enviar imagem</span>
                           </button>
-                          <textarea id="conteudo" value={conteudo} onChange={(e) => setConteudo(e.target.value)} rows="1" className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Mensagem"></textarea>
-                          <button type="button" onClick={() => enviarMsg('tecnico')} className="inline-flex justify-center p-2 text-violet-600 rounded-full cursor-pointer hover:bg-[#E6DAFF] dark:text-blue-500 dark:hover:bg-gray-600">
-                            <svg className="w-5 h-5 rotate-90 rtl:-rotate-90" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="#7F56D8" viewBox="0 0 18 20">
+                          <textarea id="conteudo" value={conteudo} onChange={(e) => setConteudo(e.target.value)} rows="1" className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-violet-500 dark:focus:border-violet-500" placeholder="Mensagem"></textarea>
+                          <button type="button" onClick={() => enviarMsg('tecnico')} className="inline-flex justify-center p-2 text-violet-600 rounded-full cursor-pointer hover:bg-[#E6DAFF] dark:text-violet-500 dark:hover:bg-gray-600">
+                            <svg className="w-5 h-5 rotate-90 rtl:-rotate-90" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
                               <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
                             </svg>
                             <span className="sr-only">Enviar mensagem</span>
@@ -831,9 +821,18 @@ export default function ChamadosTecnico({
                         {/* Formulário */}
                         {!apontamentoAtivo && (
                           <div className="mb-6">
-                            <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900">Nova atividade realizada</label>
-                            <textarea id="descricao" rows="4" value={descricao} onChange={(e) => setDescricao(e.target.value)} className="w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-violet-500" placeholder="Descreva o que foi feito..."/>
-                            <button onClick={iniciarApontamento} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-purple-700 transition">Adicionar apontamento</button>
+                            <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900">
+                              Nova atividade realizada
+                            </label>
+                            <textarea
+                              id="descricao"
+                              rows="4"
+                              value={descricao}
+                              onChange={(e) => setDescricao(e.target.value)}
+                              className="w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-violet-500 focus:border-violet-500"
+                              placeholder="Descreva o que foi feito..."
+                            />
+                            <button onClick={iniciarApontamento} className="mt-4 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition">Adicionar apontamento</button>
                           </div>
                         )}
 
@@ -852,196 +851,38 @@ export default function ChamadosTecnico({
                       </div>
                     </div>
                   </div>
+                  {/* ---------- AÇÕES (Finalizar / Gerar Relatório) ---------- */}
+                  <div className="flex items-center gap-3 mb-6">
+                    {podeFinalizar && (
+                      <button onClick={async (e) => { e.stopPropagation(); await finalizarChamado(); }}
+                        disabled={finalizando}
+                        className="inline-flex items-center px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-60">
+                        {finalizando ? 'Finalizando...' : 'Finalizar Chamado'}
+                      </button>
+                    )}
+
+                    {podeGerarRelatorio && (
+                      <>
+                        <button onClick={(e) => { e.stopPropagation(); baixarRelatorioPdf('pdf'); }}
+                          disabled={baixando}
+                          className="inline-flex items-center px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60">
+                          {baixando ? 'Gerando PDF...' : 'Gerar / Baixar PDF'}
+                        </button>
+
+                        <button onClick={(e) => { e.stopPropagation(); baixarRelatorioPdf('csv'); }}
+                          disabled={baixando}
+                          className="inline-flex items-center px-3 py-2 text-sm text-white bg-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-60">
+                          {baixando ? 'Gerando CSV...' : 'Baixar CSV'}
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               )
             )}
 
-            {/**drawer */}
-            <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-[#F8FAFB] w-full dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
-              <div className="w-full p-4 bg-white">
-                <h5 id="drawer-right-label" className="inline-flex items-center text-base poppins-semibold text-gray-500 dark:text-gray-400">
-                  <svg className="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
-                  </svg>Detalhes do chamado
-                </h5>
-                <button type="button" onClick={() => setIsOpen(false)} className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white" >
-                  <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                  </svg>
-                  <span className="sr-only">Close menu</span>
-                </button>
-              </div>
-
-              <div className="w-full h-full justify-between flex flex-row">
-                {/*informaç~eos do chamado */}
-                <div className="w-2/3 p-10">
-                  <div className="grid grid-cols-2 mb-10">
-                    <div>
-                      <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Usuário</p>
-                      <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.nome_usuario || 'Nome não encontrado'}</p>
-                    </div>
-                    <div>
-                      <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Assunto</p>
-                      <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.assunto}</p>
-                    </div>
-
-                    <div>
-                      <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Prioridade</p>
-                      <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.prioridade}</p>
-                    </div>
-                        <div>
-                          <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Prazo (data limite)</p>
-                          <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.data_limite}</p>
-                        </div>
-                    <div>
-                      <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Chamado ID</p>
-                      <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">#{chamadoSelecionado?.id}</p>
-                    </div>
-                  </div>
 
 
-                  {/**mensagem */}
-                  {mensagens === null ? (
-                    <p className="text-gray-500">Carregando mensagens...</p>
-                  ) : (mensagens.map((msg, index) => {
-                    const isTecnico = msg.id_tecnico !== null;
-                    const data = new Date(msg.data_envio).toLocaleString();
-
-                    return (
-                      <div key={index} className={`flex items-start gap-2.5 ${isTecnico ? "justify-end" : ""}`}>
-                        {!isTecnico && (
-                          <img className="w-8 h-8 rounded-full" src="/images/usuario.png" alt="Usuário" />
-                        )}
-                        <div className={`flex flex-col mb-4 gap-1 w-2/3 ${isTecnico ? "items-end text-right" : ""}`}>
-                          <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                            <span className="text-sm poppins-semibold text-gray-900 dark:text-white">
-                              {isTecnico ? "Técnico" : "Usuário"}
-                            </span>
-                            <span className="text-sm poppins-regular text-gray-500 dark:text-gray-400">{data}</span>
-                          </div>
-                          <div className={`flex flex-col leading-1.5 max-w-full p-4 border-gray-200 rounded-xl dark:bg-gray-700 ${isTecnico ? "bg-[#E6DAFF] rounded-s-xl rounded-ss-xl" : "bg-white rounded-e-xl rounded-es-xl"}`}>
-                            <p className="text-sm max-w-full poppins-regular text-left text-gray-900 dark:text-white break-all">{msg.conteudo}</p>
-                          </div>
-                        </div>
-                        {isTecnico && (
-                          <img className="w-8 h-8 rounded-full" src="/images/tecnico.png" alt="Técnico" />
-                        )}
-                      </div>
-                    );
-                  })
-                  )}
-
-                  {/**input de mensagens */}
-
-                  <label htmlFor="conteudo" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white"></label>
-                  <form>
-                    <label htmlFor="chat" className="sr-only">Mensagem</label>
-                    <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
-                      <button type="button" className="inline-flex justify-center p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
-                        <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
-                          <path fill="currentColor" d="M13 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM7.565 7.423 4.5 14h11.518l-2.516-3.71L11 13 7.565 7.423Z" />
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 1H2a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z" />
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM7.565 7.423 4.5 14h11.518l-2.516-3.71L11 13 7.565 7.423Z" />
-                        </svg>
-                        <span className="sr-only">Enviar imagem</span>
-                      </button>
-                      <textarea id="conteudo" value={conteudo} onChange={(e) => setConteudo(e.target.value)} rows="1" className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-violet-500 dark:focus:border-violet-500" placeholder="Mensagem"></textarea>
-                      <button type="button" onClick={() => enviarMsg('tecnico')} className="inline-flex justify-center p-2 text-violet-600 rounded-full cursor-pointer hover:bg-[#E6DAFF] dark:text-violet-500 dark:hover:bg-gray-600">
-                        <svg className="w-5 h-5 rotate-90 rtl:-rotate-90" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
-                          <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
-                        </svg>
-                        <span className="sr-only">Enviar mensagem</span>
-                      </button>
-                    </div>
-                  </form>
-                </div>
-
-                {/* apontamentos */}
-                <div className="w-1/3 bg-white p-10 h-full">
-                  <div className="w-full px-4 py-8">
-                    <h1 className="text-2xl poppins-bold mb-6">Apontamentos do chamado #{chamadoSelecionado?.id}</h1>
-
-                    {/* Timeline */}
-                    <ol className="relative border-s border-gray-300 mb-10">
-                      {apontamentos.map((a) => (
-                        <li key={a.id} className="mb-10 ms-4">
-                          <div className={`absolute w-3 h-3 rounded-full mt-1.5 -start-1.5 ${a.fim ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-                          <time className="mb-1 text-sm text-gray-500">
-                            {new Date(a.comeco).toLocaleString('pt-BR')}
-                          </time>
-                          <h3 className="text-lg poppins-semibold">
-                            {a.fim ? 'Apontamento finalizado' : 'Apontamento em andamento'}
-                          </h3>
-                          <p className="text-gray-700">{a.descricao}</p>
-                          {a.fim && (
-                            <p className="text-sm text-gray-500 mt-1">
-                              Encerrado em {new Date(a.fim).toLocaleString('pt-BR')}
-                            </p>
-                          )}
-                        </li>
-                      ))}
-                    </ol>
-
-                    {/* Formulário */}
-                    {!apontamentoAtivo && (
-                      <div className="mb-6">
-                        <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900">
-                          Nova atividade realizada
-                        </label>
-                        <textarea
-                          id="descricao"
-                          rows="4"
-                          value={descricao}
-                          onChange={(e) => setDescricao(e.target.value)}
-                          className="w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-violet-500 focus:border-violet-500"
-                          placeholder="Descreva o que foi feito..."
-                        />
-                        <button onClick={iniciarApontamento} className="mt-4 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition">Adicionar apontamento</button>
-                      </div>
-                    )}
-
-                    {/* Botão para encerrar apontamento */}
-                    {apontamentoAtivo && (
-                      <div className="mt-6">
-                        <p className="text-sm text-gray-700 mb-2"> Apontamento em andamento desde:{' '}
-                          {new Date(apontamentoAtivo.comeco).toLocaleString('pt-BR')}
-                        </p>
-                        <button
-                          onClick={() => finalizarApontamento(apontamentoAtivo.id)}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                        >Fechar apontamento</button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {/* ---------- AÇÕES (Finalizar / Gerar Relatório) ---------- */}
-              <div className="flex items-center gap-3 mb-6">
-                {podeFinalizar && (
-                  <button onClick={async (e) => { e.stopPropagation(); await finalizarChamado(); }}
-                    disabled={finalizando}
-                    className="inline-flex items-center px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-60">
-                    {finalizando ? 'Finalizando...' : 'Finalizar Chamado'}
-                  </button>
-                )}
-
-                {podeGerarRelatorio && (
-                  <>
-                    <button onClick={(e) => { e.stopPropagation(); baixarRelatorioPdf('pdf'); }}
-                      disabled={baixando}
-                      className="inline-flex items-center px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60">
-                      {baixando ? 'Gerando PDF...' : 'Gerar / Baixar PDF'}
-                    </button>
-
-                    <button onClick={(e) => { e.stopPropagation(); baixarRelatorioPdf('csv'); }}
-                      disabled={baixando}
-                      className="inline-flex items-center px-3 py-2 text-sm text-white bg-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-60">
-                      {baixando ? 'Gerando CSV...' : 'Baixar CSV'}
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
           </section>
         </div >
       </div >

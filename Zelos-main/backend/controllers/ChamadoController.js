@@ -528,7 +528,6 @@ export const criarApontamentoController = async (req, res) => {
   }
 };
 
-
 export const finalizarApontamentoController = async (req, res) => {
   try {
     const { apontamento_id } = req.body;

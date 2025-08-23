@@ -6,6 +6,7 @@ import ProtectedRoute from "@/components/ProtectedRoute/ProtectedRoute.jsx";
 import { usePathname, useRouter } from "next/navigation";
 import { getMetadataFromPath } from "../utils/metadata.js";
 import 'flowbite/dist/flowbite.css';
+import '@/app/globals.css'
 
 // Helpers seguros para localStorage (não quebram no SSR)
 const isBrowser = () => typeof window !== 'undefined';
@@ -137,8 +138,8 @@ export default function PrivateLayout({ children }) {
     <>
       <ProtectedRoute>
         <SideBar user={user} setUser={setUser} userType={user?.funcao} navFechada={navFechada} setNavFechada={setNavFechada} />
-        <main className="w-full bg-[#F8FAFB] justify-items-end">
-          <section className="h-fit transition-all duration-300" style={{ width: mainWidth }}>
+        <main className="w-full min-h-screen bg-[#F8FAFB] justify-items-end">
+          <section className="flex-1 flex flex-col overflow-y-auto transition-all duration-300" style={{ width: mainWidth }}>
             {children}
           </section>
         </main>

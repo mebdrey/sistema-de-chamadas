@@ -1,9 +1,9 @@
 @import "tailwindcss";
 @import "flowbite/src/themes/default";
-@plugin "flowbite/plugin";
+/* @plugin "flowbite/plugin";
 @source "../node_modules/flowbite";
 @plugin "flowbite-react/plugin/tailwindcss";
-@source "../../.flowbite-react/class-list.json";
+@source "../../.flowbite-react/class-list.json"; */
 
 /* fontes */
 .poppins-regular {
@@ -63,3 +63,24 @@
   font-family: 'Plus Jakarta Sans Light';
   src: url('../components/Fonts/PlusJakartaSans-Light.ttf') format('truetype');
 }
+
+@keyframes toast-in {
+  0% { opacity: 0; transform: translateX(100%); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toast-out {
+  0% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(100%); }
+}
+
+.toast-in {
+  animation: toast-in 0.4s ease-out forwards;
+}
+
+.toast-out {
+  animation: toast-out 0.25s ease-in forwards;
+}
+
+/* ajuda o browser a otimizar a animação */
+.toast-card { will-change: transform, opacity; }

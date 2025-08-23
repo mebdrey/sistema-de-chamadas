@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { initFlowbite } from 'flowbite'
 import { useRouter } from 'next/navigation';
 import OrdenarPor from '@/components/DropDown/DropDown.jsx'
+import ToastMsg from "@/components/Toasts/Toasts";
 
 export default function ChamadosCliente() {
     const [isMounted, setIsMounted] = useState(false); // espera o componente estar carregado no navegador p evitar erros de renderizacao
@@ -27,7 +28,8 @@ export default function ChamadosCliente() {
     const [tiposPrioridade, setTiposPrioridade] = useState([]);
     const [openAbas, setOpenAbas] = useState(false);
     const dropdownRef = useRef(null);
-
+    const { UI: ToastsUI, showToast } = ToastMsg(); // pega UI e função showToast
+    
     useEffect(() => {
         setIsMounted(true);
     }, []);
@@ -64,6 +66,7 @@ export default function ChamadosCliente() {
             })
             .catch(err => {
                 console.error('Erro ao carregar chamados:', err);
+                showToast("danger", "Erro ao carregar chamados.");
                 setChamados([]);
             });
     }, []);
@@ -125,7 +128,7 @@ export default function ChamadosCliente() {
         formData.append("assunto", assunto);
         formData.append("descricao", descricao);
         formData.append("tipo_id", tipoSelecionadoId);
-        formData.append("prioridade_id", prioridadeSelecionadaId); // <--- enviar prioridade_id
+        formData.append("prioridade_id", prioridadeSelecionadaId);
         formData.append("patrimonio", patrimonio);
         formData.append("imagem", imagemArquivo);
 
@@ -136,7 +139,6 @@ export default function ChamadosCliente() {
         });
 
         if (res.ok) {
-            // ✅ limpa os campos
             setAssunto("");
             setTipoSelecionadoId("");
             setDescricao("");
@@ -147,8 +149,10 @@ export default function ChamadosCliente() {
             const novoChamado = await res.json();
             setChamados((prev) => [novoChamado, ...prev]);
 
+            showToast("success", "Chamado criado com sucesso!");
+
         } else {
-            alert("Erro ao criar chamado.");
+            showToast("danger", "Erro ao criar chamado.");
         }
     };
 
@@ -199,6 +203,7 @@ export default function ChamadosCliente() {
 
     return (
         <>
+        {ToastsUI}
             {/* conteudo da pagina */}
             <div className="p-4 h-screen w-full">
                 <div className="p-4 mt-14">
@@ -389,7 +394,7 @@ export default function ChamadosCliente() {
                                     });
 
                                 return (
-                                    <div key={statusId} className={`${abaAtiva === statusId ? "block" : "hidden"} flex flex-col  rounded-xl dark:bg-neutral-900 gap-6 `}>
+                                    <div key={statusId} className={`${abaAtiva === statusId ? "block" : "hidden"} flex flex-col rounded-xl dark:bg-neutral-900 gap-6 `}>
                                         {chamadosFiltrados.length === 0 ? (
                                             <div className="p-4 md:p-5 bg-white rounded-xl">
                                                 <p className="text-gray-500 dark:text-neutral-400">Nenhum chamado encontrado. </p>
@@ -447,8 +452,6 @@ export default function ChamadosCliente() {
                                 <span className="sr-only">Chat</span>
                             </button>
                         </div>
-
-
 
                         {/* botão principal */}
                         <button type="button" onClick={() => setOpenSpeedDial(!openSpeedDial)} data-dial-toggle="speed-dial-menu-bottom-right" aria-controls="speed-dial-menu-bottom-right" aria-expanded={openSpeedDial} className="flex items-center justify-center text-white bg-[#7F56D8] rounded-full w-14 h-14 dark:bg-blue-600 focus:ring-4 focus:ring-blue-300 focus:outline-none dark:focus:ring-blue-800">
@@ -553,14 +556,14 @@ export default function ChamadosCliente() {
                                                 <p className="text-red-500 mb-2">Preencha todos os campos obrigatórios</p>
                                             )}
                                             {/* footer */}
-                                    <div className="flex justify-end items-center gap-x-2 py-3 px-4 border-t border-gray-200 dark:border-neutral-700">
-                                    <button type="button" className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Criar chamado</button>
-                                    </div>
+                                            <div className="flex justify-end items-center gap-x-2 py-3 px-4 border-t border-gray-200 dark:border-neutral-700">
+                                                <button type="submit" className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Criar chamado</button>
+                                            </div>
                                         </form>
                                         {/* </form> */}
                                     </div>
 
-                                    
+
 
 
                                 </div>

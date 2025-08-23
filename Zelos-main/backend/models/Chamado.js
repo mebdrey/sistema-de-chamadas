@@ -548,13 +548,13 @@ export const pegarChamado = async (chamado_id, usuario_id) => {
   return rows[0];
 };
 
-
 export const listarChamadosPorStatusEFunção = async (usuario_id, status) => {
   let condicaoStatus = '';
   const params = [usuario_id];
 
-  if (status === 'pendente') { condicaoStatus = `AND c.status_chamado = 'pendente' AND c.tecnico_id IS NULL`; }
-  else if (status === 'em andamento') {
+  if (status === 'pendente') {
+    condicaoStatus = `AND c.status_chamado = 'pendente' AND c.tecnico_id IS NULL`;
+  } else if (status === 'em andamento') {
     condicaoStatus = `AND c.status_chamado = 'em andamento' AND c.tecnico_id = ?`;
     params.push(usuario_id);
   } else if (status === 'concluido') {
@@ -562,15 +562,22 @@ export const listarChamadosPorStatusEFunção = async (usuario_id, status) => {
     params.push(usuario_id);
   }
 
-  const sql = `SELECT c.*, u.nome AS nome_usuario
+  const sql = `
+    SELECT 
+      c.*, 
+      u.nome AS nome_usuario
     FROM chamados c
     INNER JOIN usuario_servico us ON us.servico_id = c.tipo_id
     INNER JOIN usuarios u ON u.id = c.usuario_id
     WHERE us.usuario_id = ? ${condicaoStatus}
-    ORDER BY c.criado_em DESC`;
+    ORDER BY c.criado_em DESC
+  `;
 
-  try { return await readQuery(sql, params); }
-  catch (err) { throw err; }
+  try {
+    return await readQuery(sql, params);
+  } catch (err) {
+    throw err;
+  }
 };
 
 // buscar todos os apontamentos de um chamado

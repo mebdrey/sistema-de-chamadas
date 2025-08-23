@@ -69,7 +69,7 @@ export default function Login() {
           console.warn('Falha ao salvar currentUser no localStorage', e);
         }
 
-        alert('Login realizado com sucesso');
+        // alert('Login realizado com sucesso');
         const funcao = data.user.funcao?.toLowerCase();
 
         if (funcao === 'admin') {
