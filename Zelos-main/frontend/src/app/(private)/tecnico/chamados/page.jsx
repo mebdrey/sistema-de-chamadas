@@ -451,6 +451,39 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
       })
       .join(" ");
   }
+
+  // calcula tempo restante / data limite
+  const [tempoRestante, setTempoRestante] = useState("");
+
+  useEffect(() => {
+    if (!chamadoSelecionado?.data_limite) return;
+
+    const atualizarTempo = () => {
+      const agora = new Date();
+      const limite = new Date(chamadoSelecionado.data_limite);
+      const diferenca = limite - agora;
+
+      if (diferenca <= 0) {
+        setTempoRestante("Prazo expirado");
+        return;
+      }
+
+      const horas = Math.floor(diferenca / (1000 * 60 * 60));
+      const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+      const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
+
+      setTempoRestante(
+        `${horas.toString().padStart(2, "0")}:${minutos
+          .toString()
+          .padStart(2, "0")}:${segundos.toString().padStart(2, "0")}`
+      );
+    };
+
+    atualizarTempo();
+    const intervalo = setInterval(atualizarTempo, 1000);
+
+    return () => clearInterval(intervalo);
+  }, [chamadoSelecionado]);
   return ( //PÁGINA
     <>
       {/* conteudo da pagina */}
@@ -694,10 +727,13 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                     </button>
                   </div>
 
-                  <div className="w-full h-full justify-between flex flex-row">
+                  {/* <div className="w-full h-full justify-between flex flex-row"> */}
+                  <div className="w-full h-full justify-between flex flex-col">
                     {/*informaç~eos do chamado */}
-                    <div className="w-2/3 p-10">
-                      <div className="grid grid-cols-2 mb-10">
+                    <div className="w-full p-10">
+                    {/* <div className="w-2/3 p-10"> */}
+                      <div className="grid grid-cols-4 mb-10">
+                      {/* <div className="grid grid-cols-3 mb-10"> */}
                         <div>
                           <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Usuário</p>
                           <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.nome_usuario || 'Nome não encontrado'}</p>
@@ -720,16 +756,14 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                         </div>
                         <div>
                           <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Criado em</p>
-                          <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{" "} {new Date(chamadoSelecionado?.criado_em).toLocaleDateString("pt-BR", {
-                            month: "short", // abreviação do mês
-                            day: "numeric", // dia
-                            year: "numeric", // ano
-                          })}
+                          <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{" "} {new Date(chamadoSelecionado?.criado_em)
+                            .toLocaleDateString("pt-BR")
+                            .replace(/(\d{4})$/, (ano) => ano.slice(-2))}
                           </p>
                         </div>
                         <div>
                           <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Prazo (data limite)</p>
-                          <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.data_limite}</p>
+                          <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{tempoRestante}</p>
                         </div>
                         <div>
                           <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Chamado ID</p>
@@ -738,7 +772,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                       </div>
 
                       {/**mensagem */}
-                      {mensagens === null ? (
+                      {/* {mensagens === null ? (
                         <p className="text-gray-500">Carregando mensagens...</p>
                       ) : (mensagens.map((msg, index) => {
                         const isTecnico = msg.id_tecnico !== null;
@@ -766,10 +800,10 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                           </div>
                         );
                       })
-                      )}
+                      )} */}
 
-                      {/**input de mensagens */}
-                      <label htmlFor="conteudo" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white"></label>
+                      {/* input de mensagens */}
+                      {/* <label htmlFor="conteudo" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white"></label>
                       <form>
                         <label htmlFor="chat" className="sr-only">Mensagem</label>
                         <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
@@ -789,15 +823,13 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                             <span className="sr-only">Enviar mensagem</span>
                           </button>
                         </div>
-                      </form>
+                      </form> */}
                     </div>
 
-                    {/* apontamentos */}
-                    <div className="w-1/3 bg-white p-10 h-full">
+                    {/* <div className="w-1/3 bg-white p-10 h-full">
                       <div className="w-full px-4 py-8">
                         <h1 className="text-2xl poppins-bold mb-6">Apontamentos do chamado #{chamadoSelecionado?.id}</h1>
 
-                        {/* Timeline */}
                         <ol className="relative border-s border-gray-300 mb-10">
                           {apontamentos.map((a) => (
                             <li key={a.id} className="mb-10 ms-4">
@@ -818,7 +850,6 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                           ))}
                         </ol>
 
-                        {/* Formulário */}
                         {!apontamentoAtivo && (
                           <div className="mb-6">
                             <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900">
@@ -832,11 +863,68 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                               className="w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-violet-500 focus:border-violet-500"
                               placeholder="Descreva o que foi feito..."
                             />
-                            <button onClick={iniciarApontamento} className="mt-4 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition">Adicionar apontamento</button>
+                            <button onClick={iniciarApontamento} className="mt-4 flex flex-row gap-2 items-center px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pass-fill" viewBox="0 0 16 16">
+                              <path d="M10 0a2 2 0 1 1-4 0H3.5A1.5 1.5 0 0 0 2 1.5v13A1.5 1.5 0 0 0 3.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 12.5 0zM4.5 5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1m0 2h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1 0-1" />
+                            </svg>Adicionar apontamento</button>
                           </div>
                         )}
 
-                        {/* Botão para encerrar apontamento */}
+                        {apontamentoAtivo && (
+                          <div className="mt-6">
+                            <p className="text-sm text-gray-700 mb-2"> Apontamento em andamento desde:{' '}
+                              {new Date(apontamentoAtivo.comeco).toLocaleString('pt-BR')}
+                            </p>
+                            <button
+                              onClick={() => finalizarApontamento(apontamentoAtivo.id)}
+                              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                            >Fechar apontamento</button>
+                          </div>
+                        )}
+                      </div>
+                    </div> */}
+                    <div className="w-1/3 bg-white p-10 h-full">
+                      <div className="w-full px-4 py-8">
+                        <h1 className="text-2xl poppins-bold mb-6">Apontamentos do chamado #{chamadoSelecionado?.id}</h1>
+
+                        <ol className="relative border-s border-gray-300 mb-10">
+                          {apontamentos.map((a) => (
+                            <li key={a.id} className="mb-10 ms-4">
+                              <div className={`absolute w-3 h-3 rounded-full mt-1.5 -start-1.5 ${a.fim ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                              <time className="mb-1 text-sm text-gray-500">
+                                {new Date(a.comeco).toLocaleString('pt-BR')}
+                              </time>
+                              <h3 className="text-lg poppins-semibold">
+                                {a.fim ? 'Apontamento finalizado' : 'Apontamento em andamento'}
+                              </h3>
+                              <p className="text-gray-700">{a.descricao}</p>
+                              {a.fim && (
+                                <p className="text-sm text-gray-500 mt-1">
+                                  Encerrado em {new Date(a.fim).toLocaleString('pt-BR')}
+                                </p>
+                              )}
+                            </li>
+                          ))}
+                        </ol>
+
+                        {!apontamentoAtivo && (
+                          <div className="mb-6">
+                            <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900">
+                              Nova atividade realizada
+                            </label>
+                            <textarea
+                              id="descricao"
+                              rows="4"
+                              value={descricao}
+                              onChange={(e) => setDescricao(e.target.value)}
+                              className="w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-violet-500 focus:border-violet-500"
+                              placeholder="Descreva o que foi feito..."
+                            />
+                            <button onClick={iniciarApontamento} className="mt-4 flex flex-row gap-2 items-center px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pass-fill" viewBox="0 0 16 16">
+                              <path d="M10 0a2 2 0 1 1-4 0H3.5A1.5 1.5 0 0 0 2 1.5v13A1.5 1.5 0 0 0 3.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 12.5 0zM4.5 5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1m0 2h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1 0-1" />
+                            </svg>Adicionar apontamento</button>
+                          </div>
+                        )}
+
                         {apontamentoAtivo && (
                           <div className="mt-6">
                             <p className="text-sm text-gray-700 mb-2"> Apontamento em andamento desde:{' '}
@@ -919,12 +1007,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
 
             <div className="ms-3 text-sm font-normal max-w-xs break-words">{message}</div>
 
-            <button
-              type="button"
-              onClick={() => removeToast(id)}
-              className="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700"
-              aria-label="Close"
-            >
+            <button type="button" onClick={() => removeToast(id)} className="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" aria-label="Close">
               <span className="sr-only">Close</span>
               <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />

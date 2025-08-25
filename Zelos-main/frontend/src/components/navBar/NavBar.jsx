@@ -23,14 +23,23 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
         ];
     } else if (userType === 'tecnico') {
         links = [
-            { label: 'Chamados', href: '/tecnico/chamados' },
-            { label: 'Configurações', href: '/tecnico/configuracoes' },
-            {label: 'Perfil', href: '/tecnico/perfil'}
+            { label: 'Chamados', href: '/tecnico/chamados', icon: (<svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-[#7F56D8]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18"><path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" /></svg>) },
+            {
+                label: 'Perfil', href: '/tecnico/perfil', icon: (<svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-[#7F56D8]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
+                </svg>
+                )
+            }
         ];
     } else if (userType === 'usuario') {
         links = [
-            { label: 'Chamados', href: '/usuario/chamados' },
-            { label: 'Configurações', href: '/usuario/configuracoes' },
+            { label: 'Chamados', href: '/usuario/chamados', icon: (<svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-[#7F56D8]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18"><path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" /></svg>) },
+            {
+                label: 'Perfil', href: '/usuario/perfil', icon: (<svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-[#7F56D8]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
+                </svg>
+                )
+            },
         ];
     }
 
@@ -42,18 +51,18 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
     const [dropdownNotificationOpen, setDropdownNotificationOpen] = useState(false);
 
 
-    useEffect(() => { setMounted(true);}, []);
+    useEffect(() => { setMounted(true); }, []);
 
     useEffect(() => {
         function handleClickOutside(e) {
             // se clicar fora do avatar => fecha
-            if (dropdownUserOpen && !e.target.closest('#dropdown-user-button') && !e.target.closest('#dropdown-user')) {setDropdownUserOpen(false);}
+            if (dropdownUserOpen && !e.target.closest('#dropdown-user-button') && !e.target.closest('#dropdown-user')) { setDropdownUserOpen(false); }
 
             // se clicar fora do bell => fecha
-            if (dropdownNotificationOpen && !e.target.closest('#dropdown-notification-button') && !e.target.closest('#dropdownNotification')) {setDropdownNotificationOpen(false);}
+            if (dropdownNotificationOpen && !e.target.closest('#dropdown-notification-button') && !e.target.closest('#dropdownNotification')) { setDropdownNotificationOpen(false); }
 
             // se clicar fora do menu mobile => fecha
-            if (isMenuOpen && !e.target.closest('#mobile-menu') && !e.target.closest('#mobile-menu-button')) {setIsMenuOpen(false);}
+            if (isMenuOpen && !e.target.closest('#mobile-menu') && !e.target.closest('#mobile-menu-button')) { setIsMenuOpen(false); }
         }
 
         document.addEventListener('mousedown', handleClickOutside);
@@ -88,10 +97,10 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
     //link do perfil
     let perfis = [];
 
-    if(userType === 'tecnico'){perfis =[{label: 'Perfil', href: '/tecnico/perfil'}]}
-    else if (userType === 'usuario'){perfis =[{label: 'Perfil', href: '/usuario/perfil'}]}
-    else if (userType ==='admin'){perfis =[{label: 'Perfil', href: '/admin/perfil'}]}
-    
+    if (userType === 'tecnico') { perfis = [{ label: 'Perfil', href: '/tecnico/perfil' }] }
+    else if (userType === 'usuario') { perfis = [{ label: 'Perfil', href: '/usuario/perfil' }] }
+    else if (userType === 'admin') { perfis = [{ label: 'Perfil', href: '/admin/perfil' }] }
+
 
     return (
         <>
@@ -211,7 +220,7 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                                             <span className="sr-only">Open user menu</span>
                                             <div className="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full">
                                                 {user?.ftPerfil ? (
-                                                    <img className="object-cover w-full h-full"  src={`http://localhost:8080/${user.ftPerfil}`} alt="Foto de perfil" />
+                                                    <img className="object-cover w-full h-full" src={`http://localhost:8080/${user.ftPerfil}`} alt="Foto de perfil" />
                                                 ) : (
                                                     <svg className="absolute w-10 h-10 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
@@ -228,12 +237,12 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                                             </div>
                                             <ul className="py-1" role="none">
                                                 <li>
-                                                    {perfis.map((perfil) =>(
+                                                    {perfis.map((perfil) => (
                                                         <div key={perfil.href}>
                                                             <a href={perfil.href} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 " role="menuitem">Perfil</a>
                                                         </div>
                                                     ))}
-                                                    
+
                                                 </li>
                                                 <li>
                                                     <button className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 " role="menuitem" onClick={(e) => {
