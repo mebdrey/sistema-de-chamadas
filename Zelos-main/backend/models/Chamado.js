@@ -110,15 +110,12 @@ export const calcularDataLimiteUsuario = async (prioridade_id) => {
     // buscar a prioridade pelo id (read retorna só uma linha, não array)
     const prioridade = await read("prioridades", `id = ${prioridade_id}`);
 
-    if (!prioridade) {
-      return null; // prioridade não encontrada
-    }
+    if (!prioridade) { return null;} // prioridade não encontrada
+    
 
     // calcular data limite com base em horas_limite
     const agora = new Date();
-    const data_limite = new Date(
-      agora.getTime() + prioridade.horas_limite * 60 * 60 * 1000
-    );
+    const data_limite = new Date( agora.getTime() + prioridade.horas_limite * 60 * 60 * 1000);
 
     return data_limite;
 
@@ -247,9 +244,7 @@ export const contarChamadosPorStatus = async (modo) => {
 
 //contar chamados por prioridade
 export const contarChamadosPorPrioridade = async () => {
-  const sql = `SELECT
-      p.nome AS tipo,
-      COUNT(c.id) AS qtd
+  const sql = `SELECT p.nome AS tipo, COUNT(c.id) AS qtd
     FROM prioridades p
     LEFT JOIN chamados c ON p.id = c.prioridade_id
     GROUP BY p.id, p.nome
@@ -282,7 +277,7 @@ export const editarChamado = async (id, data) => {
   // Só pode editar se for pendente ou em andamento
   if (!['pendente', 'em andamento'].includes(chamado.status_chamado)) { throw new Error('Chamado não pode ser editado. Apenas chamados pendentes ou em andamento podem ser alterados.'); }
 
-  const camposPermitidos = ['prioridade', 'tecnico_id', 'tipo_id', 'descricao', 'assunto', 'status_chamado'];// Campos permitidos para atualização
+  const camposPermitidos = ['prioridade_id', 'tecnico_id', 'tipo_id', 'descricao', 'assunto', 'status_chamado'];// Campos permitidos para atualização
 
   const dadosAtualizar = {};// Filtra só os campos permitidos que vieram no body
   for (const campo of camposPermitidos) { if (data[campo] !== undefined) { dadosAtualizar[campo] = data[campo]; } }
@@ -309,9 +304,7 @@ export const criarUsuario = async (dados) => {
   }
 };
 
-export const buscarUsuarioPorUsername = async (username) => {
-  return await read('usuarios', `username = ${JSON.stringify(username)}`);
-};
+export const buscarUsuarioPorUsername = async (username) => { return await read('usuarios', `username = ${JSON.stringify(username)}`);};
 
 // retorna array de usernames semelhantes (prefix)
 export const buscarUsernamesSemelhantes = async (base) => {
@@ -595,9 +588,8 @@ export const listarChamadosPorStatusEFunção = async (usuario_id, status) => {
   let condicaoStatus = '';
   const params = [usuario_id];
 
-  if (status === 'pendente') {
-    condicaoStatus = `AND c.status_chamado = 'pendente' AND c.tecnico_id IS NULL`;
-  } else if (status === 'em andamento') {
+  if (status === 'pendente') { condicaoStatus = `AND c.status_chamado = 'pendente' AND c.tecnico_id IS NULL`;}
+  else if (status === 'em andamento') {
     condicaoStatus = `AND c.status_chamado = 'em andamento' AND c.tecnico_id = ?`;
     params.push(usuario_id);
   } else if (status === 'concluido') {
@@ -606,21 +598,15 @@ export const listarChamadosPorStatusEFunção = async (usuario_id, status) => {
   }
 
   const sql = `
-    SELECT 
-      c.*, 
-      u.nome AS nome_usuario
+    SELECT c.*, u.nome AS nome_usuario
     FROM chamados c
     INNER JOIN usuario_servico us ON us.servico_id = c.tipo_id
     INNER JOIN usuarios u ON u.id = c.usuario_id
     WHERE us.usuario_id = ? ${condicaoStatus}
-    ORDER BY c.criado_em DESC
-  `;
+    ORDER BY c.criado_em DESC`;
 
-  try {
-    return await readQuery(sql, params);
-  } catch (err) {
-    throw err;
-  }
+  try {return await readQuery(sql, params);}
+  catch (err) {throw err;}
 };
 
 // buscar todos os apontamentos de um chamado
@@ -692,10 +678,7 @@ export const finalizarChamado = async (chamado_id, tecnico_id) => {
 
 // ----------------------------------- PARA RELATÓRIOS
 export const getChamadoById = async (chamado_id) => {
-  const sql = `SELECT c.*,
-           u.nome AS nome_usuario,
-           t.nome AS tecnico_nome,
-           p.titulo AS setor_nome
+  const sql = `SELECT c.*, u.nome AS nome_usuario, t.nome AS tecnico_nome, p.titulo AS setor_nome
     FROM chamados c
     LEFT JOIN usuarios u ON u.id = c.usuario_id
     LEFT JOIN usuarios t ON t.id = c.tecnico_id
