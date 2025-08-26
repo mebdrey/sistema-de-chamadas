@@ -219,7 +219,7 @@ export default function ForgotPassword() {
   };
 
   const enviarEmail = async () => {
-    // se for numérico (LDAP) -> bloquear
+    // se htmlFor numérico (LDAP) -> bloquear
     if (/^\d+$/.test(username.trim())) {
       setMensagem('Não será possível redefinir a senha pelo sistema. Converse com os técnicos da sua escola.');
       return;

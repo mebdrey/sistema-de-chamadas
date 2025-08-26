@@ -134,30 +134,41 @@ export default function MeuPerfil() {
     const nomeSobrenome = pegarPrimeiroEUltimoNome(usuario.nome);
 
     return (
-        <section>
-            <div className='infos'>
+        <div className="p-4 h-screen w-full">
+            <div className="p-4 mt-14">
                 <div className='page-indicador'>
                     <h1>Meu perfil</h1>
                     <hr />
                 </div>
 
                 {/*NOME DO USUÁRIO E TIPO*/}
-                <div className='user flex items-center gap-3 pt-8 border-b border-[#D0D0D0]'>
+                {/* <div className='user flex items-center gap-3 pt-8 border-b border-[#D0D0D0]'>
                     <img className='foto-usuario' src='./cao.png'></img>
+                    <h3>{nomeSobrenome.primeiroNome} {nomeSobrenome.ultimoNome}</h3>
+                </div> */}
+                <div className='user flex items-center gap-3 pt-8 '>
+                    <div className="relative size-20 group">
+                        <img src={preview} alt="Foto do usuário" className="w-full h-full object-cover rounded-full z-0" />
+
+                        <input type="file" id="fileUpload" accept="image/*" className="hidden" onChange={handleFileChange} />
+
+                        <label htmlFor="fileUpload" className="absolute inset-0 z-10 flex items-center justify-center rounded-full bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                        </label>
+                    </div>
+
+
                     <h3>{nomeSobrenome.primeiroNome} {nomeSobrenome.ultimoNome}</h3>
                 </div>
 
                 {/*infos do usuario*/}
                 <div className='pt-8 grid grid-cols-2'>
 
-
-
-
                     <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
                         <div className='sec-campos'><h6>Nome completo</h6><p>{usuario.nome}</p></div>
                     </div>
-
-
 
                     <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
                         <div className='sec-campos'><h6>Departamento</h6><p>{usuario.funcao}</p></div>
@@ -172,16 +183,9 @@ export default function MeuPerfil() {
 
                 </div>
 
-
-
-
-
                 {/** Editar informações */}
                 <div className="flex flex-wrap gap-6">
-                    <button
-                        type="button"
-                        className="bg-violet-600 h-10 text-white font-medium py-2 px-4 rounded hover:bg-violet-700 transition mt-5"
-                        data-bs-toggle="modal"
+                    <button type="button" className="bg-violet-600 h-10 text-white font-medium py-2 px-4 rounded hover:bg-violet-700 transition mt-5" data-bs-toggle="modal"
                         data-bs-target="#staticBackdrop"
                     >
                         Editar perfil
@@ -252,8 +256,6 @@ export default function MeuPerfil() {
                     </div>
                 </div>
 
-
-                {/**teste modal */}
             </div>
-        </section>)
+        </div>)
 }

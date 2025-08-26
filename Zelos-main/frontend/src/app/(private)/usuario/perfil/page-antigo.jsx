@@ -213,7 +213,7 @@ export default function MeuPerfil() {
                                                 const parsed = JSON.parse(resposta);
                                                 return parsed.mensagem || 'Resposta recebida';
                                             } catch (e) {
-                                                return resposta; // mostra como texto cru se nn for json
+                                                return resposta; // mostra como texto cru se nn htmlFor json
                                             }
                                         })()}
                                     </p></div>

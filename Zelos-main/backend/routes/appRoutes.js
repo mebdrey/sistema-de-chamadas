@@ -1,6 +1,6 @@
 import express from "express";
 
-import { criarChamadoController,contarChamadosPorPrioridadeController, listarChamadosController, listarUsuariosPorSetorController, listarTiposServicoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, buscarChamadoComNomeUsuarioController, chamadosPorMesController, atribuirTecnicoController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, excluirSetorController, listarSetoresController, criarPrioridadeController, listarPrioridadesController, atualizarPrazoController, calcularDataLimiteController, finalizarChamadoController, gerarRelatorioChamadoController, contarChamadosPorPoolController,  } from "../controllers/ChamadoController.js";
+import { criarChamadoController,contarChamadosPorPrioridadeController, listarChamadosController, listarUsuariosPorSetorController, listarTiposServicoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, buscarChamadoComNomeUsuarioController, chamadosPorMesController, atribuirTecnicoController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, excluirSetorController, listarSetoresController, criarPrioridadeController, listarPrioridadesController, atualizarPrazoController, calcularDataLimiteController, finalizarChamadoController, gerarRelatorioChamadoController, contarChamadosPorPoolController, listarNotificacoesController, marcarNotificacaoLidaController, marcarTodasComoLidasController  } from "../controllers/ChamadoController.js";
 import { obterPerfilUsuarioController, editarPerfilController } from "../controllers/PerfilController.js";
 import { enviarLinkRedefinicao, redefinirSenha, verifyCode } from '../controllers/RedefinirSenhaController.js';
 import { upload } from '../middlewares/uploadMiddleware.js';
@@ -75,5 +75,9 @@ router.get('/concluido', garantirAutenticado, chamadosConcluidoController); // q
 router.post('/esqueci-senha', enviarLinkRedefinicao); // rota p/ solicitar o link de redefinicao
 router.post('/verify-code', verifyCode);
 router.post('/redefinir-senha', redefinirSenha); // rota p/ redefinir a senha (token + nova senha)
+
+router.get("/notificacoes", garantirAutenticado, listarNotificacoesController);
+router.post("/:id/lida", garantirAutenticado, marcarNotificacaoLidaController);
+router.post("/marcar-todas", garantirAutenticado, marcarTodasComoLidasController);
 
 export default router;
