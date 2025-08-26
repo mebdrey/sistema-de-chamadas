@@ -1,7 +1,8 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 
-export default function ChatWidget({ position = "bottom-right" }) {
+export default function ChatWidget({chamadoSelecionado,  position = "bottom-right" }) {
+
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(1);
   const [messages, setMessages] = useState([
@@ -33,6 +34,71 @@ export default function ChatWidget({ position = "bottom-right" }) {
     }, 600);
   }
 
+  const [mensagens, setMensagens] = useState(null); // null = ainda não carregou
+  const [conteudo, setConteudo] = useState('');
+  const [loadingMensagens, setLoadingMensagens] = useState(false);
+
+  useEffect(() => { //carregar mensagens do chamado com base no parâmetro 'chamadoSelecionado'
+    const fetchMensagens = async () => {
+      if (!chamadoSelecionado?.id) return;
+
+      setLoadingMensagens(true);
+      try {
+        const response = await fetch(`http://localhost:8080/chat?idChamado=${chamadoSelecionado.id}`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (!response.ok) throw new Error('Erro ao buscar mensagens');
+
+        const data = await response.json();
+        if (JSON.stringify(data.mensagens) !== JSON.stringify(mensagens)) { setMensagens(data.mensagens); }
+      }
+      catch (err) { console.error("Erro ao buscar mensagens do chamado", err); }
+      finally { setLoadingMensagens(false); } // só marca como carregado no fim
+
+    };
+    fetchMensagens();
+
+    const interval = setInterval(fetchMensagens, 5000); // atualiza a cada 5s
+    return () => clearInterval(interval);
+  }, [chamadoSelecionado]);
+
+  //envia mensagem 
+  const enviarMsg = async (e, tipo = 'tecnico') => {
+    e.preventDefault(); // evita reload da página
+    if (!conteudo.trim()) return; // evita enviar mensagem sem nada
+    try {
+      const endpoint =
+        tipo === 'tecnico'
+          ? 'http://localhost:8080/tecnico-enviar-msg'
+          : 'http://localhost:8080/enviar-msg';
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          idChamado: chamadoSelecionado.id,
+          conteudoMsg: conteudo,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Erro ao enviar mensagem');
+
+      // Atualiza mensagens
+      const res = await fetch(`http://localhost:8080/chat?idChamado=${chamadoSelecionado.id}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!res.ok) throw new Error('Erro ao atualizar mensagens');
+      const data = await res.json();
+      setMensagens(data.mensagens);
+      setConteudo('');
+    } catch (error) { console.error('Erro ao enviar mensagem: ', error); }
+  };
+
   return (
     <>
       {/* Janela de chat */}
@@ -54,8 +120,30 @@ export default function ChatWidget({ position = "bottom-right" }) {
         </div>
 
         {/* Mensagens */}
-        <div ref={listRef} className="h-72 overflow-y-auto p-3 space-y-2 text-sm">
-          {messages.map((m) => (
+        {mensagens === null ? (
+          <p className="text-gray-500">Carregando...</p>
+        ) : (
+          <div ref={listRef} className="h-72 overflow-y-auto p-3 space-y-2 text-sm">
+
+            {mensagens.map((msg, index) => {
+              const isTecnico = msg.id_tecnico !== null;
+              //const data = new Date(msg.data_envio).toLocaleString();
+
+              return (
+                <div key={index} className={`flex ${isTecnico ? "justify-end" : "justify-start"}`}>
+                  <div
+                    className={
+                      `px-3 py-2 rounded-2xl max-w-[75%]
+                     ${isTecnico ? "bg-violet-600 text-white rounded-br-none" : "bg-gray-100 text-gray-900 dark:bg-zinc-800 dark:text-zinc-100 rounded-bl-none"}`
+                                           
+                    }
+                  >
+                     {msg.conteudo}
+                  </div>
+                </div>
+              )
+            })}
+            {/* {messages.map((m) => (
             <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
                 className={[
@@ -68,20 +156,22 @@ export default function ChatWidget({ position = "bottom-right" }) {
                 {m.text}
               </div>
             </div>
-          ))}
-        </div>
+          ))} */}
+          </div>
+        )}
+
 
         {/* Input */}
-        <form onSubmit={sendMessage} className="p-2 border-t border-gray-200 dark:border-zinc-700 flex gap-2">
+        <form onSubmit={(e) => enviarMsg(e)} className="p-2 border-t border-gray-200 dark:border-zinc-700 flex gap-2">
           <input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
+            value={conteudo}
+            onChange={(e) => setConteudo(e.target.value)}
             placeholder="Digite uma mensagem…"
             className="flex-1 text-sm bg-transparent outline-none px-2"
           />
           <button
             type="submit"
-            disabled={!draft.trim()}
+            disabled={!conteudo.trim()}
             className="px-3 py-1 text-sm font-medium bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:opacity-50"
           >
             Enviar
