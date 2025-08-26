@@ -4,6 +4,7 @@ import { initFlowbite } from 'flowbite'
 import { useRouter } from 'next/navigation';
 import OrdenarPor from '@/components/DropDown/DropDown.jsx'
 import ToastMsg from "@/components/Toasts/Toasts";
+import ChatWidget from '@/components/ChatWidget/ChatWidget'
 
 export default function ChamadosCliente() {
     const [isMounted, setIsMounted] = useState(false); // espera o componente estar carregado no navegador p evitar erros de renderizacao
@@ -19,7 +20,7 @@ export default function ChamadosCliente() {
     const [imagemArquivo, setImagemArquivo] = useState(null); // gaurda o arquivo da imagem
     const [assunto, setAssunto] = useState(''); // gaurda o assunto do chamado
     const [descricao, setDescricao] = useState(''); // gaurda a descricao do chamado
-    const [busca, setBusca] = useState(""); // armazena o que for digitado no campo de busca
+    const [busca, setBusca] = useState(""); // armazena o que htmlFor digitado no campo de busca
     const [ordenarPor, setOrdenarPor] = useState('mais_recente'); // ordenar por mais recente ou mais antigo, por padrao ele mostra os mais recentes primeiro
     const [openSpeedDial, setOpenSpeedDial] = useState(false)
     const [openModal, setOpenModal] = useState(false)
@@ -29,7 +30,13 @@ export default function ChamadosCliente() {
     const [openAbas, setOpenAbas] = useState(false);
     const dropdownRef = useRef(null);
     const { UI: ToastsUI, showToast } = ToastMsg(); // pega UI e função showToast
-    
+    const [openApontamentos, setOpenApontamentos] = useState(false);
+    const [chamadoSelecionado, setChamadoSelecionado] = useState(null);
+    const [apontamentos, setApontamentos] = useState([]);
+    const [rating, setRating] = useState(0); // valor atual do rating
+    const [hover, setHover] = useState(0);   // valor do hover para efeito visual
+    const [openAvaliacao, setOpenAvaliacao] = useState(false);
+
     useEffect(() => {
         setIsMounted(true);
     }, []);
@@ -201,9 +208,29 @@ export default function ChamadosCliente() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    const carregarApontamentos = async (chamadoId) => {
+        try {
+            const res = await fetch(`http://localhost:8080/apontamentos/${chamadoId}`, {
+                credentials: "include",
+            });
+            if (!res.ok) throw new Error("Erro ao buscar apontamentos");
+            const data = await res.json();
+            setApontamentos(data);
+        } catch (err) {
+            console.error("Erro ao carregar apontamentos:", err);
+            showToast("danger", "Erro ao carregar apontamentos.");
+        }
+    };
+
+    const handleSubmit = () => {
+        const description = document.getElementById('description').value;
+        console.log('Rating:', rating, 'Descrição:', description);
+        // aqui você pode fazer um fetch/axios para enviar para a API
+    };
+
     return (
         <>
-        {ToastsUI}
+            {ToastsUI}
             {/* conteudo da pagina */}
             <div className="p-4 h-screen w-full">
                 <div className="p-4 mt-14">
@@ -411,12 +438,11 @@ export default function ChamadosCliente() {
                                                         <p className="text-sm text-gray-500 dark:text-neutral-500">Criado em {new Date(chamado.criado_em).toLocaleString("pt-BR")}</p>
 
                                                         {chamado.status_chamado === "em andamento" ? (
-                                                            <button className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-[#7F56D8] decoration-2 hover:underline focus:underline focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">Acompanhar apontamentos
+                                                            <button onClick={() => { setChamadoSelecionado(chamado); carregarApontamentos(chamado.id); setOpenApontamentos(true); }} className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-[#7F56D8] decoration-2 hover:underline focus:underline focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">Acompanhar apontamentos
                                                                 <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
                                                             </button>
                                                         ) : chamado.status_chamado === "concluido" ? (
-                                                            <button className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-blue-600 decoration-2 hover:text-blue-700 hover:underline focus:underline focus:outline-hidden focus:text-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">
-                                                                Ver relatório
+                                                            <button onClick={() => { setChamadoSelecionado(chamado); carregarApontamentos(chamado.id); setOpenApontamentos(true); setOpenAvaliacao(true); }} className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-[#7F56D8] decoration-2 hover:underline focus:underline focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">Ver apontamentos
                                                                 <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
                                                             </button>
                                                         ) : null}
@@ -566,6 +592,105 @@ export default function ChamadosCliente() {
 
 
 
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {openApontamentos && (
+                        <div className="fixed inset-0 z-50 flex justify-center items-center w-full h-full">
+                            <div className="relative w-full w-full h-full">
+                                <div className="relative bg-[#F8FAFB] shadow-sm dark:bg-gray-700 h-full flex flex-col rounded-lg">
+
+                                    {/* header */}
+                                    <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
+                                        <h3 className="inline-flex items-center gap-2 text-base poppins-semibold text-gray-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pass-fill" viewBox="0 0 16 16">
+                                                <path d="M10 0a2 2 0 1 1-4 0H3.5A1.5 1.5 0 0 0 2 1.5v13A1.5 1.5 0 0 0 3.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 12.5 0zM4.5 5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1m0 2h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1 0-1" />
+                                            </svg>
+                                            Apontamentos do chamado #{chamadoSelecionado?.id}
+                                        </h3>
+                                        <button type="button" onClick={() => setOpenApontamentos(false)} className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                                            <span className="sr-only">Fechar</span>
+                                            <svg className="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    {/* corpo */}
+                                    <div className="flex-1 overflow-y-auto p-6">
+                                        <ol className="relative bg-white rounded-lg border-s border-gray-300 mb-10">
+                                            {apontamentos.map((a) => (
+                                                <li key={a.id} className="mb-10 py-4 ms-4">
+                                                    <div className={`absolute w-3 h-3 rounded-full mt-1.5 -start-1.5 ${a.fim ? "bg-green-500" : "bg-yellow-500"}`}></div>
+                                                    <time className="mb-1 text-sm text-gray-500">
+                                                        {new Date(a.comeco).toLocaleString("pt-BR")}
+                                                    </time>
+                                                    <h3 className="text-lg poppins-semibold">
+                                                        {a.fim ? "Apontamento finalizado" : "Apontamento em andamento"}
+                                                    </h3>
+                                                    <p className="text-gray-700">{a.descricao}</p>
+                                                    {a.fim && (
+                                                        <p className="text-sm text-gray-500 mt-1">
+                                                            Encerrado em {new Date(a.fim).toLocaleString("pt-BR")}
+                                                        </p>
+                                                    )}
+                                                    <p className="text-sm text-gray-500 mt-1 italic">
+                                                        Técnico: {a.tecnico_nome}
+                                                    </p>
+                                                </li>
+                                            ))}
+                                        </ol>
+                                        {apontamentos.length === 0 && (
+                                            <p className="text-gray-500">Nenhum apontamento encontrado.</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <ChatWidget />
+                        </div>
+                    )}
+
+                    {openAvaliacao && (
+
+                        <div className="fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black/30">
+                            <div className="relative p-4 w-full max-w-md max-h-full">
+                                <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+                                    <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
+                                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Avalie o atendimento</h3>
+                                        <button type="button" onClick={() => setOpenAvaliacao(false)} className="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                                            <svg className="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                            </svg>
+                                            <span className="sr-only">Fechar</span>
+                                        </button>
+                                    </div>
+                                    <div className="p-4 md:p-5">
+                                        <div className="space-y-4" >
+                                            <div className="flex items-center justify-center mb-2">
+                                                <a href="#">
+                                                    <img className="w-35 h-35 rounded-full" src="/docs/images/people/profile-picture-1.jpg" alt="" />
+                                                </a>
+                                            </div>
+                                            <p className="text-base text-center font-semibold leading-none text-gray-900 dark:text-white">Leos</p>
+                                            <div className="flex justify-center items-center mb-5">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <svg key={star} className={`w-6 h-6 ms-2 cursor-pointer ${(hover || rating) >= star ? 'text-yellow-300' : 'text-gray-300 dark:text-gray-500'}`} xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20"
+                                                        onClick={() => setRating(star)}  // clica para definir rating
+                                                        onMouseEnter={() => setHover(star)}// hover
+                                                        onMouseLeave={() => setHover(0)}>
+                                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                                                    </svg>
+                                                ))}
+                                            </div>
+
+                                            <div className="col-span-2">
+                                                <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Detalhes da avaliação</label>
+                                                <textarea id="description" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:border-[#7F56D8] dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Descreva de forma detalhada os motivos de sua avaliação"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

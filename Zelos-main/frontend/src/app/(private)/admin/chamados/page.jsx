@@ -11,7 +11,7 @@ export default function ChamadosAdmin() {
   const [abaAtiva, setAbaAtiva] = useState('todos')
   const [tiposServico, setTiposServico] = useState([]); // mostra os tipos de servicos/setores
   const [setoresSelecionados, setSetoresSelecionados] = useState([]); // guarda o tipo de servico selecionado
-  const [busca, setBusca] = useState(""); // armazena o que for digitado no campo de busca
+  const [busca, setBusca] = useState(""); // armazena o que htmlFor digitado no campo de busca
   const [dropdownSetorAberto, setDropdownSetorAberto] = useState(false);
   const [dropdownPrioridadeAberto, setDropdownPrioridadeAberto] = useState(false);
   const [prioridadesSelecionadas, setPrioridadesSelecionadas] = useState([]); 

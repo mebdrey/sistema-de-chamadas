@@ -5,13 +5,36 @@ import bcrypt from 'bcryptjs';
 import { create, readAll, read, readQuery, update, deleteRecord } from '../config/database.js';
 
 export async function criarNotificacao({ usuario_id, tipo, titulo, descricao, chamado_id = null }) {
-  const query = ` INSERT INTO notificacoes (usuario_id, tipo, titulo, descricao, chamado_id) VALUES (?, ?, ?, ?, ?) `;
+  const query = `INSERT INTO notificacoes (usuario_id, tipo, titulo, descricao, chamado_id) VALUES (?, ?, ?, ?, ?)`;
   const values = [usuario_id, tipo, titulo, descricao, chamado_id];
-  try { await readQuery(query, values); }
-  catch (err) {
-    console.error('Erro ao criar notificação:', err);
+  try {
+    const result = await readQuery(query, values);
+    return result; 
+  } catch (err) {
+    console.error("Erro ao criar notificação:", err);
     throw err;
   }
+}
+
+export async function obterNotificacoesPorUsuario(usuarioId) {
+  const q = `SELECT * FROM notificacoes WHERE usuario_id = ? ORDER BY criado_em DESC`;
+  return readQuery(q, [usuarioId]);
+}
+
+export async function obterNotificacaoPorId(id) {
+  const q = `SELECT * FROM notificacoes WHERE id = ? LIMIT 1`;
+  const rows = await readQuery(q, [id]);
+  return Array.isArray(rows) ? rows[0] : rows;
+}
+
+export async function marcarComoLida(id) {
+  const q = `UPDATE notificacoes SET lida = TRUE WHERE id = ?`;
+  return readQuery(q, [id]);
+}
+
+export async function marcarTodasComoLidas(usuarioId) {
+  const q = `UPDATE notificacoes SET lida = TRUE WHERE usuario_id = ?`;
+  return readQuery(q, [usuarioId]);
 }
 
 // busca o nome do usuario pelo seu id
@@ -591,7 +614,9 @@ export const criarApontamento = async ({ chamado_id, descricao, tecnico_id }) =>
   agora.setHours(agora.getHours() - 3); // Ajusta para UTC-3
   const comeco = agora.toISOString().slice(0, 19).replace('T', ' ');
 
-  return await create('apontamentos', { chamado_id, tecnico_id, descricao, comeco });
+  // return await create('apontamentos', { chamado_id, tecnico_id, descricao, comeco });
+  const insertId = await create('apontamentos', { chamado_id, tecnico_id, descricao, comeco });
+  return insertId;
 };
 
 export const finalizarApontamento = async (apontamento_id) => {

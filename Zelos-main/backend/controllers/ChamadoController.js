@@ -1,16 +1,56 @@
 import PDFDocument from 'pdfkit';
 import { stringify } from 'csv-stringify/sync';
 
-// import { criarNotificacao, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, getPrazoPorNome, calcularDataLimite, atualizarPrazoPorChamado, finalizarChamado, getApontamentosByChamado, getChamadoById, contarChamadosPorPool, getPrioridades, calcularDataLimiteUsuario } from "../models/Chamado.js";
+import { criarNotificacao, obterNotificacoesPorUsuario, obterNotificacaoPorId, marcarTodasComoLidas, marcarComoLida, contarChamadosPorPrioridade, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, listarPrioridades, getPrazoPorNome, calcularDataLimite, atualizarPrazoPorChamado, finalizarChamado, getApontamentosByChamado, getChamadoById, contarChamadosPorPool, getPrioridades, calcularDataLimiteUsuario } from "../models/Chamado.js";
 
+export async function listarNotificacoesController(req, res) {
+  try {
+    const usuarioId = req.user?.id;
+    if (!usuarioId) return res.status(401).json({ erro: "Não autenticado" });
 
-import { criarNotificacao, contarChamadosPorPrioridade, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, listarPrioridades, getPrazoPorNome, calcularDataLimite, atualizarPrazoPorChamado, finalizarChamado, getApontamentosByChamado, getChamadoById, contarChamadosPorPool, getPrioridades, calcularDataLimiteUsuario } from "../models/Chamado.js";
+    const notificacoes = await obterNotificacoesPorUsuario(usuarioId);
+    res.json(notificacoes);
+  } catch (err) {
+    console.error("Erro ao listar notificações:", err);
+    res.status(500).json({ erro: "Erro interno ao listar notificações" });
+  }
+}
 
+export async function marcarNotificacaoLidaController(req, res) {
+  try {
+    const usuarioId = req.user?.id;
+    if (!usuarioId) return res.status(401).json({ erro: "Não autenticado" });
+
+    const { id } = req.params;
+    const notificacao = await obterNotificacaoPorId(id);
+    if (!notificacao) return res.status(404).json({ erro: "Notificação não encontrada" });
+    if (notificacao.usuario_id !== usuarioId) return res.status(403).json({ erro: "Sem permissão" });
+
+    await marcarComoLida(id);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Erro ao marcar notificação como lida:", err);
+    res.status(500).json({ erro: "Erro interno" });
+  }
+}
+
+export async function marcarTodasComoLidasController(req, res) {
+  try {
+    const usuarioId = req.user?.id;
+    if (!usuarioId) return res.status(401).json({ erro: "Não autenticado" });
+
+    await marcarTodasComoLidas(usuarioId);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Erro ao marcar todas notificações como lidas:", err);
+    res.status(500).json({ erro: "Erro interno" });
+  }
+}
 
 // busca nome do usuario com base no ID
 export const buscarChamadoComNomeUsuarioController = async (req, res) => {
   const { id } = req.params;
-  if (!id) { return res.status(400).json({ erro: "ID do chamado é obrigatório." });}
+  if (!id) { return res.status(400).json({ erro: "ID do chamado é obrigatório." }); }
 
   try {
     const chamado = await buscarChamadoComNomeUsuario(id);
@@ -29,7 +69,8 @@ const UsuarioEnviarMensagemController = async (req, res) => {
     //coisas da autenticacao idUsuario
     const idUsuario = req.user?.id;
     const { conteudoMsg, idChamado } = req.body;
-    await escreverMensagem({id_usuario: idUsuario,id_tecnico: null, //o id do tecnico seria  o técnico que respondeu o chamado
+    await escreverMensagem({
+      id_usuario: idUsuario, id_tecnico: null, //o id do tecnico seria  o técnico que respondeu o chamado
       conteudo: conteudoMsg, id_chamado: idChamado
     })
     res.status(201).json({ mensagem: 'Mensagem enviada com sucesso!' });
@@ -81,10 +122,10 @@ export const criarChamadoController = async (req, res) => {
   try {
     const data_limite = await calcularDataLimiteUsuario(prioridade_id); //resolver a Promise corretamente
 
-    const dadosChamado = {assunto, tipo_id: tipo_id || null, descricao, prioridade_id: prioridade_id || null, imagem: imagem || null, usuario_id: usuario_id || null, patrimonio: patrimonio || null, data_limite};
+    const dadosChamado = { assunto, tipo_id: tipo_id || null, descricao, prioridade_id: prioridade_id || null, imagem: imagem || null, usuario_id: usuario_id || null, patrimonio: patrimonio || null, data_limite };
 
     // Garantir que nenhum valor undefined vá para o DB
-    Object.keys(dadosChamado).forEach(key => {if (dadosChamado[key] === undefined) dadosChamado[key] = null;});
+    Object.keys(dadosChamado).forEach(key => { if (dadosChamado[key] === undefined) dadosChamado[key] = null; });
 
     const resultado = await criarChamado(dadosChamado);
 
@@ -114,9 +155,9 @@ export const listarPrioridadesController = async (req, res) => {
 export const listarChamadosController = async (req, res) => {
   try {
     const usuarioId = req.user?.id; // pegando do Passport
-    if (!usuarioId) { return res.status(401).json({ message: 'Usuário não autenticado' });}
+    if (!usuarioId) { return res.status(401).json({ message: 'Usuário não autenticado' }); }
     const chamados = await listarChamados(usuarioId);
-    res.status(200).json({ mensagem: 'Chamados listados com sucesso!',chamados});
+    res.status(200).json({ mensagem: 'Chamados listados com sucesso!', chamados });
   } catch (error) {
     console.error('Erro ao listar chamados:', error);
     res.status(500).json({ message: 'Erro ao listar chamados' });
@@ -139,19 +180,19 @@ export const listarUsuariosPorSetorController = async (req, res) => {
   try {
     const tecnicos = await verTecnicos();
     const auxiliares = await verAuxiliaresLimpeza();
-    res.status(200).json({tecnicos, auxiliares });
+    res.status(200).json({ tecnicos, auxiliares });
   } catch (err) { res.status(500).json({ erro: err.message }); }
 };
 
 export const excluirUsuarioController = async (req, res) => {
   const usuarioId = parseInt(req.params.id, 10);
 
-  if (isNaN(usuarioId)) {return res.status(400).json({ erro: 'ID do usuário inválido.' });}
+  if (isNaN(usuarioId)) { return res.status(400).json({ erro: 'ID do usuário inválido.' }); }
 
   try {
     const affectedRows = await excluirUsuario(usuarioId);
 
-    if (affectedRows === 0) {return res.status(404).json({ erro: 'Usuário não encontrado.' }); }
+    if (affectedRows === 0) { return res.status(404).json({ erro: 'Usuário não encontrado.' }); }
 
     return res.status(200).json({ mensagem: 'Usuário excluído com sucesso.' });
   } catch (error) {
@@ -173,12 +214,19 @@ export const listarTodosChamadosController = async (req, res) => {
 export const atribuirTecnicoController = async (req, res) => {
   const { chamadoId, tecnicoId } = req.body;
 
-  if (!chamadoId || !tecnicoId) { return res.status(400).json({ error: "chamadoId e tecnicoId são obrigatórios" });}
+  if (!chamadoId || !tecnicoId) { return res.status(400).json({ error: "chamadoId e tecnicoId são obrigatórios" }); }
 
   try {
     const affectedRows = await atribuirTecnico(chamadoId, tecnicoId);
-    if (affectedRows === 0) {return res.status(404).json({ error: "Chamado não encontrado" });}
-
+    if (affectedRows === 0) { return res.status(404).json({ error: "Chamado não encontrado" }); }
+    // Notificação para o técnico
+    await criarNotificacao({
+      usuario_id: tecnicoId,
+      tipo: 'tecnico_atribuido',
+      titulo: 'Novo chamado atribuído',
+      descricao: `Você foi atribuído ao chamado #${chamadoId}`,
+      chamado_id: chamadoId
+    });
     res.status(200).json({ message: "Técnico/Auxiliar atribuído com sucesso" });
   } catch (err) {
     console.error("Erro no controller atribuirTecnicoController:", err);
@@ -189,19 +237,20 @@ export const atribuirTecnicoController = async (req, res) => {
 export const contarChamadosPorStatusController = async (req, res) => {
   const { modo } = req.query;
 
-  if (!modo || (modo !== 'mensal' && modo !== 'anual')) {return res.status(400).json({ erro: 'Modo inválido. Use "mensal" ou "anual".' });}
+  if (!modo || (modo !== 'mensal' && modo !== 'anual')) { return res.status(400).json({ erro: 'Modo inválido. Use "mensal" ou "anual".' }); }
 
-  try { const resultado = await contarChamadosPorStatus(modo);
+  try {
+    const resultado = await contarChamadosPorStatus(modo);
 
     // Garante que sempre tenha todos os status, mesmo que contagem = 0
     const todosOsStatus = ['pendente', 'em andamento', 'concluido'];
     const respostaFinal = todosOsStatus.map((status) => {
-      const encontrado = resultado.find((r) => 
-  r.status_chamado.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() ===
-  status.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
-);
+      const encontrado = resultado.find((r) =>
+        r.status_chamado.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() ===
+        status.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+      );
       // console.log('Resultado bruto do banco:', resultado);
-      return { tipo: status, qtd: encontrado ? encontrado.qtd : 0, link: `/chamados?status=${status}`,};
+      return { tipo: status, qtd: encontrado ? encontrado.qtd : 0, link: `/chamados?status=${status}`, };
     });
 
     res.json(respostaFinal);
@@ -229,7 +278,7 @@ export const chamadosPorMesController = async (req, res) => {
   try {
     const dados = await obterChamadosPorMesAno(prioridade);
     res.status(200).json(dados);
-  } catch (err) {res.status(500).json({ erro: 'Erro ao buscar dados dos chamados' });}
+  } catch (err) { res.status(500).json({ erro: 'Erro ao buscar dados dos chamados' }); }
 }
 
 export const editarChamadoController = async (req, res) => {
@@ -239,11 +288,11 @@ export const editarChamadoController = async (req, res) => {
     const usuario = req.user; // vem do Passport
 
     // Apenas admin pode editar qualquer chamado
-    if (usuario.funcao !== 'admin') {return res.status(403).json({ message: 'Apenas administradores podem editar chamados' }); }
+    if (usuario.funcao !== 'admin') { return res.status(403).json({ message: 'Apenas administradores podem editar chamados' }); }
 
     const linhasAfetadas = await editarChamado(chamadoId, dados);
 
-    if (linhasAfetadas === 0) {return res.status(400).json({ message: 'Nenhuma alteração realizada' });}
+    if (linhasAfetadas === 0) { return res.status(400).json({ message: 'Nenhuma alteração realizada' }); }
 
     res.status(200).json({ message: 'Chamado atualizado com sucesso!' });
   } catch (error) {
@@ -255,7 +304,7 @@ export const editarChamadoController = async (req, res) => {
 export const criarUsuarioController = async (req, res) => {
   try {
     const { nome, username, email, senha, funcao, ftPerfil } = req.body;
-    if (!nome || !email || !senha) {return res.status(400).json({ message: 'nome, email e senha são obrigatórios' });}
+    if (!nome || !email || !senha) { return res.status(400).json({ message: 'nome, email e senha são obrigatórios' }); }
 
     // verifica username
     const desiredUsername = username || (nome.split(/\s+/)[0] || nome).toLowerCase();
@@ -390,26 +439,26 @@ export async function contarChamadosPorPoolController(req, res) {
     const setorRaw = req.query.setor;
     const modo = (req.query.modo || 'anual').toLowerCase();
 
-    if (!setorRaw || String(setorRaw).trim() === '') { return res.status(400).json({ erro: 'Parâmetro "setor" (pool.titulo) é obrigatório.' });}
+    if (!setorRaw || String(setorRaw).trim() === '') { return res.status(400).json({ erro: 'Parâmetro "setor" (pool.titulo) é obrigatório.' }); }
     const setor = String(setorRaw);
 
     const permitModo = ['anual', 'todos'];
-    if (!permitModo.includes(modo)) {return res.status(400).json({ erro: 'modo inválido — use "anual" ou "todos"' });}
+    if (!permitModo.includes(modo)) { return res.status(400).json({ erro: 'modo inválido — use "anual" ou "todos"' }); }
 
     // chama model (que já garante que só traga usuarios ligados a tecnico_id e com funcao adequada)
     const dados = await contarChamadosPorPool({ setor, modo });
 
-    const categorias     = dados.map(d => d.funcionario_nome);
+    const categorias = dados.map(d => d.funcionario_nome);
     const serieAndamento = dados.map(d => Number(d.em_andamento) || 0);
     const serieConcluido = dados.map(d => Number(d.concluido) || 0);
-    const totalGeral     = dados.reduce((acc, d) => acc + (Number(d.total) || 0), 0);
+    const totalGeral = dados.reduce((acc, d) => acc + (Number(d.total) || 0), 0);
 
     return res.status(200).json({
       filtros: { setor, modo },
       categorias,
       series: [
         { name: 'Em andamento', data: serieAndamento },
-        { name: 'Concluído',    data: serieConcluido }
+        { name: 'Concluído', data: serieConcluido }
       ],
       tabela: dados,
       total: totalGeral
@@ -425,7 +474,7 @@ export const listarChamadosDisponiveisController = async (req, res) => {
     const usuario_id = req.user?.id;
     const chamados = await listarChamadosDisponiveis(usuario_id);
     res.json(chamados);
-  } catch (error) {res.status(500).json({ erro: 'Erro ao listar chamados disponíveis.' });}
+  } catch (error) { res.status(500).json({ erro: 'Erro ao listar chamados disponíveis.' }); }
 };
 
 // export const pegarChamadoController = async (req, res) => {
@@ -441,13 +490,13 @@ export const pegarChamadoController = async (req, res) => {
   const usuario_id = req.user?.id;
   const { chamado_id } = req.body;
 
-  if (!chamado_id) { return res.status(400).json({ erro: 'ID do chamado é obrigatório.' });}
+  if (!chamado_id) { return res.status(400).json({ erro: 'ID do chamado é obrigatório.' }); }
 
   try {
     const chamadoAtualizado = await pegarChamado(chamado_id, usuario_id);
     // devolve mensagem e chamado atualizado (contendo data_limite)
     res.status(200).json({ mensagem: 'Chamado atribuído com sucesso.', chamado: chamadoAtualizado });
-  } catch (error) {res.status(400).json({ erro: error.message });}
+  } catch (error) { res.status(400).json({ erro: error.message }); }
 };
 
 export const contarChamadosController = async (req, res) => {
@@ -495,35 +544,108 @@ export const listarChamadosFuncionarioController = async (req, res) => {
   const statusParam = req.query.status?.replace('-', ' '); // transforma "em-andamento" em "em andamento"
   console.log("Status recebido:", statusParam);
 
-  if (!usuario_id || !statusParam) {return res.status(400).json({ erro: 'Parâmetros ausentes.' });}
+  if (!usuario_id || !statusParam) { return res.status(400).json({ erro: 'Parâmetros ausentes.' }); }
 
   try {
     const chamados = await listarChamadosPorStatusEFunção(usuario_id, statusParam);
     console.log("Chamados encontrados:", chamados);
     res.json(chamados);
-  } catch (error) {res.status(500).json({ erro: 'Erro ao buscar chamados por status.' });}
+  } catch (error) { res.status(500).json({ erro: 'Erro ao buscar chamados por status.' }); }
 };
+
+const usuarioPodeVerApontamentos = (user, chamado) => {
+  if (!user) return false;
+  if (user.role === 'admin') return true; // acesso irrestrito ao adm
+  if (chamado.usuario_id === user.id) return true;   // dono do chamado
+  if (chamado.tecnico_id === user.id) return true;   // técnico atribuído
+  return false;
+};
+
+// export const listarApontamentosController = async (req, res) => {
+//   try {
+//     const chamado_id = req.params.chamado_id;
+//     const apontamentos = await listarApontamentosPorChamado(chamado_id);
+//     res.json(apontamentos);
+//   } catch (error) {res.status(500).json({ erro: 'Erro ao listar apontamentos' });}
+// };
 
 export const listarApontamentosController = async (req, res) => {
   try {
-    const chamado_id = req.params.chamado_id;
-    const apontamentos = await listarApontamentosPorChamado(chamado_id);
-    res.json(apontamentos);
-  } catch (error) {res.status(500).json({ erro: 'Erro ao listar apontamentos' });}
+    const chamado_id = req.params.chamado_id || req.body.chamado_id;
+    if (!chamado_id) return res.status(400).json({ erro: 'chamado_id é obrigatório' });
+
+    // pega o chamado para validar permissões
+    const chamado = await getChamadoById(chamado_id);
+    if (!chamado) return res.status(404).json({ erro: 'Chamado não encontrado' });
+
+    // valida permissão: dono do chamado, técnico atribuído ou admin
+    const user = req.user;
+    if (!usuarioPodeVerApontamentos(user, chamado)) {
+      return res.status(403).json({ erro: 'Acesso negado' });
+    }
+
+    // pega apontamentos com join (nome do técnico)
+    const apontamentos = await getApontamentosByChamado(chamado_id);
+    return res.json(apontamentos);
+  } catch (error) {
+    console.error('Erro listarApontamentosController:', error);
+    return res.status(500).json({ erro: 'Erro ao listar apontamentos' });
+  }
 };
+
+// export const criarApontamentoController = async (req, res) => {
+//   try {
+//     const { chamado_id, descricao } = req.body;
+//     const tecnico_id = req.user?.id;
+
+//     if (!descricao || !chamado_id || !tecnico_id) {return res.status(400).json({ erro: 'Descrição, chamado_id e tecnico_id são obrigatórios' });}
+
+//     const novo = await criarApontamento({ chamado_id, tecnico_id, descricao });
+
+//     return res.status(201).json({ mensagem: 'Apontamento criado com sucesso', id: novo });
+//   } catch (error) {
+//     console.error("Erro no controller criarApontamento:", error);
+//     return res.status(500).json({ erro: 'Erro interno ao criar apontamento' });
+//   }
+// };
 
 export const criarApontamentoController = async (req, res) => {
   try {
+    // técnico cria apontamento (já tinha lógica para técnicos)
     const { chamado_id, descricao } = req.body;
     const tecnico_id = req.user?.id;
 
-    if (!descricao || !chamado_id || !tecnico_id) {return res.status(400).json({ erro: 'Descrição, chamado_id e tecnico_id são obrigatórios' });}
+    if (!descricao || !chamado_id || !tecnico_id) {
+      return res.status(400).json({ erro: 'Descrição, chamado_id e tecnico_id são obrigatórios' });
+    }
 
-    const novo = await criarApontamento({ chamado_id, tecnico_id, descricao });
+    // valida que req.user realmente é técnico atribuído OU tem permissão
+    const chamado = await getChamadoById(chamado_id);
+    if (!chamado) return res.status(404).json({ erro: 'Chamado não encontrado' });
 
-    return res.status(201).json({ mensagem: 'Apontamento criado com sucesso', id: novo });
+    // apenas o técnico atribuído (ou admin) pode criar apontamento neste chamado
+    if (!(chamado.tecnico_id === tecnico_id || req.user.role === 'admin')) {
+      return res.status(403).json({ erro: 'Você não pode criar apontamentos neste chamado' });
+    }
+
+    // cria e pega o insertId
+    const insertId = await criarApontamento({ chamado_id, descricao, tecnico_id });
+
+    // busca o registro recém-criado completo (com nome do técnico)
+    const novoApont = await getApontamentoById(insertId);
+    // Notificação para o usuário dono do chamado
+    await criarNotificacao({
+      usuario_id: chamado.usuario_id,
+      tipo: 'resposta_tecnico',
+      titulo: 'Atualização no chamado',
+      descricao: `O técnico adicionou um novo apontamento: "${descricao}".`,
+      chamado_id
+    });
+
+    // retorna o apontamento completo ao cliente (front do usuário e do técnico)
+    return res.status(201).json(novoApont);
   } catch (error) {
-    console.error("Erro no controller criarApontamento:", error);
+    console.error('Erro criarApontamentoController:', error);
     return res.status(500).json({ erro: 'Erro interno ao criar apontamento' });
   }
 };
@@ -533,7 +655,7 @@ export const finalizarApontamentoController = async (req, res) => {
     const { apontamento_id } = req.body;
     await finalizarApontamento(apontamento_id);
     res.json({ mensagem: 'Apontamento encerrado com sucesso' });
-  } catch (error) {res.status(500).json({ erro: 'Erro ao finalizar apontamento' });}
+  } catch (error) { res.status(500).json({ erro: 'Erro ao finalizar apontamento' }); }
 };
 
 export const finalizarChamadoController = async (req, res) => {
@@ -541,9 +663,17 @@ export const finalizarChamadoController = async (req, res) => {
     const tecnico_id = req.user?.id;
     const { chamado_id } = req.body;
 
-    if (!chamado_id) {return res.status(400).json({ erro: 'ID do chamado é obrigatório.' });}
+    if (!chamado_id) { return res.status(400).json({ erro: 'ID do chamado é obrigatório.' }); }
 
     const dadosRelatorio = await finalizarChamado(chamado_id, tecnico_id);
+    //  Notificação para o usuário que abriu o chamado
+    await criarNotificacao({
+      usuario_id: dadosRelatorio.usuario_id,
+      tipo: 'status_atualizado',
+      titulo: 'Chamado concluído',
+      descricao: `Seu chamado #${chamado_id} foi concluído pelo técnico.`,
+      chamado_id
+    });
 
     // retorna os dados do relatório (frontend poderá gerar CSV/PDF)
     return res.status(200).json({ mensagem: 'Chamado finalizado com sucesso.', relatorio: dadosRelatorio });
@@ -579,8 +709,9 @@ const chamadaPrioridade = (p) => { if (!p) return ''; return p === 'alta' ? 'Alt
 function formatIdHash(chamado, opts = { zeros: 0 }) {
   // retorna "#50" ou com zero-pad se opts.zeros > 0 -> "#00050"
   const id = String(chamado.id);
-  if (opts.zeros && Number(opts.zeros) > 0) {return `#${id.padStart(opts.zeros, '0')}`;}
-  return `#${id}`;}
+  if (opts.zeros && Number(opts.zeros) > 0) { return `#${id.padStart(opts.zeros, '0')}`; }
+  return `#${id}`;
+}
 
 export const gerarRelatorioChamadoController = async (req, res) => {
   try {
@@ -612,51 +743,51 @@ export const gerarRelatorioChamadoController = async (req, res) => {
     };
 
     // ---------- CSV ----------
-if (formato === 'csv') {
-  // monta linhas no formato [rotulo, valor]
-  const rows = [];
+    if (formato === 'csv') {
+      // monta linhas no formato [rotulo, valor]
+      const rows = [];
 
-  rows.push(['Relatório de Chamado']); // título (aparece na primeira coluna)
-  rows.push(['ID do Chamado', rel.idExterno]); // ex: "#50"
-  rows.push(['Status', rel.status]);
-  rows.push(['Prioridade', rel.prioridade]);
-  rows.push(['Data/Hora de Abertura', formatDateTime(rel.criado_em)]);
-  rows.push(['Data/Hora de Conclusão', formatDateTime(rel.finalizado_em)]);
-  rows.push([]); // linha em branco
-  rows.push(['Solicitante', rel.usuario_nome]);
-  rows.push(['Assunto', rel.assunto]);
-  rows.push(['Descrição', rel.descricao_inicial]);
-  rows.push(['Setor', rel.setor_nome]);
-  rows.push(['Técnico Atribuido', rel.tecnico_responsavel]);
-  rows.push(['Data/Hora da Atribuição', formatDateTime(chamado.atribuido_em || chamado.criado_em)]);
-  rows.push([]); // linha em branco
+      rows.push(['Relatório de Chamado']); // título (aparece na primeira coluna)
+      rows.push(['ID do Chamado', rel.idExterno]); // ex: "#50"
+      rows.push(['Status', rel.status]);
+      rows.push(['Prioridade', rel.prioridade]);
+      rows.push(['Data/Hora de Abertura', formatDateTime(rel.criado_em)]);
+      rows.push(['Data/Hora de Conclusão', formatDateTime(rel.finalizado_em)]);
+      rows.push([]); // linha em branco
+      rows.push(['Solicitante', rel.usuario_nome]);
+      rows.push(['Assunto', rel.assunto]);
+      rows.push(['Descrição', rel.descricao_inicial]);
+      rows.push(['Setor', rel.setor_nome]);
+      rows.push(['Técnico Atribuido', rel.tecnico_responsavel]);
+      rows.push(['Data/Hora da Atribuição', formatDateTime(chamado.atribuido_em || chamado.criado_em)]);
+      rows.push([]); // linha em branco
 
-  // Histórico de Atendimento — colocamos todos os apontamentos na célula da direita,
-  // cada apontamento em nova linha dentro da célula.
-  rows.push(['Histórico de Atendimento']);
-  const apontLines = (apontamentos && apontamentos.length)
-    ? apontamentos.map(a => `${formatDateTime(a.comeco)} — ${safeText(a.tecnico_nome || a.tecnico_id)}: ${safeText(a.descricao)}`)
-    : [];
-  if (apontLines.length) {
-    // coloca todos os apontamentos numa única célula (com quebras de linha)
-    rows.push(['Apontamentos', apontLines.join('\n')]);
-  } else {rows.push(['Apontamentos', 'Descreva aqui o procedimento realizado.']);}
+      // Histórico de Atendimento — colocamos todos os apontamentos na célula da direita,
+      // cada apontamento em nova linha dentro da célula.
+      rows.push(['Histórico de Atendimento']);
+      const apontLines = (apontamentos && apontamentos.length)
+        ? apontamentos.map(a => `${formatDateTime(a.comeco)} — ${safeText(a.tecnico_nome || a.tecnico_id)}: ${safeText(a.descricao)}`)
+        : [];
+      if (apontLines.length) {
+        // coloca todos os apontamentos numa única célula (com quebras de linha)
+        rows.push(['Apontamentos', apontLines.join('\n')]);
+      } else { rows.push(['Apontamentos', 'Descreva aqui o procedimento realizado.']); }
 
-  rows.push([]); // linha em branco
+      rows.push([]); // linha em branco
 
-  // Métricas
-  rows.push(['Métricas']);
-  rows.push(['Tempo total de atendimento', formatDurationBetween(rel.criado_em, rel.finalizado_em) || '-']);
-  rows.push(['SLA', (typeof chamado.sla_cumprido !== 'undefined' ? (chamado.sla_cumprido ? 'Cumprido' : 'Não cumprido') : 'Não calculado')]);
+      // Métricas
+      rows.push(['Métricas']);
+      rows.push(['Tempo total de atendimento', formatDurationBetween(rel.criado_em, rel.finalizado_em) || '-']);
+      rows.push(['SLA', (typeof chamado.sla_cumprido !== 'undefined' ? (chamado.sla_cumprido ? 'Cumprido' : 'Não cumprido') : 'Não calculado')]);
 
-  // monta CSV; stringify vai colocar as quebras de linha dentro de células e escapar corretamente
-  const csv = stringify(rows, { delimiter: ';' });
+      // monta CSV; stringify vai colocar as quebras de linha dentro de células e escapar corretamente
+      const csv = stringify(rows, { delimiter: ';' });
 
-  res.setHeader('Content-Disposition', `attachment; filename=relatorio_chamado_${rel.id}.csv`);
-  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-  // BOM para Excel/acentuação
-  return res.send('\uFEFF' + csv);
-}
+      res.setHeader('Content-Disposition', `attachment; filename=relatorio_chamado_${rel.id}.csv`);
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      // BOM para Excel/acentuação
+      return res.send('\uFEFF' + csv);
+    }
 
     // ---------- PDF ----------
     res.setHeader('Content-Disposition', `attachment; filename=relatorio_chamado_${rel.id}.pdf`);
@@ -702,78 +833,78 @@ if (formato === 'csv') {
     doc.moveDown(0.6);
 
     // Histórico — **apenas apontamentos**
-doc.fontSize(12).text('Histórico de Atendimento', { underline: true });
-doc.moveDown(0.4);
+    doc.fontSize(12).text('Histórico de Atendimento', { underline: true });
+    doc.moveDown(0.4);
 
-const startX = doc.x;
-const tableTop = doc.y;
-const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-const col1W = 120;
-const col2W = 140;
-const col3W = pageWidth - col1W - col2W;
+    const startX = doc.x;
+    const tableTop = doc.y;
+    const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+    const col1W = 120;
+    const col2W = 140;
+    const col3W = pageWidth - col1W - col2W;
 
-// Definição das duas colunas: Apontamentos (esquerda) e Métricas (direita)
-const leftX = startX;
-const leftWidth = col1W + col2W; // largura total da coluna esquerda
-const rightX = startX + leftWidth; // início da coluna direita
-const rightWidth = col3W; // largura disponível para métricas
+    // Definição das duas colunas: Apontamentos (esquerda) e Métricas (direita)
+    const leftX = startX;
+    const leftWidth = col1W + col2W; // largura total da coluna esquerda
+    const rightX = startX + leftWidth; // início da coluna direita
+    const rightWidth = col3W; // largura disponível para métricas
 
-// Títulos (negrito, sem underline) — mantêm a ordem original
-doc.font('Helvetica-Bold').fontSize(11).fillColor('black');
-doc.text('Apontamentos', leftX, doc.y, { width: leftWidth });
-doc.text('Métricas', rightX, doc.y, { width: rightWidth });
-doc.moveDown(0.3);
+    // Títulos (negrito, sem underline) — mantêm a ordem original
+    doc.font('Helvetica-Bold').fontSize(11).fillColor('black');
+    doc.text('Apontamentos', leftX, doc.y, { width: leftWidth });
+    doc.text('Métricas', rightX, doc.y, { width: rightWidth });
+    doc.moveDown(0.3);
 
-// Inicializa cursores verticais para cada coluna (usa posição corrente)
-let cursorLeftY = doc.y;
-let cursorRightY = doc.y;
+    // Inicializa cursores verticais para cada coluna (usa posição corrente)
+    let cursorLeftY = doc.y;
+    let cursorRightY = doc.y;
 
-// Conteúdo — APONTAMENTOS (coluna esquerda)
-if (apontamentos && apontamentos.length) {
-  doc.font('Helvetica').fontSize(10).fillColor('black');
-  let step = 1;
-  for (const a of apontamentos) {
-    const encerrado = a.fim ? formatDateTime(a.fim) : formatDateTime(a.comeco);
-    const tecnico = safeText(a.tecnico_nome || a.tecnico_id || '');
-    const desc = safeText(a.descricao || '');
+    // Conteúdo — APONTAMENTOS (coluna esquerda)
+    if (apontamentos && apontamentos.length) {
+      doc.font('Helvetica').fontSize(10).fillColor('black');
+      let step = 1;
+      for (const a of apontamentos) {
+        const encerrado = a.fim ? formatDateTime(a.fim) : formatDateTime(a.comeco);
+        const tecnico = safeText(a.tecnico_nome || a.tecnico_id || '');
+        const desc = safeText(a.descricao || '');
 
-    const line = `${step}. ${encerrado} — ${tecnico}: ${desc}`;
+        const line = `${step}. ${encerrado} — ${tecnico}: ${desc}`;
 
-    // calcula altura que a string ocupará e escreve na coluna esquerda
-    const h = doc.heightOfString(line, { width: leftWidth });
-    doc.text(line, leftX, cursorLeftY, { width: leftWidth });
-    cursorLeftY += h + 6; // espaçamento entre itens
-    step++;
-  }
-} else {
-  // restaura o texto que você pediu quando não houver apontamentos
-  doc.font('Helvetica').fontSize(10).fillColor('black');
-  const noApontText = 'Nenhum apontamento foi encontrado.';
-  const h = doc.heightOfString(noApontText, { width: leftWidth });
-  doc.text(noApontText, leftX, cursorLeftY, { width: leftWidth });
-  cursorLeftY += h + 6;
-}
+        // calcula altura que a string ocupará e escreve na coluna esquerda
+        const h = doc.heightOfString(line, { width: leftWidth });
+        doc.text(line, leftX, cursorLeftY, { width: leftWidth });
+        cursorLeftY += h + 6; // espaçamento entre itens
+        step++;
+      }
+    } else {
+      // restaura o texto que você pediu quando não houver apontamentos
+      doc.font('Helvetica').fontSize(10).fillColor('black');
+      const noApontText = 'Nenhum apontamento foi encontrado.';
+      const h = doc.heightOfString(noApontText, { width: leftWidth });
+      doc.text(noApontText, leftX, cursorLeftY, { width: leftWidth });
+      cursorLeftY += h + 6;
+    }
 
-// Conteúdo — MÉTRICAS (coluna direita)
-doc.font('Helvetica').fontSize(11).fillColor('black');
-const tempoTotal = formatDurationBetween(rel.criado_em, rel.finalizado_em) || '-';
-const slaText = (typeof chamado.sla_cumprido !== 'undefined') ? (chamado.sla_cumprido ? 'Cumprido' : 'Não cumprido') : 'Não calculado';
+    // Conteúdo — MÉTRICAS (coluna direita)
+    doc.font('Helvetica').fontSize(11).fillColor('black');
+    const tempoTotal = formatDurationBetween(rel.criado_em, rel.finalizado_em) || '-';
+    const slaText = (typeof chamado.sla_cumprido !== 'undefined') ? (chamado.sla_cumprido ? 'Cumprido' : 'Não cumprido') : 'Não calculado';
 
-const metricsLines = [
-  `Tempo total de atendimento: ${tempoTotal}`,
-  `SLA: ${slaText}`
-];
+    const metricsLines = [
+      `Tempo total de atendimento: ${tempoTotal}`,
+      `SLA: ${slaText}`
+    ];
 
-for (const ml of metricsLines) {
-  const h = doc.heightOfString(ml, { width: rightWidth });
-  doc.text(ml, rightX, cursorRightY, { width: rightWidth });
-  cursorRightY += h + 4;
-}
+    for (const ml of metricsLines) {
+      const h = doc.heightOfString(ml, { width: rightWidth });
+      doc.text(ml, rightX, cursorRightY, { width: rightWidth });
+      cursorRightY += h + 4;
+    }
 
-// posiciona doc.y para a próxima seção usando o maior Y usado
-const nextY = Math.max(cursorLeftY, cursorRightY);
-doc.y = nextY + 8;
-doc.moveDown(0);
+    // posiciona doc.y para a próxima seção usando o maior Y usado
+    const nextY = Math.max(cursorLeftY, cursorRightY);
+    doc.y = nextY + 8;
+    doc.moveDown(0);
 
     // Anexos
     if (rel.anexos && rel.anexos.length) {

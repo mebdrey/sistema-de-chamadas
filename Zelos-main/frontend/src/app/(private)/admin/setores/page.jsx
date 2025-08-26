@@ -6,7 +6,7 @@ export default function Setores() {
     const [setores, setSetores] = useState({}); // Dados completos dos usuários por setor vindo da API
     const [dropdownAberto, setDropdownAberto] = useState(false); // Estado para controlar dropdown aberto/fechado
     const [dropdownAbertoId, setDropdownAbertoId] = useState(null); // controla o estado de dropdown aberto/fechado (dropdown p cada usuario)
-    const [busca, setBusca] = useState(""); // armazena o que for digitado no campo de busca
+    const [busca, setBusca] = useState(""); // armazena o que htmlFor digitado no campo de busca
     const [mostrarModalConfirmacao, setMostrarModalConfirmacao] = useState(false);
     const [usuarioParaDeletar, setUsuarioParaDeletar] = useState(null);
 
@@ -55,7 +55,7 @@ function deletarUsuario(id) {
       alert(data.mensagem);
       setSetores((prev) => {
         const atualizado = { ...prev };
-        for (const setor in atualizado) {
+        htmlFor (const setor in atualizado) {
           atualizado[setor] = atualizado[setor].filter((u) => u.id !== id);
         }
         return atualizado;
