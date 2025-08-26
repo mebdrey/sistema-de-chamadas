@@ -6,6 +6,8 @@ import OrdenarPor from '@/components/DropDown/DropDown.jsx'
 import { useContext } from 'react';
 import { UserContext } from '@/components/ProtectedRoute/ProtectedRoute.jsx';
 
+import ChatWidget from "@/components/ChatWidget/ChatWidget.jsx";
+
 export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'download'
 }) {
   const [isOpen, setIsOpen] = useState(false); // p drawer abrir e fechar
@@ -704,6 +706,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                 </div>
               ) : (
                 <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-[#F8FAFB] w-full dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
+                    <ChatWidget className='!fixed right-0 bottom-0' chamadoSelecionado={chamadoSelecionado}></ChatWidget>
                   <div className="w-full p-4 bg-white">
                     <h5 id="drawer-right-label" className="inline-flex items-center text-base poppins-semibold text-gray-500 dark:text-gray-400">
                       <svg className="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -991,6 +994,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                         </button>
                       </>
                     )}
+
                   </div>
                   {/* === Modal de confirmação Finalizar Chamado === */}
                   {mostrarModalConfirmacao && (
