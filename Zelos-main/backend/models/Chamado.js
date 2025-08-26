@@ -134,6 +134,26 @@ export const buscarTiposServico = async () => {
   return tipos.filter(tipo => tipo.status_pool === 'ativo');
 };
 
+export const criarAvaliacao = async ({ usuario_id, atendimento_id, nota, comentario }) => {
+  const sql = `INSERT INTO avaliacoes (usuario_id, atendimento_id, nota, comentario) VALUES (?, ?, ?, ?)`;
+  return await create(sql, [usuario_id, atendimento_id, nota, comentario]);
+};
+
+export const listarAvaliacoesPorAtendimento = async (atendimento_id) => {
+  const sql = `SELECT a.*, u.nome AS usuario_nome 
+               FROM avaliacoes a
+               JOIN usuarios u ON u.id = a.usuario_id
+               WHERE a.atendimento_id = ? 
+               ORDER BY a.data_avaliacao DESC`;
+  return await readAll(sql, [atendimento_id]);
+};
+
+export const mediaAvaliacoes = async (atendimento_id) => {
+  const sql = `SELECT AVG(nota) AS media FROM avaliacoes WHERE atendimento_id = ?`;
+  const result = await read(sql, [atendimento_id]);
+  return result?.media || 0;
+};
+
 // funções utilizadas para ADMINs --------------------------------------------------------------------------------------------------------------------------------------------
 export const excluirUsuario = async (usuarioId) => {
   try {

@@ -262,6 +262,18 @@ CREATE TABLE redefinir_tokens (
   usado BOOLEAN DEFAULT FALSE
 );
 
+CREATE TABLE avaliacoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL, -- quem avaliou
+    tecnico_id INT NOT NULL,  -- técnico avaliado
+    nota INT NOT NULL CHECK (nota BETWEEN 1 AND 5), -- nota de 1 a 5
+    comentario TEXT,                        -- comentário opcional
+    data_avaliacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (atendimento_id) REFERENCES atendimentos(id) ON DELETE CASCADE
+);
+
+
 -- Índices adicionais para otimização
 CREATE INDEX idx_usuarios_email ON usuarios(email);
 CREATE INDEX idx_chamados_status ON chamados(status_chamado);

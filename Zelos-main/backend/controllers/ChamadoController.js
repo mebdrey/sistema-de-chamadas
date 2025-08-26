@@ -175,6 +175,43 @@ export const listarTiposServicoController = async (req, res) => {
   }
 };
 
+export const criarAvaliacao = async (req, res) => {
+  try {
+      const { usuario_id, atendimento_id, nota, comentario } = req.body;
+      if (!usuario_id || !atendimento_id || !nota) {
+          return res.status(400).json({ erro: "Campos obrigatórios não preenchidos" });
+      }
+
+      const resultado = await AvaliacaoModel.criarAvaliacao({ usuario_id, atendimento_id, nota, comentario });
+      res.status(201).json({ sucesso: "Avaliação criada", id: resultado.insertId });
+  } catch (erro) {
+      console.error(erro);
+      res.status(500).json({ erro: "Erro ao criar avaliação" });
+  }
+};
+
+export const listarAvaliacoes = async (req, res) => {
+  try {
+      const { atendimento_id } = req.params;
+      const avaliacoes = await AvaliacaoModel.listarAvaliacoesPorAtendimento(atendimento_id);
+      res.json(avaliacoes);
+  } catch (erro) {
+      console.error(erro);
+      res.status(500).json({ erro: "Erro ao listar avaliações" });
+  }
+};
+
+export const obterMediaAvaliacao = async (req, res) => {
+  try {
+      const { atendimento_id } = req.params;
+      const media = await AvaliacaoModel.mediaAvaliacoes(atendimento_id);
+      res.json({ media });
+  } catch (erro) {
+      console.error(erro);
+      res.status(500).json({ erro: "Erro ao calcular média" });
+  }
+};
+
 // usado para o adm -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 export const listarUsuariosPorSetorController = async (req, res) => {
   try {
