@@ -14,7 +14,7 @@ export default function ChamadosAdmin() {
   const [busca, setBusca] = useState(""); // armazena o que for digitado no campo de busca
   const [dropdownSetorAberto, setDropdownSetorAberto] = useState(false);
   const [dropdownPrioridadeAberto, setDropdownPrioridadeAberto] = useState(false);
-  const [prioridadesSelecionadas, setPrioridadesSelecionadas] = useState([]); 
+  const [prioridadesSelecionadas, setPrioridadesSelecionadas] = useState([]);
   const [ordenarPor, setOrdenarPor] = useState('mais_recente'); // ordenar por mais recente ou mais antigo, por padrao ele mostra os mais recentes primeiro
   const [chamadoSelecionado, setChamadoSelecionado] = useState(null);
   const [usuarios, setUsuarios] = useState([]);
@@ -23,10 +23,10 @@ export default function ChamadosAdmin() {
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
   const [openAtribuirDropdown, setOpenAtribuirDropdown] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({ prioridade: "", tecnico_id: "", tipo_id: "", descricao: "", assunto: "", status_chamado: ""});
+  const [formData, setFormData] = useState({ prioridade: "", tecnico_id: "", tipo_id: "", descricao: "", assunto: "", status_chamado: "" });
 
-  useEffect(() => {setIsMounted(true);initFlowbite(); }, []);// inicializa dropdowns, modais, etc.
-  
+  useEffect(() => { setIsMounted(true); initFlowbite(); }, []);// inicializa dropdowns, modais, etc.
+
   // busca os chamados feitos pelo usuario
   useEffect(() => {
     fetch('http://localhost:8080/todos-chamados', { credentials: 'include' })
@@ -60,7 +60,7 @@ export default function ChamadosAdmin() {
     { label: 'Baixa', value: 'baixa' },
     { label: 'Média', value: 'media' },
     { label: 'Alta', value: 'alta' }
-];
+  ];
   const prioridadeMap = {
     1: { label: 'Baixa', value: 'baixa' },
     2: { label: 'Média', value: 'media' },
@@ -76,12 +76,12 @@ export default function ChamadosAdmin() {
     const form = e.target;
 
     // Pegando os dados do formulário
-    const formData = req.body ;
-{/*ENVIO PARA O BACK*/}
+    const formData = req.body;
+    {/*ENVIO PARA O BACK*/ }
     try {
       const response = await fetch("http://localhost:8080/pool", {
         method: "POST",
-        headers: {"Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
         credentials: "include",
       });
@@ -91,15 +91,16 @@ export default function ChamadosAdmin() {
 
       //alert 
       if (response.ok) {
-      alert("Setor cadastrada com sucesso!");
-      setResposta(JSON.stringify(data, null, 2));
-      form.reset(); // limpa o formulário
-    } else {
-        alert("Erro ao cadastrar setor.");
-      } } catch (error) {
+        alert("Setor cadastrada com sucesso!");
+        setResposta(JSON.stringify(data, null, 2));
+        form.reset(); // limpa o formulário
+      }
+      else { alert("Erro ao cadastrar setor."); }
+    } catch (error) {
       console.error("Erro:", error);
       setResposta("Erro ao enviar os dados.");
-    }};
+    }
+  };
 
 
   // busca os tipos de servico
@@ -160,21 +161,16 @@ export default function ChamadosAdmin() {
     const tipo = chamadoSelecionado?.tipo_titulo?.toLowerCase();
     if (!tipo) return [];
 
-    if (["externo", "apoio_tecnico", "manutencao"].includes(tipo)) {
-      return usuariosPorSetor.tecnicos || [];
-    }
-    if (tipo === "limpeza") {
-      return usuariosPorSetor.auxiliares || [];
-    }
+    if (["externo", "apoio_tecnico", "manutencao"].includes(tipo)) { return usuariosPorSetor.tecnicos || []; }
+
+    if (tipo === "limpeza") { return usuariosPorSetor.auxiliares || []; }
     return [];
   })();
 
   // mapa id => usuário para lookup rápido
   const usuariosMap = useMemo(() => {
     const m = {};
-    usuarios.forEach(u => {
-      if (u && typeof u.id !== 'undefined') m[u.id] = u;
-    });
+    usuarios.forEach(u => { if (u && typeof u.id !== 'undefined') m[u.id] = u; });
     return m;
   }, [usuarios]);
 
@@ -211,9 +207,7 @@ export default function ChamadosAdmin() {
       if (!res.ok) throw new Error("Erro ao atribuir chamado");
 
       // Atualiza o chamado no estado
-      setChamados((prev) =>
-        prev.map((c) => c.id === chamadoSelecionado.id ? { ...c, tecnico_id: tecnicoId } : c)
-      );
+      setChamados((prev) => prev.map((c) => c.id === chamadoSelecionado.id ? { ...c, tecnico_id: tecnicoId } : c));
 
       // Atualiza também o chamadoSelecionado
       setChamadoSelecionado((prev) => ({ ...prev, tecnico_id: tecnicoId, }));
@@ -263,7 +257,7 @@ export default function ChamadosAdmin() {
 
     // construir payload com apenas os campos que mudaram (ou que tenham valor)
     const payload = {};
-    const permitidos = ['prioridade', 'tecnico_id', 'tipo_id', 'descricao', 'assunto', 'status_chamado'];
+    const permitidos = ['prioridade_id', 'tecnico_id', 'tipo_id', 'descricao', 'assunto', 'status_chamado'];
     for (const campo of permitidos) {
       // conversão para number em tecnico_id/tipo_id quando necessário
       const val = formData[campo];
@@ -411,7 +405,7 @@ export default function ChamadosAdmin() {
               </div>
             </div>
             {/* Barra de pesquisa */}
-            <form className="flex items-center" onSubmit={(e) => e.preventDefault()}> // evita recarregar a página
+            <form className="flex items-center" onSubmit={(e) => e.preventDefault()}>{/* evita recarregar a página */}
               <label htmlFor="simple-search" className="sr-only">Search</label>
               <div className="relative w-80">
                 <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -574,9 +568,7 @@ export default function ChamadosAdmin() {
                   <div>
                     <input type="text" id="assunto" name="assunto" value={formData.assunto ?? ""} onChange={handleChange} className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500" />
                   </div>
-                ) : (
-                  <p className="mb-6 text-sm poppins-bold text-gray-800">{chamadoSelecionado?.assunto}</p>
-                )}
+                ) : (<p className="mb-6 text-sm poppins-bold text-gray-800">{chamadoSelecionado?.assunto}</p>)}
               </div>
 
               {/* Descrição */}
@@ -584,9 +576,7 @@ export default function ChamadosAdmin() {
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Descrição</p>
                 {isEditing ? (
                   <div> <textarea id="descricao" name="descricao" rows="4" value={formData.descricao ?? ""} onChange={handleChange} className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500" /></div>
-                ) : (
-                  <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.descricao}</p>
-                )}
+                ) : (<p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.descricao}</p>)}
               </div>
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
@@ -594,9 +584,7 @@ export default function ChamadosAdmin() {
                   <div className="mb-6">
                     <img src={chamadoSelecionado.imagem} alt={`Anexo chamado #${chamadoSelecionado?.id}`} className="max-w-full max-h-48 object-contain rounded-md" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/default-anexo.png"; }} />
                   </div>
-                ) : (
-                  <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">Nenhum anexo foi enviado para o chamado</p>
-                )}
+                ) : (<p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">Nenhum anexo foi enviado para o chamado</p>)}
               </div>
               <div>
                 <p className="mb-2 text-sm text-gray-500 ">Identificador do item (n° de patrimônio)</p>
@@ -606,8 +594,7 @@ export default function ChamadosAdmin() {
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Técnico/Auxiliar</p>
                   <div className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">
                     {!chamadoSelecionado?.tecnico_id ? (
-                      <>
-                        <div>Nenhum técnico/auxiliar atribuído.</div>
+                      <><div>Nenhum técnico/auxiliar atribuído.</div>
                          botao que abre/fecha dropdown
                         <button onClick={() => setOpenAtribuirDropdown((v) => !v)}
                           aria-expanded={openAtribuirDropdown} aria-controls="dropdownUsers" className="mt-4 py-2 px-6 inline-flex items-center gap-x-1 text-xs poppins-medium rounded-full border border-dashed border-gray-200 bg-white text-gray-800 hover:bg-gray-50 focus:outline-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700">
@@ -677,20 +664,14 @@ export default function ChamadosAdmin() {
                                     const selected = usuarioSelecionado === u.id;
                                     return (
                                       <li key={u.id}>
-                                        <button
-                                          type="button"
-                                          onClick={() => setUsuarioSelecionado(u.id)}
-                                          className={`w-full text-left flex items-center px-4 py-2 focus:outline-none ${selected ? "bg-blue-100 text-blue-800" : "hover:bg-gray-100"}`}
-                                        >
+                                        <button type="button" onClick={() => setUsuarioSelecionado(u.id)} className={`w-full text-left flex items-center px-4 py-2 focus:outline-none ${selected ? "bg-blue-100 text-blue-800" : "hover:bg-gray-100"}`}>
                                           <img className="w-6 h-6 me-2 rounded-full" src={u.ftPerfil ? `http://localhost:8080/${u.ftPerfil}` : "/default-avatar.png"} alt={u.nome} />
                                           <span className="truncate">{u.nome}</span>
                                         </button>
                                       </li>
                                     );
                                   })
-                                ) : (
-                                  <li className="px-4 py-2 text-sm text-gray-500">Nenhum usuário disponível</li>
-                                )}
+                                ) : ( <li className="px-4 py-2 text-sm text-gray-500">Nenhum usuário disponível</li> )}
                               </ul>
                               <div className="border-t border-gray-200">
                                 <button type="button" onClick={async () => { await handleAtribuirChamado(usuarioSelecionado); setOpenAtribuirDropdown(false); setUsuarioSelecionado(null); }} disabled={!usuarioSelecionado} className={`w-full px-4 py-3 text-sm poppins-medium ${usuarioSelecionado ? "text-blue-600 bg-gray-50" : "text-gray-400 bg-gray-100 cursor-not-allowed"}`}>
@@ -700,9 +681,7 @@ export default function ChamadosAdmin() {
                             </div>
                           )}
                         </>
-                      ) : (
-                        <p>{getTecnicoNome(chamadoSelecionado?.tecnico_id)}</p>
-                      )}
+                      ) : (<p>{getTecnicoNome(chamadoSelecionado?.tecnico_id)}</p> )}
                     </>
                   )}
                 </div>
@@ -723,40 +702,26 @@ export default function ChamadosAdmin() {
                       <option value="concluido">Concluído</option>
                     </select>
                   </>
-                ) : (
-                  <></>
-                )}
+                ) : ( <></> )}
               </div>
-
               {/* Botões */}
               <div className="grid grid-cols-2 gap-2">
                 {!isEditing ? (
                   <>
                     {["pendente", "em andamento"].includes(chamadoSelecionado?.status_chamado) ? (
-                      <button
-                        onClick={() => setIsEditing(true)}
-                        className="px-4 py-2 text-sm poppins-medium text-center text-[#7F56D8] bg-white border border-gray-200 rounded-lg hover:bg-gray-100"
-                      >
+                      <button onClick={() => setIsEditing(true)} className="px-4 py-2 text-sm poppins-medium text-center text-[#7F56D8] bg-white border border-gray-200 rounded-lg hover:bg-gray-100">
                         Editar chamado
                       </button>
                     ) : (
-                      <p className="col-span-2 text-sm text-gray-500 italic">
-                        Chamados concluídos não podem ser editados.
-                      </p>
+                      <p className="col-span-2 text-sm text-gray-500 italic"> Chamados concluídos não podem ser editados. </p>
                     )}
                   </>
                 ) : (
                   <>
-                    <button
-                      onClick={handleSave}
-                      className="px-4 py-2 text-sm poppins-medium text-center text-white bg-[#7F56D8] rounded-lg"
-                    >
+                    <button onClick={handleSave} className="px-4 py-2 text-sm poppins-medium text-center text-white bg-[#7F56D8] rounded-lg">
                       Salvar
                     </button>
-                    <button
-                      onClick={handleCancel}
-                      className="px-4 py-2 text-sm poppins-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-[#7F56D8]"
-                    >
+                    <button onClick={handleCancel} className="px-4 py-2 text-sm poppins-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-[#7F56D8]">
                       Cancelar
                     </button>
                   </>
@@ -766,8 +731,6 @@ export default function ChamadosAdmin() {
           </section>
         </div >
       </div >
-
-
     </>
   )
 }
