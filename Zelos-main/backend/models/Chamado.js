@@ -53,6 +53,7 @@ export const buscarChamadoComNomeUsuario = async (chamadoId) => {
 //chat usuário -> técnico e técnico -> usuario
 const escreverMensagem = async (dados) => {
   try {
+     console.log('[MODEL escreverMensagem] dados a inserir:', dados);
     return await create('mensagens', {
       id_usuario: dados.id_usuario,
       id_tecnico: dados.id_tecnico,
@@ -506,6 +507,18 @@ export const contarChamadosConcluido = async () => {
   catch (err) { throw err; }
 };
 
+export const getApontamentoById = async (id) => {
+  const sql = `
+    SELECT a.*, u.nome AS tecnico_nome
+    FROM apontamentos a
+    LEFT JOIN usuarios u ON a.tecnico_id = u.id
+    WHERE a.id = ?
+    LIMIT 1
+  `;
+  const rows = await readQuery(sql, [id]);
+  return rows && rows[0] ? rows[0] : null;
+};
+
 // export const pegarChamado = async (chamado_id, usuario_id) => {
 //   // Verifica se o chamado existe e ainda não foi atribuído
 //   const consulta = `SELECT c.*
@@ -647,7 +660,9 @@ export const finalizarChamado = async (chamado_id, tecnico_id) => {
 
   if (!chamado) { throw new Error('Chamado não encontrado.'); }
 
-  if (chamado.status_chamado !== 'em andamento') { throw new Error('Só é possível finalizar chamados que estejam em andamento.'); }
+  if (Number(chamado.tecnico_id) !== Number(tecnico_id)) {
+  throw new Error('Você não tem permissão para finalizar este chamado.');
+}
 
   if (chamado.tecnico_id !== tecnico_id) { throw new Error('Você não tem permissão para finalizar este chamado.'); }
 

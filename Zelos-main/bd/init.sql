@@ -267,10 +267,10 @@ CREATE TABLE avaliacoes (
     usuario_id INT NOT NULL, -- quem avaliou
     tecnico_id INT NOT NULL,  -- técnico avaliado
     nota INT NOT NULL CHECK (nota BETWEEN 1 AND 5), -- nota de 1 a 5
-    comentario TEXT,                        -- comentário opcional
+    comentario TEXT, -- comentário opcional
     data_avaliacao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    FOREIGN KEY (atendimento_id) REFERENCES atendimentos(id) ON DELETE CASCADE
+    FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
 

@@ -431,8 +431,8 @@ export default function ChamadosCliente() {
                                                 <div key={chamado.id || `${chamado.assunto}-${Math.random()}`} className="border-b bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
                                                     <div className="px-4 pt-4 md:px-5 md:pt-5">
                                                         <h3 className="text-lg poppins-bold text-gray-800 dark:text-white">Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}</h3>
-                                                        <h6 className="text-base poppins-bold text-gray-800 dark:text-white">{chamado.assunto}</h6>
-                                                        <p className="mt-2 text-gray-500 dark:text-neutral-400">{chamado.descricao}</p>
+                                                        <h6 className="text-base poppins-bold text-gray-800 dark:text-white break-all">{chamado.assunto}</h6>
+                                                        <p className="mt-2 text-gray-500 dark:text-neutral-400 break-all">{chamado.descricao}</p>
                                                     </div>
                                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 mt-4 dark:bg-neutral-900 dark:border-neutral-700">
                                                         <p className="text-sm text-gray-500 dark:text-neutral-500">Criado em {new Date(chamado.criado_em).toLocaleString("pt-BR")}</p>
@@ -648,7 +648,7 @@ export default function ChamadosCliente() {
                                     </div>
                                 </div>
                             </div>
-                            <ChatWidget />
+                            <ChatWidget className='!fixed right-0 bottom-0' chamadoSelecionado={chamadoSelecionado}></ChatWidget>
                         </div>
                     )}
 

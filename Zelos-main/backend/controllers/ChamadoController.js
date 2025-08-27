@@ -1,7 +1,7 @@
 import PDFDocument from 'pdfkit';
 import { stringify } from 'csv-stringify/sync';
 
-import { criarNotificacao, obterNotificacoesPorUsuario, obterNotificacaoPorId, marcarTodasComoLidas, marcarComoLida, contarChamadosPorPrioridade, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, listarPrioridades, getPrazoPorNome, calcularDataLimite, atualizarPrazoPorChamado, finalizarChamado, getApontamentosByChamado, getChamadoById, contarChamadosPorPool, getPrioridades, calcularDataLimiteUsuario } from "../models/Chamado.js";
+import { criarNotificacao, obterNotificacoesPorUsuario, obterNotificacaoPorId, marcarTodasComoLidas, marcarComoLida, contarChamadosPorPrioridade, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, listarPrioridades, getPrazoPorNome, calcularDataLimite, atualizarPrazoPorChamado, finalizarChamado, getApontamentosByChamado, getChamadoById, contarChamadosPorPool, getPrioridades, calcularDataLimiteUsuario, getApontamentoById } from "../models/Chamado.js";
 
 export async function listarNotificacoesController(req, res) {
   try {
@@ -68,6 +68,7 @@ const UsuarioEnviarMensagemController = async (req, res) => {
   try {
     //coisas da autenticacao idUsuario
     const idUsuario = req.user?.id;
+    console.log('[UsuarioEnviarMensagemController] req.user:', req.user, 'body:', req.body);
     const { conteudoMsg, idChamado } = req.body;
     await escreverMensagem({
       id_usuario: idUsuario, id_tecnico: null, //o id do tecnico seria  o técnico que respondeu o chamado
@@ -85,6 +86,7 @@ const TecnicoEnviarMensagemController = async (req, res) => {
   try {
     //coisas da autenticacao idTecnico
     const idTecnico = req.user?.id; //id do tecnico autenticado
+     console.log('[TecnicoEnviarMensagemController] req.user:', req.user, 'body:', req.body);
     const { conteudoMsg, idChamado } = req.body;
     await escreverMensagem({
       id_tecnico: idTecnico, //o id do tecnico seria  o técnico que respondeu o chamado
@@ -99,6 +101,58 @@ const TecnicoEnviarMensagemController = async (req, res) => {
     res.status(500).json({ mensagem: 'Erro ao técnico enviar mensagem!!' });
   }
 }
+
+export const enviarMensagemController = async (req, res) => {
+  try {
+    const user = req.user; // passport/session
+    const { idChamado, conteudoMsg } = req.body;
+
+    if (!user || !user.id) {
+      return res.status(401).json({ erro: "Usuário não autenticado" });
+    }
+    if (!idChamado || !conteudoMsg || !String(conteudoMsg).trim()) {
+      return res.status(400).json({ erro: "idChamado e conteudoMsg são obrigatórios" });
+    }
+
+    // busca o chamado para validação de permissões
+    const chamado = await getChamadoById(idChamado);
+    if (!chamado) return res.status(404).json({ erro: "Chamado não encontrado" });
+
+    const func = (user.funcao || user.role || "").toString().toLowerCase();
+
+    // inicializa payload com ambos nulos e define a propriedade correta depois
+    const payload = { id_chamado: idChamado, conteudo: conteudoMsg, id_tecnico: null, id_usuario: null };
+
+    if (["tecnico", "apoio_tecnico", "manutencao"].includes(func)) {
+      // técnico só pode enviar mensagens se for o técnico responsável do chamado (ou admin)
+      if (!(Number(chamado.tecnico_id) === Number(user.id) || (user.funcao === "admin" || user.role === "admin"))) {
+        return res.status(403).json({ erro: "Você não tem permissão para enviar mensagem neste chamado" });
+      }
+      payload.id_tecnico = user.id;
+    } else {
+      // usuário comum: só pode enviar se for o dono do chamado (ou admin)
+      if (!(Number(chamado.usuario_id) === Number(user.id) || (user.funcao === "admin" || user.role === "admin"))) {
+        return res.status(403).json({ erro: "Você não tem permissão para enviar mensagem neste chamado" });
+      }
+      payload.id_usuario = user.id;
+    }
+
+    console.log("[ChatController] payload a inserir:", payload, "req.user:", user);
+
+    const insertRes = await escreverMensagem({
+      id_usuario: payload.id_usuario,
+      id_tecnico: payload.id_tecnico,
+      conteudo: payload.conteudo,
+      id_chamado: payload.id_chamado
+    });
+
+    // opcional: retornar a mensagem criada ou apenas ok
+    return res.status(201).json({ mensagem: "Mensagem enviada com sucesso!", inserted: insertRes });
+  } catch (err) {
+    console.error("Erro enviarMensagemController:", err);
+    return res.status(500).json({ erro: "Erro interno ao enviar mensagem" });
+  }
+};
 
 //ler as mensagens (especificadas pelo id do chamado) por ordem de envio
 const lerMensagensController = async (req, res) => {
@@ -703,16 +757,22 @@ export const finalizarChamadoController = async (req, res) => {
     if (!chamado_id) { return res.status(400).json({ erro: 'ID do chamado é obrigatório.' }); }
 
     const dadosRelatorio = await finalizarChamado(chamado_id, tecnico_id);
-    //  Notificação para o usuário que abriu o chamado
-    await criarNotificacao({
-      usuario_id: dadosRelatorio.usuario_id,
-      tipo: 'status_atualizado',
-      titulo: 'Chamado concluído',
-      descricao: `Seu chamado #${chamado_id} foi concluído pelo técnico.`,
-      chamado_id
-    });
 
-    // retorna os dados do relatório (frontend poderá gerar CSV/PDF)
+    // pega usuario_id corretamente do objeto retornado
+    const usuarioId = dadosRelatorio?.chamado?.usuario_id ?? null;
+
+    if (usuarioId !== null) {
+      await criarNotificacao({
+        usuario_id: usuarioId,
+        tipo: 'status_atualizado',
+        titulo: 'Chamado concluído',
+        descricao: `Seu chamado #${chamado_id} foi concluído pelo técnico.`,
+        chamado_id
+      });
+    } else {
+      console.warn(`[finalizarChamadoController] não encontrou usuario_id para notificar (chamado ${chamado_id})`);
+    }
+
     return res.status(200).json({ mensagem: 'Chamado finalizado com sucesso.', relatorio: dadosRelatorio });
   } catch (err) {
     console.error('Erro finalizarChamadoController:', err);

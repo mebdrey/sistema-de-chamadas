@@ -609,7 +609,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                       chamadosFiltrados.map((chamado) => ( //CARD DOS CHAMADOS
                         <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:border-t-blue-500 dark:shadow-neutral-700/70 cursor-pointer">
                           <div className="flex items-center gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:border-neutral-700">
-                            <h3 className="text-base poppins-bold text-gray-800 dark:text-white">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
+                            <h3 className="break-all text-base poppins-bold text-gray-800 dark:text-white">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
                             <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
@@ -669,15 +669,15 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                   </button>
                   <div>
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Usuário</p>
-                    <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.nome_usuario || 'Nome não encontrado'}</p>
+                    <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400 break-word">{chamadoSelecionado?.nome_usuario || 'Nome não encontrado'}</p>
                   </div>
                   <div>
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Assunto</p>
-                    <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.assunto}</p>
+                    <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400 break-all">{chamadoSelecionado?.assunto}</p>
                   </div>
                   <div>
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Descrição</p>
-                    <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.descricao}</p>
+                    <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400 break-all">{chamadoSelecionado?.descricao}</p>
                   </div>
                   <div>
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Tipo de serviço</p>
@@ -735,7 +735,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                           </div>
                           <div>
                             <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Assunto</p>
-                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.assunto}</p>
+                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400 break-all">{chamadoSelecionado?.assunto}</p>
                           </div>
                           <div>
                             <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Tipo de serviço</p>
@@ -923,7 +923,6 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                           ))}
                         </ol>
 
-
                         {!apontamentoAtivo && (
                           <div className="mb-6">
                             <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900">
@@ -955,10 +954,44 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                           </div>
                         )}
                       </div>
+                      <div className="flex items-center gap-3 mb-6">
+                    {podeFinalizar && (
+                      <button onClick={() => setMostrarModalConfirmacao(true)} disabled={finalizando} className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-violet-600 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-violet-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" >{finalizando ? "Finalizando..." : "Finalizar Chamado"}</button>
+                    )}
+
+                    {podeGerarRelatorio && (
+                      <>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            baixarRelatorioPdf("pdf");
+                          }}
+                          disabled={baixando}
+                          className="inline-flex items-center px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60"
+                        >
+                          {baixando ? "Gerando PDF..." : "Gerar / Baixar PDF"}
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            baixarRelatorioPdf("csv");
+                          }}
+                          disabled={baixando}
+                          className="inline-flex items-center px-3 py-2 text-sm text-white bg-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-60"
+                        >
+                          {baixando ? "Gerando CSV..." : "Baixar CSV"}
+                        </button>
+                      </>
+                    )}
+
+                  </div>
                     </div>
+
+                    
                   </div>
                   {/* ---------- AÇÕES (Finalizar / Gerar Relatório) ---------- */}
-                  <div className="flex items-center gap-3 mb-6">
+                  {/* <div className="flex items-center gap-3 mb-6">
                     {podeFinalizar && (
                       <button
                         onClick={() => setMostrarModalConfirmacao(true)}
@@ -995,10 +1028,10 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                       </>
                     )}
 
-                  </div>
+                  </div> */}
                   {/* === Modal de confirmação Finalizar Chamado === */}
                   {mostrarModalConfirmacao && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+                    <div className="fixed inset-0 z-[999] h-screen flex items-center justify-center bg-black/30">
                       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
                         <div className="text-center">
                           <svg
