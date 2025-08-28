@@ -1,7 +1,7 @@
 import express from "express";
 
 import { criarChamadoController,contarChamadosPorPrioridadeController, listarChamadosController, listarUsuariosPorSetorController, listarTiposServicoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, buscarChamadoComNomeUsuarioController, chamadosPorMesController, atribuirTecnicoController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, excluirSetorController, listarSetoresController, criarPrioridadeController, listarPrioridadesController, atualizarPrazoController, calcularDataLimiteController, finalizarChamadoController, gerarRelatorioChamadoController, contarChamadosPorPoolController, listarNotificacoesController, marcarNotificacaoLidaController, marcarTodasComoLidasController, enviarMensagemController } from "../controllers/ChamadoController.js";
-import { obterPerfilUsuarioController, editarPerfilController } from "../controllers/PerfilController.js";
+import { obterPerfilUsuarioController, editarPerfilController, atualizarFotoPerfilController } from "../controllers/PerfilController.js";
 import { enviarLinkRedefinicao, redefinirSenha, verifyCode } from '../controllers/RedefinirSenhaController.js';
 import { upload } from '../middlewares/uploadMiddleware.js';
 import { garantirAutenticado } from '../middlewares/authMiddleware.js';
@@ -55,6 +55,7 @@ router.get('/relatorio-chamado/:chamado_id', garantirAutenticado, gerarRelatorio
 //relacionados a perfil
 router.get('/perfil', garantirAutenticado, obterPerfilUsuarioController);
 router.patch('/editarPerfil', garantirAutenticado, editarPerfilController);
+router.post('/editarFoto', garantirAutenticado, upload.single('foto'), atualizarFotoPerfilController);
 
 
 //router.post('/chat', UsuarioEnviarMensagemController);
