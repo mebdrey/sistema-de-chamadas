@@ -37,6 +37,26 @@ export async function marcarTodasComoLidas(usuarioId) {
   return readQuery(q, [usuarioId]);
 }
 
+// marca todas notificações como visualizadas (quando abrir o sino)
+export async function marcarVisualizadas(usuarioId) {
+  const q = `UPDATE notificacoes SET visualizada = TRUE WHERE usuario_id = ? AND visualizada = FALSE`;
+  return readQuery(q, [usuarioId]);
+}
+
+// retorna contagem de notificações
+export async function obterContagemNotificacoes(usuarioId) {
+  const q = `
+    SELECT
+      COUNT(*) AS total,
+      SUM(CASE WHEN lida = FALSE THEN 1 ELSE 0 END) AS nao_lidas,
+      SUM(CASE WHEN visualizada = FALSE THEN 1 ELSE 0 END) AS nao_visualizadas
+    FROM notificacoes
+    WHERE usuario_id = ?
+  `;
+  const rows = await readQuery(q, [usuarioId]);
+  return Array.isArray(rows) && rows[0] ? rows[0] : { total: 0, nao_lidas: 0, nao_visualizadas: 0 };
+}
+
 // busca o nome do usuario pelo seu id
 export const buscarChamadoComNomeUsuario = async (chamadoId) => {
   const sql = `SELECT c.*, u.nome AS nome_usuario FROM chamados c
@@ -348,10 +368,23 @@ export const gerarSugestoesUsername = async (nome) => {
 export const criarSetor = async (dados) => {
   try {
     // dados: { titulo, descricao, created_by }
-    const id = await create('pool', dados);
+    const id = await create("pool", dados);
     return id;
   } catch (err) {
-    console.error('Erro ao criar setor!', err);
+    console.error("Erro ao criar setor!", err);
+    throw err;
+  }
+};
+
+export const existeSetorPorTitulo = async (titulo) => {
+  try {
+    const rows = await readQuery(
+      "SELECT id FROM pool WHERE titulo = ? LIMIT 1",
+      [titulo]
+    );
+    return Array.isArray(rows) && rows.length > 0;
+  } catch (err) {
+    console.error("Erro ao verificar setor por título!", err);
     throw err;
   }
 };
@@ -544,56 +577,124 @@ export const getApontamentoById = async (id) => {
 // };
 
 // --- modelo: pegarChamado (substituir a função existente) ---
+// export const pegarChamado = async (chamado_id, usuario_id) => {
+//   // busca chamado pendente e que pertence à função do usuário (mesma lógica anterior)
+//   const consulta = `SELECT c.*
+//     FROM chamados c
+//     INNER JOIN usuario_servico us ON us.servico_id = c.tipo_id
+//     WHERE c.id = ? 
+//       AND us.usuario_id = ?
+//       AND c.status_chamado = 'pendente'
+//       AND c.tecnico_id IS NULL
+//     LIMIT 1;`;
+//   const resultados = await readQuery(consulta, [chamado_id, usuario_id]);
+//   const chamado = resultados[0];
+
+//   if (!chamado) { throw new Error('Chamado não encontrado, já atribuído ou não pertence à sua função.'); }
+
+//   // --- calcula prazo com base na prioridade ---
+//   const prazoHorasPorPrioridade = {
+//     'alta': 2,
+//     'media': 4,
+//     'baixa': 8,
+//     'none': 24
+//   };
+//   const prioridade = (chamado.prioridade || 'none').toLowerCase();
+//   const horasPrazo = prazoHorasPorPrioridade[prioridade] ?? 24;
+
+//   // cria data_limite (considerando o padrão UTC-3 usado no projeto)
+//   const agora = new Date();
+//   agora.setHours(agora.getHours() - 3); // manter padrão do resto do projeto
+//   const dataLimiteDate = new Date(agora.getTime());
+//   dataLimiteDate.setHours(dataLimiteDate.getHours() + horasPrazo);
+
+//   const data_limite = dataLimiteDate.toISOString().slice(0, 19).replace('T', ' ');
+
+//   // tenta atualizar o chamado: atribui tecnico, muda status e grava data_limite
+//   const sqlUpdate = `UPDATE chamados 
+//     SET tecnico_id = ?, status_chamado = 'em andamento', data_limite = ?
+//     WHERE id = ? AND tecnico_id IS NULL`;
+//   const result = await readQuery(sqlUpdate, [usuario_id, data_limite, chamado_id]);
+
+//   if (result.affectedRows === 0) { throw new Error('Chamado já foi atribuído a outro usuário.'); }
+
+//   // busca o chamado atualizado (inclui nome do usuário, setor, técnico)
+//   const sqlChamadoAtualizado = `SELECT c.*, u.nome AS nome_usuario, t.nome AS tecnico_nome, p.titulo AS setor_titulo
+//     FROM chamados c
+//     LEFT JOIN usuarios u ON u.id = c.usuario_id
+//     LEFT JOIN usuarios t ON t.id = c.tecnico_id
+//     LEFT JOIN pool p ON p.id = c.tipo_id
+//     WHERE c.id = ? LIMIT 1 `;
+//   const rows = await readQuery(sqlChamadoAtualizado, [chamado_id]);
+//   return rows[0];
+// };
+
 export const pegarChamado = async (chamado_id, usuario_id) => {
-  // busca chamado pendente e que pertence à função do usuário (mesma lógica anterior)
-  const consulta = `SELECT c.*
+  // busca chamado ainda não atribuído, com prioridade
+  const consulta = `SELECT c.*, p.horas_limite, p.nome AS prioridade_nome
     FROM chamados c
     INNER JOIN usuario_servico us ON us.servico_id = c.tipo_id
+    LEFT JOIN prioridades p ON p.id = c.prioridade_id
     WHERE c.id = ? 
       AND us.usuario_id = ?
       AND c.status_chamado = 'pendente'
       AND c.tecnico_id IS NULL
     LIMIT 1;`;
+
   const resultados = await readQuery(consulta, [chamado_id, usuario_id]);
   const chamado = resultados[0];
 
-  if (!chamado) { throw new Error('Chamado não encontrado, já atribuído ou não pertence à sua função.'); }
+  if (!chamado) {
+    throw new Error("Chamado não encontrado, já atribuído ou não pertence à sua função.");
+  }
 
-  // --- calcula prazo com base na prioridade ---
-  const prazoHorasPorPrioridade = {
-    'alta': 2,
-    'media': 4,
-    'baixa': 8,
-    'none': 24
-  };
-  const prioridade = (chamado.prioridade || 'none').toLowerCase();
-  const horasPrazo = prazoHorasPorPrioridade[prioridade] ?? 24;
+  // pega o prazo da prioridade (se não tiver, usa um default)
+  const horasPrazo = chamado.horas_limite ?? 24;
 
-  // cria data_limite (considerando o padrão UTC-3 usado no projeto)
+  // cria data_limite considerando UTC-3 do teu sistema
   const agora = new Date();
-  agora.setHours(agora.getHours() - 3); // manter padrão do resto do projeto
+  agora.setHours(agora.getHours() - 3); 
   const dataLimiteDate = new Date(agora.getTime());
   dataLimiteDate.setHours(dataLimiteDate.getHours() + horasPrazo);
 
-  const data_limite = dataLimiteDate.toISOString().slice(0, 19).replace('T', ' ');
+  const data_limite = dataLimiteDate.toISOString().slice(0, 19).replace("T", " ");
 
-  // tenta atualizar o chamado: atribui tecnico, muda status e grava data_limite
+  // atribui técnico, muda status e grava data_limite
   const sqlUpdate = `UPDATE chamados 
     SET tecnico_id = ?, status_chamado = 'em andamento', data_limite = ?
     WHERE id = ? AND tecnico_id IS NULL`;
   const result = await readQuery(sqlUpdate, [usuario_id, data_limite, chamado_id]);
 
-  if (result.affectedRows === 0) { throw new Error('Chamado já foi atribuído a outro usuário.'); }
+  if (result.affectedRows === 0) {
+    throw new Error("Chamado já foi atribuído a outro usuário.");
+  }
 
-  // busca o chamado atualizado (inclui nome do usuário, setor, técnico)
-  const sqlChamadoAtualizado = `SELECT c.*, u.nome AS nome_usuario, t.nome AS tecnico_nome, p.titulo AS setor_titulo
+  // busca o chamado atualizado com nomes
+  const sqlChamadoAtualizado = `SELECT c.*, 
+        u.nome AS nome_usuario, 
+        t.nome AS tecnico_nome, 
+        p.titulo AS setor_titulo,
+        pr.nome AS prioridade_nome,
+        pr.horas_limite
     FROM chamados c
     LEFT JOIN usuarios u ON u.id = c.usuario_id
     LEFT JOIN usuarios t ON t.id = c.tecnico_id
     LEFT JOIN pool p ON p.id = c.tipo_id
-    WHERE c.id = ? LIMIT 1 `;
+    LEFT JOIN prioridades pr ON pr.id = c.prioridade_id
+    WHERE c.id = ? LIMIT 1`;
   const rows = await readQuery(sqlChamadoAtualizado, [chamado_id]);
-  return rows[0];
+  const chamadoAtualizado = rows[0];
+
+  // --- cria notificação para o autor do chamado ---
+  await criarNotificacao({
+    usuario_id: chamadoAtualizado.usuario_id, // autor do chamado
+    tipo: "tecnico_atribuido",
+    titulo: "Chamado atribuído",
+    descricao: `Seu chamado "${chamadoAtualizado.assunto}" foi atribuído ao técnico ${chamadoAtualizado.tecnico_nome}.`,
+    chamado_id: chamadoAtualizado.id,
+  });
+
+  return chamadoAtualizado;
 };
 
 export const listarChamadosPorStatusEFunção = async (usuario_id, status) => {
@@ -620,6 +721,70 @@ export const listarChamadosPorStatusEFunção = async (usuario_id, status) => {
   try {return await readQuery(sql, params);}
   catch (err) {throw err;}
 };
+
+export async function verificarReminders() {
+  // 1) Chamados com prazo em até 5h
+  const proximos = await readQuery(`
+    SELECT * FROM chamados
+    WHERE data_limite IS NOT NULL
+      AND status_chamado <> 'concluido'
+      AND reminder_5h_sent = FALSE
+      AND TIMESTAMPDIFF(HOUR, NOW(), data_limite) BETWEEN 0 AND 5
+  `);
+
+  for (const c of proximos) {
+    await criarNotificacao({
+      usuario_id: c.usuario_id,
+      tipo: 'urgencia_chamado',
+      titulo: `Prazo próximo para chamado #${c.id}`,
+      descricao: `O prazo do chamado (${c.assunto}) vence em ${c.data_limite}.`,
+      chamado_id: c.id
+    });
+
+    if (c.tecnico_id) {
+      await criarNotificacao({
+        usuario_id: c.tecnico_id,
+        tipo: 'urgencia_chamado',
+        titulo: `Prazo próximo para chamado #${c.id}`,
+        descricao: `O prazo do chamado (${c.assunto}) vence em ${c.data_limite}.`,
+        chamado_id: c.id
+      });
+    }
+
+    await readQuery(`UPDATE chamados SET reminder_5h_sent = TRUE WHERE id = ?`, [c.id]);
+  }
+
+  // 2) Chamados atrasados
+  const atrasados = await readQuery(`
+    SELECT * FROM chamados
+    WHERE data_limite IS NOT NULL
+      AND status_chamado <> 'concluido'
+      AND reminder_overdue_sent = FALSE
+      AND data_limite < NOW()
+  `);
+
+  for (const c of atrasados) {
+    await criarNotificacao({
+      usuario_id: c.usuario_id,
+      tipo: 'chamado_atrasado',
+      titulo: `Chamado #${c.id} está atrasado`,
+      descricao: `O prazo do chamado (${c.assunto}) expirou em ${c.data_limite}.`,
+      chamado_id: c.id
+    });
+
+    if (c.tecnico_id) {
+      await criarNotificacao({
+        usuario_id: c.tecnico_id,
+        tipo: 'chamado_atrasado',
+        titulo: `Chamado #${c.id} está atrasado`,
+        descricao: `O prazo do chamado (${c.assunto}) expirou em ${c.data_limite}.`,
+        chamado_id: c.id
+      });
+    }
+
+    await readQuery(`UPDATE chamados SET reminder_overdue_sent = TRUE WHERE id = ?`, [c.id]);
+  }
+}
 
 // buscar todos os apontamentos de um chamado
 export const listarApontamentosPorChamado = async (chamado_id) => {

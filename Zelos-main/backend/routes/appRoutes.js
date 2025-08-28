@@ -1,7 +1,7 @@
 import express from "express";
 
-import { criarChamadoController,contarChamadosPorPrioridadeController, listarChamadosController, listarUsuariosPorSetorController, listarTiposServicoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, buscarChamadoComNomeUsuarioController, chamadosPorMesController, atribuirTecnicoController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, excluirSetorController, listarSetoresController, criarPrioridadeController, listarPrioridadesController, atualizarPrazoController, calcularDataLimiteController, finalizarChamadoController, gerarRelatorioChamadoController, contarChamadosPorPoolController, listarNotificacoesController, marcarNotificacaoLidaController, marcarTodasComoLidasController, enviarMensagemController } from "../controllers/ChamadoController.js";
-import { obterPerfilUsuarioController, editarPerfilController, atualizarFotoPerfilController, removerFotoController } from "../controllers/PerfilController.js";
+import { criarChamadoController,contarChamadosPorPrioridadeController, listarChamadosController, listarUsuariosPorSetorController, listarTiposServicoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, buscarChamadoComNomeUsuarioController, chamadosPorMesController, atribuirTecnicoController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, excluirSetorController, listarSetoresController, criarPrioridadeController, listarPrioridadesController, atualizarPrazoController, calcularDataLimiteController, finalizarChamadoController, gerarRelatorioChamadoController, contarChamadosPorPoolController, listarNotificacoesController, marcarNotificacaoLidaController, marcarTodasComoLidasController, enviarMensagemController, marcarVisualizadasController, contagemNotificacoesController, atualizarSetorController } from "../controllers/ChamadoController.js";
+import { obterPerfilUsuarioController, editarPerfilController, removerFotoController, atualizarFotoPerfilController } from "../controllers/PerfilController.js";
 import { enviarLinkRedefinicao, redefinirSenha, verifyCode } from '../controllers/RedefinirSenhaController.js';
 import { upload } from '../middlewares/uploadMiddleware.js';
 import { garantirAutenticado } from '../middlewares/authMiddleware.js';
@@ -30,9 +30,10 @@ router.put("/atribuir-tecnico", garantirAutenticado, atribuirTecnicoController);
 router.patch('/chamado/:id', garantirAutenticado, editarChamadoController);
 router.post('/usuarios', criarUsuarioController); // criar usuario
 router.post('/usuarios/sugerir-username', sugerirUsernameController); // sugere username a partir do que foi digitado
-router.post('/pool', garantirAutenticado, criarSetorController); // criar setor/pool
-router.get('/pool', listarSetoresController); // lista pools/setores
-router.delete('/pool/:id', garantirAutenticado, excluirSetorController); // excluir pool/setor
+router.post("/pool", garantirAutenticado, criarSetorController); // Criar setor
+router.get("/pool", listarSetoresController); // Listar setores
+router.put("/pool/:id", garantirAutenticado, atualizarSetorController); // Atualizar setor
+router.delete("/pool/:id", garantirAutenticado, excluirSetorController); // Excluir setor
 router.post('/prioridades', garantirAutenticado, criarPrioridadeController); // cria prioridade
 router.get('/prioridades', listarPrioridadesController); // lista prioridades
 // chamados - prazo
@@ -82,5 +83,7 @@ router.get("/notificacoes", garantirAutenticado, listarNotificacoesController);
 router.post("/:id/lida", garantirAutenticado, marcarNotificacaoLidaController);
 router.post("/marcar-todas", garantirAutenticado, marcarTodasComoLidasController);
 router.post("/mensagem", garantirAutenticado, enviarMensagemController);
+router.post('/notificacoes/visualizadas', garantirAutenticado, marcarVisualizadasController);
+router.get('/notificacoes/contagem', garantirAutenticado, contagemNotificacoesController);
 
 export default router;

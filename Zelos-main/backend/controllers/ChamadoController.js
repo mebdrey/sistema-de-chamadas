@@ -1,7 +1,7 @@
 import PDFDocument from 'pdfkit';
 import { stringify } from 'csv-stringify/sync';
 
-import { criarNotificacao, obterNotificacoesPorUsuario, obterNotificacaoPorId, marcarTodasComoLidas, marcarComoLida, contarChamadosPorPrioridade, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, listarPrioridades, getPrazoPorNome, calcularDataLimite, atualizarPrazoPorChamado, finalizarChamado, getApontamentosByChamado, getChamadoById, contarChamadosPorPool, getPrioridades, calcularDataLimiteUsuario, getApontamentoById } from "../models/Chamado.js";
+import { criarNotificacao, obterNotificacoesPorUsuario, obterNotificacaoPorId, marcarTodasComoLidas, marcarComoLida, contarChamadosPorPrioridade, buscarTiposServico, criarChamado, verTecnicos, verAuxiliaresLimpeza, verClientes, listarChamados, escreverMensagem, lerMsg, excluirUsuario, pegarChamado, verChamados, contarTodosChamados, contarChamadosPendentes, contarChamadosEmAndamento, contarChamadosConcluido, contarChamadosPorStatus, listarChamadosPorStatusEFunção, listarApontamentosPorChamado, criarApontamento, finalizarApontamento, buscarChamadoComNomeUsuario, obterChamadosPorMesAno, atribuirTecnico, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, listarPrioridades, getPrazoPorNome, calcularDataLimite, atualizarPrazoPorChamado, finalizarChamado, getApontamentosByChamado, getChamadoById, contarChamadosPorPool, getPrioridades, calcularDataLimiteUsuario, getApontamentoById, verificarReminders, marcarVisualizadas, obterContagemNotificacoes, existeSetorPorTitulo } from "../models/Chamado.js";
 
 export async function listarNotificacoesController(req, res) {
   try {
@@ -47,6 +47,32 @@ export async function marcarTodasComoLidasController(req, res) {
   }
 }
 
+export async function marcarVisualizadasController(req, res) {
+  try {
+    const usuarioId = req.user?.id;
+    if (!usuarioId) return res.status(401).json({ erro: "Não autenticado" });
+
+    await marcarVisualizadas(usuarioId);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Erro ao marcar notificações como visualizadas:", err);
+    res.status(500).json({ erro: "Erro interno" });
+  }
+}
+
+export async function contagemNotificacoesController(req, res) {
+  try {
+    const usuarioId = req.user?.id;
+    if (!usuarioId) return res.status(401).json({ erro: "Não autenticado" });
+
+    const contagem = await obterContagemNotificacoes(usuarioId);
+    res.json(contagem);
+  } catch (err) {
+    console.error("Erro ao obter contagem de notificações:", err);
+    res.status(500).json({ erro: "Erro interno" });
+  }
+}
+
 // busca nome do usuario com base no ID
 export const buscarChamadoComNomeUsuarioController = async (req, res) => {
   const { id } = req.params;
@@ -86,7 +112,7 @@ const TecnicoEnviarMensagemController = async (req, res) => {
   try {
     //coisas da autenticacao idTecnico
     const idTecnico = req.user?.id; //id do tecnico autenticado
-     console.log('[TecnicoEnviarMensagemController] req.user:', req.user, 'body:', req.body);
+    console.log('[TecnicoEnviarMensagemController] req.user:', req.user, 'body:', req.body);
     const { conteudoMsg, idChamado } = req.body;
     await escreverMensagem({
       id_tecnico: idTecnico, //o id do tecnico seria  o técnico que respondeu o chamado
@@ -146,7 +172,6 @@ export const enviarMensagemController = async (req, res) => {
       id_chamado: payload.id_chamado
     });
 
-    // opcional: retornar a mensagem criada ou apenas ok
     return res.status(201).json({ mensagem: "Mensagem enviada com sucesso!", inserted: insertRes });
   } catch (err) {
     console.error("Erro enviarMensagemController:", err);
@@ -182,7 +207,49 @@ export const criarChamadoController = async (req, res) => {
     Object.keys(dadosChamado).forEach(key => { if (dadosChamado[key] === undefined) dadosChamado[key] = null; });
 
     const resultado = await criarChamado(dadosChamado);
+    const chamadoId = resultado; // ajusta se sua função retornar objeto {insertId: ...}
 
+    // --- Notificações: buscar chamado completo e técnicos uma vez ---
+    try {
+      const chamadoCompleto = await getChamadoById(chamadoId); // pega info do chamado (incluindo setor, usuario_id, etc.)
+      const todosTecnicos = await verTecnicos(); // busca todos os técnicos (uma única chamada)
+
+      // filtra por setor, se houver informação de setor no chamado
+      let tecnicosFiltrados = todosTecnicos;
+      if (chamadoCompleto && (chamadoCompleto.setor_id || chamadoCompleto.setor_nome)) {
+        const setorId = chamadoCompleto.setor_id ?? null;
+        const setorNome = chamadoCompleto.setor_nome ?? null;
+
+        if (setorId) {
+          tecnicosFiltrados = todosTecnicos.filter(t => Number(t.setor_id) === Number(setorId));
+        } else if (setorNome) {
+          tecnicosFiltrados = todosTecnicos.filter(t => String(t.setor_nome || '').toLowerCase() === String(setorNome).toLowerCase());
+        }
+      }
+
+      // Se encontrou técnicos no setor, notifica cada um. Caso contrário, NÃO envia nada.
+      if (Array.isArray(tecnicosFiltrados) && tecnicosFiltrados.length > 0) {
+        // Use Promise.all para enviar as notificações em paralelo (mais rápido)
+        await Promise.all(tecnicosFiltrados.map(t =>
+          criarNotificacao({
+            usuario_id: t.id,
+            tipo: 'novo_chamado',
+            titulo: 'Novo chamado disponível',
+            descricao: `Novo chamado #${chamadoId}: ${dadosChamado.assunto || 'sem assunto'} em setor ${setorNome}`,
+            chamado_id: chamadoId
+          }).catch(err => {
+            console.warn(`[criarChamadoController] falha ao notificar tecnico ${t.id}:`, err);
+            // não throwar para não quebrar as outras notificações
+          })
+        ));
+      } else {
+        // comportamento solicitado: se não houver técnicos, NÃO envia notificação
+        console.info(`[criarChamadoController] Nenhum técnico encontrado para o setor do chamado #${chamadoId}. Nenhuma notificação enviada.`);
+      }
+    } catch (errNotif) {
+      // capturamos qualquer erro de notificação aqui para não prejudicar a criação do chamado
+      console.warn('[criarChamadoController] erro ao processar notificações do chamado:', errNotif);
+    }
     res.status(201).json({
       ...dadosChamado,
       id: resultado,
@@ -231,38 +298,38 @@ export const listarTiposServicoController = async (req, res) => {
 
 export const criarAvaliacao = async (req, res) => {
   try {
-      const { usuario_id, atendimento_id, nota, comentario } = req.body;
-      if (!usuario_id || !atendimento_id || !nota) {
-          return res.status(400).json({ erro: "Campos obrigatórios não preenchidos" });
-      }
+    const { usuario_id, atendimento_id, nota, comentario } = req.body;
+    if (!usuario_id || !atendimento_id || !nota) {
+      return res.status(400).json({ erro: "Campos obrigatórios não preenchidos" });
+    }
 
-      const resultado = await AvaliacaoModel.criarAvaliacao({ usuario_id, atendimento_id, nota, comentario });
-      res.status(201).json({ sucesso: "Avaliação criada", id: resultado.insertId });
+    const resultado = await AvaliacaoModel.criarAvaliacao({ usuario_id, atendimento_id, nota, comentario });
+    res.status(201).json({ sucesso: "Avaliação criada", id: resultado.insertId });
   } catch (erro) {
-      console.error(erro);
-      res.status(500).json({ erro: "Erro ao criar avaliação" });
+    console.error(erro);
+    res.status(500).json({ erro: "Erro ao criar avaliação" });
   }
 };
 
 export const listarAvaliacoes = async (req, res) => {
   try {
-      const { atendimento_id } = req.params;
-      const avaliacoes = await AvaliacaoModel.listarAvaliacoesPorAtendimento(atendimento_id);
-      res.json(avaliacoes);
+    const { atendimento_id } = req.params;
+    const avaliacoes = await AvaliacaoModel.listarAvaliacoesPorAtendimento(atendimento_id);
+    res.json(avaliacoes);
   } catch (erro) {
-      console.error(erro);
-      res.status(500).json({ erro: "Erro ao listar avaliações" });
+    console.error(erro);
+    res.status(500).json({ erro: "Erro ao listar avaliações" });
   }
 };
 
 export const obterMediaAvaliacao = async (req, res) => {
   try {
-      const { atendimento_id } = req.params;
-      const media = await AvaliacaoModel.mediaAvaliacoes(atendimento_id);
-      res.json({ media });
+    const { atendimento_id } = req.params;
+    const media = await AvaliacaoModel.mediaAvaliacoes(atendimento_id);
+    res.json({ media });
   } catch (erro) {
-      console.error(erro);
-      res.status(500).json({ erro: "Erro ao calcular média" });
+    console.error(erro);
+    res.status(500).json({ erro: "Erro ao calcular média" });
   }
 };
 
@@ -372,6 +439,25 @@ export const chamadosPorMesController = async (req, res) => {
   } catch (err) { res.status(500).json({ erro: 'Erro ao buscar dados dos chamados' }); }
 }
 
+// export const editarChamadoController = async (req, res) => {
+//   try {
+//     const chamadoId = req.params.id;
+//     const dados = req.body;
+//     const usuario = req.user; // vem do Passport
+
+//     // Apenas admin pode editar qualquer chamado
+//     if (usuario.funcao !== 'admin') { return res.status(403).json({ message: 'Apenas administradores podem editar chamados' }); }
+
+//     const linhasAfetadas = await editarChamado(chamadoId, dados);
+
+//     if (linhasAfetadas === 0) { return res.status(400).json({ message: 'Nenhuma alteração realizada' }); }
+
+//     res.status(200).json({ message: 'Chamado atualizado com sucesso!' });
+//   } catch (error) {
+//     console.error('Erro ao editar chamado:', error);
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 export const editarChamadoController = async (req, res) => {
   try {
     const chamadoId = req.params.id;
@@ -380,10 +466,84 @@ export const editarChamadoController = async (req, res) => {
 
     // Apenas admin pode editar qualquer chamado
     if (usuario.funcao !== 'admin') { return res.status(403).json({ message: 'Apenas administradores podem editar chamados' }); }
-
+// pega estado atual
+const antes = await getChamadoById(chamadoId);
+if (!antes) return res.status(404).json({ message: 'Chamado não encontrado' });
     const linhasAfetadas = await editarChamado(chamadoId, dados);
 
     if (linhasAfetadas === 0) { return res.status(400).json({ message: 'Nenhuma alteração realizada' }); }
+     // --- prioridade alterada?
+     if (dados.prioridade_id && Number(dados.prioridade_id) !== Number(antes.prioridade_id)) {
+      // notificar dono
+      await criarNotificacao({
+        usuario_id: antes.usuario_id,
+        tipo: 'prazo_alterado',
+        titulo: 'Prioridade do chamado alterada',
+        descricao: `A prioridade do seu chamado #${chamadoId} foi alterada.`,
+        chamado_id: chamadoId
+      });
+
+      // notificar técnico atribuído (se houver)
+      if (antes.tecnico_id) {
+        await criarNotificacao({
+          usuario_id: antes.tecnico_id,
+          tipo: 'prazo_alterado',
+          titulo: 'Prioridade alterada (chamado atribuído)',
+          descricao: `A prioridade do chamado #${chamadoId} que você atende foi alterada.`,
+          chamado_id: chamadoId
+        });
+      }
+    }
+
+    // 2) Status alterado -> notificar dono e técnico
+    if (typeof dados.status_chamado !== 'undefined' && String(dados.status_chamado) !== String(antes.status_chamado)) {
+      const novoStatus = dados.status_chamado;
+      const titulo = `Status do chamado #${chamadoId} alterado para ${novoStatus}`;
+
+      // dono
+      await criarNotificacao({
+        usuario_id: antes.usuario_id,
+        tipo: 'status_atualizado',
+        titulo,
+        descricao: `O status do seu chamado #${chamadoId} mudou para "${novoStatus}".`,
+        chamado_id: chamadoId
+      }).catch(e => console.error('Erro notificação status -> dono:', e));
+
+      // técnico
+      if (antes.tecnico_id) {
+        await criarNotificacao({
+          usuario_id: antes.tecnico_id,
+          tipo: 'status_atualizado',
+          titulo,
+          descricao: `O status do chamado #${chamadoId} (que você atende) mudou para "${novoStatus}".`,
+          chamado_id: chamadoId
+        }).catch(e => console.error('Erro notificação status -> tecnico:', e));
+      }
+    }
+
+    // 3) Técnico alterado (atribuição/remover) -> notificar novo técnico e dono
+    // Se o body contém tecnico_id e diferente do antes.tecnico_id
+    if (typeof dados.tecnico_id !== 'undefined' && String(dados.tecnico_id) !== String(antes.tecnico_id)) {
+      // notificar dono sobre mudança de técnico
+      await criarNotificacao({
+        usuario_id: antes.usuario_id,
+        tipo: 'tecnico_atribuido',
+        titulo: `Técnico alterado no chamado #${chamadoId}`,
+        descricao: `O técnico responsável pelo seu chamado foi alterado.`,
+        chamado_id: chamadoId
+      }).catch(e => console.error('Erro notificação tecnico alterado -> dono:', e));
+
+      // notificar técnico removido:
+      if (antes.tecnico_id && !dados.tecnico_id) {
+        await criarNotificacao({
+          usuario_id: antes.tecnico_id,
+          tipo: 'tecnico_removido',
+          titulo: `Você foi removido do chamado #${chamadoId}`,
+          descricao: `Você não é mais o técnico responsável pelo chamado #${chamadoId}.`,
+          chamado_id: chamadoId
+        }).catch(e => console.error('Erro notificação tecnico removido:', e));
+      }
+    }
 
     res.status(200).json({ message: 'Chamado atualizado com sucesso!' });
   } catch (error) {
@@ -416,6 +576,13 @@ export const criarUsuarioController = async (req, res) => {
     }
 
     const userId = await criarUsuario({ nome, username: desiredUsername, email, senha, funcao: funcao || 'usuario', ftPerfil: ftPerfil || null });
+    await criarNotificacao({
+      usuario_id: userId,
+      tipo: 'notificacao_geral',
+      titulo: 'Bem-vindo ao Zelos',
+      descricao: 'Seu usuário foi criado com sucesso. Bem-vindo(a)!',
+      chamado_id: null
+    });
     res.status(201).json({ id: userId, nome, username: desiredUsername, email, funcao: funcao || 'usuario' });
   } catch (err) {
     console.error('Erro criar usuário:', err);
@@ -438,64 +605,75 @@ export const sugerirUsernameController = async (req, res) => {
 };
 
 //CRIAR SETOR
+// Criar setor
 export const criarSetorController = async (req, res) => {
   try {
     const { titulo, descricao } = req.body;
     const created_by = req.user?.id || null;
 
     if (!titulo || !String(titulo).trim()) {
-      return res.status(400).json({ message: 'titulo obrigatório' });
+      return res.status(400).json({ message: "titulo obrigatório" });
     }
 
     const tituloNorm = String(titulo).trim();
 
-
-    // Verifica duplicidade (por título)
-    const rows = await readQuery('SELECT id FROM pool WHERE titulo = ? LIMIT 1', [tituloNorm]);
-    if (Array.isArray(rows) ? rows.length > 0 : !!rows) {
-      return res.status(409).json({ message: 'setor com esse título já existe' });
+    const jaExiste = await existeSetorPorTitulo(tituloNorm);
+    if (jaExiste) {
+      return res.status(409).json({ message: "setor com esse título já existe" });
     }
 
-    const id = await criarSetor({ titulo: tituloNorm, descricao: descricao || null, created_by });
+    const id = await criarSetor({
+      titulo: tituloNorm,
+      descricao: descricao || null,
+      created_by,
+    });
+
     res.status(201).json({ id, titulo: tituloNorm, descricao });
   } catch (err) {
-    console.error('Erro criar setor:', err);
-    res.status(500).json({ message: 'Erro interno' });
+    console.error("Erro criar setor:", err);
+    res.status(500).json({ message: "Erro interno" });
   }
-}
+};
 
+// Listar setores
 export const listarSetoresController = async (req, res) => {
   try {
     const setores = await listarSetores();
     res.status(200).json(setores);
   } catch (err) {
-    console.error('Erro listar setores:', err);
-    res.status(500).json({ message: 'Erro interno' });
+    console.error("Erro listar setores:", err);
+    res.status(500).json({ message: "Erro interno" });
   }
 };
 
-export const excluirSetorController = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const rows = await excluirSetor(id);
-    if (rows === 0) return res.status(404).json({ message: 'Setor não encontrado ou já excluído' });
-    res.status(200).json({ message: 'Setor excluído' });
-  } catch (err) {
-    console.error('Erro excluir setor:', err);
-    res.status(500).json({ message: 'Erro interno' });
-  }
-};
-
+// Atualizar setor
 export const atualizarSetorController = async (req, res) => {
   try {
     const id = req.params.id;
     const dados = req.body;
+    dados.updated_by = req.user?.id || null;
+
     const affected = await atualizarSetor(id, dados);
-    if (affected === 0) return res.status(404).json({ message: 'Setor não encontrado' });
-    res.status(200).json({ message: 'Setor atualizado' });
+    if (affected === 0) return res.status(404).json({ message: "Setor não encontrado" });
+
+    res.status(200).json({ message: "Setor atualizado" });
   } catch (err) {
-    console.error('Erro atualizar setor:', err);
-    res.status(500).json({ message: 'Erro interno' });
+    console.error("Erro atualizar setor:", err);
+    res.status(500).json({ message: "Erro interno" });
+  }
+};
+
+// Excluir setor
+export const excluirSetorController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const rows = await excluirSetor(id);
+    if (rows === 0) return res.status(404).json({ message: "Setor não encontrado ou já excluído" });
+
+    res.status(200).json({ message: "Setor excluído" });
+  } catch (err) {
+    console.error("Erro excluir setor:", err);
+    res.status(500).json({ message: "Erro interno" });
   }
 };
 
@@ -613,6 +791,7 @@ export const listarChamadosDisponiveisController = async (req, res) => {
 //     res.status(200).json({ mensagem: 'Chamado atribuído com sucesso.' });
 //   } catch (error) {res.status(400).json({ erro: error.message });}
 // };
+
 export const pegarChamadoController = async (req, res) => {
   const usuario_id = req.user?.id;
   const { chamado_id } = req.body;
@@ -621,6 +800,7 @@ export const pegarChamadoController = async (req, res) => {
 
   try {
     const chamadoAtualizado = await pegarChamado(chamado_id, usuario_id);
+
     // devolve mensagem e chamado atualizado (contendo data_limite)
     res.status(200).json({ mensagem: 'Chamado atribuído com sucesso.', chamado: chamadoAtualizado });
   } catch (error) { res.status(400).json({ erro: error.message }); }
@@ -674,6 +854,8 @@ export const listarChamadosFuncionarioController = async (req, res) => {
   if (!usuario_id || !statusParam) { return res.status(400).json({ erro: 'Parâmetros ausentes.' }); }
 
   try {
+    // dispara reminders antes de listar
+    await verificarReminders();
     const chamados = await listarChamadosPorStatusEFunção(usuario_id, statusParam);
     console.log("Chamados encontrados:", chamados);
     res.json(chamados);
