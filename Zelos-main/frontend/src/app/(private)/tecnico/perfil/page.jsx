@@ -41,7 +41,7 @@ export default function MeuPerfil() {
 
             const data = await res.json();
             if (res.ok) {
-                alert("Foto atualizada com sucesso!");
+                // alert("Foto atualizada com sucesso!");
                 setUsuario((prev) => ({ ...prev, ftPerfil: data.caminho }));
             } else {
                 alert(data.mensagem || "Erro ao atualizar foto.");
@@ -51,6 +51,22 @@ export default function MeuPerfil() {
             alert("Erro ao enviar a foto.");
         }
     };
+
+    const removerFoto = async () => {
+        try {
+            const response = await fetch("http://localhost:8080/removerFoto", {
+                method: "POST",
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                alert("Foto de perfil removida.")
+            }
+        } catch (err) {
+            console.error("Erro ao remover foto:", err);
+            alert("Erro ao remover a foto.");
+        }
+    }
 
 
     //info perfil 
@@ -155,7 +171,7 @@ export default function MeuPerfil() {
         imagem = [{ src: `http://localhost:8080/${usuario.ftPerfil}` }]
     }
     else {
-        imagem = [{ src: './cao.png' }] //só falta arrumar aqui
+        imagem = [{ src: '/img/user.png' }] //só falta arrumar aqui
     }
 
     return (
@@ -271,26 +287,23 @@ export default function MeuPerfil() {
                                                     <div className="mt-2">
                                                         <img src={preview} alt="Prévia da nova foto" className="w-24 h-24 rounded-full object-cover" />
                                                     </div>
-                                                )}
-
-                                                <div className="flex justify-center gap-3 mt-4">
-
-                                                    <button
-                                                        type="button"
-                                                        onClick={enviarFoto}
-                                                        className="bg-violet-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
-                                                    > Salvar nova foto</button>
-
-                                                </div>
+                                                )}                                         
 
                                             </>)}
 
+                                        <div className="flex justify-center gap-3">
+                                            <button type="button"  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition">
+                                                Remover Foto
+                                            </button>
+                                        </div>
 
                                         <div className="flex justify-center gap-3">
-                                            <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
+                                            <button type="submit"onClick={enviarFoto} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
                                                 Salvar alterações
                                             </button>
                                         </div>
+
+
 
                                         {/* Mensagem de resposta */}
                                         {resposta && (

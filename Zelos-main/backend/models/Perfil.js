@@ -39,5 +39,17 @@ throw err
   
 };
 
+const removerFotoPerfil = async (id) =>{
+  try{
+    const sql = 'UPDATE usuarios set ftPerfil = null where id = ?';
+    const resultado = await readQuery(sql, [id] );
+    return resultado
+  }
+  catch (err) {
+    console.error('Erro ao remover foto de perfil', err);
+    throw err
+  }
+};
 
-export { obterDadosDoUsuario, editarPerfil, atualizarFotoPerfil };
+
+export { obterDadosDoUsuario, editarPerfil, atualizarFotoPerfil, removerFotoPerfil };

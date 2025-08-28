@@ -1,4 +1,4 @@
-import { obterDadosDoUsuario, editarPerfil, atualizarFotoPerfil} from '../models/Perfil.js';
+import { obterDadosDoUsuario, editarPerfil, atualizarFotoPerfil, removerFotoPerfil} from '../models/Perfil.js';
 import session from "express-session";
 
 // obter dados do perfil do usuario -- funcionando, só não consegui testar com o id da sessão
@@ -62,6 +62,20 @@ const editarPerfilController = async (req, res) => {
         res.status(500).json({ mensagem: 'Erro ao atualizar foto de perfil.' });
     }
 };
+
+export const removerFotoController = async(req,res) =>{
+  
+  try{
+    const id = req.user.id;
+    await removerFotoPerfil(id);
+    res.status(200).json({mensagem: 'Foto de perfil removida com sucesso!'})
+    
+  }
+  catch (err){
+    console.error('Erro ao remover ft de perfil: ', err);
+    res.status(500).json({mensagem: 'Erro ao remover foto de perfil.'})
+  }
+}
 
 
 
