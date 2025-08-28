@@ -56,6 +56,8 @@ router.get('/relatorio-chamado/:chamado_id', garantirAutenticado, gerarRelatorio
 //relacionados a perfil
 router.get('/perfil', garantirAutenticado, obterPerfilUsuarioController);
 router.patch('/editarPerfil', garantirAutenticado, editarPerfilController);
+router.post('/editarFoto', garantirAutenticado, upload.single('foto'), atualizarFotoPerfilController);
+router.post('/removerFoto', garantirAutenticado, removerFotoController);
 
 
 //router.post('/chat', UsuarioEnviarMensagemController);
