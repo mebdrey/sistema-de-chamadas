@@ -233,7 +233,7 @@ export default function ChamadosCliente() {
             {ToastsUI}
             {/* conteudo da pagina */}
             <div className="p-4 h-screen w-full">
-                <div className="p-4 mt-14">
+                <div className="px-4 pt-4 pb-14 mt-14">
                     <div className='flex flex-row w-full justify-between mb-15'>
                         {/* select */}
                         <OrdenarPor ordenarPor={ordenarPor} setOrdenarPor={setOrdenarPor} />
@@ -460,7 +460,7 @@ export default function ChamadosCliente() {
                         {/* menu do speed dial */}
                         <div id="speed-dial-menu-bottom-right" className={`flex flex-col items-center mb-4 space-y-2 transition-all duration-300 ${openSpeedDial ? "flex" : "hidden"}`}>
                             <button type="button" onClick={() => setOpenModal(true)} // <-- abre o modal
-                                className="flex justify-center items-center w-[52px] h-[52px] text-gray-500 hover:text-[#7F56D8] bg-white rounded-full border border-gray-200 dark:border-gray-600 shadow-xs dark:hover:text-white dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400">
+                                className="flex justify-center items-center w-[52px] h-[52px] text-gray-500 hover:text-[#7F56D8] bg-white rounded-full border border-gray-200 shadow-xs focus:ring-4 focus:ring-gray-300 focus:outline-none">
                                 <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
                                     <path d="M16.9573 27.3064C17.342 27.3973 17.3772 27.9086 17.0025 28.0354L14.7901 28.7743C9.23099 30.5932 6.30442 29.0727 4.49807 23.4312L2.70572 17.8181C0.913372 12.1766 2.39766 9.19247 7.95674 7.37354L8.69048 7.12695C9.2546 6.93736 9.8036 7.51154 9.64341 8.09228C9.56401 8.38014 9.48763 8.68056 9.41302 8.99352L8.04076 14.9477C6.50046 21.6407 8.7549 25.3354 15.3502 26.927L16.9573 27.3064Z" />
                                     <path d="M23.2477 3.50833L20.9093 2.95413C16.2323 1.83151 13.4458 2.75518 11.8075 6.19408C11.3874 7.06092 11.0513 8.11248 10.7713 9.32036L9.39902 15.2745C8.02675 21.2144 9.83311 24.1417 15.6722 25.5486L18.0247 26.117C18.8369 26.3159 19.593 26.4438 20.2931 26.5007C24.662 26.927 26.9864 24.8523 28.1627 19.7223L29.5349 13.7824C30.9072 7.84248 29.1149 4.90094 23.2477 3.50833ZM20.6152 17.8892C20.4892 18.3723 20.0691 18.685 19.593 18.685C19.509 18.685 19.425 18.6708 19.327 18.6566L15.2522 17.605C14.692 17.4629 14.356 16.8803 14.496 16.3118C14.636 15.7434 15.2102 15.4024 15.7703 15.5445L19.8451 16.5961C20.4192 16.7382 20.7552 17.3208 20.6152 17.8892ZM24.718 13.0861C24.592 13.5693 24.1719 13.8819 23.6958 13.8819C23.6118 13.8819 23.5278 13.8677 23.4297 13.8535L16.6384 12.1056C16.0783 11.9635 15.7423 11.3809 15.8823 10.8124C16.0223 10.244 16.5964 9.90298 17.1565 10.0451L23.9478 11.793C24.522 11.9209 24.858 12.5035 24.718 13.0861Z" />
@@ -469,18 +469,8 @@ export default function ChamadosCliente() {
                             </button>
                         </div>
 
-                        <div id="speed-dial-chat-bottom-right" className={`flex flex-col items-center mb-4 space-y-2 transition-all duration-300 ${openSpeedDial ? "flex" : "hidden"}`}>
-                            <button type="button" onClick={() => setOpenModal(true)} // <-- abre o modal
-                                className="flex justify-center items-center w-[52px] h-[52px] text-gray-500 hover:text-[#7F56D8] bg-white rounded-full border border-gray-200 dark:border-gray-600 shadow-xs dark:hover:text-white dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M19.1023 8.70742C18.8795 6.27979 17.4759 4.12732 15.3644 2.97449C13.2528 1.82166 10.7138 1.82166 8.60238 2.97449C6.49092 4.12751 5.08737 6.27998 4.86446 8.70742C3.755 8.9472 2.81772 9.69677 2.32639 10.7368C1.83506 11.7768 1.8453 12.9898 2.35433 14.021C2.86316 15.0522 3.81323 15.7853 4.92652 16.0056C5.20186 17.7085 6.0623 19.2566 7.35465 20.3744C8.64695 21.4922 10.2873 22.1071 11.9836 22.1099H13.0175C13.6805 22.1099 14.3163 21.8418 14.7851 21.3649C15.2539 20.8881 15.5172 20.2412 15.5172 19.5666C15.5172 18.8921 15.2539 18.2452 14.7851 17.7682C14.3163 17.2913 13.6805 17.0234 13.0175 17.0234C12.3547 17.0234 11.7189 17.2913 11.2501 17.7682C10.7813 18.2452 10.5178 18.8921 10.5178 19.5666V20.3346C9.41072 20.026 8.42293 19.3801 7.68728 18.4834C6.95157 17.5868 6.50336 16.4826 6.40273 15.3192C6.47774 11.1322 6.48279 9.79615 6.3847 9.27015H6.38452C6.40724 7.23509 7.49523 5.3668 9.23888 4.36895C10.9825 3.37134 13.1169 3.3959 14.8381 4.43353C16.5592 5.47097 17.6054 7.36387 17.5829 9.39907V9.44383C17.4718 15.4928 17.5183 15.5506 17.8027 15.8479H17.8025C17.9507 15.9987 18.1514 16.0838 18.3609 16.0845C19.5674 16.0649 20.687 15.4419 21.3541 14.4189C22.0215 13.396 22.1506 12.1043 21.6996 10.9656C21.2488 9.82692 20.2755 8.98706 19.0977 8.72049L19.1023 8.70742Z" />
-                                </svg>
-                                <span className="sr-only">Chat</span>
-                            </button>
-                        </div>
-
                         {/* botão principal */}
-                        <button type="button" onClick={() => setOpenSpeedDial(!openSpeedDial)} data-dial-toggle="speed-dial-menu-bottom-right" aria-controls="speed-dial-menu-bottom-right" aria-expanded={openSpeedDial} className="flex items-center justify-center text-white bg-[#7F56D8] rounded-full w-14 h-14 dark:bg-blue-600 focus:ring-4 focus:ring-blue-300 focus:outline-none dark:focus:ring-blue-800">
+                        <button type="button" onClick={() => setOpenSpeedDial(!openSpeedDial)} data-dial-toggle="speed-dial-menu-bottom-right" aria-controls="speed-dial-menu-bottom-right" aria-expanded={openSpeedDial} className="flex items-center justify-center text-white bg-[#7F56D8] rounded-full w-14 h-14">
                             <svg className={`w-5 h-5 transform transition-transform duration-300 ${openSpeedDial ? "rotate-45" : ""}`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
                             </svg>
                             <span className="sr-only">Abrir</span>

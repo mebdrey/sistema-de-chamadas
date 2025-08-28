@@ -395,21 +395,32 @@ export const editarChamadoController = async (req, res) => {
 export const criarUsuarioController = async (req, res) => {
   try {
     const { nome, username, email, senha, funcao, ftPerfil } = req.body;
-    if (!nome || !email || !senha) { return res.status(400).json({ message: 'nome, email e senha são obrigatórios' }); }
+    if (!nome || !email || !senha) {
+      return res.status(400).json({ message: 'nome, email e senha são obrigatórios' });
+    }
+    // validar formato email básico
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return res.status(400).json({ message: 'email inválido' });
 
-    // verifica username
     const desiredUsername = username || (nome.split(/\s+/)[0] || nome).toLowerCase();
     const existing = await buscarUsuarioPorUsername(desiredUsername);
     if (existing) {
-      const sugestões = await gerarSugestoesUsername(nome);
-      return res.status(409).json({ message: 'username já existe', sugestões });
+      const sugestoes = await gerarSugestoesUsername(nome);
+      return res.status(409).json({ message: 'username já existe', sugestoes });
     }
 
-    const userId = await criarUsuario({ nome, username: desiredUsername, email, senha, funcao: funcao || 'user', ftPerfil: ftPerfil || null });
-    res.status(201).json({ id: userId, nome, username: desiredUsername, email, funcao: funcao || 'user' });
+    // checar email duplicado explicitamente
+    const existingEmail = await read('usuarios', `email = ${JSON.stringify(email)}`);
+    if (Array.isArray(existingEmail) ? existingEmail.length > 0 : !!existingEmail) {
+      return res.status(409).json({ message: 'email já cadastrado' });
+    }
+
+    const userId = await criarUsuario({ nome, username: desiredUsername, email, senha, funcao: funcao || 'usuario', ftPerfil: ftPerfil || null });
+    res.status(201).json({ id: userId, nome, username: desiredUsername, email, funcao: funcao || 'usuario' });
   } catch (err) {
     console.error('Erro criar usuário:', err);
-    res.status(500).json({ message: 'Erro interno ao criar usuário' });
+    // retornar mensagem de erro mais rica para frontend (sem vazar stack)
+    res.status(500).json({ message: 'Erro interno ao criar usuário', error: err.message || 'unknown' });
   }
 };
 
@@ -432,16 +443,26 @@ export const criarSetorController = async (req, res) => {
     const { titulo, descricao } = req.body;
     const created_by = req.user?.id || null;
 
-    if (!titulo) return res.status(400).json({ message: 'titulo obrigatório' });
-    // opcional: validar titulo contra enum do DB (se desejar)
+    if (!titulo || !String(titulo).trim()) {
+      return res.status(400).json({ message: 'titulo obrigatório' });
+    }
 
-    const id = await criarSetor({ titulo, descricao: descricao || null, created_by });
-    res.status(201).json({ id, titulo, descricao });
+    const tituloNorm = String(titulo).trim();
+
+
+    // Verifica duplicidade (por título)
+    const rows = await readQuery('SELECT id FROM pool WHERE titulo = ? LIMIT 1', [tituloNorm]);
+    if (Array.isArray(rows) ? rows.length > 0 : !!rows) {
+      return res.status(409).json({ message: 'setor com esse título já existe' });
+    }
+
+    const id = await criarSetor({ titulo: tituloNorm, descricao: descricao || null, created_by });
+    res.status(201).json({ id, titulo: tituloNorm, descricao });
   } catch (err) {
     console.error('Erro criar setor:', err);
     res.status(500).json({ message: 'Erro interno' });
   }
-};
+}
 
 export const listarSetoresController = async (req, res) => {
   try {
@@ -478,13 +499,28 @@ export const atualizarSetorController = async (req, res) => {
   }
 };
 
+
 export const criarPrioridadeController = async (req, res) => {
   try {
     const { nome, prazo_dias } = req.body;
-    if (!nome) return res.status(400).json({ message: 'nome obrigatório' });
+    if (!nome || !String(nome).trim()) {
+      return res.status(400).json({ message: 'nome obrigatório' });
+    }
+
+    // Normalize para comparação (trim + lowercase)
+    const nomeNorm = String(nome).trim();
+
+    // Verifica duplicidade de forma segura (parametrizado)
+    const rows = await readQuery('SELECT id FROM prioridades WHERE nome = ? LIMIT 1', [nomeNorm]);
+    const exists = Array.isArray(rows) ? rows.length > 0 : !!rows;
+    if (exists) {
+      return res.status(409).json({ message: 'prioridade com esse nome já existe' });
+    }
+
     const created_by = req.user?.id || null;
-    const id = await criarPrioridade({ nome, prazo_dias: prazo_dias || 0, created_by });
-    res.status(201).json({ id, nome, prazo_dias: prazo_dias || 0 });
+    const id = await criarPrioridade({ nome: nomeNorm, prazo_dias: prazo_dias || 0, created_by });
+
+    res.status(201).json({ id, nome: nomeNorm, prazo_dias: prazo_dias || 0 });
   } catch (err) {
     console.error('Erro criar prioridade:', err);
     res.status(500).json({ message: 'Erro interno' });

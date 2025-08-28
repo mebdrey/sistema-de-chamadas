@@ -55,7 +55,7 @@ function deletarUsuario(id) {
       alert(data.mensagem);
       setSetores((prev) => {
         const atualizado = { ...prev };
-        htmlFor (const setor in atualizado) {
+        for (const setor in atualizado) {
           atualizado[setor] = atualizado[setor].filter((u) => u.id !== id);
         }
         return atualizado;
@@ -282,9 +282,6 @@ function deletarUsuario(id) {
                                                 <ul className="py-2 text-sm text-gray-700 ">
                                                     <li>
                                                         <a href="#" className="block px-4 py-2 hover:bg-gray-100" role="menuitem">Ver perfil</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100" role="menuitem">Desativar conta</a>
                                                     </li>
                                                 </ul>
                                                 <div className="py-2">

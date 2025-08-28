@@ -305,7 +305,12 @@ export const criarUsuario = async (dados) => {
   }
 };
 
-export const buscarUsuarioPorUsername = async (username) => { return await read('usuarios', `username = ${JSON.stringify(username)}`);};
+export const buscarUsuarioPorUsername = async (username) => {
+  if (!username) return null;
+  const uname = String(username).trim().toLowerCase();
+  const rows = await readQuery('SELECT * FROM usuarios WHERE username = ? LIMIT 1', [uname]);
+  return Array.isArray(rows) ? (rows[0] || null) : (rows || null);
+};
 
 // retorna array de usernames semelhantes (prefix)
 export const buscarUsernamesSemelhantes = async (base) => {
@@ -433,18 +438,20 @@ export const atualizarPrazoPorChamado = async (chamadoId) => {
 };
 
 
-export async function obterChamadosPorMesAno(prioridade = null) {
-  let sql = `SELECT MONTH(criado_em) as mes, 
-            COUNT(*) as total 
-        FROM chamados
-        WHERE YEAR(criado_em) = YEAR(CURDATE())`;
+export async function obterChamadosPorMesAno(prioridadeNome = null) {
+  let sql = `
+    SELECT MONTH(c.criado_em) as mes, COUNT(*) as total
+    FROM chamados c
+    JOIN prioridades p ON p.id = c.prioridade_id
+    WHERE YEAR(c.criado_em) = YEAR(CURDATE())
+  `;
 
-  if (prioridade) {
-    sql += ` AND prioridade = ?`;
-    return await readQuery(sql + ` GROUP BY MONTH(criado_em)`, [prioridade]);
+  if (prioridadeNome) {
+    sql += ` AND LOWER(p.nome) = LOWER(?)`;
+    return await readQuery(sql + ` GROUP BY MONTH(c.criado_em)`, [prioridadeNome]);
   }
 
-  sql += ` GROUP BY MONTH(criado_em)`;
+  sql += ` GROUP BY MONTH(c.criado_em)`;
   return await readQuery(sql);
 }
 
