@@ -133,6 +133,8 @@ CREATE TABLE chamados (
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   finalizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  reminder_5h_sent BOOLEAN DEFAULT FALSE, /* aviso 5 horas antes do prazo */
+  reminder_overdue_sent BOOLEAN DEFAULT FALSE, /* aviso ao chamado estiver atrasado */
   FOREIGN KEY (tipo_id) REFERENCES pool(id) ON DELETE CASCADE,
   FOREIGN KEY (prioridade_id) REFERENCES prioridades(id) ON DELETE CASCADE,
   FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE,
@@ -249,6 +251,7 @@ CREATE TABLE notificacoes (
   descricao TEXT NOT NULL,
   chamado_id INT DEFAULT NULL,
   lida BOOLEAN DEFAULT FALSE,
+  visualizada BOOLEAN DEFAULT FALSE,
   criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
   FOREIGN KEY (chamado_id) REFERENCES chamados(id)

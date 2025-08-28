@@ -135,7 +135,7 @@
 //                     className={
 //                       `px-3 py-2 rounded-2xl max-w-[75%]
 //                      ${isTecnico ? "bg-violet-600 text-white rounded-br-none" : "bg-gray-100 text-gray-900 dark:bg-zinc-800 dark:text-zinc-100 rounded-bl-none"}`
-                                           
+
 //                     }
 //                   >
 //                      {msg.conteudo}
@@ -220,42 +220,42 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
    * fetchCurrentUser robusto - aceita várias formas de resposta do servidor.
    * Logs: rawResponse + detectedUser -> veja no DevTools Console.
    */
-const fetchCurrentUser = async () => {
-  try {
-    console.log("[Chat] fetchCurrentUser -> iniciando...");
-    const res = await fetch("http://localhost:8080/auth/check-auth", {
-      method: "GET",
-      credentials: "include",
-    });
+  const fetchCurrentUser = async () => {
+    try {
+      console.log("[Chat] fetchCurrentUser -> iniciando...");
+      const res = await fetch("http://localhost:8080/auth/check-auth", {
+        method: "GET",
+        credentials: "include",
+      });
 
-    // tenta ler JSON
-    const data = await res.json();
-    console.log("[Chat] check-auth raw:", data, "status:", res.status);
+      // tenta ler JSON
+      const data = await res.json();
+      console.log("[Chat] check-auth raw:", data, "status:", res.status);
 
-    // seu backend retorna: { authenticated: true, user: { id, nome, ... } }
-    if (!res.ok || !data) {
+      // seu backend retorna: { authenticated: true, user: { id, nome, ... } }
+      if (!res.ok || !data) {
+        setCurrentUser(null);
+        return null;
+      }
+
+      // se veio no formato { authenticated: true, user: {...} }
+      const userObj = data.user || (data.authenticated ? data : null);
+      if (!userObj || !userObj.id) {
+        console.warn("[Chat] check-auth não retornou user.id:", data);
+        setCurrentUser(null);
+        return null;
+      }
+
+      const mapped = { id: Number(userObj.id), role: String(userObj.funcao || userObj.role || "").toLowerCase() };
+      setCurrentUser(mapped);
+      console.log("[Chat] currentUser definido:", mapped);
+      return mapped;
+    } catch (err) {
+      console.error("[Chat] erro fetchCurrentUser:", err);
       setCurrentUser(null);
       return null;
     }
-
-    // se veio no formato { authenticated: true, user: {...} }
-    const userObj = data.user || (data.authenticated ? data : null);
-    if (!userObj || !userObj.id) {
-      console.warn("[Chat] check-auth não retornou user.id:", data);
-      setCurrentUser(null);
-      return null;
-    }
-
-    const mapped = { id: Number(userObj.id), role: String(userObj.funcao || userObj.role || "").toLowerCase() };
-    setCurrentUser(mapped);
-    console.log("[Chat] currentUser definido:", mapped);
-    return mapped;
-  } catch (err) {
-    console.error("[Chat] erro fetchCurrentUser:", err);
-    setCurrentUser(null);
-    return null;
-  }
-};
+  };
 
   // busca currentUser ao montar o componente
   useEffect(() => {
@@ -315,86 +315,86 @@ const fetchCurrentUser = async () => {
   };
 
   // enviar mensagem -> usa endpoint unificado /mensagem
-const enviarMsg = async (e) => {
-  e?.preventDefault();
+  const enviarMsg = async (e) => {
+    e?.preventDefault();
 
-  // validações básicas
-  if (!conteudo.trim() || !chamadoSelecionado?.id) return;
+    // validações básicas
+    if (!conteudo.trim() || !chamadoSelecionado?.id) return;
 
-  // evita envios duplicados
-  if (isSending) return;
-  // garante currentUser conhecido (undefined = ainda não buscado)
-  if (currentUser === undefined) {
-    await fetchCurrentUser();
-  }
-  if (!currentUser || !currentUser.id) {
-    console.warn("[Chat] currentUser ausente/nulo — abortando envio. Veja output de fetchCurrentUser no console.");
-    return;
-  }
+    // evita envios duplicados
+    if (isSending) return;
+    // garante currentUser conhecido (undefined = ainda não buscado)
+    if (currentUser === undefined) {
+      await fetchCurrentUser();
+    }
+    if (!currentUser || !currentUser.id) {
+      console.warn("[Chat] currentUser ausente/nulo — abortando envio. Veja output de fetchCurrentUser no console.");
+      return;
+    }
 
-  setIsSending(true);
+    setIsSending(true);
 
-  const endpoint = "http://localhost:8080/mensagem"; // ajuste se sua rota usar /api/mensagem
-  const payload = { idChamado: chamadoSelecionado.id, conteudoMsg: conteudo };
+    const endpoint = "http://localhost:8080/mensagem"; // ajuste se sua rota usar /api/mensagem
+    const payload = { idChamado: chamadoSelecionado.id, conteudoMsg: conteudo };
 
-  console.log("[Chat] Enviando mensagem", { endpoint, payload, currentUser });
+    console.log("[Chat] Enviando mensagem", { endpoint, payload, currentUser });
 
-  try {
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    });
-
-    // tenta ler JSON ou texto de forma segura
-    let body;
     try {
-      const contentType = res.headers.get("content-type") || "";
-      body = contentType.includes("application/json") ? await res.json() : await res.text();
-    } catch (parseErr) {
-      body = null;
-    }
-
-    console.log("[Chat] send status:", res.status, "body:", body);
-
-    // caso de não autenticado: invalida currentUser para forçar novo fetch
-    if (res.status === 401) {
-      setCurrentUser(null);
-      throw new Error("Não autenticado");
-    }
-
-    if (!res.ok) {
-      // tenta extrair mensagem útil do body
-      const errMsg = (body && (body.erro || body.error || body.message)) || "Erro ao enviar mensagem";
-      throw new Error(errMsg);
-    }
-
-    // sucesso -> refetch das mensagens (imediato)
-    try {
-      const updated = await fetch(`http://localhost:8080/chat?idChamado=${chamadoSelecionado.id}`, {
-        method: "GET",
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
+        body: JSON.stringify(payload),
       });
-      if (updated.ok) {
-        const data = await updated.json();
-        setMensagens(Array.isArray(data.mensagens) ? data.mensagens : []);
-      } else {
-        console.warn("[Chat] Falha ao atualizar mensagens após envio:", updated.status);
-      }
-    } catch (rErr) {
-      console.error("[Chat] Erro ao refetch mensagens:", rErr);
-    }
 
-    // limpa input
-    setConteudo("");
-  } catch (err) {
-    console.error("[Chat] Erro ao enviar mensagem (front):", err);
-    // opcional: você pode mostrar um toast/alert aqui para o usuário
-  } finally {
-    setIsSending(false);
-  }
-};
+      // tenta ler JSON ou texto de forma segura
+      let body;
+      try {
+        const contentType = res.headers.get("content-type") || "";
+        body = contentType.includes("application/json") ? await res.json() : await res.text();
+      } catch (parseErr) {
+        body = null;
+      }
+
+      console.log("[Chat] send status:", res.status, "body:", body);
+
+      // caso de não autenticado: invalida currentUser para forçar novo fetch
+      if (res.status === 401) {
+        setCurrentUser(null);
+        throw new Error("Não autenticado");
+      }
+
+      if (!res.ok) {
+        // tenta extrair mensagem útil do body
+        const errMsg = (body && (body.erro || body.error || body.message)) || "Erro ao enviar mensagem";
+        throw new Error(errMsg);
+      }
+
+      // sucesso -> refetch das mensagens (imediato)
+      try {
+        const updated = await fetch(`http://localhost:8080/chat?idChamado=${chamadoSelecionado.id}`, {
+          method: "GET",
+          credentials: "include",
+        });
+        if (updated.ok) {
+          const data = await updated.json();
+          setMensagens(Array.isArray(data.mensagens) ? data.mensagens : []);
+        } else {
+          console.warn("[Chat] Falha ao atualizar mensagens após envio:", updated.status);
+        }
+      } catch (rErr) {
+        console.error("[Chat] Erro ao refetch mensagens:", rErr);
+      }
+
+      // limpa input
+      setConteudo("");
+    } catch (err) {
+      console.error("[Chat] Erro ao enviar mensagem (front):", err);
+      // opcional: você pode mostrar um toast/alert aqui para o usuário
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <>
@@ -410,7 +410,19 @@ const enviarMsg = async (e) => {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-zinc-700">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-zinc-100">Suporte</h2>
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-zinc-100">
+            {mensagens && mensagens.length > 0
+              ? (() => {
+                const primeira = mensagens[0];
+                // se eu sou usuário, exibo nome do técnico; se eu sou técnico, exibo nome do usuário
+                if (currentUser?.role?.includes("tecnico")) {
+                  return `${primeira.usuario_nome || ""} ${primeira.usuario_sobrenome || ""}`;
+                } else {
+                  return `${primeira.tecnico_nome || ""} ${primeira.tecnico_sobrenome || ""}`;
+                }
+              })()
+              : "Chat"}
+          </h2>
           <button onClick={() => setOpen(false)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800">
             <span className="sr-only">Fechar</span>—
           </button>
@@ -466,8 +478,9 @@ const enviarMsg = async (e) => {
       <button
         onClick={() => setOpen((s) => !s)}
         className={`fixed ${pos.button} z-50 h-14 w-14 rounded-full bg-violet-600 text-white flex items-center justify-center shadow-lg hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500`}
-      >
-        💬
+      ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+          <path fillRule="evenodd" d="M5.337 21.718a6.707 6.707 0 0 1-.533-.074.75.75 0 0 1-.44-1.223 3.73 3.73 0 0 0 .814-1.686c.023-.115-.022-.317-.254-.543C3.274 16.587 2.25 14.41 2.25 12c0-5.03 4.428-9 9.75-9s9.75 3.97 9.75 9c0 5.03-4.428 9-9.75 9-.833 0-1.643-.097-2.417-.279a6.721 6.721 0 0 1-4.246.997Z" clipRule="evenodd" />
+        </svg>
         {unread > 0 && !open && (
           <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5">
             {unread}

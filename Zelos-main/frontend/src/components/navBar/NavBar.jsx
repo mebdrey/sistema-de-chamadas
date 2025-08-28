@@ -11,6 +11,8 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
     const [mounted, setMounted] = useState(false);
     const [dropdownUserOpen, setDropdownUserOpen] = useState(false);
     const [dropdownNotificationOpen, setDropdownNotificationOpen] = useState(false);
+    const [unvisualizedCount, setUnvisualizedCount] = useState(0);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     // links da sidebar
     let links = [];
@@ -24,6 +26,11 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                     <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
                 </svg>)
             },
+            {
+                label: 'Painel de Gestão', href: '/admin/painelGestao', icon: (<svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-[#7F56D8]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                    <path fillRule="evenodd" d="M11.828 2.25c-.916 0-1.699.663-1.85 1.567l-.091.549a.798.798 0 0 1-.517.608 7.45 7.45 0 0 0-.478.198.798.798 0 0 1-.796-.064l-.453-.324a1.875 1.875 0 0 0-2.416.2l-.243.243a1.875 1.875 0 0 0-.2 2.416l.324.453a.798.798 0 0 1 .064.796 7.448 7.448 0 0 0-.198.478.798.798 0 0 1-.608.517l-.55.092a1.875 1.875 0 0 0-1.566 1.849v.344c0 .916.663 1.699 1.567 1.85l.549.091c.281.047.508.25.608.517.06.162.127.321.198.478a.798.798 0 0 1-.064.796l-.324.453a1.875 1.875 0 0 0 .2 2.416l.243.243c.648.648 1.67.733 2.416.2l.453-.324a.798.798 0 0 1 .796-.064c.157.071.316.137.478.198.267.1.47.327.517.608l.092.55c.15.903.932 1.566 1.849 1.566h.344c.916 0 1.699-.663 1.85-1.567l.091-.549a.798.798 0 0 1 .517-.608 7.52 7.52 0 0 0 .478-.198.798.798 0 0 1 .796.064l.453.324a1.875 1.875 0 0 0 2.416-.2l.243-.243c.648-.648.733-1.67.2-2.416l-.324-.453a.798.798 0 0 1-.064-.796c.071-.157.137-.316.198-.478.1-.267.327-.47.608-.517l.55-.091a1.875 1.875 0 0 0 1.566-1.85v-.344c0-.916-.663-1.699-1.567-1.85l-.549-.091a.798.798 0 0 1-.608-.517 7.507 7.507 0 0 0-.198-.478.798.798 0 0 1 .064-.796l.324-.453a1.875 1.875 0 0 0-.2-2.416l-.243-.243a1.875 1.875 0 0 0-2.416-.2l-.453.324a.798.798 0 0 1-.796.064 7.462 7.462 0 0 0-.478-.198.798.798 0 0 1-.517-.608l-.091-.55a1.875 1.875 0 0 0-1.85-1.566h-.344ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" clipRule="evenodd" />
+                </svg>)
+            }
         ];
     } else if (userType === 'tecnico') {
         links = [
@@ -74,44 +81,105 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
     else if (userType === 'usuario') { perfis = [{ label: 'Perfil', href: '/usuario/perfil' }] }
     else if (userType === 'admin') { perfis = [{ label: 'Perfil', href: '/admin/perfil' }] }
 
-
-    useEffect(() => {
-        if (dropdownNotificationOpen) {
-            fetch("http://localhost:8080/notificacoes", {
+    // busca notificações (quando abrir dropdown)
+    async function fetchNotificacoes() {
+        try {
+            const res = await fetch("http://localhost:8080/notificacoes", {
                 method: "GET",
                 credentials: "include",
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            })
-                .then((res) => {
-                    if (!res.ok) throw new Error("Erro ao buscar notificações");
-                    return res.json();
-                })
-                .then((data) => setNotificacoes(data))
-                .catch((err) => console.error("Erro ao buscar notificações:", err));
+                headers: { "Content-Type": "application/json" }
+            });
+            if (!res.ok) throw new Error("Erro ao buscar notificações");
+            const data = await res.json();
+            setNotificacoes(data);
+        } catch (err) {
+            console.error("Erro ao buscar notificações:", err);
+        }
+    }
+
+    // busca contagem (total / nao lidas / nao visualizadas)
+    async function fetchContagens() {
+        try {
+            const res = await fetch("http://localhost:8080/notificacoes/contagem", {
+                method: "GET",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" }
+            });
+            if (!res.ok) throw new Error("Erro ao buscar contagem");
+            const data = await res.json();
+            setUnvisualizedCount(Number(data.nao_visualizadas || data.unvisualized || 0));
+            setUnreadCount(Number(data.nao_lidas || data.nao_lidas || 0));
+        } catch (err) {
+            console.error("Erro ao buscar contagem de notificações:", err);
+        }
+    }
+
+    // quando abrir o dropdown: marcar visualizadas e buscar lista + contagem
+    useEffect(() => {
+        if (dropdownNotificationOpen) {
+            // marca como visualizadas (o user "viu" as notificações)
+            fetch("http://localhost:8080/notificacoes/visualizadas", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" }
+            }).catch(err => console.error("Erro marcando visualizadas:", err))
+                .finally(() => {
+                    // depois de marcar visualizadas, busca a lista atualizada e as contagens
+                    fetchNotificacoes();
+                    fetchContagens();
+                });
         }
     }, [dropdownNotificationOpen]);
+
+    // buscar contagem ao montar e a cada 30s (polling simples)
+    useEffect(() => {
+        fetchContagens();
+        const id = setInterval(fetchContagens, 30000); // 30s
+        return () => clearInterval(id);
+    }, []);
+
+    // função ao abrir/acionar uma notificação individual (marca como lida)
+    async function abrirNotificacao(n) {
+        // se já for lida, apenas abre; se não, marcar como lida
+        try {
+            // chama seu endpoint já existente para marcar como lida
+            if (!n.lida) {
+                await fetch(`http://localhost:8080/notificacoes/${n.id}/marcar-lida`, {
+                    method: "POST", // ou PUT conforme sua rota (se seu endpoint atual for diferente, adapte)
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+        } catch (err) {
+            console.error("Erro marcando notificação como lida:", err);
+        } finally {
+            // atualiza lista e contagem
+            fetchNotificacoes();
+            fetchContagens();
+            // aqui você pode abrir o modal/detalhe da notificação
+            // openModalComNotificacao(n)
+        }
+    }
 
     function getNotificacaoIcon(tipo) {
         switch (tipo) {
             case "resposta_tecnico": // apontamento
                 return (
-                    <svg className="w-2 h-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                    <svg className="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
                         <path d="M18 0H2a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2v4a1 1 0 0 0 1.707.707L10.414 13H18a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5 4h2a1 1 0 1 1 0 2h-2a1 1 0 1 1 0-2ZM5 4h5a1 1 0 1 1 0 2H5a1 1 0 0 1 0-2Zm2 5H5a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2Zm9 0h-6a1 1 0 0 1 0-2h6a1 1 0 1 1 0 2Z" />
                     </svg>
                 );
 
             case "tecnico_atribuido": // atribuição
                 return (
-                    <svg className="w-2 h-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                    <svg className="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
                         <path d="M6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Zm11-3h-2V5a1 1 0 0 0-2 0v2h-2a1 1 0 1 0 0 2h2v2a1 1 0 0 0 2 0V9h2a1 1 0 1 0 0-2Z" />
                     </svg>
                 );
 
             default: // qualquer chamado (criado, finalizado, atualizado etc.)
                 return (
-                    <svg className="w-2 h-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+                    <svg className="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
                         <path d="M1 18h16a1 1 0 0 0 1-1v-6h-4.439a.99.99 0 0 0-.908.6 3.978 3.978 0 0 1-7.306 0 .99.99 0 0 0-.908-.6H0v6a1 1 0 0 0 1 1Z" />
                         <path d="M4.439 9a2.99 2.99 0 0 1 2.742 1.8 1.977 1.977 0 0 0 3.638 0A2.99 2.99 0 0 1 13.561 9H17.8L15.977.783A1 1 0 0 0 15 0H3a1 1 0 0 0-.977.783L.2 9h4.239Z" />
                     </svg>
@@ -168,13 +236,18 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                             </button> */}
 
                             {/* Botão do sino */}
-                            <button id="dropdown-notification-button" onClick={() => setDropdownNotificationOpen(!dropdownNotificationOpen)} className="relative inline-flex items-center text-sm poppins-medium text-center text-gray-500 hover:text-gray-900 focus:outline-none dark:hover:text-white dark:text-gray-400" type="button">
+                            <button id="dropdown-notification-button" onClick={() => setDropdownNotificationOpen(v => !v)} className="relative inline-flex items-center text-sm poppins-medium text-center text-gray-500 hover:text-gray-900 focus:outline-none dark:hover:text-white dark:text-gray-400" type="button">
                                 <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 14 20">
                                     <path d="M12.133 10.632v-1.8A5.406 5.406 0 0 0 7.979 3.57.946.946 0 0 0 8 3.464V1.1a1 1 0 0 0-2 0v2.364a.946.946 0 0 0 .021.106 5.406 5.406 0 0 0-4.154 5.262v1.8C1.867 13.018 0 13.614 0 14.807 0 15.4 0 16 .538 16h12.924C14 16 14 15.4 14 14.807c0-1.193-1.867-1.789-1.867-4.175ZM3.823 17a3.453 3.453 0 0 0 6.354 0H3.823Z" />
                                 </svg>
                                 {/* Pontinho vermelho se tiver notificações não lidas */}
-                                {notificacoes.some(n => !n.lida) && (
+                                {/* {notificacoes.some(n => !n.lida) && (
                                     <div className="absolute block w-3 h-3 bg-red-500 border-2 border-white rounded-full -top-0.5 start-2.5"></div>
+                                )} */}
+                                {unvisualizedCount > 0 && (
+                                    <span title={`${unvisualizedCount} nova(s)`} className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-600 rounded-full">
+                                        {unvisualizedCount > 9 ? '9+' : unvisualizedCount}
+                                    </span>
                                 )}
                             </button>
 
@@ -267,8 +340,8 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                                                     className={`flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 ${!n.lida ? "bg-gray-50" : ""}`}
                                                 >
                                                     <div className="shrink-0">
-                                                        <img className="rounded-full w-11 h-11" src="/docs/images/people/profile-picture-1.jpg" alt="avatar" />
-                                                        <div className="absolute flex items-center justify-center w-5 h-5 ms-6 -mt-5 bg-blue-600 border border-white rounded-full dark:border-gray-800">
+                                                        {/* <img className="rounded-full w-11 h-11" src="/docs/images/people/profile-picture-1.jpg" alt="avatar" /> */}
+                                                        <div className="flex items-center justify-center w-11 h-11 bg-[#7F56D8] border border-white rounded-full dark:border-gray-800">
                                                             {getNotificacaoIcon(n.tipo)}
                                                         </div>
                                                     </div>
@@ -277,7 +350,7 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                                                             <span className="poppins-semibold text-gray-900 dark:text-white">{n.titulo}</span>
                                                             <p>{n.descricao}</p>
                                                         </div>
-                                                        <div className="text-xs text-blue-600 dark:text-blue-500">
+                                                        <div className="text-xs text-[#7F56D8] dark:text-blue-500">
                                                             {new Date(n.criado_em).toLocaleString("pt-BR")}
                                                         </div>
                                                     </div>
