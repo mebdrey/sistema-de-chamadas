@@ -26,19 +26,32 @@ export default function MeuPerfil() {
         }
     };
 
-    // const enviarFoto = async () => {
-    //     if (!foto) return alert("Selecione uma foto");
-    //     const formData = new FormData();
-    //     formData.append("foto", foto);
-    //     const res = await fetch("/api/editarPerfil/foto", {
-    //         method: "POST",
-    //         body: formData,
-    //     });
-    //     if (res.ok) {
-    //         alert("Foto atualizada!");
-    //     } else {
-    //         alert("Erro ao enviar foto");
-    //     }};
+    const enviarFoto = async () => {
+        if (!foto) return alert("Selecione uma foto");
+
+        const formData = new FormData();
+        formData.append("foto", foto);
+
+        try {
+            const res = await fetch("http://localhost:8080/editarFoto", {
+                method: "POST",
+                body: formData,
+                credentials: "include"
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                alert("Foto atualizada com sucesso!");
+                setUsuario((prev) => ({ ...prev, ftPerfil: data.caminho }));
+            } else {
+                alert(data.mensagem || "Erro ao atualizar foto.");
+            }
+        } catch (err) {
+            console.error("Erro ao enviar foto:", err);
+            alert("Erro ao enviar a foto.");
+        }
+    };
+
 
     //info perfil 
     useEffect(() => {
@@ -108,6 +121,8 @@ export default function MeuPerfil() {
         setEmailEditando(false);
     };
 
+
+
     // enquanto carrega
     if (erro) {
         return <p className="text-red-600 p-4">{erro}</p>;
@@ -136,11 +151,11 @@ export default function MeuPerfil() {
 
     let imagem = [];
 
-    if (usuario.ftPerfil !=null ){
-        imagem = [{src: `http://localhost:8080/${usuario.ftPerfil}`}]
-    } 
+    if (usuario.ftPerfil != null) {
+        imagem = [{ src: `http://localhost:8080/${usuario.ftPerfil}` }]
+    }
     else {
-        imagem = [{  src: './cao.png'}] //só falta arrumar aqui
+        imagem = [{ src: './cao.png' }] //só falta arrumar aqui
     }
 
     return (
@@ -153,13 +168,13 @@ export default function MeuPerfil() {
 
                 {/*NOME DO USUÁRIO E TIPO*/}
                 <div className='user flex items-center gap-7 pt-8 border-b border-[#D0D0D0]'>
-                    
-                    {imagem.map((img) =>(
+
+                    {imagem.map((img) => (
                         <div key={img}>
                             <img className='foto-usuario' src={img.src}></img>
                         </div>
                     ))}
-                    
+
                     <h3>{nomeSobrenome.primeiroNome} {nomeSobrenome.ultimoNome}</h3>
                 </div>
 
@@ -241,6 +256,35 @@ export default function MeuPerfil() {
                                                 </button>
                                             </div>
                                         </div>
+
+                                        {/**enviar foto */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Foto de perfil</label>
+                                            <input type="file" accept="image/*" onChange={handleFileChange} className="mt-1 block w-full text-sm text-gray-500" />
+                                        </div>
+
+
+
+                                        {foto && (
+                                            <>
+                                                {preview && (
+                                                    <div className="mt-2">
+                                                        <img src={preview} alt="Prévia da nova foto" className="w-24 h-24 rounded-full object-cover" />
+                                                    </div>
+                                                )}
+
+                                                <div className="flex justify-center gap-3 mt-4">
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={enviarFoto}
+                                                        className="bg-violet-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
+                                                    > Salvar nova foto</button>
+
+                                                </div>
+
+                                            </>)}
+
 
                                         <div className="flex justify-center gap-3">
                                             <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">

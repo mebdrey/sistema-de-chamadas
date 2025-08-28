@@ -1,4 +1,4 @@
-import { obterDadosDoUsuario, editarPerfil} from '../models/Perfil.js';
+import { obterDadosDoUsuario, editarPerfil, atualizarFotoPerfil} from '../models/Perfil.js';
 import session from "express-session";
 
 // obter dados do perfil do usuario -- funcionando, só não consegui testar com o id da sessão
@@ -44,4 +44,25 @@ const editarPerfilController = async (req, res) => {
     res.status(500).json({ mensagem: 'Erro ao atualizar perfil' });
   }};
 
-export { obterPerfilUsuarioController, editarPerfilController};
+
+  //foto de perfil
+  export const atualizarFotoPerfilController = async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ mensagem: 'Nenhuma imagem enviada.' });
+    }
+
+    const caminhoFoto = `uploads/${req.file.filename}`;
+    const id = req.user.id; // vindo do middleware de autenticação
+
+    try {
+        await atualizarFotoPerfil(id, caminhoFoto);
+        res.status(200).json({ mensagem: 'Foto de perfil atualizada com sucesso!', caminho: caminhoFoto });
+    } catch (err) {
+        console.error('Erro ao atualizar foto:', err);
+        res.status(500).json({ mensagem: 'Erro ao atualizar foto de perfil.' });
+    }
+};
+
+
+
+export { obterPerfilUsuarioController, editarPerfilController, atualizarFotoPerfil};
