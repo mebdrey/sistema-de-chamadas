@@ -505,7 +505,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                         <li key={prioridade.id}>
                           <div className="flex p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
                             <div className="flex items-center h-5">
-                              <input id={`prioridade-checkbox-${prioridade.id}`} type="checkbox" name="prioridade" value={prioridade.nome} checked={prioridadesSelecionadas.includes(prioridade.nome)} onChange={(e) => {
+                              {/* <input id={`prioridade-checkbox-${prioridade.id}`} type="checkbox" name="prioridade" value={prioridade.nome} checked={prioridadesSelecionadas.includes(prioridade.nome)} onChange={(e) => {
                                 const checked = e.target.checked;
                                 const valor = prioridade.nome;
                                 if (checked) {
@@ -514,7 +514,23 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                                   setPrioridadesSelecionadas((prev) => prev.filter((p) => p !== valor));
                                 }
                               }}
-                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
+                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" /> */}
+                              <input
+                                id={`prioridade-checkbox-${prioridade.id}`}
+                                type="checkbox"
+                                name="prioridade"
+                                value={prioridade.id}
+                                checked={prioridadesSelecionadas.includes(prioridade.id)}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  const valor = prioridade.id; // ✅ usar ID, não nome
+                                  if (checked) {
+                                    setPrioridadesSelecionadas((prev) => [...prev, valor]);
+                                  } else {
+                                    setPrioridadesSelecionadas((prev) => prev.filter((p) => p !== valor));
+                                  }
+                                }}
+                              />
                             </div>
                             <div className="ms-2 text-sm">
                               <label htmlFor={`prioridade-checkbox-${prioridade.id}`} className="poppins-medium text-gray-900 dark:text-gray-300">{formatarLabel(prioridade.nome)}</label>
@@ -588,7 +604,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
 
                     const correspondePrioridade =
                       prioridadesSelecionadas.length === 0 ||
-                      prioridadesSelecionadas.includes(c.prioridade);
+                      prioridadesSelecionadas.includes(c.prioridade_id);
 
                     return correspondeStatus && correspondeBusca && correspondeSetor && correspondePrioridade;
                   })
@@ -706,7 +722,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                 </div>
               ) : (
                 <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-[#F8FAFB] w-full dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
-                    <ChatWidget className='!fixed right-0 bottom-0' chamadoSelecionado={chamadoSelecionado}></ChatWidget>
+                  <ChatWidget className='!fixed right-0 bottom-0' chamadoSelecionado={chamadoSelecionado}></ChatWidget>
                   <div className="w-full p-4 bg-white">
                     <h5 id="drawer-right-label" className="inline-flex items-center text-base poppins-semibold text-gray-500 dark:text-gray-400">
                       <svg className="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -788,7 +804,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                       </div>
                     </div>
 
-                 
+
                     <div className="w-full p-10 h-full">
                       <div className="w-full">
                         <h1 className="text-2xl poppins-bold mb-6">Apontamentos do chamado #{chamadoSelecionado?.id}</h1>
@@ -845,41 +861,41 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                         )}
                       </div>
                       <div className="flex items-center gap-3 mb-6">
-                    {podeFinalizar && (
-                      <button onClick={() => setMostrarModalConfirmacao(true)} disabled={finalizando} className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-violet-600 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-violet-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" >{finalizando ? "Finalizando..." : "Finalizar Chamado"}</button>
-                    )}
+                        {podeFinalizar && (
+                          <button onClick={() => setMostrarModalConfirmacao(true)} disabled={finalizando} className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-violet-600 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-violet-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" >{finalizando ? "Finalizando..." : "Finalizar Chamado"}</button>
+                        )}
 
-                    {podeGerarRelatorio && (
-                      <>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            baixarRelatorioPdf("pdf");
-                          }}
-                          disabled={baixando}
-                          className="inline-flex items-center px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60"
-                        >
-                          {baixando ? "Gerando PDF..." : "Gerar / Baixar PDF"}
-                        </button>
+                        {podeGerarRelatorio && (
+                          <>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                baixarRelatorioPdf("pdf");
+                              }}
+                              disabled={baixando}
+                              className="inline-flex items-center px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60"
+                            >
+                              {baixando ? "Gerando PDF..." : "Gerar / Baixar PDF"}
+                            </button>
 
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            baixarRelatorioPdf("csv");
-                          }}
-                          disabled={baixando}
-                          className="inline-flex items-center px-3 py-2 text-sm text-white bg-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-60"
-                        >
-                          {baixando ? "Gerando CSV..." : "Baixar CSV"}
-                        </button>
-                      </>
-                    )}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                baixarRelatorioPdf("csv");
+                              }}
+                              disabled={baixando}
+                              className="inline-flex items-center px-3 py-2 text-sm text-white bg-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-60"
+                            >
+                              {baixando ? "Gerando CSV..." : "Baixar CSV"}
+                            </button>
+                          </>
+                        )}
 
-                  </div>
+                      </div>
                     </div>
 
                   </div>
-                
+
                   {/* === Modal de confirmação Finalizar Chamado === */}
                   {mostrarModalConfirmacao && (
                     <div className="fixed inset-0 z-[999] h-screen flex items-center justify-center bg-black/30">
