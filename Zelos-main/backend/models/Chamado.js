@@ -439,12 +439,10 @@ export const atualizarPrazoPorChamado = async (chamadoId) => {
 
 
 export async function obterChamadosPorMesAno(prioridadeNome = null) {
-  let sql = `
-    SELECT MONTH(c.criado_em) as mes, COUNT(*) as total
+  let sql = `SELECT MONTH(c.criado_em) as mes, COUNT(*) as total
     FROM chamados c
     JOIN prioridades p ON p.id = c.prioridade_id
-    WHERE YEAR(c.criado_em) = YEAR(CURDATE())
-  `;
+    WHERE YEAR(c.criado_em) = YEAR(CURDATE())`;
 
   if (prioridadeNome) {
     sql += ` AND LOWER(p.nome) = LOWER(?)`;
@@ -456,8 +454,7 @@ export async function obterChamadosPorMesAno(prioridadeNome = null) {
 }
 
 export async function contarChamadosPorPool({
-  setor, modo = 'anual'
-} = {}) {
+  setor, modo = 'anual'} = {}) {
   if (!setor) return [];
   const params = [];
 
@@ -515,13 +512,11 @@ export const contarChamadosConcluido = async () => {
 };
 
 export const getApontamentoById = async (id) => {
-  const sql = `
-    SELECT a.*, u.nome AS tecnico_nome
+  const sql = `SELECT a.*, u.nome AS tecnico_nome
     FROM apontamentos a
     LEFT JOIN usuarios u ON a.tecnico_id = u.id
     WHERE a.id = ?
-    LIMIT 1
-  `;
+    LIMIT 1`;
   const rows = await readQuery(sql, [id]);
   return rows && rows[0] ? rows[0] : null;
 };
@@ -536,12 +531,9 @@ export const getApontamentoById = async (id) => {
 //       AND c.status_chamado = 'pendente'
 //       AND c.tecnico_id IS NULL
 //     LIMIT 1;`;
-
 //   const resultados = await readQuery(consulta, [chamado_id, usuario_id]);
 //   const chamado = resultados[0];
-
 //   if (!chamado) {throw new Error('Chamado não encontrado, já atribuído ou não pertence à sua função.');}
-
 //   // Tenta atualizar o chamado para o técnico logado
 //   const sqlUpdate = `UPDATE chamados 
 //     SET tecnico_id = ?, status_chamado = 'em andamento' 
@@ -644,6 +636,7 @@ export const criarApontamento = async ({ chamado_id, descricao, tecnico_id }) =>
   const insertId = await create('apontamentos', { chamado_id, tecnico_id, descricao, comeco });
   return insertId;
 };
+
 
 export const finalizarApontamento = async (apontamento_id) => {
   const agora = new Date();
