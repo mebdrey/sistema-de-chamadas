@@ -498,8 +498,6 @@ export default function PainelGestao() {
                               </div>
                             </td>
                           </tr>
-
-                          
                         </tbody>
                       </table>
 
@@ -509,17 +507,13 @@ export default function PainelGestao() {
                             <span className="font-semibold text-gray-800 dark:text-neutral-200">9</span> results
                           </p>
                         </div>
-
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
-
-
         </main>
 
         {/* Modal: Criar usuário */}
