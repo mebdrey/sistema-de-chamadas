@@ -624,8 +624,8 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                     ) : (
                       chamadosFiltrados.map((chamado) => ( //CARD DOS CHAMADOS
                         <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl  dark:bg-gray-800 dark:border-gray-700 dark:border-t-blue-500 dark:shadow-neutral-700/70 cursor-pointer">
-                          <div className="flex items-center gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:border-neutral-700">
-                            <h3 className="break-all text-base poppins-bold text-gray-800 dark:text-white">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
+                          <div className="flex items-center flex-wrap gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:border-neutral-700">
+                            <h3 className="wrap-break-word break-normal whitespace-normal text-base poppins-bold text-gray-800 dark:text-white">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
                             <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
