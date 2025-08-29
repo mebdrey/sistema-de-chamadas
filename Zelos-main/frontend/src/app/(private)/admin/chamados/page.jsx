@@ -1,14 +1,14 @@
 "use client"
 import { useEffect, useState, useMemo } from "react";
-import { initFlowbite } from 'flowbite'
+import { initFlowbite } from 'flowbite';
 import { useRouter } from 'next/navigation';
-import OrdenarPor from '@/components/DropDown/DropDown.jsx'
+import OrdenarPor from '@/components/DropDown/DropDown.jsx';
 
 export default function ChamadosAdmin() {
   const [isOpen, setIsOpen] = useState(false); // p drawer abrir e fechar
   const [isMounted, setIsMounted] = useState(false); // espera o componente estar carregado no navegador p evitar erros de renderizacao
-  const [chamados, setChamados] = useState([]) // p selecionar os chamados com base no status
-  const [abaAtiva, setAbaAtiva] = useState('todos')
+  const [chamados, setChamados] = useState([]);// p selecionar os chamados com base no status
+  const [abaAtiva, setAbaAtiva] = useState('todos');
   const [tiposServico, setTiposServico] = useState([]); // mostra os tipos de servicos/setores
   const [setoresSelecionados, setSetoresSelecionados] = useState([]); // guarda o tipo de servico selecionado
   const [busca, setBusca] = useState(""); // armazena o que htmlFor digitado no campo de busca
@@ -27,8 +27,7 @@ export default function ChamadosAdmin() {
 
   useEffect(() => { setIsMounted(true); initFlowbite(); }, []);// inicializa dropdowns, modais, etc.
 
-  // busca os chamados feitos pelo usuario
-  useEffect(() => {
+  useEffect(() => {  // busca os chamados feitos pelo usuario
     fetch('http://localhost:8080/todos-chamados', { credentials: 'include' })
       .then(res => {
         if (!res.ok) throw new Error('Erro ao buscar chamados');
@@ -64,13 +63,13 @@ export default function ChamadosAdmin() {
     e.preventDefault();
 
     const form = e.target;
-
     // Pegando os dados do formulário
     const formData = req.body;
     {/*ENVIO PARA O BACK*/ }
     try {
       const response = await fetch("http://localhost:8080/pool", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(formData), credentials: "include"
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData), credentials: "include"
       });
 
       const data = await response.json();
@@ -120,7 +119,6 @@ export default function ChamadosAdmin() {
     const fetchUsuarios = async () => {
       try {
         const res = await fetch("http://localhost:8080/usuarios-por-setor", { credentials: "include" });
-
         if (!res.ok) {
           const text = await res.text().catch(() => "");
           throw new Error(`Erro ao buscar usuários: ${res.status} ${res.statusText} ${text}`);
@@ -137,14 +135,12 @@ export default function ChamadosAdmin() {
         setUsuarios([]);
       }
     };
-
     fetchUsuarios();
   }, []);
 
   const usuariosFiltrados = (() => {
     const tipo = chamadoSelecionado?.tipo_titulo?.toLowerCase();
     if (!tipo) return [];
-
     if (["externo", "apoio_tecnico", "manutencao"].includes(tipo)) { return usuariosPorSetor.tecnicos || []; }
 
     if (tipo === "limpeza") { return usuariosPorSetor.auxiliares || []; }
@@ -205,7 +201,13 @@ export default function ChamadosAdmin() {
   useEffect(() => {
     if (chamadoSelecionado) {
       setFormData({
-        prioridade_id: chamadoSelecionado.prioridade_id ?? 'none', tecnico_id: chamadoSelecionado.tecnico_id ?? "", tipo_id: chamadoSelecionado.tipo_id ?? "", descricao: chamadoSelecionado.descricao ?? "", assunto: chamadoSelecionado.assunto ?? "", status_chamado: chamadoSelecionado.status_chamado ?? "pendente", data_limite: chamadoSelecionado.data_limite ?? ''
+        prioridade_id: chamadoSelecionado.prioridade_id ?? 'none',
+        tecnico_id: chamadoSelecionado.tecnico_id ?? "",
+        tipo_id: chamadoSelecionado.tipo_id ?? "",
+        descricao: chamadoSelecionado.descricao ?? "",
+        assunto: chamadoSelecionado.assunto ?? "",
+        status_chamado: chamadoSelecionado.status_chamado ?? "pendente",
+        data_limite: chamadoSelecionado.data_limite ?? ''
       });
       setIsEditing(false); // start in read mode
     } else {
@@ -244,7 +246,9 @@ export default function ChamadosAdmin() {
     }
 
     try {
-      const res = await fetch(`http://localhost:8080/chamado/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) });
+      const res = await fetch(`http://localhost:8080/chamado/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload)
+      });
 
       if (!res.ok) {
         const text = await res.text().catch(() => "");
@@ -256,12 +260,10 @@ export default function ChamadosAdmin() {
       setChamados((prev) => prev.map(c => c.id === id ? { ...c, ...payload } : c));
       setChamadoSelecionado((prev) => ({ ...prev, ...payload }));
       setIsEditing(false);
-      if (payload.tipo_id) {
-        dadosAtualizados.tipo_titulo = mapaTipoIdParaTitulo[payload.tipo_id];
-      }
-      setChamados((prev) =>
-        prev.map(c => c.id === id ? { ...c, ...dadosAtualizados } : c)
-      );
+
+      if (payload.tipo_id) { dadosAtualizados.tipo_titulo = mapaTipoIdParaTitulo[payload.tipo_id]; }
+
+      setChamados((prev) => prev.map(c => c.id === id ? { ...c, ...dadosAtualizados } : c));
       setChamadoSelecionado((prev) => ({ ...prev, ...dadosAtualizados }));
 
       alert('Chamado atualizado com sucesso!');
@@ -305,9 +307,8 @@ export default function ChamadosAdmin() {
   }
 
   return (
-    <>
-      {/* conteudo da pagina */}
-      <div className="p-4 w-full">
+    <>{/* conteudo da pagina */}
+      <div className="p-4 w-full dark:bg-gray-900">
         <div className="p-4 mt-14">
           <div className='flex flex-row flex-wrap gap-6 w-full justify-between mb-15'>
             <div className="w-fit flex-wrap gap-4 flex flex-row ">
@@ -442,27 +443,27 @@ export default function ChamadosAdmin() {
                     {chamadosFiltrados.length === 0 ? (
                       <div className="p-4 md:p-5"><p className="text-gray-500"> Nenhum chamado encontrado.</p></div>
                     ) : (chamadosFiltrados.map((chamado) => (
-                      <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:border-t-blue-500 dark:shadow-neutral-700/70 cursor-pointer">
-                        <div className="flex items-center gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 ">
-                          <h3 className="text-base poppins-bold text-gray-800 ">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
-                          <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
+                      <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl dark:bg-gray-800 border border-gray-700 border-neutral-700 border-t-blue-500 shadow-neutral-700/70 cursor-pointer hover:border-purple-500">
+                        <div className="flex items-center gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:bg-gray-800 ">
+                          <h3 className="text-base poppins-bold text-gray-800 dark:text-gray-200   ">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
+                          <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-700 text-white hover:bg-gray-500 ">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-4 ">
                           <div>
-                            <p className="text-xs text-gray-500 ">Usuário</p>
-                            <p className="text-sm poppins-bold text-gray-800">{chamado?.usuario_nome || chamado?.nome_usuario || 'Nome não encontrado'}</p>
+                            <p className="text-xs text-gray-100 ">Usuário</p>
+                            <p className="text-sm poppins-bold text-gray-200">{chamado?.usuario_nome || chamado?.nome_usuario || 'Nome não encontrado'}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500">Criado em</p>
-                            <p className="text-sm poppins-bold text-gray-800">{formatarDataSimples(chamado.criado_em)} </p>
+                            <p className="text-xs text-gray-100">Criado em</p>
+                            <p className="text-sm poppins-bold text-gray-200">{formatarDataSimples(chamado.criado_em)} </p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500">Prioridade</p>
-                            <p className="text-sm poppins-bold text-gray-800">{getPrioridadeLabel(chamado.prioridade_id)}</p>
+                            <p className="text-xs text-gray-100">Prioridade</p>
+                            <p className="text-sm poppins-bold text-gray-200">{getPrioridadeLabel(chamado.prioridade_id)}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500 ">Chamado ID</p>
-                            <p className="text-sm poppins-bold text-gray-800">#{chamado.id}</p>
+                            <p className="text-xs text-gray-100 ">Chamado ID</p>
+                            <p className="text-sm poppins-bold text-gray-200">#{chamado.id}</p>
                           </div>
                         </div>
                       </div>
@@ -485,51 +486,51 @@ export default function ChamadosAdmin() {
                 <span className="sr-only">Close menu</span>
               </button>
               <div>
-                <p className="mb-2 text-sm text-gray-500 ">Usuário</p>
-                <p className="mb-6 text-sm poppins-bold text-gray-800">{getUsuarioNome(chamadoSelecionado?.usuario_id)}</p>
+                <p className="mb-2 text-sm text-gray-400 ">Usuário</p>
+                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-300">{getUsuarioNome(chamadoSelecionado?.usuario_id)}</p>
               </div>
               {/* Tipo de serviço -> select se estiver editando, senão texto */}
               <div>
-                <p className="mb-2 text-sm text-gray-500 ">Tipo de serviço</p>
+                <p className="mb-2 text-sm text-gray-400 ">Tipo de serviço</p>
                 {isEditing ? (
                   <>
                     <select id="tipo_id" name="tipo_id" value={formData.tipo_id ?? ""} onChange={handleChange} className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50">
                       <option value="">Selecione um tipo</option>
                       {tiposServico.map((t) => (<option key={t.id} value={t.id}>{formatarLabel(t.titulo.replace(/_/g, ' '))}</option>))}
                     </select>
-                  </>) : (<p className="mb-6 text-sm poppins-bold text-gray-800">{formatarLabel(getTipoServicoTitulo(chamadoSelecionado?.tipo_id))}</p>
+                  </>) : (<p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-300">{formatarLabel(getTipoServicoTitulo(chamadoSelecionado?.tipo_id))}</p>
                 )}
               </div>
 
               {/* Prioridade */}
               <div>
-                <p className="mb-2 text-sm text-gray-500 ">Prioridade</p>
+                <p className="mb-2 text-sm text-gray-400 ">Prioridade</p>
                 {isEditing ? (<>
                   <select id="prioridade_id" name="prioridade_id" value={formData.prioridade_id ?? ""} onChange={handleChange} className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50">
                     <option value="">Selecione uma prioridade</option>
-                    {Object.entries(prioridadeMap).map(([id, {label}])=>(<option key={id} value={id}> {label}</option>))}
+                    {Object.entries(prioridadeMap).map(([id, { label }]) => (<option key={id} value={id}> {label}</option>))}
                   </select>
                 </>) : (
-                  <p className="mb-6 text-sm poppins-bold text-gray-800">{formatarLabel(getPrioridadeLabel(chamadoSelecionado?.prioridade_id))}</p>
+                  <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-300">{formatarLabel(getPrioridadeLabel(chamadoSelecionado?.prioridade_id))}</p>
                 )}
               </div>
 
               {/* Assunto */}
               <div>
-                <p className="mb-2 text-sm text-gray-500 ">Assunto</p>
+                <p className="mb-2 text-sm text-gray-400 ">Assunto</p>
                 {isEditing ? (
                   <div>
                     <input type="text" id="assunto" name="assunto" value={formData.assunto ?? ""} onChange={handleChange} className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500" />
                   </div>
-                ) : (<p className="mb-6 text-sm poppins-bold text-gray-800">{chamadoSelecionado?.assunto}</p>)}
+                ) : (<p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-300">{chamadoSelecionado?.assunto}</p>)}
               </div>
-
+              
               {/* Descrição */}
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Descrição</p>
                 {isEditing ? (
                   <div> <textarea id="descricao" name="descricao" rows="4" value={formData.descricao ?? ""} onChange={handleChange} className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500" /></div>
-                ) : (<p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.descricao}</p>)}
+                ) : (<p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-300">{chamadoSelecionado?.descricao}</p>)}
               </div>
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
@@ -537,15 +538,18 @@ export default function ChamadosAdmin() {
                   <div className="mb-6">
                     <img src={chamadoSelecionado.imagem} alt={`Anexo chamado #${chamadoSelecionado?.id}`} className="max-w-full max-h-48 object-contain rounded-md" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/default-anexo.png"; }} />
                   </div>
-                ) : (<p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">Nenhum anexo foi enviado para o chamado</p>)}
+                ) : (<p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-300">Nenhum anexo foi enviado para o chamado</p>)}
               </div>
               <div>
-                <p className="mb-2 text-sm text-gray-500 ">Identificador do item (n° de patrimônio)</p>
-                <p className="mb-6 text-sm poppins-bold text-gray-800">{chamadoSelecionado?.patrimonio}</p>
+                <p className="mb-2 text-sm text-gray-400 ">Identificador do item (n° de patrimônio)</p>
+                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-300">{chamadoSelecionado?.patrimonio}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Data limite</p>
-                <p className="text-sm poppins-bold text-gray-800">{formatarDataSimples(chamadoSelecionado?.data_limite)} </p>
+                <p className="text-xs text-gray-400">Data limite</p>
+                {chamadoSelecionado?.data_limite ? (
+                <div className="mb-6">
+                  <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-300">{chamadoSelecionado?.data_limite}</p></div>
+              ) : (<p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-300">Chamado sem data limite.</p>)}
               </div>
               {/* <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Técnico/Auxiliar</p>
@@ -574,7 +578,6 @@ export default function ChamadosAdmin() {
                                         <span className="truncate">{u.nome}</span> </button></li>
                                   ); })
                               ) : ( <li className="px-4 py-2 text-sm text-gray-500">Nenhum usuário disponível</li> )} </ul>
-
                             <div className="border-t border-gray-200">
                               <button type="button" onClick={async () => {
                                   // chama a função existente para atribuir e depois faz reset/fechamento
@@ -593,7 +596,7 @@ export default function ChamadosAdmin() {
               {/* Técnico / Atribuir */}
               <div>
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Técnico/Auxiliar</p>
-                <div className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">
+                <div className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-200">
                   {isEditing ? (
                     <>
                       <>
@@ -602,7 +605,6 @@ export default function ChamadosAdmin() {
                             Adicionar
                           </button>
                         </div>
-
                         {openAtribuirDropdown && (
                           <div id="dropdownUsers" className="z-10 bg-white rounded-lg shadow-sm w-60 mt-2">
                             <ul className="h-48 py-2 overflow-y-auto text-gray-700">
@@ -669,13 +671,13 @@ export default function ChamadosAdmin() {
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-sm text-gray-500 ">Criado em</p>
-                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">{formatarDataSimples(chamadoSelecionado?.criado_em)} </p>
+                <p className="mb-2 text-sm text-gray-400 ">Criado em</p>
+                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-200">{formatarDataSimples(chamadoSelecionado?.criado_em)} </p>
               </div>
               {/* Status (select se editando) */}
               <div className="mb-4">
                 {isEditing ? (
-                  <><label htmlFor="status_chamado" className="block mb-2 text-sm font-medium text-gray-900 ">Status</label>
+                  <><label htmlFor="status_chamado" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white ">Status</label>
                     <select id="status_chamado" name="status_chamado" value={formData.status_chamado ?? "pendente"} onChange={handleChange} className="block w-full p-2 mb-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:border-[#7F56D8]">
                       <option value="pendente">Pendente</option>
                       <option value="em andamento">Em andamento</option>

@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import jsPDF from "jspdf";
@@ -43,16 +42,12 @@ export default function LeadsCard({
           throw new Error(`API retornou ${res.status} ${txt || ""}`);
         }
         const json = await res.json();
-        if (!canceled) {
-          setApiData(normalizeApiResponse(json));
-        }
+        if (!canceled) { setApiData(normalizeApiResponse(json));}
       } catch (err) {
         console.error("Erro ao carregar dados:", err);
         if (!canceled) setErro("Falha ao carregar dados do servidor.");
         if (!canceled) setApiData({ categorias: [], series: [{ name: "Em andamento", data: [] }, { name: "Concluído", data: [] }], tabela: [], total: 0 });
-      } finally {
-        if (!canceled) setLoading(false);
-      }
+      } finally {if (!canceled) setLoading(false);}
     }
     if (setor) fetchDados();
     return () => { canceled = true; };
@@ -79,14 +74,7 @@ export default function LeadsCard({
       colors: ["#cfb5e8", "#9254d1"],
       series: apiData.series || [],
       chart: { type: "bar", height: 340, fontFamily: "Inter, sans-serif", toolbar: { show: false } },
-      plotOptions: {
-        bar: {
-          horizontal: false,
-          columnWidth: "40%",
-          borderRadiusApplication: "end",
-          borderRadius: 8,
-        },
-      },
+      plotOptions: {bar: {horizontal: false, columnWidth: "40%", borderRadiusApplication: "end", borderRadius: 8},},
       xaxis: { categories: apiData.categorias || [], labels: { rotate: -15 } },
       dataLabels: { enabled: false },
       legend: { show: true },
@@ -147,9 +135,7 @@ function gerarCSV() {
     titulo,
     dataGeracao,
     headers.join(separator),
-    ...rows.map(r =>
-      headers.map(h => r[h]).join(separator)
-    )
+    ...rows.map(r => headers.map(h => r[h]).join(separator))
   ];
 
   const csv = bom + lines.join("\n");
@@ -160,8 +146,8 @@ function gerarCSV() {
   a.setAttribute("download", `relatorio_${setorFormatado}_${modo}.csv`);
   document.body.appendChild(a);
   a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  a.remove()
+  URL.revokeObjectURL(url)
 }
 
 function gerarPDF() {
@@ -189,7 +175,7 @@ function gerarPDF() {
 
   const totalChamados = tabela.reduce((acc, r) => acc + (r.total || (Number(r.em_andamento || 0) + Number(r.concluido || 0))), 0);
 
-  const doc = new jsPDF();
+  const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth();
 
   // --- TÍTULO ---
@@ -231,7 +217,7 @@ function gerarPDF() {
   }
 
   // --- SALVAR PDF ---
-  doc.save(`relatorio_setor_${setorFormatado.replace(/ /g, "_")}_${modo}.pdf`);
+  doc.save(`relatorio_setor_${setorFormatado.replace(/ /g, "_")}_${modo}.pdf`)
 }
 
    // formata os tipos de servico
@@ -242,14 +228,14 @@ function formatarLabel(str) {
       apoio_tecnico: "Apoio Técnico"
     };
 
-  const palavras = str.replace(/_/g, " ").split(" ");
+  const palavras = str.replace(/_/g, " ").split(" ")
 
   return palavras
   .map(palavra => {
     const semAcento = palavra.toLowerCase();
     return correcoes[semAcento] || (palavra.charAt(0).toUpperCase() + palavra.slice(1));
   })
-  .join(" ");
+  .join(" ")
 }
 
   // busca os tipos de servico
@@ -257,7 +243,7 @@ function formatarLabel(str) {
     fetch('http://localhost:8080/servicos', { credentials: 'include' })
       .then(res => res.json())
       .then(data => setTiposServico(data))
-      .catch(err => console.error('Erro ao carregar tipos:', err));
+      .catch(err => console.error('Erro ao carregar tipos:', err))
   }, []);
 
   return (
@@ -291,7 +277,7 @@ function formatarLabel(str) {
         {loading && <div className="text-sm text-gray-500 mb-2">Carregando dados...</div>}
         {erro && <div className="text-sm text-red-500 mb-2">{erro}</div>}
         {!loading && apiData && apiData.categorias && apiData.categorias.length === 0 && (
-          <div className="text-sm text-gray-500 mb-2">Nenhum funcionário com chamados nessa pool (no ano selecionado).</div>
+          <div className="text-sm text-gray-500 mb-2 dark:text-gray-200">Nenhum funcionário com chamados nessa pool (no ano selecionado).</div>
         )}
         <div id="column-chart" ref={chartRef} />
       </div>
@@ -299,7 +285,7 @@ function formatarLabel(str) {
       <div className="flex justify-between items-center ">
         <div>
           <button onClick={gerarCSV} className="text-sm px-3 py-2 rounded-md bg-[#7F56D8] text-white">Exportar CSV</button>
-          <button onClick={gerarPDF} className="ms-2 text-sm px-3 py-2 rounded-md border">Exportar PDF</button>
+          <button onClick={gerarPDF} className="ms-2 text-sm px-3 py-2 rounded-md border dark:border border-white text-white">Exportar PDF</button>
         </div>
       </div>
     </div>

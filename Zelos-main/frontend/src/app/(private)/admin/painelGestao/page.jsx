@@ -141,15 +141,15 @@ export default function PainelGestao() {
   };
 
   return (
-    <div className="p-4 w-full">
+    <div className="p-4 w-full dark:bg-gray-800">
       <div className="p-4 mt-14">
 
         <main className="max-w-7xl mx-auto">
           <div className="flex flex-col">
             {/* Card: Usuários */}
-            <section className="bg-white rounded-2xl shadow-sm p-6">
+            <section className="bg-white rounded-2xl shadow-sm p-6 dark:bg-gray-700">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Criar novos usuários</h3>
+                <h3 className="text-lg font-semibold dark:text-white">Criar novos usuários</h3>
               </div>
               <div className="mt-4 space-y-3">
 
@@ -291,30 +291,30 @@ export default function PainelGestao() {
             <section className="flex flex-col">
               <div className="-m-1.5 overflow-x-auto">
                 <div className="p-1.5 min-w-full inline-block align-middle">
-                  <div className="bg-white border border-gray-200 rounded-xl shadow-2xs overflow-hidden dark:bg-neutral-900 dark:border-neutral-700">
+                  <div className="bg-white border border-gray-200 rounded-xl shadow-2xs overflow-hidden dark:bg-neutral-900 dark:border-neutral-700 dark:bg-gray-700">
                     <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200 dark:border-neutral-700">
                       <div>
-                        <h2 className="text-xl font-semibold text-gray-800 dark:text-neutral-200">Setores / Pools</h2>
-                        <p className="text-sm text-gray-600 dark:text-neutral-400">Crie, edite e exclua setores.</p>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-neutral-200 dark:text-white">Setores / Pools</h2>
+                        <p className="text-sm text-gray-600 dark:text-neutral-400 dark:text-gray-200">Crie, edite e exclua setores.</p>
                       </div>
 
                       <div>
                         <div className="inline-flex gap-x-2">
 
-                          <button type="button" className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">Criar setor</button>
+                          <button type="button" className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none ">Criar setor</button>
                         </div>
                       </div>
                     </div>
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
-                      <thead className="bg-gray-50 dark:bg-neutral-800">
+                      <thead className="bg-gray-50 dark:bg-neutral-800 dark:bg-gray-700">
                         <tr>
                           <th scope="col" className="px-6 py-3 text-start">
-                            <a className="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-hidden focus:text-gray-500 dark:text-neutral-200 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="#">Setor <svg className="shrink-0 size-3.5 text-gray-800 dark:text-neutral-200" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" /></svg>
+                            <a className="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-hidden focus:text-gray-500 dark:text-neutral-200 dark:hover:text-neutral-500 dark:focus:text-neutral-500 dark:text-white " href="#">Setor <svg className="shrink-0 size-3.5 text-gray-800 dark:text-neutral-200 dark:text-gray-200 " width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" /></svg>
                             </a>
                           </th>
 
                           <th scope="col" className="px-6 py-3 text-start">
-                            <a className="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-hidden focus:text-gray-500 dark:text-neutral-200 dark:hover:text-neutral-500 dark:focus:text-neutral-500" href="#">Descrição<svg className="shrink-0 size-3.5 text-gray-800 dark:text-neutral-200" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" /></svg>
+                            <a className="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-hidden focus:text-gray-500 dark:text-neutral-200 dark:hover:text-neutral-500 dark:focus:text-neutral-500 dark:text-white" href="#">Descrição<svg className="shrink-0 size-3.5 text-gray-800 dark:text-neutral-200 dark:text-gray-200" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" /></svg>
                             </a>
                           </th>
 
@@ -325,19 +325,13 @@ export default function PainelGestao() {
                       <tbody className="divide-y divide-gray-200 dark:divide-neutral-700">
                         {setores.length === 0 ? (
                           <tr>
-                            <td
-                              colSpan="4"
-                              className="px-6 py-4 text-center text-sm text-gray-500 dark:text-neutral-400"
-                            >
+                            <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500 dark:text-neutral-400 dark:text-gray-200" >
                               Nenhum setor encontrado
                             </td>
                           </tr>
                         ) : (
                           setores.map((s) => (
-                            <tr
-                              key={s.id}
-                              className="bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800"
-                            >
+                            <tr key={s.id} className="bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800" >
                               {/* Coluna: Setor */}
                               <td className="size-px whitespace-nowrap">
                                 <a className="block relative z-10" href="#">
@@ -363,17 +357,8 @@ export default function PainelGestao() {
                                 <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 p-4">
                                   <form onSubmit={handleAtualizarSetor} className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
                                     <h3 className="text-lg font-semibold mb-4">Editar setor</h3>
-                                    <input
-                                      type="text"
-                                      value={editSetor.titulo}
-                                      onChange={(e) => setEditSetor({ ...editSetor, titulo: e.target.value })}
-                                      className="w-full border rounded-lg p-2 mb-3"
-                                    />
-                                    <textarea
-                                      value={editSetor.descricao}
-                                      onChange={(e) => setEditSetor({ ...editSetor, descricao: e.target.value })}
-                                      className="w-full border rounded-lg p-2 mb-3"
-                                    />
+                                    <input type="text" value={editSetor.titulo} onChange={(e) => setEditSetor({ ...editSetor, titulo: e.target.value })} className="w-full border rounded-lg p-2 mb-3"/>
+                                    <textarea value={editSetor.descricao} onChange={(e) => setEditSetor({ ...editSetor, descricao: e.target.value })} className="w-full border rounded-lg p-2 mb-3"/>
                                     <div className="flex justify-end gap-2">
                                       <button type="button" onClick={() => setEditSetor(null)} className="px-4 py-2 border rounded-lg">
                                         Cancelar
@@ -385,7 +370,6 @@ export default function PainelGestao() {
                                   </form>
                                 </div>
                               )}
-
 
                               {/* Coluna: Ações */}
                               <td className="size-px whitespace-nowrap">
@@ -418,9 +402,8 @@ export default function PainelGestao() {
                     </table>
                     <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-neutral-400"><span className="font-semibold text-gray-800 dark:text-neutral-200">6</span> resultados</p>
+                        <p className="text-sm text-gray-600 dark:text-neutral-400 dark:text-gray-200"><span className="font-semibold text-gray-800 dark:text-neutral-200 dark:text-gray-200">6</span> resultados</p>
                       </div>
-
                     </div>
                   </div>
                 </div>
@@ -443,11 +426,11 @@ export default function PainelGestao() {
               </div>
             </section> */}
 
-            <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+            <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto ">
               <div className="flex flex-col">
                 <div className="-m-1.5 overflow-x-auto">
                   <div className="p-1.5 min-w-full inline-block align-middle">
-                    <div className="bg-white border border-gray-200 rounded-xl shadow-2xs overflow-hidden dark:bg-neutral-900 dark:border-neutral-700">
+                    <div className="bg-white border border-gray-200 rounded-xl shadow-2xs overflow-hidden dark:bg-neutral-900 dark:border-neutral-700 dark:bg-gray-600">
                       <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200 dark:border-neutral-700">
                         <div>
                           <h2 className="text-xl font-semibold text-gray-800 dark:text-neutral-200">Prioridades</h2>
@@ -465,7 +448,7 @@ export default function PainelGestao() {
                       </div>
 
                       <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
-                        <thead className="bg-gray-50 divide-y divide-gray-200 dark:bg-neutral-800 dark:divide-neutral-700">
+                        <thead className="bg-gray-50 divide-y divide-gray-200 dark:bg-neutral-800 dark:divide-neutral-700 dark:bg-gray-500">
                           <tr>
                             <th scope="col" className="px-6 py-3 text-start border-s border-gray-200 dark:border-neutral-700">
                               <span className="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Nome</span>

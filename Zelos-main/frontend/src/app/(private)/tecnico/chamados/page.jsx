@@ -527,9 +527,8 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                                   const valor = prioridade.id; // ✅ usar ID, não nome
                                   if (checked) {
                                     setPrioridadesSelecionadas((prev) => [...prev, valor]);
-                                  } else {
-                                    setPrioridadesSelecionadas((prev) => prev.filter((p) => p !== valor));
                                   }
+                                  else {setPrioridadesSelecionadas((prev) => prev.filter((p) => p !== valor));}
                                 }}
                               />
                             </div>

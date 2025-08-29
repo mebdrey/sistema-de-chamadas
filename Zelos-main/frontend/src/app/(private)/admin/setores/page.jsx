@@ -14,9 +14,7 @@ export default function Setores() {
     useEffect(() => {
         fetch("http://localhost:8080/usuarios-por-setor", { credentials: 'include' })
             .then((res) => res.json())
-            .then((data) => {
-                setSetores(data);
-            });
+            .then((data) => {setSetores(data); });
     }, []);
 
     // Função para lidar com check/uncheck dos setores no dropdown
@@ -81,9 +79,7 @@ function deletarUsuario(id) {
             "tecnico": "Técnico"
         };
 
-        if (correcoes[texto]) {
-            return correcoes[texto];
-        }
+        if (correcoes[texto]) { return correcoes[texto];}
 
         // capitaliza cada palavra caso não tenha uma correção personalizada
         return texto
@@ -93,9 +89,8 @@ function deletarUsuario(id) {
     }
 
     return (
-        <div className="p-4 h-screen w-full">
+        <div className="p-4 h-screen w-full dark:bg-gray-800">
             <div className="p-4  rounded-lg dark:border-gray-700 mt-14">
-
                 <div className="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 p-4 ">
                     <div className="relative inline-block text-left">
                         {/* <button onClick={() => setDropdownAberto(!dropdownAberto)} className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" >
@@ -104,7 +99,6 @@ function deletarUsuario(id) {
                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                                 </svg>
                             </button>
-
                             {dropdownAberto && (
                                 <div className="z-10 absolute mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600" style={{ top: "100%", left: 0 }} >
                                     <ul className="py-1 text-sm text-gray-700 dark:text-gray-200">
@@ -168,17 +162,11 @@ function deletarUsuario(id) {
                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
                                 </svg>
                             </div>
-                            <input
-                                type="text"
-                                id="simple-search"
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#7F56D8] focus:border-[#7F56D8] block w-full ps-10 p-2.5"
-                                placeholder="Pesquisar por usuário"
-                                value={busca}
-                                onChange={(e) => setBusca(e.target.value)} />
+                            <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#7F56D8] focus:border-[#7F56D8] block w-full ps-10 p-2.5"
+                                placeholder="Pesquisar por usuário" value={busca} onChange={(e) => setBusca(e.target.value)} />
                         </div>
                     </form>
                 </div>
-
 
                 {/* Dropdown botão */}
                 {/* <button id="dropdownHelperButton" data-dropdown-toggle="dropdownHelper" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
@@ -186,33 +174,19 @@ function deletarUsuario(id) {
           <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
         </svg>
       </button>
-
       {/* Dropdown menu */}
                 {/* {dropdownAberto && (
-        <div id="dropdownHelper"
-          className="z-10 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-60 dark:bg-gray-700 dark:divide-gray-600"
-        >
-          <ul
-            className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200"
-            aria-labelledby="dropdownHelperButton"
-          >
+        <div id="dropdownHelper" className="z-10 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-60 dark:bg-gray-700 dark:divide-gray-600" >
+          <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHelperButton">
             {Object.keys(setores).map((nomeSetor) => (
               <li key={nomeSetor}>
                 <div className="flex p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
                   <div className="flex items-center h-5">
-                    <input
-                      id={`checkbox-${nomeSetor}`}
-                      type="checkbox"
-                      checked={!!setoresSelecionados[nomeSetor]}
-                      onChange={() => toggleSetor(nomeSetor)}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                    <input id={`checkbox-${nomeSetor}`} type="checkbox" checked={!!setoresSelecionados[nomeSetor]} onChange={() => toggleSetor(nomeSetor)} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
                     />
                   </div>
                   <div className="ms-2 text-sm">
-                    <label
-                      htmlFor={`checkbox-${nomeSetor}`}
-                      className="poppins-medium text-gray-900 dark:text-gray-300 capitalize"
-                    >
+                    <label htmlFor={`checkbox-${nomeSetor}`} className="poppins-medium text-gray-900 dark:text-gray-300 capitalize" >
                       {nomeSetor}
                     </label>
                   </div>
@@ -226,9 +200,9 @@ function deletarUsuario(id) {
                 {/* Tabela única com usuários filtrados */}
                 <div className="overflow-auto">
                     <table className="w-full text-sm text-left text-gray-500 ">
-                        <thead className="text-xs text-gray-700 uppercase bg-[#E6DAFF]">
+                        <thead className="text-xs text-gray-700 uppercase bg-[#E6DAFF] dark:bg-gray-700 dark:text-gray-200">
                             <tr>
-                                <th className="px-6 py-3">Nome</th>
+                                <th className="px-6 py-3 ">Nome</th>
                                 <th className="px-6 py-3">Função</th>
                                 <th className="px-6 py-3">Status</th>
                                 <th className="px-6 py-3"></th>
@@ -243,7 +217,7 @@ function deletarUsuario(id) {
                                 </tr>
                             )}
                             {usuariosFiltrados.map((usuario) => (
-                                <tr key={usuario.id} className="bg-white border-b border-gray-200 hover:bg-gray-50" >
+                                <tr key={usuario.id} className="bg-white border-b border-gray-200 hover:bg-gray-50 dark:bg-gray-400 " >
                                     <th scope="row" className="flex items-center px-6 py-4 poppins-medium text-gray-900 whitespace-nowrap " >
                                         <div className="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full ">
                                             {usuario.ftPerfil ? (
@@ -258,19 +232,19 @@ function deletarUsuario(id) {
 
                                         <div className="ms-3">
                                             <div>{usuario.nome}</div>
-                                            <div className="text-gray-500 text-sm">{usuario.email}</div>
+                                            <div className="text-gray-500 text-sm dark:text-gray-800">{usuario.email}</div>
                                         </div>
                                     </th>
-                                    <td className="px-6 py-4">{formatarLabel(usuario.funcao)}</td>
+                                    <td className="px-6 py-4 dark:text-gray-800">{formatarLabel(usuario.funcao)}</td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center">
-                                            <div className={`h-2.5 w-2.5 rounded-full me-2 ${usuario.status_usuarios === "ativo" ? "bg-green-500" : "bg-red-500"}`}></div>
+                                            <div className={`h-2.5 w-2.5 rounded-full me-2 ${usuario.status_usuarios === "ativo" ? "bg-green-500 " : "bg-red-500"}`}></div>
                                             {primeiraLetraMaiuscula(usuario.status_usuarios)}
                                         </div>
                                     </td>
 
                                     <td className="relative">
-                                        <button onClick={() => setDropdownAbertoId((prev) => (prev === usuario.id ? null : usuario.id))} className="inline-flex items-center p-2 text-sm poppins-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-50" type="button" aria-expanded={dropdownAbertoId === usuario.id} aria-haspopup="true" >
+                                        <button onClick={() => setDropdownAbertoId((prev) => (prev === usuario.id ? null : usuario.id))} className="inline-flex items-center p-2 text-sm poppins-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-50 " type="button" aria-expanded={dropdownAbertoId === usuario.id} aria-haspopup="true" >
                                             <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3" >
                                                 <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
                                             </svg>
