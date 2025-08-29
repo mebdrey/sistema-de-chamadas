@@ -23,7 +23,7 @@ section h1 {
 }
 .infos {
 
-background-color: white !important;
+/* background-color: white !important; */
     margin-top: 56px;
     align-items: center;
     padding: 2%
@@ -42,11 +42,11 @@ background-color: white !important;
     border-radius: 50%;
 }
 
-.page-indicador,
+/* .page-indicador,
 .sec-indicador {
     width: min-content;
     white-space: nowrap;
-}
+} */
 
 .perfil-img-nome div {
     height: fit-content;
