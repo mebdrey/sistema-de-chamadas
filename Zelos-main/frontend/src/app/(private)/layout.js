@@ -138,8 +138,8 @@ export default function PrivateLayout({ children }) {
     <>
       <ProtectedRoute>
         <SideBar user={user} setUser={setUser} userType={user?.funcao} navFechada={navFechada} setNavFechada={setNavFechada} />
-        <main className="w-full min-h-screen bg-[#F8FAFB] justify-items-end">
-          <section className="flex-1 flex flex-col overflow-y-auto transition-all duration-300" style={{ width: mainWidth }}>
+        <main className="w-full min-h-screen bg-[#F8FAFB] dark:bg-gray-900 justify-items-end">
+          <section className="flex-1 flex flex-col overflow-y-auto transition-all duration-300 dark:bg-gray-900" style={{ width: mainWidth }}>
             {children}
           </section>
         </main>

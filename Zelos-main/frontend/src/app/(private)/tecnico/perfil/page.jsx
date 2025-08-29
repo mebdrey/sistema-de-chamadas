@@ -177,7 +177,7 @@ export default function MeuPerfil() {
     return (
         <section>
             <div className='infos'>
-                <div className='page-indicador'>
+                <div className='page-indicador w-min whitespace-nowrap text-black dark:text-white'>
                     <h1>Meu perfil</h1>
                     <hr />
                 </div>
@@ -191,7 +191,7 @@ export default function MeuPerfil() {
                         </div>
                     ))}
 
-                    <h3>{nomeSobrenome.primeiroNome} {nomeSobrenome.ultimoNome}</h3>
+                    <h3 className='text-black dark:text-white'>{nomeSobrenome.primeiroNome} {nomeSobrenome.ultimoNome}</h3>
                 </div>
 
                 {/*infos do usuario*/}
@@ -201,20 +201,20 @@ export default function MeuPerfil() {
 
 
                     <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
-                        <div className='sec-campos'><h6>Nome completo</h6><p>{usuario.nome}</p></div>
+                        <div className='sec-campos text-black dark:text-white'><h6>Nome completo</h6><p>{usuario.nome}</p></div>
                     </div>
 
 
 
                     <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
-                        <div className='sec-campos'><h6>Departamento</h6><p>{usuario.funcao}</p></div>
+                        <div className='sec-campos text-black dark:text-white'><h6>Departamento</h6><p>{usuario.funcao}</p></div>
                     </div>
                     <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
-                        <div className='sec-campos'><h6>Status</h6><p>Ativo</p></div>
+                        <div className='sec-campos text-black dark:text-white'><h6>Status</h6><p>Ativo</p></div>
                     </div>
 
                     <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
-                        <div className='sec-campos'><h6>Email pessoal</h6><p>{usuario.email}</p></div>
+                        <div className='sec-campos text-black dark:text-white'><h6>Email pessoal</h6><p>{usuario.email}</p></div>
                     </div>
 
                 </div>
@@ -238,8 +238,8 @@ export default function MeuPerfil() {
                     <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                         <div className="modal-dialog modal-dialog-centered">
                             <div className="modal-content  rounded-lg shadow-lg">
-                                <div className="modal-header flex p-2 items-center bg-gray-100 ">
-                                    <h5 className="titulo-modal modal-title  text-lg font-semibold" id="staticBackdropLabel">Editar Perfil</h5>
+                                <div className="modal-header flex p-2 items-center bg-gray-100 dark:bg-gray-700">
+                                    <h5 className="titulo-modal modal-title  text-lg font-semibold dark:text-gray-200" id="staticBackdropLabel">Editar Perfil</h5>
                                     <button
                                         type="button"
                                         className="btn-close"
@@ -248,10 +248,10 @@ export default function MeuPerfil() {
                                     ></button>
                                 </div>
 
-                                <div className="modal-body px-4 py-3">
+                                <div className="modal-body px-4 py-3 bg-white dark:bg-gray-800">
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div>
-                                            <label htmlFor="email" className="form-label font-medium text-gray-700">Email</label>
+                                            <label htmlFor="email" className="form-label font-medium text-gray-700 dark:text-gray-200">Email</label>
                                             <div className="flex items-center gap-2">
                                                 <input
                                                     type="email"
@@ -275,8 +275,8 @@ export default function MeuPerfil() {
 
                                         {/**enviar foto */}
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Foto de perfil</label>
-                                            <input type="file" accept="image/*" onChange={handleFileChange} className="mt-1 block w-full text-sm text-gray-500" />
+                                            <label className="form-label font-medium text-gray-700 dark:text-gray-200">Foto de perfil</label>
+                                            <input type="file" accept="image/*" onChange={handleFileChange} className="mt-1 block w-full dark:bg-gray-700 text-sm text-gray-500" />
                                         </div>
 
 
@@ -292,7 +292,7 @@ export default function MeuPerfil() {
                                             </>)}
 
                                         <div className="flex justify-center gap-3">
-                                            <button type="button"  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition">
+                                            <button type="button" onClick={removerFoto} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition">
                                                 Remover Foto
                                             </button>
                                         </div>

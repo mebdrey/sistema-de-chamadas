@@ -480,18 +480,18 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
   return ( //PÁGINA
     <>
       {/* conteudo da pagina */}
-      <div className="p-4 h-screen w-full">
+      <div className="p-4 h-screen w-full ">
         <div className="p-4 mt-14">
           <div className='flex flex-row w-full justify-between mb-15'>
             <div className="w-fit flex flex-row ">
 
               {/* select */}
-              <OrdenarPor ordenarPor={ordenarPor} setOrdenarPor={setOrdenarPor} />
+              <OrdenarPor  ordenarPor={ordenarPor} setOrdenarPor={setOrdenarPor} />
 
               <div className="mx-4 border-x border-gray-200"></div>
               {/* Dropdown de Prioridade */}
               <div className="relative inline-block">
-                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="text-white bg-violet-700 hover:bg-violet-800 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-8 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" id="dropdownPrioridadeButton">
+                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="text-white bg-violet-700 hover:bg-violet-800 focus:ring-4 focus:outline-none focus:ring-violet-300 poppins-medium rounded-lg text-sm px-8 py-2.5 text-center inline-flex items-center dark:bg-violet-600 dark:hover:bg-violet-700 dark:focus:ring-violet-800" type="button" id="dropdownPrioridadeButton">
                   Prioridade
                   <svg className="w-2.5 h-2.5 ms-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
@@ -516,6 +516,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                               }}
                                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" /> */}
                               <input
+                              className="has-checked: text-violet-500 focus: outline-none focus:ring-0"
                                 id={`prioridade-checkbox-${prioridade.id}`}
                                 type="checkbox"
                                 name="prioridade"
@@ -553,7 +554,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
                   </svg>
                 </div>
-                <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Pesquisar chamado" value={busca} onChange={(e) => setBusca(e.target.value)} />
+                <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white  " placeholder="Pesquisar chamado" value={busca} onChange={(e) => setBusca(e.target.value)} />
               </div>
             </form>
           </div>
@@ -622,9 +623,9 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                       </div>
                     ) : (
                       chamadosFiltrados.map((chamado) => ( //CARD DOS CHAMADOS
-                        <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:border-t-blue-500 dark:shadow-neutral-700/70 cursor-pointer">
-                          <div className="flex items-center gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:border-neutral-700">
-                            <h3 className="break-all text-base poppins-bold text-gray-800 dark:text-white">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
+                        <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl  dark:bg-gray-800 dark:border-gray-700 dark:border-t-blue-500 dark:shadow-neutral-700/70 cursor-pointer">
+                          <div className="flex items-center flex-wrap gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:border-neutral-700">
+                            <h3 className="wrap-break-word break-normal whitespace-normal text-base poppins-bold text-gray-800 dark:text-white">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
                             <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
@@ -722,7 +723,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
               ) : (
                 <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-[#F8FAFB] w-full dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
                   <ChatWidget className='!fixed right-0 bottom-0' chamadoSelecionado={chamadoSelecionado}></ChatWidget>
-                  <div className="w-full p-4 bg-white">
+                  <div className="w-full p-4 bg-white dark:bg-gray-900">
                     <h5 id="drawer-right-label" className="inline-flex items-center text-base poppins-semibold text-gray-500 dark:text-gray-400">
                       <svg className="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
@@ -806,19 +807,19 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
 
                     <div className="w-full p-10 h-full">
                       <div className="w-full">
-                        <h1 className="text-2xl poppins-bold mb-6">Apontamentos do chamado #{chamadoSelecionado?.id}</h1>
+                        <h1 className="text-2xl poppins-bold mb-6 dark:text-white">Apontamentos do chamado #{chamadoSelecionado?.id}</h1>
 
-                        <ol className="relative bg-white rounded-lg border-s border-gray-300 mb-10">
+                        <ol className="relative bg-white dark:bg-gray-900 rounded-lg border-s border-gray-300 dark:border-gray-600 mb-10">
                           {apontamentos.map((a) => (
-                            <li key={a.id} className="mb-10 py-4 ms-4">
+                            <li key={a.id} className="mb-10 py-4 ms-4 dark:bg-gray-900">
                               <div className={`absolute w-3 h-3 rounded-full mt-1.5 -start-1.5 ${a.fim ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
                               <time className="mb-1 text-sm text-gray-500">
                                 {new Date(a.comeco).toLocaleString('pt-BR')}
                               </time>
-                              <h3 className="text-lg poppins-semibold">
+                              <h3 className="text-lg poppins-semibold dark:text-white">
                                 {a.fim ? 'Apontamento finalizado' : 'Apontamento em andamento'}
                               </h3>
-                              <p className="text-gray-700">{a.descricao}</p>
+                              <p className="text-gray-700 dark:text-white">{a.descricao}</p>
                               {a.fim && (
                                 <p className="text-sm text-gray-500 mt-1">
                                   Encerrado em {new Date(a.fim).toLocaleString('pt-BR')}
@@ -830,7 +831,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
 
                         {!apontamentoAtivo && (
                           <div className="mb-6">
-                            <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900">
+                            <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-gray-200">
                               Nova atividade realizada
                             </label>
                             <textarea
@@ -838,7 +839,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                               rows="4"
                               value={descricao}
                               onChange={(e) => setDescricao(e.target.value)}
-                              className="w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-violet-500 focus:border-violet-500"
+                              className="w-full p-2.5 text-sm text-gray-900 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-violet-500 focus:border-violet-500"
                               placeholder="Descreva o que foi feito..."
                             />
                             <button onClick={iniciarApontamento} className="mt-4 flex flex-row gap-2 items-center px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pass-fill" viewBox="0 0 16 16">
