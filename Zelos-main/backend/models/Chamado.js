@@ -69,7 +69,6 @@ export const buscarChamadoComNomeUsuario = async (chamadoId) => {
 };
 
 //funções para o chat -------------------------------------------------------------------------------------
-
 //chat usuário -> técnico e técnico -> usuario
 const escreverMensagem = async (dados) => {
   try {
@@ -133,7 +132,6 @@ export const calcularDataLimiteUsuario = async (prioridade_id) => {
 
     if (!prioridade) { return null;} // prioridade não encontrada
     
-
     // calcular data limite com base em horas_limite
     const agora = new Date();
     const data_limite = new Date( agora.getTime() + prioridade.horas_limite * 60 * 60 * 1000);
