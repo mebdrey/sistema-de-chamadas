@@ -486,7 +486,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
             <div className="w-fit flex flex-row ">
 
               {/* select */}
-              <OrdenarPor ordenarPor={ordenarPor} setOrdenarPor={setOrdenarPor} />
+              <OrdenarPor className="bg-red-500" ordenarPor={ordenarPor} setOrdenarPor={setOrdenarPor} />
 
               <div className="mx-4 border-x border-gray-200"></div>
               {/* Dropdown de Prioridade */}
