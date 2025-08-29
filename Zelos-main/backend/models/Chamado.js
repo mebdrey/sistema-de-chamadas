@@ -3,59 +3,8 @@ import puppeteer from 'puppeteer';
 import { jsPDF } from 'jspdf';
 import bcrypt from 'bcryptjs';
 import { create, readAll, read, readQuery, update, deleteRecord } from '../config/database.js';
+import { criarNotificacao } from './Notificacoes.js';
 
-export async function criarNotificacao({ usuario_id, tipo, titulo, descricao, chamado_id = null }) {
-  const query = `INSERT INTO notificacoes (usuario_id, tipo, titulo, descricao, chamado_id) VALUES (?, ?, ?, ?, ?)`;
-  const values = [usuario_id, tipo, titulo, descricao, chamado_id];
-  try {
-    const result = await readQuery(query, values);
-    return result; 
-  } catch (err) {
-    console.error("Erro ao criar notificação:", err);
-    throw err;
-  }
-}
-
-export async function obterNotificacoesPorUsuario(usuarioId) {
-  const q = `SELECT * FROM notificacoes WHERE usuario_id = ? ORDER BY criado_em DESC`;
-  return readQuery(q, [usuarioId]);
-}
-
-export async function obterNotificacaoPorId(id) {
-  const q = `SELECT * FROM notificacoes WHERE id = ? LIMIT 1`;
-  const rows = await readQuery(q, [id]);
-  return Array.isArray(rows) ? rows[0] : rows;
-}
-
-export async function marcarComoLida(id) {
-  const q = `UPDATE notificacoes SET lida = TRUE WHERE id = ?`;
-  return readQuery(q, [id]);
-}
-
-export async function marcarTodasComoLidas(usuarioId) {
-  const q = `UPDATE notificacoes SET lida = TRUE WHERE usuario_id = ?`;
-  return readQuery(q, [usuarioId]);
-}
-
-// marca todas notificações como visualizadas (quando abrir o sino)
-export async function marcarVisualizadas(usuarioId) {
-  const q = `UPDATE notificacoes SET visualizada = TRUE WHERE usuario_id = ? AND visualizada = FALSE`;
-  return readQuery(q, [usuarioId]);
-}
-
-// retorna contagem de notificações
-export async function obterContagemNotificacoes(usuarioId) {
-  const q = `
-    SELECT
-      COUNT(*) AS total,
-      SUM(CASE WHEN lida = FALSE THEN 1 ELSE 0 END) AS nao_lidas,
-      SUM(CASE WHEN visualizada = FALSE THEN 1 ELSE 0 END) AS nao_visualizadas
-    FROM notificacoes
-    WHERE usuario_id = ?
-  `;
-  const rows = await readQuery(q, [usuarioId]);
-  return Array.isArray(rows) && rows[0] ? rows[0] : { total: 0, nao_lidas: 0, nao_visualizadas: 0 };
-}
 
 // busca o nome do usuario pelo seu id
 export const buscarChamadoComNomeUsuario = async (chamadoId) => {
@@ -68,107 +17,6 @@ export const buscarChamadoComNomeUsuario = async (chamadoId) => {
   } catch (err) { throw err; }
 };
 
-//funções para o chat -------------------------------------------------------------------------------------
-//chat usuário -> técnico e técnico -> usuario
-const escreverMensagem = async (dados) => {
-  try {
-     console.log('[MODEL escreverMensagem] dados a inserir:', dados);
-    return await create('mensagens', {
-      id_usuario: dados.id_usuario,
-      id_tecnico: dados.id_tecnico,
-      conteudo: dados.conteudo,
-      id_chamado: dados.id_chamado
-    });
-  }
-  catch (err) {
-    console.error('Erro ao enviar mensagem! - models', err);
-    throw err;
-  }
-}
-
-const lerMsg = async (idChamado) => {
-  const consulta = `SELECT * FROM mensagens WHERE id_chamado = ${idChamado} order by data_envio asc`;
-  try { return await readQuery(consulta); }
-  catch (err) { console.error('Erro ao listar mensagens do chamado especificado!!', err) }
-}
-
-// funções utilizadas para usuarios comuns --------------------------------------------------------------------------------------------------------------------------------------------
-//criar chamado usuário -- funcionando
-export const criarChamado = async (dados) => {
-  try {
-    const resultado = await create("chamados", dados);
-    return resultado;
-  } catch (err) {
-    console.error("Erro ao criar chamado!", err);
-    throw err;
-  }
-};
-
-// Buscar todas as prioridades
-export const getPrioridades = async () => {
-  try {
-    const resultado = await readAll("prioridades"); // SELECT * FROM prioridades
-    return resultado;
-  } catch (err) {
-    console.error("Erro ao buscar prioridades:", err);
-    throw err;
-  }
-};
-
-export const listarChamados = async (usuarioId) => {
-  try { return await readAll('chamados', `usuario_id = ${usuarioId}`); }
-  catch (err) {
-    console.error("Erro ao listar chamados!", err);
-    throw err;
-  }
-};
-
-export const calcularDataLimiteUsuario = async (prioridade_id) => {
-  try {
-    if (!prioridade_id) return null; // caso não tenha prioridade
-
-    // buscar a prioridade pelo id (read retorna só uma linha, não array)
-    const prioridade = await read("prioridades", `id = ${prioridade_id}`);
-
-    if (!prioridade) { return null;} // prioridade não encontrada
-    
-    // calcular data limite com base em horas_limite
-    const agora = new Date();
-    const data_limite = new Date( agora.getTime() + prioridade.horas_limite * 60 * 60 * 1000);
-
-    return data_limite;
-
-  } catch (error) {
-    console.error("Erro ao calcular data limite:", error);
-    return null;
-  }
-};
-
-// busca servicos
-export const buscarTiposServico = async () => {
-  const tipos = await readAll('pool');
-  return tipos.filter(tipo => tipo.status_pool === 'ativo');
-};
-
-export const criarAvaliacao = async ({ usuario_id, atendimento_id, nota, comentario }) => {
-  const sql = `INSERT INTO avaliacoes (usuario_id, atendimento_id, nota, comentario) VALUES (?, ?, ?, ?)`;
-  return await create(sql, [usuario_id, atendimento_id, nota, comentario]);
-};
-
-export const listarAvaliacoesPorAtendimento = async (atendimento_id) => {
-  const sql = `SELECT a.*, u.nome AS usuario_nome 
-               FROM avaliacoes a
-               JOIN usuarios u ON u.id = a.usuario_id
-               WHERE a.atendimento_id = ? 
-               ORDER BY a.data_avaliacao DESC`;
-  return await readAll(sql, [atendimento_id]);
-};
-
-export const mediaAvaliacoes = async (atendimento_id) => {
-  const sql = `SELECT AVG(nota) AS media FROM avaliacoes WHERE atendimento_id = ?`;
-  const result = await read(sql, [atendimento_id]);
-  return result?.media || 0;
-};
 
 // funções utilizadas para ADMINs --------------------------------------------------------------------------------------------------------------------------------------------
 export const excluirUsuario = async (usuarioId) => {
@@ -877,5 +725,3 @@ export const getApontamentosByChamado = async (chamado_id) => {
   const rows = await readQuery(sql, [chamado_id]);
   return Array.isArray(rows) ? rows : [];
 };
-
-export { lerMsg, escreverMensagem };

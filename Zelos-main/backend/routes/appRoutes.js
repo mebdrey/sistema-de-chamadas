@@ -1,10 +1,17 @@
 import express from "express";
 
-import { criarChamadoController,contarChamadosPorPrioridadeController, listarChamadosController, listarUsuariosPorSetorController, listarTiposServicoController, UsuarioEnviarMensagemController, TecnicoEnviarMensagemController, lerMensagensController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, buscarChamadoComNomeUsuarioController, chamadosPorMesController, atribuirTecnicoController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, excluirSetorController, listarSetoresController, criarPrioridadeController, listarPrioridadesController, atualizarPrazoController, calcularDataLimiteController, finalizarChamadoController, gerarRelatorioChamadoController, contarChamadosPorPoolController, listarNotificacoesController, marcarNotificacaoLidaController, marcarTodasComoLidasController, enviarMensagemController, marcarVisualizadasController, contagemNotificacoesController, atualizarSetorController } from "../controllers/ChamadoController.js";
-import { obterPerfilUsuarioController, editarPerfilController, removerFotoController, atualizarFotoPerfilController } from "../controllers/PerfilController.js";
-import { enviarLinkRedefinicao, redefinirSenha, verifyCode } from '../controllers/RedefinirSenhaController.js';
+import { contarChamadosPorPrioridadeController, listarUsuariosPorSetorController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, buscarChamadoComNomeUsuarioController, chamadosPorMesController, atribuirTecnicoController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, excluirSetorController, listarSetoresController, criarPrioridadeController, atualizarPrazoController, calcularDataLimiteController, finalizarChamadoController, gerarRelatorioChamadoController, contarChamadosPorPoolController, atualizarSetorController } from "../controllers/ChamadoController.js";
+
+// middlewares -----------------------------------------------------------------------------------------
 import { upload } from '../middlewares/uploadMiddleware.js';
 import { garantirAutenticado } from '../middlewares/authMiddleware.js';
+
+// controllers --------------------------------------------------------------------
+import { listarNotificacoesController, marcarNotificacaoLidaController, marcarTodasComoLidasController, marcarVisualizadasController, contagemNotificacoesController } from '../controllers/NotificacoesController.js'
+import { lerMensagensController, enviarMensagemController, contarNaoLidasController, marcarLidasController } from '../controllers/ChatController.js'
+import {criarChamadoController, listarPrioridadesController, listarChamadosController, listarTiposServicoController, criarAvaliacaoController, existeAvaliacaoController} from '../controllers/UsuarioComumController.js'
+import { obterPerfilUsuarioController, editarPerfilController, removerFotoController, atualizarFotoPerfilController } from "../controllers/PerfilController.js";
+import { enviarLinkRedefinicao, redefinirSenha, verifyCode } from '../controllers/RedefinirSenhaController.js';
 
 const router = express.Router();
 
@@ -15,17 +22,16 @@ router.post('/chamado', upload.single('imagem'), garantirAutenticado, criarChama
 router.get('/meus-chamados', garantirAutenticado, listarChamadosController); // ver chamados feito pelo usuario
 router.get('/servicos', listarTiposServicoController); // listar tipos de serviço
 router.get('/prioridades', listarPrioridadesController); // lista prioridades
+router.post("/criar-avaliacao", garantirAutenticado, criarAvaliacaoController); // criar avaliação
+router.get("/avaliacao-existe", garantirAutenticado, existeAvaliacaoController); // checar se já existe avaliação
 
 // rotas usadas para o adm ------------------------------------------------------------------------------------------------------------------------------------------------
 router.get('/usuarios-por-setor', garantirAutenticado, listarUsuariosPorSetorController); // adm - ver usuarios
 router.delete('/usuarios/:id', garantirAutenticado, excluirUsuarioController); // adm- excluir usuarios
 router.get('/todos-chamados', garantirAutenticado, listarTodosChamadosController) // ver todos os chamados registrados
 router.get('/contar-por-status', garantirAutenticado, contarChamadosPorStatusController);
-// router.post('/relatorio-grafico', garantirAutenticado, gerarRelatorioChamadosController); // relatorio - chamamdos por mes
-// router.get('/relatorios/chamados-por-tipo', garantirAutenticado, relatorioTipoController);
-// router.get('/relatorios/atividades-tecnicos', garantirAutenticado, relatorioTecnicosController);
 router.get('/chamados-por-mes', garantirAutenticado, chamadosPorMesController);
-router.get('/chamadosPorPrioridade',garantirAutenticado,contarChamadosPorPrioridadeController);
+router.get('/chamadosPorPrioridade', garantirAutenticado, contarChamadosPorPrioridadeController);
 router.put("/atribuir-tecnico", garantirAutenticado, atribuirTecnicoController);
 router.patch('/chamado/:id', garantirAutenticado, editarChamadoController);
 router.post('/usuarios', criarUsuarioController); // criar usuario
@@ -50,7 +56,7 @@ router.get('/apontamentos/:chamado_id', garantirAutenticado, listarApontamentosC
 router.post('/criar-apontamento', garantirAutenticado, criarApontamentoController); // tecnico cria apontamentos
 router.patch('/finalizar-apontamento', garantirAutenticado, finalizarApontamentoController); // tecnico finaliza apontamentos
 router.patch('/finalizar-chamado', garantirAutenticado, finalizarChamadoController);
-router.get('/relatorio-chamado/:chamado_id', garantirAutenticado, gerarRelatorioChamadoController); 
+router.get('/relatorio-chamado/:chamado_id', garantirAutenticado, gerarRelatorioChamadoController);
 
 
 //relacionados a perfil
@@ -59,16 +65,11 @@ router.patch('/editarPerfil', garantirAutenticado, editarPerfilController);
 router.post('/editarFoto', garantirAutenticado, upload.single('foto'), atualizarFotoPerfilController);
 router.post('/removerFoto', garantirAutenticado, removerFotoController);
 
-
-//router.post('/chat', UsuarioEnviarMensagemController);
-
-
-//para o chat de usuario para tecnico
-router.post('/enviar-msg', garantirAutenticado, UsuarioEnviarMensagemController);
-//para o chat de técnico para usuario
-router.post('/tecnico-enviar-msg', garantirAutenticado, TecnicoEnviarMensagemController);
+// chat -----------------------------------------------------------------------------------------------------------------
 router.get('/chat', garantirAutenticado, lerMensagensController);
-
+router.post("/mensagem", garantirAutenticado, enviarMensagemController);
+router.get("/mensagens/nao-lidas", garantirAutenticado, contarNaoLidasController); // conta mensagens não-lidas
+router.post("/mensagens/marcar-lidas", garantirAutenticado, marcarLidasController); // marca como lidas
 
 router.get('/contar-chamados', garantirAutenticado, contarChamadosController); // qtnd de chamados
 router.get('/pendentes', garantirAutenticado, chamadosPendentesController); // qnt de chamamdos pendentes
@@ -79,10 +80,11 @@ router.post('/esqueci-senha', enviarLinkRedefinicao); // rota p/ solicitar o lin
 router.post('/verify-code', verifyCode);
 router.post('/redefinir-senha', redefinirSenha); // rota p/ redefinir a senha (token + nova senha)
 
+
+// notificacoes ------------------------------------------------------------------------------------------------
 router.get("/notificacoes", garantirAutenticado, listarNotificacoesController);
 router.post("/:id/lida", garantirAutenticado, marcarNotificacaoLidaController);
 router.post("/marcar-todas", garantirAutenticado, marcarTodasComoLidasController);
-router.post("/mensagem", garantirAutenticado, enviarMensagemController);
 router.post('/notificacoes/visualizadas', garantirAutenticado, marcarVisualizadasController);
 router.get('/notificacoes/contagem', garantirAutenticado, contagemNotificacoesController);
 

@@ -268,12 +268,14 @@ CREATE TABLE redefinir_tokens (
 CREATE TABLE avaliacoes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL, -- quem avaliou
+    chamado_id INT NOT NULL,
     tecnico_id INT NOT NULL,  -- técnico avaliado
     nota INT NOT NULL CHECK (nota BETWEEN 1 AND 5), -- nota de 1 a 5
     comentario TEXT, -- comentário opcional
     data_avaliacao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE
+    FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    foreign key (chamado_id) references chamados(id) on delete cascade
 );
 
 -- Índices adicionais para otimização
@@ -283,3 +285,4 @@ CREATE INDEX idx_apontamentos_comeco_fim ON apontamentos(comeco, fim);
 
 select *from chamados;
 select *from apontamentos;
+select *from avaliacoes;

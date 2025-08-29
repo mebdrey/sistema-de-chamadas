@@ -36,6 +36,8 @@ export default function ChamadosCliente() {
     const [rating, setRating] = useState(0); // valor atual do rating
     const [hover, setHover] = useState(0);   // valor do hover para efeito visual
     const [openAvaliacao, setOpenAvaliacao] = useState(false);
+    const [comentario, setComentario] = useState("");
+    const [jaAvaliado, setJaAvaliado] = useState(false);
 
     useEffect(() => {
         setIsMounted(true);
@@ -222,11 +224,121 @@ export default function ChamadosCliente() {
         }
     };
 
-    const handleSubmit = () => {
-        const description = document.getElementById('description').value;
-        console.log('Rating:', rating, 'Descrição:', description);
-        // aqui você pode fazer um fetch/axios para enviar para a API
+    // Verifica se existe avaliação (usa ids passados)
+    const verificarAvaliacao = async (chamadoId, tecnicoId) => {
+        try {
+            const res = await fetch(`http://localhost:8080/avaliacao-existe?chamado_id=${encodeURIComponent(chamadoId)}&tecnico_id=${encodeURIComponent(tecnicoId)}`, {
+                credentials: 'include',
+            });
+            if (!res.ok) {
+                // Se backend retornar 4xx/5xx, tratamos como "não avaliado" por segurança (mas logamos)
+                console.error('Erro na verificação de avaliação:', await res.text());
+                return false;
+            }
+            const data = await res.json();
+            return !!data.existe;
+        } catch (err) {
+            console.error('Erro ao verificar avaliação:', err);
+            return false;
+        }
     };
+
+    // Abre os apontamentos e, se o usuário não tiver avaliado, abre o modal de avaliação
+    const abrirModalAvaliacao = async (chamado) => {
+        if (!chamado) return;
+
+        // garante que o chamado selecionado seja definido
+        setChamadoSelecionado(chamado);
+
+        // carrega apontamentos (mantive sua função existente)
+        await carregarApontamentos(chamado.id);
+
+        // Verifica se já existe avaliação para este usuário/tecnico/chamado
+        const tecnicoId = chamado.tecnico_id ?? chamado.responsavel_tecnico_id ?? null; // tenta propriedades comuns
+        if (!tecnicoId) {
+            console.warn('Chamado não tem tecnico_id definido:', chamado);
+            // apenas abre apontamentos se não soubermos o tecnico
+            setOpenApontamentos(true);
+            return;
+        }
+
+        const existe = await verificarAvaliacao(chamado.id, tecnicoId);
+        setJaAvaliado(existe);
+
+        // abre a janela de apontamentos sempre; avaliacão apenas se ainda não existe
+        setOpenApontamentos(true);
+
+        if (!existe) {
+            // abre modal de avaliação (após carregar apontamentos)
+            setOpenAvaliacao(true);
+        } else {
+            // NÃO abre o modal de avaliação
+            setOpenAvaliacao(false);
+        }
+    };
+
+    // Envia a avaliação para o backend (POST)
+    const enviarAvaliacao = async () => {
+        if (jaAvaliado) {
+            alert("Você já avaliou este chamado!");
+            return;
+        }
+
+        if (!rating || rating < 1) {
+            alert("Escolha uma nota antes de enviar!");
+            return;
+        }
+
+        // precisa ter chamadoSelecionado (com id e tecnico_id)
+        if (!chamadoSelecionado) {
+            alert("Nenhum chamado selecionado para avaliação.");
+            return;
+        }
+
+        const payload = {
+            chamado_id: chamadoSelecionado.id,
+            tecnico_id: chamadoSelecionado.tecnico_id,
+            nota: rating,
+            comentario,
+        };
+
+        try {
+            const res = await fetch("http://localhost:8080/criar-avaliacao", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify(payload),
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                // trata 409 (já avaliado) e outros erros
+                if (res.status === 409) {
+                    alert(data.message || "Você já avaliou este chamado.");
+                    setJaAvaliado(true);
+                    setOpenAvaliacao(false);
+                    return;
+                }
+                alert(data.message || "Erro ao enviar avaliação!");
+                return;
+            }
+
+            // sucesso
+            alert("Avaliação enviada com sucesso!");
+            setOpenAvaliacao(false);
+            setRating(0);
+            setComentario("");
+            setJaAvaliado(true);
+
+            // (opcional) atualizar localmente lista de avaliações ou chamados
+            // — por enquanto apenas mantém flag jaAvaliado
+        } catch (err) {
+            console.error("Erro ao enviar avaliação:", err);
+            alert("Erro ao enviar avaliação!");
+        }
+    };
+
 
     return (
         <>
@@ -300,6 +412,7 @@ export default function ChamadosCliente() {
                             <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" className=" hidden md:flex flex-row items-center block text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-5 py-2.5 h-fit text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button"><svg className="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>Novo chamado</button>
 
                             <div id="crud-modal" tabIndex="-1" aria-hidden="true" className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                                <div className="fixed inset-0 bg-black/50 dark:bg-black/60"></div>
                                 <div className="relative p-4 w-full max-w-md max-h-full">
                                     <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
                                         <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
@@ -398,6 +511,7 @@ export default function ChamadosCliente() {
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                         {/* visualizar chamados */}
                         <div id="default-tab-content">
@@ -429,11 +543,19 @@ export default function ChamadosCliente() {
                                             chamadosFiltrados.map((chamado) => (
 
                                                 <div key={chamado.id || `${chamado.assunto}-${Math.random()}`} className="border-b bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
-                                                    <div className="px-4 pt-4 md:px-5 md:pt-5">
-                                                        <h3 className="text-lg poppins-bold text-gray-800 dark:text-white">Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}</h3>
-                                                        <h6 className="text-base poppins-bold text-gray-800 dark:text-white break-all">{chamado.assunto}</h6>
-                                                        <p className="mt-2 text-gray-500 dark:text-neutral-400 break-all">{chamado.descricao}</p>
+                                                    <div className="flex flex-row">
+                                                        <div className="px-4 pt-4 md:px-5 md:pt-5">
+                                                            <h3 className="wrap-break-word break-normal whitespace-normal text-lg poppins-bold text-gray-800 dark:text-white">Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}</h3>
+                                                            <h6 className="wrap-break-word break-normal whitespace-normal text-base poppins-bold text-gray-800 dark:text-white break-all">{chamado.assunto}</h6>
+                                                            <p className="wrap-break-word break-normal whitespace-normal mt-2 text-gray-500 dark:text-neutral-400 break-all">{chamado.descricao}</p>
+
+                                                        </div>
+                                                        <div className="px-4 pt-4 md:px-5 md:pt-5">
+                                                            <img src={`http://localhost:8080/uploads/${chamado.imagem}`} className="mt-6 w-60 h-60 object-cover rounded-lg" alt="Imagem do chamado" />
+                                                        </div>
                                                     </div>
+
+
                                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 mt-4 dark:bg-neutral-900 dark:border-neutral-700">
                                                         <p className="text-sm text-gray-500 dark:text-neutral-500">Criado em {new Date(chamado.criado_em).toLocaleString("pt-BR")}</p>
 
@@ -442,7 +564,7 @@ export default function ChamadosCliente() {
                                                                 <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
                                                             </button>
                                                         ) : chamado.status_chamado === "concluido" ? (
-                                                            <button onClick={() => { setChamadoSelecionado(chamado); carregarApontamentos(chamado.id); setOpenApontamentos(true); setOpenAvaliacao(true); }} className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-[#7F56D8] decoration-2 hover:underline focus:underline focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">Ver apontamentos
+                                                            <button onClick={() => { setChamadoSelecionado(chamado); carregarApontamentos(chamado.id); setOpenApontamentos(true); abrirModalAvaliacao(chamado); }} className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-[#7F56D8] decoration-2 hover:underline focus:underline focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">Ver apontamentos
                                                                 <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
                                                             </button>
                                                         ) : null}
@@ -677,8 +799,17 @@ export default function ChamadosCliente() {
 
                                             <div className="col-span-2">
                                                 <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Detalhes da avaliação</label>
-                                                <textarea id="description" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:border-[#7F56D8] dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Descreva de forma detalhada os motivos de sua avaliação"></textarea>
+                                                <textarea id="description" value={comentario} onChange={(e) => setComentario(e.target.value)} rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:border-[#7F56D8] dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Descreva de forma detalhada os motivos de sua avaliação"></textarea>
                                             </div>
+                                            <div className="flex justify-end mt-4">
+                                                <button
+                                                    onClick={enviarAvaliacao}
+                                                    className="px-4 py-2 bg-[#7F56D8] text-white rounded-lg hover:bg-[#5a39a6]"
+                                                >
+                                                    Enviar Avaliação
+                                                </button>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
