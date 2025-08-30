@@ -1,4 +1,4 @@
-import { criarChamado, getPrioridades, listarChamados, calcularDataLimiteUsuario, buscarTiposServico, criarAvaliacao, existeAvaliacao } from '../models/UsuarioComum.js'
+import { criarChamado, listarChamados, calcularDataLimiteUsuario, buscarTiposServico, criarAvaliacao, existeAvaliacao } from '../models/UsuarioComum.js'
 
 // usado para usuarios comuns ------------------------------------------------------------------------------------------------------------------------------------------------------
 export const criarChamadoController = async (req, res) => {
@@ -71,16 +71,6 @@ export const criarChamadoController = async (req, res) => {
     }
 };
 
-// Controller para listar prioridades
-export const listarPrioridadesController = async (req, res) => {
-    try {
-        const prioridades = await getPrioridades();
-        res.json(prioridades);
-    } catch (error) {
-        res.status(500).json({ erro: "Erro ao buscar prioridades." });
-    }
-};
-
 export const listarChamadosController = async (req, res) => {
     try {
         const usuarioId = req.user?.id; // pegando do Passport
@@ -103,43 +93,6 @@ export const listarTiposServicoController = async (req, res) => {
         res.status(500).json({ erro: 'Erro interno ao listar tipos.' });
     }
 };
-
-// export const criarAvaliacao = async (req, res) => {
-//   try {
-//     const { usuario_id, atendimento_id, nota, comentario } = req.body;
-//     if (!usuario_id || !atendimento_id || !nota) {
-//       return res.status(400).json({ erro: "Campos obrigatórios não preenchidos" });
-//     }
-
-//     const resultado = await AvaliacaoModel.criarAvaliacao({ usuario_id, atendimento_id, nota, comentario });
-//     res.status(201).json({ sucesso: "Avaliação criada", id: resultado.insertId });
-//   } catch (erro) {
-//     console.error(erro);
-//     res.status(500).json({ erro: "Erro ao criar avaliação" });
-//   }
-// };
-
-// export const listarAvaliacoes = async (req, res) => {
-//   try {
-//     const { atendimento_id } = req.params;
-//     const avaliacoes = await AvaliacaoModel.listarAvaliacoesPorAtendimento(atendimento_id);
-//     res.json(avaliacoes);
-//   } catch (erro) {
-//     console.error(erro);
-//     res.status(500).json({ erro: "Erro ao listar avaliações" });
-//   }
-// };
-
-// export const obterMediaAvaliacao = async (req, res) => {
-//   try {
-//     const { atendimento_id } = req.params;
-//     const media = await AvaliacaoModel.mediaAvaliacoes(atendimento_id);
-//     res.json({ media });
-//   } catch (erro) {
-//     console.error(erro);
-//     res.status(500).json({ erro: "Erro ao calcular média" });
-//   }
-// };
 
 // Controller para criar avaliação
 export const criarAvaliacaoController = async (req, res) => {
