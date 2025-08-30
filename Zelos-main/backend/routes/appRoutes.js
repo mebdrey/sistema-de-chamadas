@@ -13,7 +13,7 @@ import {criarChamadoController, listarChamadosController, listarTiposServicoCont
 import { obterPerfilUsuarioController, editarPerfilController, removerFotoController, atualizarFotoPerfilController } from "../controllers/PerfilController.js"; // perfil
 import { enviarLinkRedefinicao, redefinirSenha, verifyCode } from '../controllers/RedefinirSenhaController.js'; // controller de redefinir a senha
 import { pegarChamadoController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, finalizarChamadoController, gerarRelatorioChamadoController} from '../controllers/TecnicosController.js' // controllers de tecnicos/auxiliares
-import {listarUsuariosPorSetorController, excluirUsuarioController, listarTodosChamadosController, atribuirTecnicoController, contarChamadosPorStatusController, contarChamadosPorPrioridadeController, chamadosPorMesController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, listarSetoresController, atualizarSetorController, excluirSetorController, criarPrioridadeController, atualizarPrazoController, calcularDataLimiteController, contarChamadosPorPoolController} from '../controllers/AdminController.js'
+import {listarUsuariosPorSetorController, excluirUsuarioController, listarTodosChamadosController, atribuirTecnicoController, contarChamadosPorStatusController, contarChamadosPorPrioridadeController, chamadosPorMesController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, listarSetoresController, atualizarSetorController, excluirSetorController, criarPrioridadeController, atualizarPrazoController, calcularDataLimiteController, contarChamadosPorPoolController, listarUsuariosController, atualizarPrioridadeController, excluirPrioridadeController} from '../controllers/AdminController.js'
 
 const router = express.Router();
 
@@ -54,7 +54,9 @@ router.get('/prioridades', listarPrioridadesController); // lista prioridades
 router.patch('/chamados/:id/prazo', garantirAutenticado, atualizarPrazoController);
 router.post('/chamados/calcular-prazo', calcularDataLimiteController);
 router.get("/relatorios/chamados-por-pool", garantirAutenticado, contarChamadosPorPoolController);
-
+router.get('/usuarios', garantirAutenticado, listarUsuariosController); // Listar usuários
+router.put('/prioridades/:id', garantirAutenticado, atualizarPrioridadeController); // Atualizar prioridade
+router.delete('/prioridades/:id', garantirAutenticado, excluirPrioridadeController); // Excluir prioridade
 
 
 

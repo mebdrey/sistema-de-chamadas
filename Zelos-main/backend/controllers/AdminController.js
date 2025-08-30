@@ -1,5 +1,6 @@
 import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool } from '../models/Admin.js'
 import { criarNotificacao } from '../models/Notificacoes.js';
+import { readAll, readQuery, update, deleteRecord } from '../config/database.js'; // Importar deleteRecord
 
 // usado para o adm -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 export const listarUsuariosPorSetorController = async (req, res) => {
@@ -57,6 +58,36 @@ export const atribuirTecnicoController = async (req, res) => {
     } catch (err) {
         console.error("Erro no controller atribuirTecnicoController:", err);
         res.status(500).json({ error: "Erro ao atribuir técnico/auxiliar" });
+    }
+};
+
+export const listarUsuariosController = async (req, res) => {
+    try {
+        const { funcao, q } = req.query;
+        let usuarios;
+
+        if (funcao || q) {
+            let query = 'SELECT id, nome, username, email, funcao, created_at, ftPerfil FROM usuarios WHERE 1=1';
+            const params = [];
+
+            if (funcao) {
+                query += ' AND funcao = ?';
+                params.push(funcao);
+            }
+            if (q) {
+                query += ' AND (LOWER(nome) LIKE ? OR LOWER(username) LIKE ?)';
+                params.push(`%${q.toLowerCase()}%`);
+                params.push(`%${q.toLowerCase()}%`);
+            }
+            usuarios = await readQuery(query, params);
+        } else {
+            usuarios = await readAll('usuarios', 'id, nome, username, email, funcao, created_at, ftPerfil');
+        }
+
+        res.status(200).json(usuarios);
+    } catch (err) {
+        console.error('Erro ao listar usuários:', err);
+        res.status(500).json({ message: 'Erro interno ao listar usuários.' });
     }
 };
 
@@ -224,7 +255,10 @@ export const criarUsuarioController = async (req, res) => {
             return res.status(409).json({ message: 'email já cadastrado' });
         }
 
-        const userId = await criarUsuario({ nome, username: desiredUsername, email, senha, funcao: funcao || 'usuario', ftPerfil: ftPerfil || null });
+        const allowedFunctions = ['admin','usuario','tecnico_externo','tecnico_manutencao','apoio_tecnico','auxiliar_limpeza'];
+        const finalFuncao = funcao && allowedFunctions.includes(funcao) ? funcao : 'usuario';
+
+        const userId = await criarUsuario({ nome, username: desiredUsername, email, senha, funcao: finalFuncao, ftPerfil: ftPerfil || null });
         await criarNotificacao({
             usuario_id: userId,
             tipo: 'notificacao_geral',
@@ -232,7 +266,7 @@ export const criarUsuarioController = async (req, res) => {
             descricao: 'Seu usuário foi criado com sucesso. Bem-vindo(a)!',
             chamado_id: null
         });
-        res.status(201).json({ id: userId, nome, username: desiredUsername, email, funcao: funcao || 'usuario' });
+        res.status(201).json({ id: userId, nome, username: desiredUsername, email, funcao: finalFuncao });
     } catch (err) {
         console.error('Erro criar usuário:', err);
         // retornar mensagem de erro mais rica para frontend (sem vazar stack)
@@ -350,6 +384,60 @@ export const criarPrioridadeController = async (req, res) => {
     } catch (err) {
         console.error('Erro criar prioridade:', err);
         res.status(500).json({ message: 'Erro interno' });
+    }
+};
+
+export const atualizarPrioridadeController = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nome, prazo_dias } = req.body;
+        const updated_by = req.user?.id || null;
+
+        if (!nome && prazo_dias === undefined) {
+            return res.status(400).json({ message: 'Pelo menos um campo (nome ou prazo_dias) é obrigatório para atualização.' });
+        }
+
+        const dadosAtualizar = { updated_by };
+        if (nome) {
+            const nomeNorm = String(nome).trim();
+            const exists = await readQuery('SELECT id FROM prioridades WHERE nome = ? AND id != ? LIMIT 1', [nomeNorm, id]);
+            if (Array.isArray(exists) ? exists.length > 0 : !!exists) {
+                return res.status(409).json({ message: 'Já existe uma prioridade com este nome.' });
+            }
+            dadosAtualizar.nome = nomeNorm;
+        }
+        if (prazo_dias !== undefined) {
+            dadosAtualizar.prazo_dias = prazo_dias;
+        }
+
+        const affectedRows = await update('prioridades', dadosAtualizar, 'id = ?', [id]);
+
+        if (affectedRows === 0) {
+            return res.status(404).json({ message: 'Prioridade não encontrada ou nenhum dado para atualizar.' });
+        }
+
+        res.status(200).json({ message: 'Prioridade atualizada com sucesso.' });
+
+    } catch (err) {
+        console.error('Erro ao atualizar prioridade:', err);
+        res.status(500).json({ message: 'Erro interno ao atualizar prioridade.' });
+    }
+};
+
+export const excluirPrioridadeController = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const affectedRows = await deleteRecord('prioridades', 'id = ?', [id]);
+
+        if (affectedRows === 0) {
+            return res.status(404).json({ message: 'Prioridade não encontrada.' });
+        }
+
+        res.status(200).json({ message: 'Prioridade excluída com sucesso.' });
+
+    } catch (err) {
+        console.error('Erro ao excluir prioridade:', err);
+        res.status(500).json({ message: 'Erro interno ao excluir prioridade.' });
     }
 };
 
