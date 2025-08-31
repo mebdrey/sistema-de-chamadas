@@ -21,7 +21,7 @@ CREATE TABLE usuarios (
 /* Lista de tipos/categorias de serviço ofertados*/
 CREATE TABLE pool (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    titulo ENUM('externo', 'manutencao', 'apoio_tecnico', 'limpeza') NOT NULL,
+    titulo varchar(255) NOT NULL,
     descricao TEXT,
     status_pool ENUM('ativo', 'inativo') DEFAULT 'ativo',
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -284,5 +284,7 @@ CREATE INDEX idx_chamados_status ON chamados(status_chamado);
 CREATE INDEX idx_apontamentos_comeco_fim ON apontamentos(comeco, fim);
 
 select *from chamados;
+select *from usuarios;
+select *from pool;
 select *from apontamentos;
 select *from avaliacoes;
