@@ -18,9 +18,7 @@ export default function Setores() {
     }, []);
 
     // Função para lidar com check/uncheck dos setores no dropdown
-    function toggleSetor(nomeSetor) {
-        setSetoresSelecionados((prev) => ({...prev, [nomeSetor]: !prev[nomeSetor], }));
-    }
+    function toggleSetor(nomeSetor) {setSetoresSelecionados((prev) => ({...prev, [nomeSetor]: !prev[nomeSetor], }));}
 
     // Juntar usuários só dos setores selecionados para exibir numa tabela só
     const usuariosFiltrados = Object.entries(setores)
@@ -74,14 +72,13 @@ export default function Setores() {
             .join(' ');
     }
     return (
-        <div className="p-4 h-screen w-full dark:bg-gray-800">
+        <div className="p-4 h-screen w-full dark:bg-gray-900">
             <div className="p-4  rounded-lg dark:border-gray-700 mt-14">
                 <div className="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 p-4 ">
                     <div className="relative inline-block text-left">
                         {/* <button onClick={() => setDropdownAberto(!dropdownAberto)} className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" >
                                 Action
-                                <svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" /></svg>
+                                <svg className="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" /></svg>
                             </button>
                             {dropdownAberto && (
                                 <div className="z-10 absolute mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600" style={{ top: "100%", left: 0 }} >
@@ -105,9 +102,7 @@ export default function Setores() {
                                 </div>
                             )} */}
                         <button id="dropdownHelperButton" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
-                            <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" >
-                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                            </svg>
+                            <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" ><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" /></svg>
                         </button>
                         {/* Dropdown menu */}
                         {dropdownAberto && (
@@ -171,7 +166,7 @@ export default function Setores() {
                 {/* Tabela única com usuários filtrados */}
                 <div className="overflow-auto">
                     <table className="w-full text-sm text-left text-gray-500 ">
-                        <thead className="text-xs text-gray-700 uppercase bg-[#E6DAFF] dark:bg-gray-700 dark:text-gray-200">
+                        <thead className="text-xs text-gray-700 uppercase bg-[#E6DAFF] dark:bg-gray-800 dark:text-gray-200">
                             <tr>
                                 <th className="px-6 py-3 ">Nome</th>
                                 <th className="px-6 py-3">Função</th>
@@ -186,7 +181,7 @@ export default function Setores() {
                                 </tr>
                             )}
                             {usuariosFiltrados.map((usuario) => (
-                                <tr key={usuario.id} className="bg-white border-b border-gray-200 hover:bg-gray-50 dark:bg-gray-400 " >
+                                <tr key={usuario.id} className="bg-white border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600" >
                                     <th scope="row" className="flex items-center px-6 py-4 poppins-medium text-gray-900 whitespace-nowrap " >
                                         <div className="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full ">
                                             {usuario.ftPerfil ? (
@@ -195,14 +190,14 @@ export default function Setores() {
                                             )}
                                         </div>
                                         <div className="ms-3">
-                                            <div>{usuario.nome}</div>
-                                            <div className="text-gray-500 text-sm dark:text-gray-800">{usuario.email}</div>
+                                            <div className="text-gray-800 dark:text-gray-100">{usuario.nome}</div>
+                                            <div className="text-gray-500 text-sm dark:text-gray-400">{usuario.email}</div>
                                         </div>
                                     </th>
-                                    <td className="px-6 py-4 dark:text-gray-800">{formatarLabel(usuario.funcao)}</td>
+                                    <td className="px-6 py-4 dark:text-gray-100">{formatarLabel(usuario.funcao)}</td>
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center">
-                                            <div className={`h-2.5 w-2.5 rounded-full me-2 ${usuario.status_usuarios === "ativo" ? "bg-green-500 " : "bg-red-500"}`}></div>
+                                        <div className="flex items-center dark:text-gray-100">
+                                            <div className={`h-2.5 w-2.5 rounded-full me-2  ${usuario.status_usuarios === "ativo" ? "bg-green-500 " : "bg-red-500"}`}></div>
                                             {primeiraLetraMaiuscula(usuario.status_usuarios)}
                                         </div>
                                     </td>

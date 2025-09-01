@@ -32,6 +32,48 @@ export default function MeuPerfil() {
     //         alert("Erro ao enviar foto");
     //     }};
 
+    const enviarFoto = async () => {
+        // if (!foto) return alert("Selecione uma foto");
+
+        const formData = new FormData();
+        formData.append("foto", foto);
+
+        try {
+            const res = await fetch("http://localhost:8080/editarFoto", {
+                method: "POST",
+                body: formData,
+                credentials: "include"
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                // alert("Foto atualizada com sucesso!");
+                setUsuario((prev) => ({ ...prev, ftPerfil: data.caminho }));
+            } else {
+                alert(data.mensagem || "Erro ao atualizar foto.");
+            }
+        } catch (err) {
+            console.error("Erro ao enviar foto:", err);
+            alert("Erro ao enviar a foto.");
+        }
+    };
+
+    const removerFoto = async () => {
+        try {
+            const response = await fetch("http://localhost:8080/removerFoto", {
+                method: "POST",
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                alert("Foto de perfil removida.")
+            }
+        } catch (err) {
+            console.error("Erro ao remover foto:", err);
+            alert("Erro ao remover a foto.");
+        }
+    }
+
     //info perfil 
     useEffect(() => {
         fetch("http://localhost:8080/perfil", { method: "GET", credentials: "include" })
@@ -109,18 +151,38 @@ export default function MeuPerfil() {
     };
     const nomeSobrenome = pegarPrimeiroEUltimoNome(usuario.nome);
 
+    let imagem = [];
+
+    if (usuario.ftPerfil != null) {
+        imagem = [{ src: `http://localhost:8080/${usuario.ftPerfil}` }]
+    }
+    else {
+        imagem = [{ src: '/img/user.png' }] //só falta arrumar aqui
+    }
+
     return (
-        <section>
-            <div className='infos'>
-                <div className='page-indicador'>
+        <div className="p-4 h-screen w-full">
+            <div className="p-4 mt-14">
+                <div className='page-indicador w-min whitespace-nowrap text-black dark:text-white'>
                     <h1>Meu perfil</h1>
                     <hr />
                 </div>
 
                 {/*NOME DO USUÁRIO E TIPO*/}
-                <div className='user flex items-center gap-3 pt-8 border-b border-[#D0D0D0]'>
+                {/* <div className='user flex items-center gap-3 pt-8 border-b border-[#D0D0D0]'>
                     <img className='foto-usuario' src='./cao.png'></img>
                     <h3>{nomeSobrenome.primeiroNome} {nomeSobrenome.ultimoNome}</h3>
+                </div> */}
+                 {/*NOME DO USUÁRIO E TIPO*/}
+                <div className='user flex items-center gap-7 pt-8 border-b border-[#D0D0D0]'>
+
+                    {imagem.map((img) => (
+                        <div key={img}>
+                            <img className='foto-usuario' src={img.src}></img>
+                        </div>
+                    ))}
+
+                    <h3 className='text-black dark:text-white'>{nomeSobrenome.primeiroNome} {nomeSobrenome.ultimoNome}</h3>
                 </div>
 
                 {/*infos do usuario*/}
@@ -135,7 +197,14 @@ export default function MeuPerfil() {
                         <div className='sec-campos'><h6>Status</h6><p>Ativo</p></div>
                     </div>
                     <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
-                        <div className='sec-campos'><h6>Email pessoal</h6><p>{usuario.email}</p></div>
+                        <div className='sec-campos text-black dark:text-white'><h6>Departamento</h6><p>{usuario.funcao}</p></div>
+                    </div>
+                    <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
+                        <div className='sec-campos text-black dark:text-white'><h6>Status</h6><p>Ativo</p></div>
+                    </div>
+
+                    <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
+                        <div className='sec-campos text-black dark:text-white'><h6>Email pessoal</h6><p>{usuario.email}</p></div>
                     </div>
                 </div>
                 {/** Editar informações */}
@@ -153,10 +222,10 @@ export default function MeuPerfil() {
                                     <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
 
-                                <div className="modal-body px-4 py-3">
+                                <div className="modal-body px-4 py-3 bg-white dark:bg-gray-800">
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div>
-                                            <label htmlFor="email" className="form-label font-medium text-gray-700">Email</label>
+                                            <label htmlFor="email" className="form-label font-medium text-gray-700 dark:text-gray-200">Email</label>
                                             <div className="flex items-center gap-2">
                                                 <input type="email" defaultValue={usuario.email} ref={emailInputRef} className="form-control border rounded px-3 py-2" readOnly={!emailEditando} />
                                                 <button type="button" onClick={() => setEmailEditando(true)} title="Editar e-mail" className="text-gray-500 hover:text-black transition">
@@ -167,7 +236,13 @@ export default function MeuPerfil() {
                                             </div>
                                         </div>
                                         <div className="flex justify-center gap-3">
-                                            <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
+                                            <button type="button" onClick={removerFoto} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition">
+                                                Remover Foto
+                                            </button>
+                                        </div>
+
+                                        <div className="flex justify-center gap-3">
+                                            <button type="submit"onClick={enviarFoto} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
                                                 Salvar alterações
                                             </button>
                                         </div>
@@ -190,5 +265,5 @@ export default function MeuPerfil() {
                     </div>
                 </div>
             </div>
-        </section>)
+        </div>)
 }
