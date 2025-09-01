@@ -704,7 +704,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                   </div>
 
                   <div className="">
-                    <button onClick={async (e) => { e.stopPropagation(); await pegarChamado(chamadoSelecionado.id); setIsOpen(false); }} className="inline-flex items-center px-4 py-2 text-sm poppins-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 cursor-pointer">Pegar chamado<svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                    <button onClick={async (e) => { e.stopPropagation(); await pegarChamado(chamadoSelecionado.id); setIsOpen(false); }} className="inline-flex items-center px-4 py-2 text-sm poppins-medium text-center text-white bg-violet-700 rounded-lg hover:bg-violet-800 focus:ring-4 focus:ring-blue-300 dark:bg-violet-600 dark:hover:bg-violet-700 focus:outline-none dark:focus:ring-blue-800 cursor-pointer">Pegar chamado<svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                       <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
                     </svg>
                     </button>
@@ -829,7 +829,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                               rows="4"
                               value={descricao}
                               onChange={(e) => setDescricao(e.target.value)}
-                              className="w-full p-2.5 text-sm text-gray-900 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-violet-500 focus:border-violet-500"
+                              className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-violet-500 focus:border-violet-500"
                               placeholder="Descreva o que foi feito..."
                             />
                             <button onClick={iniciarApontamento} className="mt-4 flex flex-row gap-2 items-center px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pass-fill" viewBox="0 0 16 16">

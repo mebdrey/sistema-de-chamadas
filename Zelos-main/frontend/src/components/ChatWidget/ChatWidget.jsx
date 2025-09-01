@@ -569,7 +569,7 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
                   <div
                     className={[
                       "px-3 py-2 rounded-2xl max-w-[75%] break-words",
-                      mine ? "bg-violet-600 text-white rounded-br-none" : "bg-gray-100 text-gray-900 dark:bg-zinc-800 dark:text-zinc-100 rounded-bl-none",
+                      mine ? "bg-violet-600 text-white rounded-br-none" : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:bg-zinc-800 dark:text-zinc-100 rounded-bl-none",
                     ].join(" ")}
                   >
                     {msg.conteudo}
