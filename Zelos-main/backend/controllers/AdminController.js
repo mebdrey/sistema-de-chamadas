@@ -236,7 +236,7 @@ const normalizeIdentifier = (s) => String(s || '')
 
 export const criarUsuarioController = async (req, res) => {
     try {
-        const { nome, username, email, senha, funcao, ftPerfil } = req.body;
+        const {nome, username, email, senha, funcao, ftPerfil } = req.body;
 
         // validações básicas
         if (!nome || !email || !senha) {
@@ -262,9 +262,7 @@ export const criarUsuarioController = async (req, res) => {
         const existingEmail = await buscarUsuarioPorEmail(email);
         if (existingEmail) {
             return res.status(409).json({
-                message: 'Erros de validação',
-                fieldErrors: { email: 'Email já cadastrado' }
-            });
+                message: 'Erros de validação', fieldErrors: { email: 'Email já cadastrado' }});
         }
 
         // 3) valida função e prepara payload
