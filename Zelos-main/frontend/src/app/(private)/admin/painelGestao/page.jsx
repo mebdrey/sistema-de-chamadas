@@ -2,7 +2,6 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import ToastMsg from "@/components/Toasts/Toasts";
-
 const API_BASE_URL = 'http://localhost:8080';
 
 // fetch com timeout reutilizado
@@ -46,7 +45,6 @@ export default function PainelGestao() {
   const [toasts, setToasts] = useState([]);
   const addToast = (t) => setToasts(s => [...s, { id: Date.now() + Math.random(), ...t }]);
   const removeToast = (id) => setToasts(s => s.filter(x => x.id !== id));
-
   const [usuarios, setUsuarios] = useState([]);
   const [setores, setSetores] = useState([]);
   const [prioridades, setPrioridades] = useState([]);
@@ -69,7 +67,6 @@ export default function PainelGestao() {
   const [usernameChecking, setUsernameChecking] = useState(false);
   const [usernameExists, setUsernameExists] = useState(false);
   const lastUsernameRef = useRef('');
-
   const [showSetorModal, setShowSetorModal] = useState(false);
   const [novoSetor, setNovoSetor] = useState({ titulo: "", descricao: "" });
   const [isCreatingSetorRow, setIsCreatingSetorRow] = useState(false); //linha de criação
@@ -96,8 +93,7 @@ export default function PainelGestao() {
   const { UI: ToastsUI, showToast } = ToastMsg(); // pega UI e função showToast
 
 
-  useEffect(() => {
-    loadAll();}, []);
+  useEffect(() => {loadAll();}, []);
 
   const loadAll = async () => {
     setLoading(true);
@@ -306,12 +302,7 @@ export default function PainelGestao() {
       return;
     }
     // mapeamento simples baseado em títulos de pool
-    const mapTituloToFunc = {
-      'externo': 'tecnico_externo',
-      'manutencao': 'tecnico_manutencao',
-      'apoio_tecnico': 'apoio_tecnico',
-      'limpeza': 'auxiliar_limpeza'
-    };
+    const mapTituloToFunc = {'externo': 'tecnico_externo','manutencao': 'tecnico_manutencao','apoio_tecnico': 'apoio_tecnico','limpeza': 'auxiliar_limpeza'};
     const matches = setores
       .map(s => s.titulo)
       .filter(Boolean)
@@ -539,7 +530,6 @@ export default function PainelGestao() {
   }
 
 
-
   function formatDate(d) {
     if (!d) return "—";
     const dt = new Date(d);
@@ -550,6 +540,7 @@ export default function PainelGestao() {
     return (<img src={src} alt={alt} className={`inline-block rounded-full object-cover`} style={{ width: `${size}px`, height: `${size}px`}}/> );
   }
 
+  
   return (
     <>
       {ToastsUI}
@@ -579,19 +570,16 @@ export default function PainelGestao() {
                         <input type="text" name="nome" id="user_full_name" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer" placeholder=" " value={form.nome} onChange={handleNomeChange} required />
                         <label htmlFor="user_full_name" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Nome completo</label>
                       </div>
-
                       {/* Username e sugestões */}
                       <div className="relative z-0 mb-5 group w-full md:w-80">
                         <input type="text" name="username" id="user_username" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer" placeholder=" " ref={usernameInputRef} value={form.username} onChange={handleUsernameChange} onKeyDown={handleUsernameKeyDown} autoComplete="off" required />
                         <label htmlFor="user_username" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Username</label>
-
                         {/* Mensagem de estado username */}
                         <div className="mt-2">
                           {usernameChecking && <span className="text-xs text-gray-500">Verificando...</span>}
                           {!usernameChecking && usernameExists && <div className="text-xs text-red-500">Esse username já existe</div>}
                           {!usernameChecking && !usernameExists && form.username && <div className="text-xs text-green-600">Disponível</div>}
                         </div>
-
                         {usernameSuggestions.length > 0 && (
                           <div role="listbox" aria-label="Sugestões de username" className="mt-2 flex flex-wrap gap-2">
                             {usernameSuggestions.map((s, idx) => {
@@ -640,7 +628,7 @@ export default function PainelGestao() {
                         {form.repeat_password.length > 0 && !passwordsMatch && <div className="text-xs text-red-500 mt-1">As duas senhas devem ser iguais</div>}
                       </div>
                     </div>
-                    <button type="submit" className="text-white bg-[#7F56D8] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-purple-500 dark:hover:bg-purple-500 dark:focus:ring-purple-500"><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>Criar Usuário</button>
+                    <button type="submit" onClick={'H'} className="text-white bg-[#7F56D8] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-purple-500 dark:hover:bg-purple-500 dark:focus:ring-purple-500"><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Criar Usuário</button>
                   </form>
                 </div>
               </section>
@@ -760,7 +748,6 @@ export default function PainelGestao() {
                               <td className="px-6 py-2">
                                 <textarea placeholder="Descrição do setor" value={novoSetor.descricao} onChange={(e) => setNovoSetor(prev => ({ ...prev, descricao: e.target.value }))} className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 whitespace-normal break-words focus:outline-none focus:ring-2 focus:ring-[#7F56D8] focus:border-[#7F56D8] transition" rows={2} />
                               </td>
-
                               {/* Coluna: Ações (Salvar / Cancelar) */}
                               <td className="px-6 py-2 text-end">
                                 <div className="inline-flex gap-2">
@@ -867,7 +854,6 @@ export default function PainelGestao() {
                             )}
                           </tbody>
                         </table>
-
                         {editPrioridade && (
                           <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 p-4">
                             <form onSubmit={handleAtualizarPrioridade} className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
@@ -881,7 +867,6 @@ export default function PainelGestao() {
                             </form>
                           </div>
                         )}
-
                         <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-gray-700">
                           <div>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
