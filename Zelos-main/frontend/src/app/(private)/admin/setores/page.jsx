@@ -76,7 +76,8 @@ function deletarUsuario(id) {
         const correcoes = {
             "auxiliar limpeza": "Auxiliar de Limpeza",
             "apoio tecnico": "Apoio Técnico",
-            "tecnico": "Técnico"
+            "tecnico": "Técnico",
+            "admin" : "Administrador"
         };
 
         if (correcoes[texto]) { return correcoes[texto];}
@@ -89,7 +90,7 @@ function deletarUsuario(id) {
     }
 
     return (
-        <div className="p-4 h-screen w-full dark:bg-gray-800">
+        <div className="p-4 h-screen w-full dark:bg-gray-900">
             <div className="p-4  rounded-lg dark:border-gray-700 mt-14">
                 <div className="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 p-4 ">
                     <div className="relative inline-block text-left">
@@ -200,7 +201,7 @@ function deletarUsuario(id) {
                 {/* Tabela única com usuários filtrados */}
                 <div className="overflow-auto">
                     <table className="w-full text-sm text-left text-gray-500 ">
-                        <thead className="text-xs text-gray-700 uppercase bg-[#E6DAFF] dark:bg-gray-900 dark:text-gray-200">
+                        <thead className="text-xs text-gray-700 uppercase bg-[#E6DAFF] dark:bg-gray-800 dark:text-gray-200">
                             <tr>
                                 <th className="px-6 py-3 ">Nome</th>
                                 <th className="px-6 py-3">Função</th>
@@ -244,7 +245,7 @@ function deletarUsuario(id) {
                                     </td>
 
                                     <td className="relative">
-                                        <button onClick={() => setDropdownAbertoId((prev) => (prev === usuario.id ? null : usuario.id))} className="inline-flex items-center p-2 text-sm poppins-medium text-center text-gray-900 bg-white dark:bg-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-50 " type="button" aria-expanded={dropdownAbertoId === usuario.id} aria-haspopup="true" >
+                                        <button onClick={() => setDropdownAbertoId((prev) => (prev === usuario.id ? null : usuario.id))} className="inline-flex items-center p-2 text-sm poppins-medium text-center text-gray-900 bg-white dark:bg-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-50 dark:focus:ring-gray-800 " type="button" aria-expanded={dropdownAbertoId === usuario.id} aria-haspopup="true" >
                                             <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3" >
                                                 <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
                                             </svg>

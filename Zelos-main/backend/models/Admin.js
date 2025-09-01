@@ -28,6 +28,16 @@ export const verAuxiliaresLimpeza = async () => {
   catch (err) { throw err; }
 };
 
+//admins
+export const verAdmins = async () => {
+  const consulta = 'SELECT *from usuarios where funcao = "admin"';
+  try {
+    return await readQuery(consulta);
+  } catch (err) {
+    throw err;
+  }
+}
+
 export const verChamados = async () => {
   const consulta = `SELECT
       c.*,
@@ -307,7 +317,7 @@ export const getPrazoPorNome = async (nome) => {
 export const calcularDataLimite = async (prioridade) => {
   try {
     const [row] = await read('prioridades', '*', 'nome = ?', [prioridade]);
-    if (row && row.horas_limite) {return new Date(Date.now() + row.horas_limite * 60 * 60 * 1000); }
+    if (row && row.horas_limite) { return new Date(Date.now() + row.horas_limite * 60 * 60 * 1000); }
     return null;
   } catch (err) {
     console.error("Erro ao buscar prioridade:", err);
@@ -343,7 +353,7 @@ export async function obterChamadosPorMesAno(prioridadeNome = null) {
 }
 
 export async function contarChamadosPorPool({
-  setor, modo = 'anual'} = {}) {
+  setor, modo = 'anual' } = {}) {
   if (!setor) return [];
   const params = [];
 

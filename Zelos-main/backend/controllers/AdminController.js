@@ -1,4 +1,4 @@
-import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool, buscarUsuarioPorEmail } from '../models/Admin.js'
+import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool, buscarUsuarioPorEmail, verAdmins } from '../models/Admin.js'
 import { criarNotificacao } from '../models/Notificacoes.js';
 import { readAll, readQuery, update, deleteRecord } from '../config/database.js'; // Importar deleteRecord
 
@@ -7,7 +7,8 @@ export const listarUsuariosPorSetorController = async (req, res) => {
     try {
         const tecnicos = await verTecnicos();
         const auxiliares = await verAuxiliaresLimpeza();
-        res.status(200).json({ tecnicos, auxiliares });
+        const admins = await verAdmins();
+        res.status(200).json({ tecnicos, auxiliares, admins });
     } catch (err) { res.status(500).json({ erro: err.message }); }
 };
 
