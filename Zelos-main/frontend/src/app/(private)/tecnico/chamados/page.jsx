@@ -887,7 +887,56 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                   </div>
 
                   {/* === Modal de confirmação Finalizar Chamado === */}
-                  {mostrarModalConfirmacao && (
+                  {/* {mostrarModalConfirmacao && (
+                    <div className="fixed inset-0 z-[999] h-screen flex items-center justify-center bg-black/30">
+                      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                        <div className="text-center">
+                          <svg
+                            className="mx-auto mb-4 text-gray-400 w-12 h-12"
+                            fill="none"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                            />
+                          </svg>
+                          <h3 className="mb-5 text-lg poppins-regular text-gray-500">
+                            Tem certeza que deseja finalizar este chamado?
+                          </h3>
+
+                          <button
+                            onClick={async () => {
+                              setMostrarModalConfirmacao(false);
+                              await finalizarChamado();
+                            }}
+                            disabled={finalizando}
+                            className="text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-[#7F56D8] poppins-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center disabled:opacity-60"
+                          >
+                            {finalizando ? "Finalizando..." : "Sim, finalizar"}
+                          </button>
+
+                          <button
+                            onClick={() => setMostrarModalConfirmacao(false)}
+                            className="py-2.5 px-5 ms-3 text-sm poppins-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )} */}
+                </div>
+              )
+            )}
+
+
+
+          </section>
+          {mostrarModalConfirmacao && (
                     <div className="fixed inset-0 z-[999] h-screen flex items-center justify-center bg-black/30">
                       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
                         <div className="text-center">
@@ -929,14 +978,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                       </div>
                     </div>
                   )}
-                </div>
-              )
-            )}
-
-
-
-          </section>
-        </div >
+        </div>
       </div >
 
       {/* TOASTS: canto inferior direito */}
