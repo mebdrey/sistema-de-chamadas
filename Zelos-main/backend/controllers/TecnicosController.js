@@ -17,8 +17,7 @@ export const pegarChamadoController = async (req, res) => {
 
     if (!chamado_id) { return res.status(400).json({ erro: 'ID do chamado é obrigatório.' }); }
 
-    try {
-        const chamadoAtualizado = await pegarChamado(chamado_id, usuario_id);
+    try {const chamadoAtualizado = await pegarChamado(chamado_id, usuario_id);
 
         // devolve mensagem e chamado atualizado (contendo data_limite)
         res.status(200).json({ mensagem: 'Chamado atribuído com sucesso.', chamado: chamadoAtualizado });
@@ -100,9 +99,7 @@ export const listarApontamentosController = async (req, res) => {
 
         // valida permissão: dono do chamado, técnico atribuído ou admin
         const user = req.user;
-        if (!usuarioPodeVerApontamentos(user, chamado)) {
-            return res.status(403).json({ erro: 'Acesso negado' });
-        }
+        if (!usuarioPodeVerApontamentos(user, chamado)) {return res.status(403).json({ erro: 'Acesso negado' }); }
 
         // pega apontamentos com join (nome do técnico)
         const apontamentos = await getApontamentosByChamado(chamado_id);
@@ -128,8 +125,8 @@ export const criarApontamentoController = async (req, res) => {
         if (!chamado) return res.status(404).json({ erro: 'Chamado não encontrado' });
 
         // apenas o técnico atribuído (ou admin) pode criar apontamento neste chamado
-        if (!(chamado.tecnico_id === tecnico_id || req.user.role === 'admin')) {
-            return res.status(403).json({ erro: 'Você não pode criar apontamentos neste chamado' });
+        if (!(chamado.tecnico_id===tecnico_id || req.user.role==='admin')) {
+            return res.status(403).json({ erro:'Você não pode criar apontamentos neste chamado' });
         }
 
         // cria e pega o insertId
@@ -182,9 +179,7 @@ export const finalizarChamadoController = async (req, res) => {
                 descricao: `Seu chamado #${chamado_id} foi concluído pelo técnico.`,
                 chamado_id
             });
-        } else {
-            console.warn(`[finalizarChamadoController] não encontrou usuario_id para notificar (chamado ${chamado_id})`);
-        }
+        } else { console.warn(`[finalizarChamadoController] não encontrou usuario_id para notificar (chamado ${chamado_id})`);}
 
         return res.status(200).json({ mensagem: 'Chamado finalizado com sucesso.', relatorio: dadosRelatorio });
     } catch (err) {
@@ -278,10 +273,8 @@ export const gerarRelatorioChamadoController = async (req, res) => {
             const apontLines = (apontamentos && apontamentos.length)
                 ? apontamentos.map(a => `${formatDateTime(a.comeco)} — ${safeText(a.tecnico_nome || a.tecnico_id)}: ${safeText(a.descricao)}`)
                 : [];
-            if (apontLines.length) {
-                // coloca todos os apontamentos numa única célula (com quebras de linha)
-                rows.push(['Apontamentos', apontLines.join('\n')]);
-            } else { rows.push(['Apontamentos', 'Descreva aqui o procedimento realizado.']); }
+            if (apontLines.length) {rows.push(['Apontamentos', apontLines.join('\n')]);}// coloca todos os apontamentos numa única célula (com quebras de linha)
+            else { rows.push(['Apontamentos', 'Descreva aqui o procedimento realizado.']); }
 
             rows.push([]); // linha em branco
 
@@ -295,8 +288,7 @@ export const gerarRelatorioChamadoController = async (req, res) => {
 
             res.setHeader('Content-Disposition', `attachment; filename=relatorio_chamado_${rel.id}.csv`);
             res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-            // BOM para Excel/acentuação
-            return res.send('\uFEFF' + csv);
+            return res.send('\uFEFF' + csv); // BOM para Excel/acentuação
         }
 
         // ---------- PDF ----------
@@ -400,10 +392,7 @@ export const gerarRelatorioChamadoController = async (req, res) => {
         const tempoTotal = formatDurationBetween(rel.criado_em, rel.finalizado_em) || '-';
         const slaText = (typeof chamado.sla_cumprido !== 'undefined') ? (chamado.sla_cumprido ? 'Cumprido' : 'Não cumprido') : 'Não calculado';
 
-        const metricsLines = [
-            `Tempo total de atendimento: ${tempoTotal}`,
-            `SLA: ${slaText}`
-        ];
+        const metricsLines = [`Tempo total de atendimento: ${tempoTotal}`,`SLA: ${slaText}`];
 
         for (const ml of metricsLines) {
             const h = doc.heightOfString(ml, { width: rightWidth });

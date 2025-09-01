@@ -147,7 +147,7 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
                     <path d="M7.29235 1V4.0625M7.29235 11.9375V15M14.4977 1H5.49325C2.04452 1 1.08104 1.805 1 4.9375C2.73787 4.9375 4.14257 6.31125 4.14257 8C4.14257 9.68875 2.73787 11.0538 1 11.0625C1.08104 14.195 2.04452 15 5.49325 15H14.4977C18.0995 15 19 14.125 19 10.625V5.375C19 1.875 18.0995 1 14.4977 1Z" stroke="#6A7282" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M12.7729 5.55297L13.3412 6.6988C13.3962 6.8088 13.5062 6.8913 13.6254 6.90964L14.8904 7.09297C15.202 7.1388 15.3304 7.5238 15.1012 7.7438L14.1845 8.63297C14.0929 8.71547 14.0562 8.8438 14.0745 8.97214L14.2945 10.228C14.3495 10.5396 14.0195 10.778 13.7445 10.6313L12.617 10.0355C12.5613 10.0083 12.5002 9.99422 12.4383 9.99422C12.3763 9.99422 12.3152 10.0083 12.2595 10.0355L11.132 10.6313C10.8479 10.778 10.527 10.5396 10.582 10.228L10.802 8.97214C10.8122 8.91092 10.8076 8.84815 10.7884 8.78912C10.7693 8.73009 10.7362 8.67653 10.692 8.63297L9.78452 7.7438C9.73346 7.69418 9.69732 7.63126 9.68017 7.56216C9.66302 7.49306 9.66556 7.42054 9.68751 7.35281C9.70945 7.28508 9.74991 7.22484 9.80432 7.17892C9.85872 7.133 9.9249 7.10322 9.99536 7.09297L11.2604 6.90964C11.3887 6.8913 11.4895 6.81797 11.5445 6.6988L12.1037 5.55297C12.232 5.2688 12.6354 5.2688 12.7729 5.55297Z" stroke="#6A7282" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  <h5 className="text-2xl poppins-semibold tracking-tight text-gray-900 dark:text-gray-400"><AnimatedNumber value={nChamados.qtd} duration={300}/></h5>
+                  <h5 className="text-2xl poppins-semibold tracking-tight text-gray-900 dark:text-gray-400"><AnimatedNumber value={nChamados.qtd} duration={300} /></h5>
                 </div>
               </div>
             </div>
@@ -160,8 +160,8 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
               {dropdownChamadosStatusOpen && (
                 <div className="absolute z-10 mt-2 bg-white border border-gray-200 rounded-lg shadow-sm w-40">
                   <ul className="py-2 text-sm text-gray-700">
-                    <li><button onClick={() => { exportarCsvChamadosPorStatus(); setDropdownChamadosStatusOpen(false);}} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar CSV</button></li>
-                    <li><button onClick={() => { gerarRelatorioChamadoPorStatus(); setDropdownChamadosStatusOpen(false);}} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF</button></li>
+                    <li><button onClick={() => { exportarCsvChamadosPorStatus(); setDropdownChamadosStatusOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar CSV</button></li>
+                    <li><button onClick={() => { gerarRelatorioChamadoPorStatus(); setDropdownChamadosStatusOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF</button></li>
                   </ul>
                 </div>
               )}
