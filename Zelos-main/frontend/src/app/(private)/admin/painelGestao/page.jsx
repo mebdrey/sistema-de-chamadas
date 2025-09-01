@@ -867,6 +867,7 @@ export default function PainelGestao() {
                             )}
                           </tbody>
                         </table>
+
                         {editPrioridade && (
                           <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 p-4">
                             <form onSubmit={handleAtualizarPrioridade} className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
@@ -880,6 +881,7 @@ export default function PainelGestao() {
                             </form>
                           </div>
                         )}
+
                         <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-gray-700">
                           <div>
                             <p className="text-sm text-gray-600 dark:text-gray-400">

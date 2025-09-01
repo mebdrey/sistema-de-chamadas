@@ -291,27 +291,83 @@ export const atualizarSetor = async (id, dados) => {
   }
 };
 
-// adiciona uma prioridade 
-export const criarPrioridade = async (dados) => {
-  try {
-    // dados: { nome, horas_limite, created_by }
-    const id = await create('prioridades', dados);
-    return id;
-  } catch (err) {
-    console.error('Erro ao criar prioridade', err);
-    throw err;
-  }
-};
+// // adiciona uma prioridade 
+// export const criarPrioridade = async (dados) => {
+//   try {
+//     // dados: { nome, horas_limite, created_by }
+//     const id = await create('prioridades', dados);
+//     return id;
+//   } catch (err) {
+//     console.error('Erro ao criar prioridade', err);
+//     throw err;
+//   }
+// };
 
-export const getPrazoPorNome = async (nome) => {
+// export const excluirPrioridade = async (id) => {
+//   if (!id) throw new Error("ID inválido");
+//   const affectedRows = await deleteRecord("prioridades", "id = ?", [id]);
+//   return affectedRows;
+// };
+
+// export const getPrazoPorNome = async (nome) => {
+//   try {
+//     const row = await read('prioridades', `nome = ${JSON.stringify(nome)}`);
+//     return row ? Number(row.horas_limite ?? row.prazo_dias ?? 0) : null;
+//   } catch (err) {
+//     console.error('Erro getPrazoPorNome', err);
+//     throw err;
+//   }
+// };
+
+// Criar prioridade
+export async function criarPrioridade({ nome, horas_limite }) {
   try {
-    const row = await read('prioridades', `nome = ${JSON.stringify(nome)}`);
-    return row ? Number(row.horas_limite ?? row.prazo_dias ?? 0) : null;
+    return await create("prioridades", { nome, horas_limite });
   } catch (err) {
-    console.error('Erro getPrazoPorNome', err);
+    console.error("Erro no model ao criar prioridade:", err);
+    throw err; // repassa para o controller
+  }
+}
+
+// Listar todas
+export async function listarPrioridades() {
+  try {
+    return await readAll("prioridades");
+  } catch (err) {
+    console.error("Erro no model ao listar prioridades:", err);
     throw err;
   }
-};
+}
+
+// Buscar por nome
+export async function buscarPrioridadePorNome(nome) {
+  try {
+    return await readQuery("SELECT * FROM prioridades WHERE nome = ? LIMIT 1", [nome]);
+  } catch (err) {
+    console.error("Erro no model ao buscar prioridade por nome:", err);
+    throw err;
+  }
+}
+
+// Atualizar
+export async function atualizarPrioridade(id, dados) {
+  try {
+    return await update("prioridades", dados, `id = ${id}`);
+  } catch (err) {
+    console.error("Erro no model ao atualizar prioridade:", err);
+    throw err;
+  }
+}
+
+// Excluir
+export async function excluirPrioridade(id) {
+  try {
+    return await deleteRecord("prioridades", `id = ${id}`);
+  } catch (err) {
+    console.error("Erro no model ao excluir prioridade:", err);
+    throw err;
+  }
+}
 
 // calcula data limite com base em prioridade
 export const calcularDataLimite = async (prioridade) => {
