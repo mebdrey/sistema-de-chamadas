@@ -27,7 +27,7 @@ export default function MeuPerfil() {
     };
 
     const enviarFoto = async () => {
-        if (!foto) return alert("Selecione uma foto");
+        // if (!foto) return alert("Selecione uma foto");
 
         const formData = new FormData();
         formData.append("foto", foto);

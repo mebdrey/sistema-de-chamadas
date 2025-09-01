@@ -382,11 +382,11 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                                                         e.preventDefault();
                                                         abrirNotificacao(n);
                                                     }}
-                                                    className={`flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 ${!n.lida ? "bg-gray-50" : ""}`}
+                                                    className={`flex px-4 py-3 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 ${!n.lida ? "bg-gray-50 dark:bg-gray-600" : ""}`}
                                                 >
                                                     <div className="shrink-0">
                                                         {/* <img className="rounded-full w-11 h-11" src="/docs/images/people/profile-picture-1.jpg" alt="avatar" /> */}
-                                                        <div className="flex items-center justify-center w-11 h-11 bg-[#7F56D8] border border-white rounded-full dark:border-gray-800">
+                                                        <div className="flex items-center justify-center w-11 h-11 bg-violet-500 border border-white rounded-full dark:border-gray-800">
                                                             {getNotificacaoIcon(n.tipo)}
                                                         </div>
                                                     </div>
@@ -395,7 +395,7 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                                                             <span className="poppins-semibold text-gray-900 dark:text-white">{n.titulo}</span>
                                                             <p>{n.descricao}</p>
                                                         </div>
-                                                        <div className="text-xs text-[#7F56D8] dark:text-blue-500">
+                                                        <div className="text-xs text-violet-500 dark:text-violet-500">
                                                             {new Date(n.criado_em).toLocaleString("pt-BR")}
                                                         </div>
                                                     </div>

@@ -40,6 +40,48 @@ export default function MeuPerfil() {
     //         alert("Erro ao enviar foto");
     //     }};
 
+    const enviarFoto = async () => {
+        // if (!foto) return alert("Selecione uma foto");
+
+        const formData = new FormData();
+        formData.append("foto", foto);
+
+        try {
+            const res = await fetch("http://localhost:8080/editarFoto", {
+                method: "POST",
+                body: formData,
+                credentials: "include"
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                // alert("Foto atualizada com sucesso!");
+                setUsuario((prev) => ({ ...prev, ftPerfil: data.caminho }));
+            } else {
+                alert(data.mensagem || "Erro ao atualizar foto.");
+            }
+        } catch (err) {
+            console.error("Erro ao enviar foto:", err);
+            alert("Erro ao enviar a foto.");
+        }
+    };
+
+    const removerFoto = async () => {
+        try {
+            const response = await fetch("http://localhost:8080/removerFoto", {
+                method: "POST",
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                alert("Foto de perfil removida.")
+            }
+        } catch (err) {
+            console.error("Erro ao remover foto:", err);
+            alert("Erro ao remover a foto.");
+        }
+    }
+
     //info perfil 
     useEffect(() => {
         fetch("http://localhost:8080/perfil", {
@@ -133,10 +175,19 @@ export default function MeuPerfil() {
     };
     const nomeSobrenome = pegarPrimeiroEUltimoNome(usuario.nome);
 
+    let imagem = [];
+
+    if (usuario.ftPerfil != null) {
+        imagem = [{ src: `http://localhost:8080/${usuario.ftPerfil}` }]
+    }
+    else {
+        imagem = [{ src: '/img/user.png' }] //só falta arrumar aqui
+    }
+
     return (
         <div className="p-4 h-screen w-full">
             <div className="p-4 mt-14">
-                <div className='page-indicador'>
+                <div className='page-indicador w-min whitespace-nowrap text-black dark:text-white'>
                     <h1>Meu perfil</h1>
                     <hr />
                 </div>
@@ -146,46 +197,44 @@ export default function MeuPerfil() {
                     <img className='foto-usuario' src='./cao.png'></img>
                     <h3>{nomeSobrenome.primeiroNome} {nomeSobrenome.ultimoNome}</h3>
                 </div> */}
-                <div className='user flex items-center gap-3 pt-8 '>
-                    <div className="relative size-20 group">
-                        <img src={preview} alt="Foto do usuário" className="w-full h-full object-cover rounded-full z-0" />
+                 {/*NOME DO USUÁRIO E TIPO*/}
+                <div className='user flex items-center gap-7 pt-8 border-b border-[#D0D0D0]'>
 
-                        <input type="file" id="fileUpload" accept="image/*" className="hidden" onChange={handleFileChange} />
+                    {imagem.map((img) => (
+                        <div key={img}>
+                            <img className='foto-usuario' src={img.src}></img>
+                        </div>
+                    ))}
 
-                        <label htmlFor="fileUpload" className="absolute inset-0 z-10 flex items-center justify-center rounded-full bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                        </label>
-                    </div>
-
-
-                    <h3>{nomeSobrenome.primeiroNome} {nomeSobrenome.ultimoNome}</h3>
+                    <h3 className='text-black dark:text-white'>{nomeSobrenome.primeiroNome} {nomeSobrenome.ultimoNome}</h3>
                 </div>
 
                 {/*infos do usuario*/}
                 <div className='pt-8 grid grid-cols-2'>
 
                     <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
-                        <div className='sec-campos'><h6>Nome completo</h6><p>{usuario.nome}</p></div>
+                        <div className='sec-campos text-black dark:text-white'><h6>Nome completo</h6><p>{usuario.nome}</p></div>
                     </div>
 
                     <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
-                        <div className='sec-campos'><h6>Departamento</h6><p>{usuario.funcao}</p></div>
+                        <div className='sec-campos text-black dark:text-white'><h6>Departamento</h6><p>{usuario.funcao}</p></div>
                     </div>
                     <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
-                        <div className='sec-campos'><h6>Status</h6><p>Ativo</p></div>
+                        <div className='sec-campos text-black dark:text-white'><h6>Status</h6><p>Ativo</p></div>
                     </div>
 
                     <div className='sec-container flex flex-wrap flex-row justify-between gap-3'>
-                        <div className='sec-campos'><h6>Email pessoal</h6><p>{usuario.email}</p></div>
+                        <div className='sec-campos text-black dark:text-white'><h6>Email pessoal</h6><p>{usuario.email}</p></div>
                     </div>
 
                 </div>
 
                 {/** Editar informações */}
                 <div className="flex flex-wrap gap-6">
-                    <button type="button" className="bg-violet-600 h-10 text-white font-medium py-2 px-4 rounded hover:bg-violet-700 transition mt-5" data-bs-toggle="modal"
+                    <button
+                        type="button"
+                        className="bg-violet-600 h-10 text-white font-medium py-2 px-4 rounded hover:bg-violet-700 transition mt-5"
+                        data-bs-toggle="modal"
                         data-bs-target="#staticBackdrop"
                     >
                         Editar perfil
@@ -195,8 +244,8 @@ export default function MeuPerfil() {
                     <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                         <div className="modal-dialog modal-dialog-centered">
                             <div className="modal-content  rounded-lg shadow-lg">
-                                <div className="modal-header flex p-2 items-center bg-gray-100 ">
-                                    <h5 className="titulo-modal modal-title  text-lg font-semibold" id="staticBackdropLabel">Editar Perfil</h5>
+                                <div className="modal-header flex p-2 items-center bg-gray-100 dark:bg-gray-700">
+                                    <h5 className="titulo-modal modal-title  text-lg font-semibold dark:text-gray-200" id="staticBackdropLabel">Editar Perfil</h5>
                                     <button
                                         type="button"
                                         className="btn-close"
@@ -205,10 +254,10 @@ export default function MeuPerfil() {
                                     ></button>
                                 </div>
 
-                                <div className="modal-body px-4 py-3">
+                                <div className="modal-body px-4 py-3 bg-white dark:bg-gray-800">
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div>
-                                            <label htmlFor="email" className="form-label font-medium text-gray-700">Email</label>
+                                            <label htmlFor="email" className="form-label font-medium text-gray-700 dark:text-gray-200">Email</label>
                                             <div className="flex items-center gap-2">
                                                 <input
                                                     type="email"
@@ -223,18 +272,44 @@ export default function MeuPerfil() {
                                                     title="Editar e-mail"
                                                     className="text-gray-500 hover:text-black transition"
                                                 >
-                                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <svg width="18" className='text-black dark:text-white ' height="18" viewBox="0 0 18 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                         <path d="M14.3786 6.44975L4.96376 15.8648C4.68455 16.144 4.32895 16.3343 3.94177 16.4117L1.00003 17.0001L1.58838 14.0583C1.66582 13.6711 1.85612 13.3155 2.13532 13.0363L11.5502 3.62132M14.3786 6.44975L15.7929 5.03553C16.1834 4.64501 16.1834 4.01184 15.7929 3.62132L14.3786 2.20711C13.9881 1.81658 13.355 1.81658 12.9644 2.20711L11.5502 3.62132M14.3786 6.44975L11.5502 3.62132" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                                     </svg>
                                                 </button>
                                             </div>
                                         </div>
 
+                                        {/**enviar foto */}
+                                        <div>
+                                            <label className="form-label font-medium text-gray-700 dark:text-gray-200">Foto de perfil</label>
+                                            <input type="file" accept="image/*" onChange={handleFileChange} className="mt-1 block w-full dark:bg-gray-700 text-sm text-gray-500" />
+                                        </div>
+
+
+
+                                        {foto && (
+                                            <>
+                                                {preview && (
+                                                    <div className="mt-2">
+                                                        <img src={preview} alt="Prévia da nova foto" className="w-24 h-24 rounded-full object-cover" />
+                                                    </div>
+                                                )}                                         
+
+                                            </>)}
+
                                         <div className="flex justify-center gap-3">
-                                            <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
+                                            <button type="button" onClick={removerFoto} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition">
+                                                Remover Foto
+                                            </button>
+                                        </div>
+
+                                        <div className="flex justify-center gap-3">
+                                            <button type="submit"onClick={enviarFoto} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
                                                 Salvar alterações
                                             </button>
                                         </div>
+
+
 
                                         {/* Mensagem de resposta */}
                                         {resposta && (
