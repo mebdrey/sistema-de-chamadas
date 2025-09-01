@@ -620,7 +620,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                     <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-400">#{chamadoSelecionado?.id}</p>
                   </div>
                   <div className="">
-                    <button onClick={async (e) => { e.stopPropagation(); await pegarChamado(chamadoSelecionado.id); setIsOpen(false); }} className="inline-flex items-center px-4 py-2 text-sm poppins-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 cursor-pointer">Pegar chamado<svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                    <button onClick={async (e) => { e.stopPropagation(); await pegarChamado(chamadoSelecionado.id); setIsOpen(false); }} className="inline-flex items-center px-4 py-2 text-sm poppins-medium text-center text-white bg-violet-700 rounded-lg hover:bg-violet-800 focus:ring-4 focus:ring-blue-300 dark:bg-violet-600 dark:hover:bg-violet-700 focus:outline-none dark:focus:ring-blue-800 cursor-pointer">Pegar chamado<svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                       <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
                     </svg>
                     </button>
@@ -714,7 +714,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                         {!apontamentoAtivo && (
                           <div className="mb-6">
                             <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-gray-200">Nova atividade realizada</label>
-                            <textarea id="descricao" rows="4" value={descricao} onChange={(e) => setDescricao(e.target.value)} className="w-full p-2.5 text-sm text-gray-900 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-violet-500 focus:border-violet-500" placeholder="Descreva o que foi feito..." />
+                            <textarea id="descricao" rows="4" value={descricao} onChange={(e) => setDescricao(e.target.value)} className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-violet-500 focus:border-violet-500" placeholder="Descreva o que foi feito..." />
                             <button onClick={iniciarApontamento} className="mt-4 flex flex-row gap-2 items-center px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pass-fill" viewBox="0 0 16 16">
                               <path d="M10 0a2 2 0 1 1-4 0H3.5A1.5 1.5 0 0 0 2 1.5v13A1.5 1.5 0 0 0 3.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 12.5 0zM4.5 5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1m0 2h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1 0-1" /></svg>Adicionar apontamento</button>
                           </div>

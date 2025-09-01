@@ -712,11 +712,11 @@ export default function ChamadosCliente() {
                     {openApontamentos && (
                         <div className="fixed inset-0 z-50 flex justify-center items-center w-full h-full">
                             <div className="relative w-full w-full h-full">
-                                <div className="relative bg-[#F8FAFB] shadow-sm dark:bg-gray-700 h-full flex flex-col rounded-lg">
+                                <div className="relative bg-[#F8FAFB] shadow-sm dark:bg-gray-900 h-full flex flex-col rounded-lg">
 
                                     {/* header */}
                                     <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
-                                        <h3 className="inline-flex items-center gap-2 text-base poppins-semibold text-gray-500">
+                                        <h3 className="inline-flex items-center gap-2 text-base poppins-semibold text-gray-500 dark:text-gray-100">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pass-fill" viewBox="0 0 16 16">
                                                 <path d="M10 0a2 2 0 1 1-4 0H3.5A1.5 1.5 0 0 0 2 1.5v13A1.5 1.5 0 0 0 3.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 12.5 0zM4.5 5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1m0 2h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1 0-1" />
                                             </svg>
@@ -732,7 +732,7 @@ export default function ChamadosCliente() {
 
                                     {/* corpo */}
                                     <div className="flex-1 overflow-y-auto p-6">
-                                        <ol className="relative bg-white rounded-lg border-s border-gray-300 mb-10">
+                                        <ol className="relative bg-white dark:bg-gray-800 dark:text-white rounded-lg border-s border-gray-300 mb-10">
                                             {apontamentos.map((a) => (
                                                 <li key={a.id} className="mb-10 py-4 ms-4">
                                                     <div className={`absolute w-3 h-3 rounded-full mt-1.5 -start-1.5 ${a.fim ? "bg-green-500" : "bg-yellow-500"}`}></div>
@@ -742,7 +742,7 @@ export default function ChamadosCliente() {
                                                     <h3 className="text-lg poppins-semibold">
                                                         {a.fim ? "Apontamento finalizado" : "Apontamento em andamento"}
                                                     </h3>
-                                                    <p className="text-gray-700">{a.descricao}</p>
+                                                    <p>{a.descricao}</p>
                                                     {a.fim && (
                                                         <p className="text-sm text-gray-500 mt-1">
                                                             Encerrado em {new Date(a.fim).toLocaleString("pt-BR")}
