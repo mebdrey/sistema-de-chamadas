@@ -359,7 +359,7 @@ export default function ChamadosCliente() {
                                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
                                     </svg>
                                 </div>
-                                <input type="text" id="simple-search" className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#7F56D8] focus:border-[#7F56D8] block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Pesquisar chamado" value={busca} onChange={(e) => setBusca(e.target.value)} />
+                                <input type="text" id="simple-search" className="bg-gray-50 focus:ring-violet-500 focus:border-violet-500 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white " placeholder="Pesquisar chamado" value={busca} onChange={(e) => setBusca(e.target.value)} />
                             </div>
                         </form>
                     </div>
@@ -372,7 +372,7 @@ export default function ChamadosCliente() {
                                     return (
                                         <li className="me-2" role="presentation" key={status}>
                                             <button onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === statusId
-                                                ? "active border-[#7F56D8] text-[#7F56D8] dark:text-blue-400"
+                                                ? "active border-violet-500 text-violet-600 dark:text-violet-400"
                                                 : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-neutral-400 dark:hover:text-neutral-300"
                                                 }`} type="button">
                                                 {primeiraLetraMaiuscula(status)}
@@ -409,7 +409,7 @@ export default function ChamadosCliente() {
                                 )}
                             </div>
                             {/* modal - criar chamado*/}
-                            <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" className=" hidden md:flex flex-row items-center block text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-5 py-2.5 h-fit text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button"><svg className="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>Novo chamado</button>
+                            <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" className=" hidden md:flex flex-row items-center block text-white bg-violet-500 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-5 py-2.5 h-fit text-center dark:bg-violet-600 dark:hover:bg-violet-700 dark:focus:ring-violet-800" type="button"><svg className="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>Novo chamado</button>
 
                             <div id="crud-modal" tabIndex="-1" aria-hidden="true" className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
                                 <div className="fixed inset-0 bg-black/50 dark:bg-black/60"></div>
@@ -451,7 +451,7 @@ export default function ChamadosCliente() {
                                                     </select></div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="prioridade" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Prioridade<span className="text-red-500">*</span></label>
-                                                    <select id="prioridade" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.prioridade ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
+                                                    <select id="prioridade" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-violet-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.prioridade ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-violet-500 focus:ring-violet-500"
                                                         }`} value={prioridadeSelecionadaId} onChange={(e) => { setPrioridadeSelecionadaId(e.target.value); setCamposInvalidos({ ...camposInvalidos, prioridade: false }); }} required>
                                                         <option value="">Selecione prioridade</option>
                                                         {tiposPrioridade.map(tipo => (
@@ -470,9 +470,9 @@ export default function ChamadosCliente() {
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="description" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Descrição<span className="text-red-500">*</span></label>
-                                                    <textarea id="description" rows="4" className={`block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:border-[#7F56D8] dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 ${camposInvalidos.descricao
+                                                    <textarea id="description" rows="4" className={`block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:border-violet-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-violet-500 dark:focus:border-violet-500 ${camposInvalidos.descricao
                                                         ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                                                        : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
+                                                        : "border-gray-300 focus:border-violet-500 focus:ring-violet-500"
                                                         }`} placeholder="Escreva a descrição do chamado" value={descricao} onChange={(e) => { setDescricao(e.target.value); setCamposInvalidos({ ...camposInvalidos, descricao: false }); }}></textarea>
                                                 </div>
                                                 <div className="col-span-2">
@@ -506,7 +506,7 @@ export default function ChamadosCliente() {
                                             {erroCampos && (
                                                 <p className="text-red-500 mb-2">Preencha todos os campos obrigatórios</p>
                                             )}
-                                            <button type="submit" className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Criar chamado</button>
+                                            <button type="submit" className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-violet-500 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Criar chamado</button>
                                         </form>
                                     </div>
                                 </div>
@@ -535,16 +535,16 @@ export default function ChamadosCliente() {
                                     });
 
                                 return (
-                                    <div key={statusId} className={`${abaAtiva === statusId ? "block" : "hidden"} flex flex-col rounded-xl dark:bg-neutral-900 gap-6 `}>
+                                    <div key={statusId} className={`${abaAtiva === statusId ? "block" : "hidden"} flex flex-col rounded-xl dark:bg-gray-900 gap-6 `}>
                                         {chamadosFiltrados.length === 0 ? (
-                                            <div className="p-4 md:p-5 bg-white rounded-xl">
+                                            <div className="p-4 md:p-5 ">
                                                 <p className="text-gray-500 dark:text-neutral-400">Nenhum chamado encontrado. </p>
                                             </div>) : (
                                             chamadosFiltrados.map((chamado) => (
 
-                                                <div key={chamado.id || `${chamado.assunto}-${Math.random()}`} className="border-b bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-neutral-700/70">
+                                                <div key={chamado.id || `${chamado.assunto}-${Math.random()}`} className="border-b bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:border-t-violet-500 dark:shadow-neutral-700/70">
                                                     <div className="flex flex-row">
-                                                        <div className="px-4 pt-4 md:px-5 md:pt-5">
+                                                        <div className="px-4 pt-4 md:px-5 md:pt-5 border-gray-200 dark:border-neutral-700">
                                                             <h3 className="wrap-break-word break-normal whitespace-normal text-lg poppins-bold text-gray-800 dark:text-white">Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}</h3>
                                                             <h6 className="wrap-break-word break-normal whitespace-normal text-base poppins-bold text-gray-800 dark:text-white break-all">{chamado.assunto}</h6>
                                                             <p className="wrap-break-word break-normal whitespace-normal mt-2 text-gray-500 dark:text-neutral-400 break-all">{chamado.descricao}</p>
@@ -556,15 +556,15 @@ export default function ChamadosCliente() {
                                                     </div>
 
 
-                                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 mt-4 dark:bg-neutral-900 dark:border-neutral-700">
+                                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-100 border-t border-gray-200 rounded-b-xl py-3 px-4 mt-4 dark:bg-gray-900 dark:border-gray-700">
                                                         <p className="text-sm text-gray-500 dark:text-neutral-500">Criado em {new Date(chamado.criado_em).toLocaleString("pt-BR")}</p>
 
                                                         {chamado.status_chamado === "em andamento" ? (
-                                                            <button onClick={() => { setChamadoSelecionado(chamado); carregarApontamentos(chamado.id); setOpenApontamentos(true); }} className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-[#7F56D8] decoration-2 hover:underline focus:underline focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">Acompanhar apontamentos
+                                                            <button onClick={() => { setChamadoSelecionado(chamado); carregarApontamentos(chamado.id); setOpenApontamentos(true); }} className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-violet-500 decoration-2 hover:underline focus:underline focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none dark:text-violet-500 dark:hover:text-violet-600 dark:focus:text-violet-600">Acompanhar apontamentos
                                                                 <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
                                                             </button>
                                                         ) : chamado.status_chamado === "concluido" ? (
-                                                            <button onClick={() => { setChamadoSelecionado(chamado); carregarApontamentos(chamado.id); setOpenApontamentos(true); abrirModalAvaliacao(chamado); }} className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-[#7F56D8] decoration-2 hover:underline focus:underline focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-600 dark:focus:text-blue-600">Ver apontamentos
+                                                            <button onClick={() => { setChamadoSelecionado(chamado); carregarApontamentos(chamado.id); setOpenApontamentos(true); abrirModalAvaliacao(chamado); }} className="inline-flex items-center gap-x-1 text-sm poppins-semibold rounded-lg border border-transparent text-violet-500 decoration-2 hover:underline focus:underline focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none dark:text-violet-500 dark:hover:text-violet-600 dark:focus:text-violet-600">Ver apontamentos
                                                                 <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
                                                             </button>
                                                         ) : null}
@@ -582,7 +582,7 @@ export default function ChamadosCliente() {
                         {/* menu do speed dial */}
                         <div id="speed-dial-menu-bottom-right" className={`flex flex-col items-center mb-4 space-y-2 transition-all duration-300 ${openSpeedDial ? "flex" : "hidden"}`}>
                             <button type="button" onClick={() => setOpenModal(true)} // <-- abre o modal
-                                className="flex justify-center items-center w-[52px] h-[52px] text-gray-500 hover:text-[#7F56D8] bg-white rounded-full border border-gray-200 shadow-xs focus:ring-4 focus:ring-gray-300 focus:outline-none">
+                                className="flex justify-center items-center w-[52px] h-[52px] text-gray-500 hover:text-violet-500 bg-white rounded-full border border-gray-200 shadow-xs focus:ring-4 focus:ring-gray-300 focus:outline-none">
                                 <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
                                     <path d="M16.9573 27.3064C17.342 27.3973 17.3772 27.9086 17.0025 28.0354L14.7901 28.7743C9.23099 30.5932 6.30442 29.0727 4.49807 23.4312L2.70572 17.8181C0.913372 12.1766 2.39766 9.19247 7.95674 7.37354L8.69048 7.12695C9.2546 6.93736 9.8036 7.51154 9.64341 8.09228C9.56401 8.38014 9.48763 8.68056 9.41302 8.99352L8.04076 14.9477C6.50046 21.6407 8.7549 25.3354 15.3502 26.927L16.9573 27.3064Z" />
                                     <path d="M23.2477 3.50833L20.9093 2.95413C16.2323 1.83151 13.4458 2.75518 11.8075 6.19408C11.3874 7.06092 11.0513 8.11248 10.7713 9.32036L9.39902 15.2745C8.02675 21.2144 9.83311 24.1417 15.6722 25.5486L18.0247 26.117C18.8369 26.3159 19.593 26.4438 20.2931 26.5007C24.662 26.927 26.9864 24.8523 28.1627 19.7223L29.5349 13.7824C30.9072 7.84248 29.1149 4.90094 23.2477 3.50833ZM20.6152 17.8892C20.4892 18.3723 20.0691 18.685 19.593 18.685C19.509 18.685 19.425 18.6708 19.327 18.6566L15.2522 17.605C14.692 17.4629 14.356 16.8803 14.496 16.3118C14.636 15.7434 15.2102 15.4024 15.7703 15.5445L19.8451 16.5961C20.4192 16.7382 20.7552 17.3208 20.6152 17.8892ZM24.718 13.0861C24.592 13.5693 24.1719 13.8819 23.6958 13.8819C23.6118 13.8819 23.5278 13.8677 23.4297 13.8535L16.6384 12.1056C16.0783 11.9635 15.7423 11.3809 15.8823 10.8124C16.0223 10.244 16.5964 9.90298 17.1565 10.0451L23.9478 11.793C24.522 11.9209 24.858 12.5035 24.718 13.0861Z" />
@@ -592,7 +592,7 @@ export default function ChamadosCliente() {
                         </div>
 
                         {/* botão principal */}
-                        <button type="button" onClick={() => setOpenSpeedDial(!openSpeedDial)} data-dial-toggle="speed-dial-menu-bottom-right" aria-controls="speed-dial-menu-bottom-right" aria-expanded={openSpeedDial} className="flex items-center justify-center text-white bg-[#7F56D8] rounded-full w-14 h-14">
+                        <button type="button" onClick={() => setOpenSpeedDial(!openSpeedDial)} data-dial-toggle="speed-dial-menu-bottom-right" aria-controls="speed-dial-menu-bottom-right" aria-expanded={openSpeedDial} className="flex items-center justify-center text-white bg-violet-500 rounded-full w-14 h-14">
                             <svg className={`w-5 h-5 transform transition-transform duration-300 ${openSpeedDial ? "rotate-45" : ""}`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
                             </svg>
                             <span className="sr-only">Abrir</span>

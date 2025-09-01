@@ -1,21 +1,26 @@
 import express from "express";
 
-import { contarChamadosPorPrioridadeController, listarUsuariosPorSetorController, excluirUsuarioController, listarChamadosDisponiveisController, pegarChamadoController, listarTodosChamadosController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, contarChamadosPorStatusController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, buscarChamadoComNomeUsuarioController, chamadosPorMesController, atribuirTecnicoController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, excluirSetorController, listarSetoresController, criarPrioridadeController, atualizarPrazoController, calcularDataLimiteController, finalizarChamadoController, gerarRelatorioChamadoController, contarChamadosPorPoolController, atualizarSetorController } from "../controllers/ChamadoController.js";
+import { buscarChamadoComNomeUsuarioController, listarPrioridadesController} from "../controllers/ChamadoController.js";
 
 // middlewares -----------------------------------------------------------------------------------------
-import { upload } from '../middlewares/uploadMiddleware.js';
+import { upload } from '../middlewares/uploadMiddleware.js'; // uploads de fotos
 import { garantirAutenticado } from '../middlewares/authMiddleware.js';
 
 // controllers --------------------------------------------------------------------
-import { listarNotificacoesController, marcarNotificacaoLidaController, marcarTodasComoLidasController, marcarVisualizadasController, contagemNotificacoesController } from '../controllers/NotificacoesController.js'
-import { lerMensagensController, enviarMensagemController, contarNaoLidasController, marcarLidasController } from '../controllers/ChatController.js'
-import {criarChamadoController, listarPrioridadesController, listarChamadosController, listarTiposServicoController, criarAvaliacaoController, existeAvaliacaoController} from '../controllers/UsuarioComumController.js'
-import { obterPerfilUsuarioController, editarPerfilController, removerFotoController, atualizarFotoPerfilController } from "../controllers/PerfilController.js";
-import { enviarLinkRedefinicao, redefinirSenha, verifyCode } from '../controllers/RedefinirSenhaController.js';
+import { listarNotificacoesController, marcarNotificacaoLidaController, marcarTodasComoLidasController, marcarVisualizadasController, contagemNotificacoesController } from '../controllers/NotificacoesController.js' // notificacao
+import { lerMensagensController, enviarMensagemController, contarNaoLidasController, marcarLidasController } from '../controllers/ChatController.js' // chat
+import {criarChamadoController, listarChamadosController, listarTiposServicoController, criarAvaliacaoController, existeAvaliacaoController} from '../controllers/UsuarioComumController.js' // controllers de usuarios comuns
+import { obterPerfilUsuarioController, editarPerfilController, removerFotoController, atualizarFotoPerfilController } from "../controllers/PerfilController.js"; // perfil
+import { enviarLinkRedefinicao, redefinirSenha, verifyCode } from '../controllers/RedefinirSenhaController.js'; // controller de redefinir a senha
+import { pegarChamadoController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, finalizarChamadoController, gerarRelatorioChamadoController} from '../controllers/TecnicosController.js' // controllers de tecnicos/auxiliares
+import {listarUsuariosPorSetorController, excluirUsuarioController, listarTodosChamadosController, atribuirTecnicoController, contarChamadosPorStatusController, contarChamadosPorPrioridadeController, chamadosPorMesController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, listarSetoresController, atualizarSetorController, excluirSetorController, criarPrioridadeController, atualizarPrazoController, calcularDataLimiteController, contarChamadosPorPoolController, listarUsuariosController, atualizarPrioridadeController, excluirPrioridadeController, verificarUsernameController} from '../controllers/AdminController.js'
 
 const router = express.Router();
 
 router.get("/chamado/:id", garantirAutenticado, buscarChamadoComNomeUsuarioController);
+
+
+
 
 // rotas usadas em usuario -----------------------------------------------------------------------------------------------------------------------------------------------
 router.post('/chamado', upload.single('imagem'), garantirAutenticado, criarChamadoController); // criação de chamados
@@ -24,6 +29,9 @@ router.get('/servicos', listarTiposServicoController); // listar tipos de servi�
 router.get('/prioridades', listarPrioridadesController); // lista prioridades
 router.post("/criar-avaliacao", garantirAutenticado, criarAvaliacaoController); // criar avaliação
 router.get("/avaliacao-existe", garantirAutenticado, existeAvaliacaoController); // checar se já existe avaliação
+
+
+
 
 // rotas usadas para o adm ------------------------------------------------------------------------------------------------------------------------------------------------
 router.get('/usuarios-por-setor', garantirAutenticado, listarUsuariosPorSetorController); // adm - ver usuarios
@@ -41,15 +49,19 @@ router.get("/pool", listarSetoresController); // Listar setores
 router.put("/pool/:id", garantirAutenticado, atualizarSetorController); // Atualizar setor
 router.delete("/pool/:id", garantirAutenticado, excluirSetorController); // Excluir setor
 router.post('/prioridades', garantirAutenticado, criarPrioridadeController); // cria prioridade
-router.get('/prioridades', listarPrioridadesController); // lista prioridades
+router.get('/prioridades', garantirAutenticado, listarPrioridadesController); // lista prioridades
+router.get('/usuarios/check', garantirAutenticado, verificarUsernameController);
 // chamados - prazo
 router.patch('/chamados/:id/prazo', garantirAutenticado, atualizarPrazoController);
 router.post('/chamados/calcular-prazo', calcularDataLimiteController);
 router.get("/relatorios/chamados-por-pool", garantirAutenticado, contarChamadosPorPoolController);
+router.get('/usuarios', garantirAutenticado, listarUsuariosController); // Listar usuários
+router.put('/prioridades/:id', garantirAutenticado, atualizarPrioridadeController); // Atualizar prioridade
+router.delete('/prioridades/:id', garantirAutenticado, excluirPrioridadeController); // Excluir prioridade
 
 
-// rotas usadas para tecnicos e auxiliares ------------------------------------------------------------------------------------------------------------------------------------------------
-// router.get('/chamados-disponiveis', listarChamadosDisponiveisController); 
+
+// rotas usadas para tecnicos e auxiliares ------------------------------------------------------------------------------------------------------------
 router.post('/pegar-chamado', garantirAutenticado, pegarChamadoController); // tecnico/auxiliar pega um chamado
 router.get('/chamados-funcionario', garantirAutenticado, listarChamadosFuncionarioController); // lista chamados disponiveis para o tecnico/auxiliar logado
 router.get('/apontamentos/:chamado_id', garantirAutenticado, listarApontamentosController); // lista os apontamentos feitos para determinado chamamdo 
@@ -59,11 +71,14 @@ router.patch('/finalizar-chamado', garantirAutenticado, finalizarChamadoControll
 router.get('/relatorio-chamado/:chamado_id', garantirAutenticado, gerarRelatorioChamadoController);
 
 
+
 //relacionados a perfil
 router.get('/perfil', garantirAutenticado, obterPerfilUsuarioController);
 router.patch('/editarPerfil', garantirAutenticado, editarPerfilController);
 router.post('/editarFoto', garantirAutenticado, upload.single('foto'), atualizarFotoPerfilController);
 router.post('/removerFoto', garantirAutenticado, removerFotoController);
+
+
 
 // chat -----------------------------------------------------------------------------------------------------------------
 router.get('/chat', garantirAutenticado, lerMensagensController);

@@ -260,7 +260,7 @@ function formatarLabel(str) {
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Relatório anual por setor</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">Escolha a pool para ver os funcionários e seus chamados</p>
             <div className="mt-3 flex items-center gap-3">
-              <label className="text-sm text-gray-600">Pool:</label>
+              <label className="text-sm text-gray-600 dark:text-gray-400">Pool:</label>
               <select value={setor} onChange={(e) => setSetor(e.target.value)} className="flex flex-row gap-4 justify-between text-sm px-2 py-1 border rounded-md focus:border-[#7F56D8] focus:ring-2 focus:ring-[#7F56D8]">
                 {tiposServico.map(tipo => (
                   <option key={tipo.id} value={tipo.titulo} >
@@ -268,7 +268,7 @@ function formatarLabel(str) {
                   </option>
                 ))}
               </select>
-              <span className="text-sm text-gray-500">Total chamados: <strong className="ms-1">{apiData?.total ?? "—"}</strong></span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">Total chamados: <strong className="ms-1">{apiData?.total ?? "—"}</strong></span>
             </div>
           </div>
         </div>

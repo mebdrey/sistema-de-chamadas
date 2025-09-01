@@ -70,7 +70,7 @@ const OrdenarPor = ({ ordenarPor, setOrdenarPor }) => {
 
       <div className={`absolute mt-2 z-10 ${showDropdown ? 'block' : 'hidden'} w-48 bg-white dark:bg-gray-700 divide-y divide-gray-100 rounded-lg shadow-sm `}>
         {opcoesOrdenacao.map((opcao, index) => (
-          <div key={index} className="flex items-center p-2 rounded-sm hover:bg-gray-100 ">
+          <div key={index} className="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-800">
             <input id={`ordenar-radio-${index}`} type="radio" value={opcao.value} name="ordenar" checked={ordenarPor === opcao.value} onChange={() => setOrdenarPor(opcao.value)} className="w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 focus:ring-[#E6DAFF] focus:ring-2" />
             <label htmlFor={`ordenar-radio-${index}`} className="w-full ms-2 text-sm poppins-medium text-gray-900 rounded-sm dark:text-gray-300">
               {opcao.label}
