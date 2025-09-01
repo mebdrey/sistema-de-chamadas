@@ -39,7 +39,7 @@ export default function GraficoDeLinhas() {
         ],
         labels: {
           style: {
-            colors: "#7F56D8",
+            colors: "#8b5cf6",
             fontSize: "13px",
             fontFamily: "Inter, ui-sans-serif",
             fontWeight: 400
@@ -52,7 +52,7 @@ export default function GraficoDeLinhas() {
         labels: {
           align: "left",
           style: {
-            colors: "#7F56D8",
+            colors: "#8b5cf6",
             fontSize: "13px",
             fontFamily: "Inter, ui-sans-serif",
             fontWeight: 400
@@ -69,7 +69,7 @@ export default function GraficoDeLinhas() {
       },
       colors: ["#2563eb"],
       grid: {
-        borderColor: "#7F56D8"
+        borderColor: "#8b5cf6"
       }
       
     });

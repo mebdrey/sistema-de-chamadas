@@ -68,7 +68,7 @@ export default function GraficoChamadosPorAno() {
     stroke: {
       curve: 'smooth',
       width: 6,
-      colors: ['#7F56D8']
+      colors: ['#8b5cf6']
     },
     dataLabels: { enabled: false },
     grid: {
@@ -89,7 +89,7 @@ export default function GraficoChamadosPorAno() {
     return dados && dados.length > 0 ? [{
       name: 'Chamados',
       data: [...dados],
-      color: '#7F56D8',
+      color: '#8b5cf6',
     }] : [];
   }, [dados]);
 
@@ -217,8 +217,8 @@ export default function GraficoChamadosPorAno() {
           </div>
 
           <div className="relative">
-            <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-[#7F56D8] hover:bg-[#E6DAFF] px-3 py-2" onClick={() => setDropdownRelatorioOpen(prev => !prev)}>Gerar relatório
-              <svg className="w-3.5 h-3.5 text-[#7F56D8] me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+            <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-violet-500 hover:bg-[#E6DAFF] px-3 py-2" onClick={() => setDropdownRelatorioOpen(prev => !prev)}>Gerar relatório
+              <svg className="w-3.5 h-3.5 text-violet-500 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
                 <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" />
                 <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
               </svg>
