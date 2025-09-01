@@ -443,27 +443,27 @@ export default function ChamadosAdmin() {
                     {chamadosFiltrados.length === 0 ? (
                       <div className="p-4 md:p-5"><p className="text-gray-500"> Nenhum chamado encontrado.</p></div>
                     ) : (chamadosFiltrados.map((chamado) => (
-                      <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl dark:bg-gray-800 border border-gray-700 border-neutral-700 border-t-blue-500 shadow-neutral-700/70 cursor-pointer hover:border-purple-500">
+                      <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl dark:bg-gray-800 dark:border dark:border-gray-700 dark:border-neutral-700 dark:border-t-blue-500 dark:shadow-neutral-700/70 cursor-pointer dark:hover:border-purple-500">
                         <div className="flex items-center gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:bg-gray-800 ">
                           <h3 className="text-base poppins-bold text-gray-800 dark:text-gray-200   ">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
-                          <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-700 text-white hover:bg-gray-500 ">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
+                          <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-500 ">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
                         </div>
                         <div className="grid grid-cols-2 gap-4 ">
                           <div>
-                            <p className="text-xs text-gray-100 ">Usuário</p>
-                            <p className="text-sm poppins-bold text-gray-200">{chamado?.usuario_nome || chamado?.nome_usuario || 'Nome não encontrado'}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-100 ">Usuário</p>
+                            <p className="text-sm poppins-bold  dark:text-gray-200">{chamado?.usuario_nome || chamado?.nome_usuario || 'Nome não encontrado'}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-100">Criado em</p>
-                            <p className="text-sm poppins-bold text-gray-200">{formatarDataSimples(chamado.criado_em)} </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-100">Criado em</p>
+                            <p className="text-sm poppins-bold  dark:text-gray-200">{formatarDataSimples(chamado.criado_em)} </p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-100">Prioridade</p>
-                            <p className="text-sm poppins-bold text-gray-200">{getPrioridadeLabel(chamado.prioridade_id)}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-100">Prioridade</p>
+                            <p className="text-sm poppins-bold  dark:text-gray-200">{getPrioridadeLabel(chamado.prioridade_id)}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-100 ">Chamado ID</p>
-                            <p className="text-sm poppins-bold text-gray-200">#{chamado.id}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-100 ">Chamado ID</p>
+                            <p className="text-sm poppins-bold  dark:text-gray-200">#{chamado.id}</p>
                           </div>
                         </div>
                       </div>
@@ -653,9 +653,7 @@ export default function ChamadosAdmin() {
                                           <span className="truncate">{u.nome}</span>
                                         </button>
                                       </li>
-                                    );
-                                  })
-                                ) : (<li className="px-4 py-2 text-sm text-gray-500">Nenhum usuário disponível</li>)}
+                                    );}) ) : (<li className="px-4 py-2 text-sm text-gray-500">Nenhum usuário disponível</li>)}
                               </ul>
                               <div className="border-t border-gray-200">
                                 <button type="button" onClick={async () => { await handleAtribuirChamado(usuarioSelecionado); setOpenAtribuirDropdown(false); setUsuarioSelecionado(null); }} disabled={!usuarioSelecionado} className={`w-full px-4 py-3 text-sm poppins-medium ${usuarioSelecionado ? "text-blue-600 bg-gray-50" : "text-gray-400 bg-gray-100 cursor-not-allowed"}`}>

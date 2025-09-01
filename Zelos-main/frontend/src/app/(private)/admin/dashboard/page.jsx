@@ -140,7 +140,7 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
         <div className="grid grid-cols-3 lg:items-center gap-4 mb-4 ">
           {qndtChamados.map((nChamados, index) => (
             <div key={index} className="flex items-center justify-center h-fit ">
-              <div className="w-full p-6 border border-gray-100 rounded-xl bg-white dark:bg-gray-800 border border-gray-700">
+              <div className="w-full p-6 border border-gray-100 rounded-xl bg-white dark:bg-gray-800 dark:border dark:border-gray-700">
                 <p className="mb-3 poppins-regular text-gray-500 ">Chamados {nChamados.tipo}</p>
                 <div className="flex flex-row items-center gap-3">
                   <svg width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -181,14 +181,14 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
       </div>
       { /*CARDS DA QUANTIDADE DE CHAMADOS p mes*/}
       <div className="grid grid-cols-3 gap-4 mb-4 items-start">
-        <div className="col-span-2 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 border border-gray-600"><GraficoChamadosPorAno /></div>
-        <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 border border-gray-600"><KpiSla /></div>
+        <div className="col-span-2 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600"><GraficoChamadosPorAno /></div>
+        <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600"><KpiSla /></div>
       </div>
       <div className="grid grid-cols-2 gap-1 mb-4">
-        <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 mb-4 g-700 dark:bg-gray-800 border border-gray-600">
+        <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 mb-4 g-700 dark:bg-gray-800 dark:border dark:border-gray-600">
           <ChamadosPorPrioridade />
         </div>
-        <div className="col-span-1 flex items-center justify-start mb-4 rounded-sm dark:bg-gray-800 border border-gray-600">
+        <div className="col-span-1 flex items-center justify-start mb-4 rounded-sm dark:bg-gray-800 dark:border dark:border-gray-600">
           <GraficoFuncionarios />
         </div>
       </div>
