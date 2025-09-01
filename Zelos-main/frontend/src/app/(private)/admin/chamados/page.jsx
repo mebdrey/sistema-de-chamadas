@@ -316,7 +316,7 @@ export default function ChamadosAdmin() {
               <OrdenarPor ordenarPor={ordenarPor} setOrdenarPor={setOrdenarPor} />
               {/* dropdown de Setor */}
               <div className="relative inline-block">
-                <button onClick={() => setDropdownSetorAberto(!dropdownSetorAberto)} className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" id="dropdownHelperButton">
+                <button onClick={() => setDropdownSetorAberto(!dropdownSetorAberto)} className="hover:cursor-pointer inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" id="dropdownHelperButton">
                   Setor
                   <svg className="w-2.5 h-2.5 ms-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" /></svg>
                 </button>
@@ -333,10 +333,10 @@ export default function ChamadosAdmin() {
                                   const valor = setor.titulo;
                                   if (checked) { setSetoresSelecionados((prev) => [...prev, valor]); }
                                   else { setSetoresSelecionados((prev) => prev.filter((s) => s !== valor)); }
-                                }} className="w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#E6DAFF] focus:ring-2" />
+                                }} className="hover:cursor-pointer w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#E6DAFF] focus:ring-2" />
                               </div>
-                              <div className="ms-2 text-sm">
-                                <label htmlFor={`helper-checkbox-${index}`} className="poppins-medium text-gray-900 ">
+                              <div className="ms-2 text-sm ">
+                                <label htmlFor={`helper-checkbox-${index}`} className="hover:cursor-pointer poppins-medium text-gray-900 ">
                                   <div>{formatarLabel(setor.titulo.replace(/_/g, " "))}</div>
                                   <p className="text-xs poppins-regular text-gray-500">{setor.descricao || "Sem descrição"}</p>
                                 </label>
@@ -354,7 +354,7 @@ export default function ChamadosAdmin() {
 
               {/* Dropdown de Prioridade */}
               <div className="relative inline-block">
-                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" id="dropdownPrioridadeButton">
+                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="hover:cursor-pointer inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" id="dropdownPrioridadeButton">
                   Prioridade
                   <svg className="w-2.5 h-2.5 ms-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" /></svg>
                 </button>
@@ -363,7 +363,7 @@ export default function ChamadosAdmin() {
                     <ul className="p-3 space-y-1 text-sm text-gray-700" aria-labelledby="dropdownPrioridadeButton">
                       {prioridades.map((prioridade, index) => (
                         <li key={index}>
-                          <div className="flex p-2 rounded-sm hover:bg-gray-100">
+                          <div className="flex p-2 rounded-sm hover:bg-gray-100 hover:cursor-pointer">
                             <div className="flex items-center h-5">
                               <input id={`prioridade-checkbox-${index}`} type="checkbox" name="prioridade" value={prioridade.value} checked={prioridadesSelecionadas.includes(prioridade.value)}
                                 onChange={(e) => {
@@ -371,9 +371,9 @@ export default function ChamadosAdmin() {
                                   const valor = prioridade.value;
                                   if (checked) { setPrioridadesSelecionadas((prev) => [...prev, valor]); }
                                   else { setPrioridadesSelecionadas((prev) => prev.filter((p) => p !== valor)); }
-                                }} className="w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#E6DAFF] focus:ring-2 " />
+                                }} className="hover:cursor-pointer w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#E6DAFF] focus:ring-2 " />
                             </div>
-                            <div className="ms-2 text-sm"><label htmlFor={`prioridade-checkbox-${index}`} className="poppins-medium text-gray-900">{prioridade.label}</label></div>
+                            <div className="ms-2 text-sm"><label htmlFor={`prioridade-checkbox-${index}`} className="hover:cursor-pointer poppins-medium text-gray-900">{prioridade.label}</label></div>
                           </div>
                         </li>
                       ))}
@@ -403,7 +403,7 @@ export default function ChamadosAdmin() {
                   const statusId = normalizarId(status)
                   return (
                     <li className="me-2" role="presentation" key={status}>
-                      <button onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 ${abaAtiva === statusId ? "active border-[#7F56D8] text-[#7F56D8]" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 "}`} type="button" >{primeiraLetraMaiuscula(status)}</button>
+                      <button onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 hover:cursor-pointer ${abaAtiva === statusId ? "active border-[#7F56D8] text-[#7F56D8]" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 "}`} type="button" >{primeiraLetraMaiuscula(status)}</button>
                     </li>
                   )
                 })}
@@ -439,14 +439,14 @@ export default function ChamadosAdmin() {
                   });
 
                 return (
-                  <div key={status} className={`${abaAtiva === statusId ? "grid" : "hidden"} grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5`} >
+                  <div key={status} className={`${abaAtiva === statusId ? "grid" : "hidden"} grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 `} >
                     {chamadosFiltrados.length === 0 ? (
-                      <div className="p-4 md:p-5"><p className="text-gray-500"> Nenhum chamado encontrado.</p></div>
+                      <div className="p-4 md:p-5 "><p className="text-gray-500"> Nenhum chamado encontrado.</p></div>
                     ) : (chamadosFiltrados.map((chamado) => (
                       <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl dark:bg-gray-800 dark:border dark:border-gray-700 dark:border-neutral-700 dark:border-t-blue-500 dark:shadow-neutral-700/70 cursor-pointer dark:hover:border-purple-500">
                         <div className="flex items-center gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:bg-gray-800 ">
                           <h3 className="text-base poppins-bold text-gray-800 dark:text-gray-200   ">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
-                          <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-500 ">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
+                          <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-500 hover:cursor-pointer">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
                         </div>
                         <div className="grid grid-cols-2 gap-4 ">
                           <div>

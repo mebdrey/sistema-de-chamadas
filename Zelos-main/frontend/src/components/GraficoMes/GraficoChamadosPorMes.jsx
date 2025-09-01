@@ -197,7 +197,7 @@ export default function GraficoChamadosPorAno() {
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
                   </svg>
                 </span>
-              ) : (<> Selecionar prioridade <ChevronDown className="w-4 h-4 ml-1.5" /></>)}
+              ) : (<> Selecionar prioridade <ChevronDown className="w-4 h-4 ml-1.5 hover:cursor-pointer" /></>)}
             </button>
             {dropdownPrioridadeOpen && (
               <div className="absolute z-10 mt-2 bg-white border border-gray-200 rounded-lg shadow-sm w-44">
@@ -217,7 +217,7 @@ export default function GraficoChamadosPorAno() {
           </div>
 
           <div className="relative">
-            <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-violet-500 hover:bg-[#E6DAFF] px-3 py-2" onClick={() => setDropdownRelatorioOpen(prev => !prev)}>Gerar relatório
+            <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-violet-500 hover:bg-[#E6DAFF] px-3 py-2 hover:cursor-pointer" onClick={() => setDropdownRelatorioOpen(prev => !prev)}>Gerar relatório
               <svg className="w-3.5 h-3.5 text-violet-500 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
                 <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" />
                 <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
@@ -229,11 +229,11 @@ export default function GraficoChamadosPorAno() {
               <div className="absolute z-10 mt-2 bg-white border border-gray-200 rounded-lg shadow-sm w-40">
                 <ul className="py-2 text-sm text-gray-700">
                   <li>
-                    <button onClick={() => { gerarCSV(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100" >Exportar CSV
+                    <button onClick={() => { gerarCSV(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer" >Exportar CSV
                     </button>
                   </li>
                   <li>
-                    <button onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF
+                    <button onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer">Exportar PDF
                     </button>
                   </li>
                 </ul>

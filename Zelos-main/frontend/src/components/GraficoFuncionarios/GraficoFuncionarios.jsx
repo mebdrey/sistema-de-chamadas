@@ -261,7 +261,7 @@ function formatarLabel(str) {
             <p className="text-sm text-gray-500 dark:text-gray-400">Escolha a pool para ver os funcionários e seus chamados</p>
             <div className="mt-3 flex items-center gap-3">
               <label className="text-sm text-gray-600 dark:text-gray-400">Pool:</label>
-              <select value={setor} onChange={(e) => setSetor(e.target.value)} className="flex flex-row gap-4 justify-between text-sm px-2 py-1 border rounded-md focus:border-[#7F56D8] focus:ring-2 focus:ring-[#7F56D8]">
+              <select value={setor} onChange={(e) => setSetor(e.target.value)} className="flex flex-row gap-4 justify-between text-sm px-2 py-1 border rounded-md focus:border-[#7F56D8] focus:ring-2 focus:ring-[#7F56D8] hover:cursor-pointer">
                 {tiposServico.map(tipo => (
                   <option key={tipo.id} value={tipo.titulo} >
                     {formatarLabel(tipo.titulo)}
@@ -284,8 +284,8 @@ function formatarLabel(str) {
 
       <div className="flex justify-between items-center ">
         <div>
-          <button onClick={gerarCSV} className="text-sm px-3 py-2 rounded-md bg-[#7F56D8] text-white">Exportar CSV</button>
-          <button onClick={gerarPDF} className="ms-2 text-sm px-3 py-2 rounded-md border dark:border border-white text-white">Exportar PDF</button>
+          <button onClick={gerarCSV} className="text-sm px-3 py-2 rounded-md bg-[#7F56D8] text-white hover:cursor-pointer">Exportar CSV</button>
+          <button onClick={gerarPDF} className="ms-2 text-sm px-3 py-2 rounded-md border dark:border dark:border-white dark:text-white hover:cursor-pointer">Exportar PDF</button>
         </div>
       </div>
     </div>
