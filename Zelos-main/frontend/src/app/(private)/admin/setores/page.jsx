@@ -121,7 +121,7 @@ function deletarUsuario(id) {
                                 </div>
                             )} */}
 
-                        <button id="dropdownHelperButton" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-violet-500 poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
+                        <button id="dropdownHelperButton" className="inline-flex items-center text-gray-500 dark:text-gray-100 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none hover:bg-gray-100 dark:hover:bg-gray-600 focus:ring-4 focus:ring-[#F8FAFB] dark:focus:ring-gray-700  poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
                             <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" >
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                             </svg>
@@ -162,7 +162,7 @@ function deletarUsuario(id) {
                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
                                 </svg>
                             </div>
-                            <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full ps-10 p-2.5"
+                            <input type="text" id="simple-search" className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 dark:text-gray-100 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full ps-10 p-2.5"
                                 placeholder="Pesquisar por usuário" value={busca} onChange={(e) => setBusca(e.target.value)} />
                         </div>
                     </form>
