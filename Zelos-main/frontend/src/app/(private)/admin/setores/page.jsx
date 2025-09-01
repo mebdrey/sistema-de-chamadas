@@ -121,7 +121,7 @@ function deletarUsuario(id) {
                                 </div>
                             )} */}
 
-                        <button id="dropdownHelperButton" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
+                        <button id="dropdownHelperButton" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-violet-500 poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
                             <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" >
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                             </svg>
@@ -136,7 +136,7 @@ function deletarUsuario(id) {
                                             <div className="flex p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
                                                 <div className="flex items-center h-5">
                                                     <input id={`checkbox-${nomeSetor}`} type="checkbox" checked={!!setoresSelecionados[nomeSetor]} onChange={() => toggleSetor(nomeSetor)}
-                                                        className="w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#7F56D8] dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                                                        className="w-4 h-4 text-violet-500 bg-gray-100 border-gray-300 rounded-sm focus:ring-violet-500 dark:focus:ring-violet-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
                                                     />
                                                 </div>
                                                 <div className="ms-2 text-sm">
@@ -162,7 +162,7 @@ function deletarUsuario(id) {
                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
                                 </svg>
                             </div>
-                            <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#7F56D8] focus:border-[#7F56D8] block w-full ps-10 p-2.5"
+                            <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full ps-10 p-2.5"
                                 placeholder="Pesquisar por usuário" value={busca} onChange={(e) => setBusca(e.target.value)} />
                         </div>
                     </form>
@@ -200,7 +200,7 @@ function deletarUsuario(id) {
                 {/* Tabela única com usuários filtrados */}
                 <div className="overflow-auto">
                     <table className="w-full text-sm text-left text-gray-500 ">
-                        <thead className="text-xs text-gray-700 uppercase bg-[#E6DAFF] dark:bg-gray-700 dark:text-gray-200">
+                        <thead className="text-xs text-gray-700 uppercase bg-[#E6DAFF] dark:bg-gray-900 dark:text-gray-200">
                             <tr>
                                 <th className="px-6 py-3 ">Nome</th>
                                 <th className="px-6 py-3">Função</th>
@@ -217,7 +217,7 @@ function deletarUsuario(id) {
                                 </tr>
                             )}
                             {usuariosFiltrados.map((usuario) => (
-                                <tr key={usuario.id} className="bg-white border-b border-gray-200 hover:bg-gray-50 dark:bg-gray-400 " >
+                                <tr key={usuario.id} className="bg-white border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600" >
                                     <th scope="row" className="flex items-center px-6 py-4 poppins-medium text-gray-900 whitespace-nowrap " >
                                         <div className="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full ">
                                             {usuario.ftPerfil ? (
@@ -231,20 +231,20 @@ function deletarUsuario(id) {
 
 
                                         <div className="ms-3">
-                                            <div>{usuario.nome}</div>
-                                            <div className="text-gray-500 text-sm dark:text-gray-800">{usuario.email}</div>
+                                            <div className="text-gray-800 dark:text-gray-100">{usuario.nome}</div>
+                                            <div className="text-gray-500 text-sm dark:text-gray-400">{usuario.email}</div>
                                         </div>
                                     </th>
-                                    <td className="px-6 py-4 dark:text-gray-800">{formatarLabel(usuario.funcao)}</td>
+                                    <td className="px-6 py-4 dark:text-gray-100">{formatarLabel(usuario.funcao)}</td>
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center">
-                                            <div className={`h-2.5 w-2.5 rounded-full me-2 ${usuario.status_usuarios === "ativo" ? "bg-green-500 " : "bg-red-500"}`}></div>
+                                        <div className="flex items-center dark:text-gray-100">
+                                            <div className={`h-2.5 w-2.5 rounded-full me-2  ${usuario.status_usuarios === "ativo" ? "bg-green-500 " : "bg-red-500"}`}></div>
                                             {primeiraLetraMaiuscula(usuario.status_usuarios)}
                                         </div>
                                     </td>
 
                                     <td className="relative">
-                                        <button onClick={() => setDropdownAbertoId((prev) => (prev === usuario.id ? null : usuario.id))} className="inline-flex items-center p-2 text-sm poppins-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-50 " type="button" aria-expanded={dropdownAbertoId === usuario.id} aria-haspopup="true" >
+                                        <button onClick={() => setDropdownAbertoId((prev) => (prev === usuario.id ? null : usuario.id))} className="inline-flex items-center p-2 text-sm poppins-medium text-center text-gray-900 bg-white dark:bg-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-50 " type="button" aria-expanded={dropdownAbertoId === usuario.id} aria-haspopup="true" >
                                             <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3" >
                                                 <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
                                             </svg>
