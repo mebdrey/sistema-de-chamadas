@@ -124,12 +124,7 @@ export const editarChamado = async (id, data) => {
 
 export const criarUsuario = async (dados) => {
   try {
-    // hash da senha antes de criar )
     const copy = { ...dados };
-    if (copy.senha) {
-      const salt = await bcrypt.genSalt(10);
-      copy.senha = await bcrypt.hash(copy.senha, salt);
-    }
     const id = await create('usuarios', copy);
     return id;
   } catch (err) {
@@ -152,30 +147,86 @@ export const buscarUsernamesSemelhantes = async (base) => {
   return rows.map(r => r.username);
 };
 
-// gera sugestões a partir de um nome (ex: João Silva -> joaosilva, joaosilva1, joaosilva2), verifica no banco e retorna um array de opções (max 5)
-export const gerarSugestoesUsername = async (nome) => {
-  if (!nome) return [];
-  const normalize = (s) => s.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]/g, '');
-  const parts = nome.split(/\s+/).filter(Boolean);
-  let base = normalize(parts.join(''));
-  if (!base) base = `user${Date.now().toString().slice(-4)}`;
-
-  const existentes = await buscarUsernamesSemelhantes(base);
-  const setExist = new Set(existentes);
-
-  const suggestions = [];
-  if (!setExist.has(base)) suggestions.push(base);
-  let i = 1;
-  while (suggestions.length < 5) {
-    const cand = `${base}${i}`;
-    if (!setExist.has(cand)) suggestions.push(cand);
-    i++;
-    if (i > 2000) break;
-  }
-  return suggestions;
+export const buscarUsuarioPorEmail = async (email) => {
+  if (!email) return null;
+  const e = String(email).trim().toLowerCase();
+  const rows = await readQuery('SELECT * FROM usuarios WHERE email = ? LIMIT 1', [e]);
+  return Array.isArray(rows) ? (rows[0] || null) : (rows || null);
 };
+
+const MAX_SUGESTOES = 5;
+const MAX_CANDIDATOS = 10000; // trava de segurança
+
+export const gerarSugestoesUsername = async (input) => {
+  try {
+    // aceita tanto string quanto objetos (por exemplo { username: 'valor' })
+    const rawInput = (typeof input === 'string')
+      ? input
+      : (input && (input.username || input.nome || input.value)) || '';
+
+    // normalização: remove acentos, caracteres não alfanuméricos e baixa para lowercase
+    const normalize = (s) => String(s || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '');
+
+    const baseRaw = normalize(rawInput);
+    if (!baseRaw) return [];
+
+    const base = baseRaw.slice(0, 30); // limitar tamanho base
+
+    // Busca usernames semelhantes via função do model (não acessar DB aqui diretamente)
+    // Espera-se que buscarUsernamesSemelhantes(base) retorne algo como ['juliaalves', 'juliaalves1', ...]
+    const existentesRaw = Array.isArray(await buscarUsernamesSemelhantes(base))
+      ? await buscarUsernamesSemelhantes(base)
+      : [];
+
+    // Normaliza os valores retornados (podem ser strings ou objetos)
+    const existentes = (existentesRaw || []).map(item => {
+      if (!item) return '';
+      if (typeof item === 'string') return normalize(item);
+      // se for objeto, tentar extrair propriedade username (ou fallback para toString)
+      if (typeof item === 'object') {
+        return normalize(item.username || item.username_raw || item.value || String(item));
+      }
+      return normalize(String(item));
+    }).filter(Boolean);
+
+    const setExist = new Set(existentes);
+
+    // Monta sugestões iniciais sem colisões
+    const sugestoes = [];
+    if (!setExist.has(base)) sugestoes.push(base);
+
+    // Gera alternativas simples e previsíveis (base + número)
+    let i = 1;
+    while (sugestoes.length < MAX_SUGESTOES && i <= MAX_CANDIDATOS) {
+      const cand = `${base}${i}`;
+      if (!setExist.has(cand) && !sugestoes.includes(cand)) sugestoes.push(cand);
+      i++;
+    }
+
+    // Caso ainda não tenha atingido o máximo, adiciona variações com underscore/prefixos
+    if (sugestoes.length < MAX_SUGESTOES) {
+      const extras = [
+        `${base}_01`,
+        `${base}_user`,
+        `${base}.official`,
+        `${base}_team`
+      ];
+      for (const e of extras) {
+        if (sugestoes.length >= MAX_SUGESTOES) break;
+        if (!setExist.has(e) && !sugestoes.includes(e)) sugestoes.push(e);
+      }
+    }
+
+    return sugestoes.slice(0, MAX_SUGESTOES);
+  } catch (err) {
+    console.error('gerarSugestoesUsername falhou:', err);
+    return [];
+  }
+};
+
 
 //SETORES
 export const criarSetor = async (dados) => {
@@ -233,7 +284,7 @@ export const atualizarSetor = async (id, dados) => {
 // adiciona uma prioridade 
 export const criarPrioridade = async (dados) => {
   try {
-    // dados: { nome, prazo_dias, created_by }
+    // dados: { nome, horas_limite, created_by }
     const id = await create('prioridades', dados);
     return id;
   } catch (err) {
@@ -245,7 +296,7 @@ export const criarPrioridade = async (dados) => {
 export const getPrazoPorNome = async (nome) => {
   try {
     const row = await read('prioridades', `nome = ${JSON.stringify(nome)}`);
-    return row ? Number(row.prazo_dias) : null;
+    return row ? Number(row.horas_limite ?? row.prazo_dias ?? 0) : null;
   } catch (err) {
     console.error('Erro getPrazoPorNome', err);
     throw err;

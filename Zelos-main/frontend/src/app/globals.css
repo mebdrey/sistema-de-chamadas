@@ -94,3 +94,47 @@ input[type="password"]::-webkit-credentials-auto-fill-button,
 input[type="password"]::-webkit-reveal {
   display: none;
 }
+
+
+/* cores */
+:root {
+  --input-bg-light: transparent;
+  --input-text-light: #111827; /* text-gray-900 */
+  --input-bg-dark: transparent;
+  --input-text-dark: #ffffff;
+}
+
+/* Chrome / WebKit: força texto & "pinta" o fundo com box-shadow + transition hack */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--input-text-black) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg-light) inset !important;
+  box-shadow: 0 0 0px 1000px var(--input-bg-light) inset !important;
+  transition: background-color 5000s ease-in-out 0s !important; /* evita que o browser reaplique cor */
+}
+
+/* mesmo para o modo escuro) */
+.dark input:-webkit-autofill,
+.dark textarea:-webkit-autofill,
+.dark select:-webkit-autofill {
+  -webkit-text-fill-color: var(--input-text-white) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg-dark) inset !important;
+  box-shadow: 0 0 0px 1000px var(--input-bg-dark) inset !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+/* Firefox */
+input:-moz-autofill,
+textarea:-moz-autofill,
+select:-moz-autofill {
+  box-shadow: 0 0 0px 1000px transparent inset !important;
+  background-color: transparent !important;
+  -moz-text-fill-color: inherit !important;
+}

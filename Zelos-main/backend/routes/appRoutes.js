@@ -13,7 +13,7 @@ import {criarChamadoController, listarChamadosController, listarTiposServicoCont
 import { obterPerfilUsuarioController, editarPerfilController, removerFotoController, atualizarFotoPerfilController } from "../controllers/PerfilController.js"; // perfil
 import { enviarLinkRedefinicao, redefinirSenha, verifyCode } from '../controllers/RedefinirSenhaController.js'; // controller de redefinir a senha
 import { pegarChamadoController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, finalizarChamadoController, gerarRelatorioChamadoController} from '../controllers/TecnicosController.js' // controllers de tecnicos/auxiliares
-import {listarUsuariosPorSetorController, excluirUsuarioController, listarTodosChamadosController, atribuirTecnicoController, contarChamadosPorStatusController, contarChamadosPorPrioridadeController, chamadosPorMesController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, listarSetoresController, atualizarSetorController, excluirSetorController, criarPrioridadeController, atualizarPrazoController, calcularDataLimiteController, contarChamadosPorPoolController, listarUsuariosController, atualizarPrioridadeController, excluirPrioridadeController} from '../controllers/AdminController.js'
+import {listarUsuariosPorSetorController, excluirUsuarioController, listarTodosChamadosController, atribuirTecnicoController, contarChamadosPorStatusController, contarChamadosPorPrioridadeController, chamadosPorMesController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, listarSetoresController, atualizarSetorController, excluirSetorController, criarPrioridadeController, atualizarPrazoController, calcularDataLimiteController, contarChamadosPorPoolController, listarUsuariosController, atualizarPrioridadeController, excluirPrioridadeController, verificarUsernameController} from '../controllers/AdminController.js'
 
 const router = express.Router();
 
@@ -49,7 +49,8 @@ router.get("/pool", listarSetoresController); // Listar setores
 router.put("/pool/:id", garantirAutenticado, atualizarSetorController); // Atualizar setor
 router.delete("/pool/:id", garantirAutenticado, excluirSetorController); // Excluir setor
 router.post('/prioridades', garantirAutenticado, criarPrioridadeController); // cria prioridade
-router.get('/prioridades', listarPrioridadesController); // lista prioridades
+router.get('/prioridades', garantirAutenticado, listarPrioridadesController); // lista prioridades
+router.get('/usuarios/check', garantirAutenticado, verificarUsernameController);
 // chamados - prazo
 router.patch('/chamados/:id/prazo', garantirAutenticado, atualizarPrazoController);
 router.post('/chamados/calcular-prazo', calcularDataLimiteController);
