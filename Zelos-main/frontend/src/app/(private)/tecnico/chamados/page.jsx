@@ -492,7 +492,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
               <div className="mx-4 border-x border-gray-200"></div>
               {/* Dropdown de Prioridade */}
               <div className="relative inline-block">
-                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="text-white bg-violet-700 hover:bg-violet-800 focus:ring-4 focus:outline-none focus:ring-violet-300 poppins-medium rounded-lg text-sm px-8 py-2.5 text-center inline-flex items-center dark:bg-violet-600 dark:hover:bg-violet-700 dark:focus:ring-violet-800" type="button" id="dropdownPrioridadeButton">
+                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="cursor-pointer text-white bg-violet-700 hover:bg-violet-800 focus:ring-4 focus:outline-none focus:ring-violet-300 poppins-medium rounded-lg text-sm px-8 py-2.5 text-center inline-flex items-center dark:bg-violet-600 dark:hover:bg-violet-700 dark:focus:ring-violet-800" type="button" id="dropdownPrioridadeButton">
                   Prioridade
                   <svg className="w-2.5 h-2.5 ms-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
@@ -504,7 +504,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                     <ul className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownPrioridadeButton">
                       {tiposPrioridade.map((prioridade) => (
                         <li key={prioridade.id}>
-                          <div className="flex p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+                          <div className="cursor-pointer flex p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
                             <div className="flex items-center h-5">
                               {/* <input id={`prioridade-checkbox-${prioridade.id}`} type="checkbox" name="prioridade" value={prioridade.nome} checked={prioridadesSelecionadas.includes(prioridade.nome)} onChange={(e) => {
                                 const checked = e.target.checked;
@@ -517,24 +517,18 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                               }}
                                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" /> */}
                               <input
-                              className="has-checked: text-violet-500 focus: outline-none focus:ring-0"
-                                id={`prioridade-checkbox-${prioridade.id}`}
-                                type="checkbox"
-                                name="prioridade"
-                                value={prioridade.id}
-                                checked={prioridadesSelecionadas.includes(prioridade.id)}
+                              className="cursor-pointer has-checked: text-violet-500 focus: outline-none focus:ring-0"
+                                id={`prioridade-checkbox-${prioridade.id}`} type="checkbox" name="prioridade" value={prioridade.id} checked={prioridadesSelecionadas.includes(prioridade.id)}
                                 onChange={(e) => {
                                   const checked = e.target.checked;
                                   const valor = prioridade.id; // ✅ usar ID, não nome
-                                  if (checked) {
-                                    setPrioridadesSelecionadas((prev) => [...prev, valor]);
-                                  }
+                                  if (checked) {setPrioridadesSelecionadas((prev) => [...prev, valor]); }
                                   else {setPrioridadesSelecionadas((prev) => prev.filter((p) => p !== valor));}
                                 }}
                               />
                             </div>
                             <div className="ms-2 text-sm">
-                              <label htmlFor={`prioridade-checkbox-${prioridade.id}`} className="poppins-medium text-gray-900 dark:text-gray-300">{formatarLabel(prioridade.nome)}</label>
+                              <label htmlFor={`prioridade-checkbox-${prioridade.id}`} className="cursor-pointer poppins-medium text-gray-900 dark:text-gray-300">{formatarLabel(prioridade.nome)}</label>
                             </div>
                           </div>
                         </li>
@@ -563,11 +557,10 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
             <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700">
               <ul className="flex flex-wrap -mb-px text-sm poppins-medium text-center">
                 {/* Tabs */}
-                {statusAbas.map((status) => {
-                  const statusId = normalizarId(status)
+                {statusAbas.map((status) => { const statusId = normalizarId(status)
                   return (
                     <li className="me-2" role="presentation" key={status}>
-                      <button onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === statusId ? "active border-violet-500 text-violet-600 dark:text-violet-400" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-neutral-400 dark:hover:text-neutral-300"
+                      <button onClick={() => setAbaAtiva(statusId)} className={`cursor-pointer inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 ${abaAtiva === statusId ? "active border-violet-500 text-violet-600 dark:text-violet-400" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-neutral-400 dark:hover:text-neutral-300"
                         }`} type="button" >{primeiraLetraMaiuscula(status)}
                       </button>
                     </li>
@@ -577,15 +570,13 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
 
             </div>
             <div id="default-tab-content">
-              {statusAbas.map((status) => {
-                const statusId = normalizarId(status);
+              {statusAbas.map((status) => { const statusId = normalizarId(status);
                 console.log("Aba ativa:", abaAtiva);
 
                 // Primeiro filtra por status
                 let filtradosPorStatus = status === "pendente" ? chamados : chamados.filter((c) => normalizarId(c.status_chamado) === statusId);
 
-                // // Depois aplica filtro de busca
-                const statusIdAtivo = abaAtiva;
+                const statusIdAtivo = abaAtiva;// // Depois aplica filtro de busca
 
                 // Filtrando apenas com base na aba ativa
                 let chamadosFiltrados = chamados
@@ -627,7 +618,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                         <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl  dark:bg-gray-800 dark:border-gray-700 dark:border-t-violet-500 dark:shadow-neutral-700/70 cursor-pointer">
                           <div className="flex items-center flex-wrap gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:border-neutral-700">
                             <h3 className="wrap-break-word break-normal whitespace-normal text-base poppins-bold text-gray-800 dark:text-white">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
-                            <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
+                            <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 cursor-pointer">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
@@ -654,15 +645,13 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                           </div>
                           {/* botão para pegar chamado, só se aba htmlFor pendente */}
                           {chamado.status_chamado === 'pendente' && (
-                            <button onClick={(e) => {
-                              e.stopPropagation(); // evitar que abra o modal
+                            <button onClick={(e) => { e.stopPropagation(); // evitar que abra o modal
                               pegarChamado(chamado.id);
-                            }} className="mt-4 bg-violet-500 hover:bg-violet-600 text-white text-sm px-4 py-2 rounded-lg" >
+                            }} className="cursor-pointer mt-4 bg-violet-500 hover:bg-violet-600 text-white text-sm px-4 py-2 rounded-lg" >
                               Pegar chamado
                             </button>
                           )}
                         </div>
-
                       ))
                     )}
                   </div>
@@ -715,7 +704,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                   </div>
 
                   <div className="">
-                    <button onClick={async (e) => { e.stopPropagation(); await pegarChamado(chamadoSelecionado.id); setIsOpen(false); }} className="inline-flex items-center px-4 py-2 text-sm poppins-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Pegar chamado<svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                    <button onClick={async (e) => { e.stopPropagation(); await pegarChamado(chamadoSelecionado.id); setIsOpen(false); }} className="inline-flex items-center px-4 py-2 text-sm poppins-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 cursor-pointer">Pegar chamado<svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                       <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
                     </svg>
                     </button>
