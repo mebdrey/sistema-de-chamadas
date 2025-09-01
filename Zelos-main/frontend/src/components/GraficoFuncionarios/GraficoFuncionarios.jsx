@@ -71,7 +71,7 @@ export default function LeadsCard({
     if (!apiData || !el) return;
 
     const options = {
-      colors: ["#cfb5e8", "#9254d1"],
+      colors: ["#C8AFFF", "#8b5cf6"],
       series: apiData.series || [],
       chart: { type: "bar", height: 340, fontFamily: "Inter, sans-serif", toolbar: { show: false } },
       plotOptions: {bar: {horizontal: false, columnWidth: "40%", borderRadiusApplication: "end", borderRadius: 8},},

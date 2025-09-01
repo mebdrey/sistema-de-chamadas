@@ -9,7 +9,7 @@ export default function ChamadosPorPrioridade() {
   const [chartOptions, setChartOptions] = useState({
     chart: { type: "bar", toolbar: { show: false }, background: 'transparent' },
     plotOptions: { bar: { horizontal: false, borderRadius: 6, columnWidth: '40%' } },
-    colors: ["#a78bfa"],
+    colors: ["#8b5cf6"],
     dataLabels: { enabled: false },
     xaxis: {
       categories: [],
