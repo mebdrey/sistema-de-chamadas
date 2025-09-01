@@ -359,7 +359,7 @@ export default function ChamadosCliente() {
                                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
                                     </svg>
                                 </div>
-                                <input type="text" id="simple-search" className="bg-gray-50 focus:ring-violet-500 focus:border-violet-500 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white " placeholder="Pesquisar chamado" value={busca} onChange={(e) => setBusca(e.target.value)} />
+                                <input type="text" id="simple-search" className="bg-white focus:ring-violet-500 focus:border-violet-500 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white " placeholder="Pesquisar chamado" value={busca} onChange={(e) => setBusca(e.target.value)} />
                             </div>
                         </form>
                     </div>

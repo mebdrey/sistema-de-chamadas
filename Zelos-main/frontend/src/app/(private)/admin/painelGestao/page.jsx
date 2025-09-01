@@ -79,6 +79,8 @@ export default function PainelGestao() {
   const [calculatedPrazo, setCalculatedPrazo] = useState(null); // Adicionado
   const [openDropdownId, setOpenDropdownId] = useState(null); // Estado para controlar dropdowns abertos
   const [openSetorDropdownId, setOpenSetorDropdownId] = useState(null); // Estado para controlar dropdowns abertos
+  const [mostrarModalConfirmacaoSetor, setMostrarModalConfirmacaoSetor] = useState(false);
+  const [mostrarModalConfirmacaoPrioridade, setMostrarModalConfirmacaoPrioridade] = useState(false);
 
   // function suggestions for funcao
   const [funcaoSuggestions, setFuncaoSuggestions] = useState([]);
@@ -95,6 +97,24 @@ export default function PainelGestao() {
   const [passwordsMatch, setPasswordsMatch] = useState(true);
 
   const { UI: ToastsUI, showToast } = ToastMsg(); // pega UI e função showToast
+
+  // states para validação
+  const [errors, setErrors] = useState({
+    nome: null,
+    username: null,
+    email: null,
+    funcao: null,
+    senha: null,
+    repeat_password: null
+  });
+  const [touched, setTouched] = useState({
+    nome: false,
+    username: false,
+    email: false,
+    funcao: false,
+    senha: false,
+    repeat_password: false
+  });
 
 
   useEffect(() => {
@@ -118,6 +138,54 @@ export default function PainelGestao() {
       setLoading(false);
     }
   };
+
+  // validação / erro (adicionar junto dos outros useState)
+
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const allowedFuncs = ['admin', 'tecnico', 'auxiliar_limpeza']; // ajuste conforme seu app
+
+  const validateField = (name, value) => {
+    switch (name) {
+      case 'nome':
+        if (!String(value || '').trim()) return 'Nome é obrigatório';
+        return null;
+      case 'username':
+        if (!String(value || '').trim()) return 'Username é obrigatório';
+        if ((value || '').length < 5) return 'Username muito curto';
+        if (usernameExists) return 'Username já existe';
+        return null;
+      case 'email':
+        if (!String(value || '').trim()) return 'Email é obrigatório';
+        if (!emailRegex.test(String(value || '').trim())) return 'Email inválido';
+        return null;
+      case 'funcao':
+        if (!String(value || '').trim()) return 'Função é obrigatória';
+        if (!allowedFuncs.includes(String(value).toLowerCase())) return 'Escolha uma função válida';
+        return null;
+      case 'senha':
+        if (!String(value || '').trim()) return 'Senha é obrigatória';
+        if ((value || '').length < 6) return 'Senha deve ter ao menos 6 caracteres';
+        return null;
+      case 'repeat_password':
+        if (!String(value || '').trim()) return 'Confirme a senha';
+        if (value !== form.senha) return 'Senhas não coincidem';
+        return null;
+      default:
+        return null;
+    }
+  };
+
+  const validateAll = () => ({
+    nome: validateField('nome', form.nome),
+    username: validateField('username', form.username),
+    email: validateField('email', form.email),
+    funcao: validateField('funcao', form.funcao),
+    senha: validateField('senha', form.senha),
+    repeat_password: validateField('repeat_password', form.repeat_password)
+  });
+
 
   // ---------- Nome: manter livre enquanto digita; transformar em Title Case apenas no submit ----------
   const handleNomeChange = (e) => {
@@ -364,27 +432,29 @@ export default function PainelGestao() {
   // --------- criar usuário (submit) ---------
   const handleCreateUser = async (e) => {
     e.preventDefault();
+    setSubmitAttempted(true);
 
-    // client validation
-    if (!form.nome || !form.email || !form.senha) {
-      addToast({ title: 'Campos obrigatórios', msg: 'Preencha nome, email e senha', type: 'error' });
-      return;
-    }
-    if (!emailValid) {
-      addToast({ title: 'Email inválido', msg: 'Informe um email válido', type: 'error' });
-      return;
-    }
-    if (!passwordsMatch) {
-      addToast({ title: 'Senhas não coincidem', msg: 'As duas senhas devem ser iguais', type: 'error' });
-      return;
-    }
-    const allowedFuncs = ['admin', 'tecnico', 'auxiliar_limpeza'];
+    const nextErrors = validateAll();
+    setErrors(nextErrors);
 
-    // exige seleção explícita (não permite criar com função vazia ou 'usuario')
-    if (!form.funcao || !allowedFuncs.includes(form.funcao)) {
-      addToast({ title: 'Função inválida', msg: 'Escolha uma função: Admin, Técnico ou Auxiliar', type: 'error' });
-      return;
+    const firstErrorField = Object.keys(nextErrors).find(k => nextErrors[k]);
+    if (firstErrorField) {
+      addToast({ title: 'Erro de validação', msg: 'Corrija os campos em destaque', type: 'error' });
+
+      const fieldIdMap = {
+        nome: 'user_full_name',
+        username: 'user_username',
+        email: 'user_email',
+        funcao: 'user_function',
+        senha: 'user_password',
+        repeat_password: 'floating_repeat_password'
+      };
+      const el = document.getElementById(fieldIdMap[firstErrorField]);
+      if (el) el.focus();
+      return; // bloqueia envio
     }
+
+    // se chegou aqui, enviar normalmente
     setLoading(true);
     try {
       const finalFuncao = form.funcao;
@@ -396,21 +466,83 @@ export default function PainelGestao() {
         credentials: 'include',
         body: JSON.stringify(payload)
       }, 10000);
-      showToast("success", 'Usuário criado');
+
+      showToast("success", 'Usuário criado com successo');
       setShowUserModal(false);
-      setForm({ nome: "", username: "", email: "", senha: "", repeat_password: "", funcao: "usuario", ftPerfil: null });
+      setForm({ nome: "", username: "", email: "", senha: "", repeat_password: "", funcao: "", ftPerfil: null });
       setUsernameSuggestions([]);
+      // reset validation
+      setErrors({ nome: null, username: null, email: null, funcao: null, senha: null, repeat_password: null });
+      setSubmitAttempted(false);
       await loadAll();
-    } catch (err) {
-      // se backend retornar 409 com sugestões, o helper fetchWithTimeout já jogou erro; tentar extrair
-      const message = (err && (err.body && err.body.message)) || err.message || 'Erro desconhecido';
+    }
+    // catch (err) {
+    //   const message = (err && (err.body && err.body.message)) || err.message || 'Erro desconhecido';
+    //   showToast("danger", 'Erro criar usuário');
+    //   if (err && err.body && Array.isArray(err.body.sugestoes)) setUsernameSuggestions(err.body.sugestoes);
+    // } 
+    catch (err) {
+      // mensagem de fallback
+      const message = (err && err.body && err.body.message) || err.message || 'Erro desconhecido';
       showToast("danger", 'Erro criar usuário');
-      // se backend forneceu sugestões no body, atualiza
-      if (err && err.body && Array.isArray(err.body.sugestoes)) setUsernameSuggestions(err.body.sugestoes);
-    } finally {
+
+      // 1) se o backend devolveu fieldErrors (objeto com chaves por campo)
+      if (err && err.body && err.body.fieldErrors && typeof err.body.fieldErrors === 'object') {
+        // merge com erros existentes
+        setErrors(prev => ({ ...prev, ...err.body.fieldErrors }));
+        // garante que os erros sejam mostrados (flag para exibir)
+        setSubmitAttempted(true);
+        // opcional: foca no primeiro campo retornado
+        const firstField = Object.keys(err.body.fieldErrors)[0];
+        const fieldIdMap = {
+          nome: 'user_full_name',
+          username: 'user_username',
+          email: 'user_email',
+          funcao: 'user_function',
+          senha: 'user_password',
+          repeat_password: 'floating_repeat_password'
+        };
+        if (firstField && fieldIdMap[firstField]) {
+          const el = document.getElementById(fieldIdMap[firstField]);
+          if (el) el.focus();
+        }
+        return;
+      }
+
+      // 2) se o backend retornou 'field' simples (ex: { message, field: 'email' })
+      if (err && err.body && err.body.field) {
+        const field = err.body.field;
+        setErrors(prev => ({ ...prev, [field]: err.body.message || message }));
+        setSubmitAttempted(true);
+        const fieldIdMap = {
+          nome: 'user_full_name',
+          username: 'user_username',
+          email: 'user_email',
+          funcao: 'user_function',
+          senha: 'user_password',
+          repeat_password: 'floating_repeat_password'
+        };
+        if (fieldIdMap[field]) {
+          const el = document.getElementById(fieldIdMap[field]);
+          if (el) el.focus();
+        }
+        return;
+      }
+
+      // 3) fallback: se o backend só retornou sugestões (por username) ou outro formato
+      if (err && err.body && Array.isArray(err.body.sugestoes)) {
+        setUsernameSuggestions(err.body.sugestoes);
+      }
+
+      // você já mostrou um toast; pode opcionalmente setar um erro genérico
+      // setErrors(prev => ({ ...prev, geral: message }));
+    }
+
+    finally {
       setLoading(false);
     }
   };
+
 
   // ---------- Outras funções existentes (setores, prioridades, etc) são mantidas e apenas adaptadas se necessário ----------
 
@@ -437,7 +569,7 @@ export default function PainelGestao() {
       }, 10000);
 
       // res deve conter { id, titulo, descricao } conforme seu back
-      addToast({ title: "Sucesso", msg: "Setor criado", type: "success" });
+      addToast({ title: "successo", msg: "Setor criado", type: "success" });
 
       // atualizar array local de setores para não precisar recarregar
       // (coloca no topo; você pode usar loadAll() se preferir)
@@ -449,19 +581,31 @@ export default function PainelGestao() {
     } catch (err) {
       // extrai mensagem do fetchWithTimeout (err.body.message) quando possível
       const message = (err && err.body && err.body.message) || err.message || "Erro ao criar setor";
-      addToast({ title: "Erro criar setor", msg: message, type: "error" });
+      showToast("danger", "Erro ao criar setor");
     }
   };
 
-  const handleExcluirSetor = async (id) => {
-    if (!confirm("Tem certeza que deseja excluir este setor?")) return;
+  // States
+  const [setorParaExcluir, setSetorParaExcluir] = useState(null);
+
+  // Chamar a exclusão real (sem confirm)
+  const excluirSetor = async (id) => {
     try {
-      const res = await fetchWithTimeout(`${API_BASE_URL}/pool/${id}`, { method: "DELETE", credentials: 'include', });
-      showToast("success", "Setor excluído");
+      const res = await fetchWithTimeout(`${API_BASE_URL}/pool/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      showToast("success", "Setor excluído com successo");
       await loadAll();
     } catch (err) {
       showToast("danger", "Erro excluir setor");
     }
+  };
+
+  // Quando clicar em "Excluir" no dropdown -> abre modal
+  const confirmarExclusaoSetor = (id) => {
+    setSetorParaExcluir(id);
+    setMostrarModalConfirmacaoSetor(true);
   };
 
   const [editSetor, setEditSetor] = useState(null);
@@ -475,7 +619,7 @@ export default function PainelGestao() {
         credentials: 'include',
         body: JSON.stringify({ titulo: editSetor.titulo, descricao: editSetor.descricao })
       });
-      showToast("success", "Setor atualizado");
+      showToast("success", "Setor atualizado com successo");
       setEditSetor(null);
       await loadAll();
     } catch (err) {
@@ -487,92 +631,73 @@ export default function PainelGestao() {
     setPrioridadeForm({ ...prioridadeForm, [e.target.name]: e.target.value });
   };
 
-  const handleCriarPrioridade = async (e) => {
-    e.preventDefault();
+  const handleCriarPrioridadeInline = async () => {
     try {
       const res = await fetchWithTimeout(`${API_BASE_URL}/prioridades`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', },
-        credentials: 'include',
-        body: JSON.stringify(prioridadeForm)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(novaPrioridade)
       });
-      showToast("success", 'Nova prioridade adicionada');
-      setPrioridadeForm({ nome: '', prazo_dias: 0 });
+      showToast("success", "Prioridade adicionada com successo");
+      setIsCreatingPrioridadeRow(false);
+      setNovaPrioridade({ nome: "", horas_limite: 0 });
       await loadAll();
     } catch (err) {
-      showToast("danger", 'Erro criar prioridade');
+      showToast("danger", "Erro criar prioridade");
     }
   };
 
-  // Edit Prioridade
+// Edit Prioridade
   const [editPrioridade, setEditPrioridade] = useState(null);
+  const [isCreatingPrioridadeRow, setIsCreatingPrioridadeRow] = useState(false);
+  const [novaPrioridade, setNovaPrioridade] = useState({ nome: "", horas_limite: 0 });
 
   const handleAtualizarPrioridade = async (e) => {
     e.preventDefault();
     if (!editPrioridade || !editPrioridade.id) return;
-
+  
     try {
-      const payload = { nome: editPrioridade.nome, prazo_dias: Number(editPrioridade.prazo_dias) };
+      // enviar horas_limite diretamente (em horas), não prazo_dias
+      const payload = {
+        nome: editPrioridade.nome,
+        horas_limite: Number(editPrioridade.horas_limite) // garante number
+      };
+  
       const res = await fetchWithTimeout(`${API_BASE_URL}/prioridades/${editPrioridade.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(payload)
       });
-      addToast({ title: 'Prioridade atualizada', msg: 'Prioridade salva com sucesso', type: 'success' });
+  
+      showToast("success", 'Prioridade atualizada com sucesso');
       setEditPrioridade(null);
       await loadAll();
     } catch (err) {
-      addToast({ title: 'Erro atualizar prioridade', msg: err.message, type: 'error' });
+      showToast("danger", 'Erro atualizar prioridade');
     }
   };
+  
 
+  const [prioridadeParaExcluir, setPrioridadeParaExcluir] = useState(null);
   const handleExcluirPrioridade = async (id) => {
-    if (!confirm("Tem certeza que deseja excluir esta prioridade?")) return;
     try {
       const res = await fetchWithTimeout(`${API_BASE_URL}/prioridades/${id}`, {
         method: "DELETE",
         credentials: 'include',
       });
-      addToast({ title: "Sucesso", msg: "Prioridade excluída", type: "success" });
+      showToast("success", "Prioridade excluída com successo");
       await loadAll();
     } catch (err) {
-      addToast({ title: "Erro excluir prioridade", msg: err.message, type: "error" });
+      showToast("danger", "Erro excluir prioridade");
     }
   };
 
-  const handleCalcularPrazo = async (e) => {
-    e.preventDefault();
-    if (!prazoForm.prioridade_id) { addToast({ title: 'Erro', msg: 'Selecione uma prioridade', type: 'error' }); return; }
-    try {
-      const prioridadeSelecionada = prioridades.find(p => String(p.id) === String(prazoForm.prioridade_id));
-      if (!prioridadeSelecionada) { addToast({ title: 'Erro', msg: 'Prioridade não encontrada', type: 'error' }); return; }
-      const res = await fetchWithTimeout(`${API_BASE_URL}/chamados/calcular-prazo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', },
-        credentials: 'include',
-        body: JSON.stringify({ prioridade: prioridadeSelecionada.nome })
-      });
-      setCalculatedPrazo(res.data_limite || null);
-      addToast({ title: 'Sucesso', msg: 'Data limite calculada', type: 'success' });
-    } catch (err) {
-      addToast({ title: 'Erro calcular prazo', msg: err.message, type: 'error' });
-    }
-  };
-
-  const handleAtualizarPrazoChamado = async (e) => {
-    e.preventDefault();
-    if (!prazoForm.chamadoId) { addToast({ title: 'Erro', msg: 'Informe o ID do chamado', type: 'error' }); return; }
-    try {
-      const res = await fetchWithTimeout(`${API_BASE_URL}/chamados/${prazoForm.chamadoId}/prazo`, {
-        method: 'PATCH',
-        headers: { credentials: 'include', }
-      });
-      if (!res.ok) throw new Error("Erro ao atualizar prazo");
-      addToast({ title: 'Sucesso', msg: 'Prazo do chamado atualizado', type: 'success' });
-    } catch (err) {
-      addToast({ title: 'Erro atualizar prazo', msg: err.message, type: 'error' });
-    }
+  // Quando clicar em "Excluir" no dropdown -> abre modal
+  const confirmarExclusaoPrioridade = (id) => {
+    setPrioridadeParaExcluir(id);
+    setMostrarModalConfirmacaoPrioridade(true);
   };
 
   function formatarLabel(str) {
@@ -586,25 +711,24 @@ export default function PainelGestao() {
     return texto
       .split(' ').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
   }
+  // estados
+  const [openPrioridadeDropdownId, setOpenPrioridadeDropdownId] = useState(null);
 
+  // fecha dropdown ao clicar fora ou apertar ESC
+  useEffect(() => {
+    const onDocClick = () => setOpenPrioridadeDropdownId(null);
+    const onKey = (ev) => { if (ev.key === 'Escape') setOpenPrioridadeDropdownId(null); };
 
+    if (openPrioridadeDropdownId !== null) {
+      document.addEventListener('click', onDocClick);
+      document.addEventListener('keydown', onKey);
+    }
+    return () => {
+      document.removeEventListener('click', onDocClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [openPrioridadeDropdownId]);
 
-  function formatDate(d) {
-    if (!d) return "—";
-    const dt = new Date(d);
-    return dt.toLocaleDateString(undefined, { day: "2-digit", month: "long", year: "numeric" });
-  }
-
-  function Avatar({ src, alt, size = 8 }) {
-    return (
-      <img
-        src={src}
-        alt={alt}
-        className={`inline-block rounded-full object-cover`}
-        style={{ width: `${size}px`, height: `${size}px` }}
-      />
-    );
-  }
 
   return (
     <>
@@ -615,17 +739,11 @@ export default function PainelGestao() {
           <div className="flex max-w-full dark:bg-gray-900 ">
             {/* ASIDE FIXO */}
             <aside className="fixed top-23 left-[80px] w-64 bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-4 dark:bg-gray-800 dark:border-gray-700">
-              <h2 className="text-lg font-semibold mb-3 dark:text-white">Índice</h2>
+              <h2 className="text-lg poppins-semibold mb-3 dark:text-white">Índice</h2>
               <nav className="flex flex-col gap-3 text-[#7F56D8] dark:text-purple-500">
-                <a href="#criar-usuario" className="hover:underline">
-                  Criar Usuário
-                </a>
-                <a href="#setores" className="hover:underline">
-                  Setores
-                </a>
-                <a href="#prioridade" className="hover:underline">
-                  Prioridade
-                </a>
+                <a href="#criar-usuario" className="hover:underline">Criar Usuário</a>
+                <a href="#setores" className="hover:underline">Setores</a>
+                <a href="#prioridade" className="hover:underline">Prioridade</a>
               </nav>
             </aside>
 
@@ -633,25 +751,29 @@ export default function PainelGestao() {
               {/* Card: Usuários */}
               <section id="criar-usuario" className="scroll-mt-14 bg-white w-full rounded-2xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold dark:text-white">Criar novos usuários</h3>
+                  <h3 className="text-lg poppins-semibold dark:text-white">Criar novos usuários</h3>
                 </div>
                 <div className="mt-4 space-y-3">
 
 
-                  <form className="w-full" onSubmit={handleCreateUser}> {/* Adicionar onSubmit */}
-                    {/* Nome completo */}
+                  <form className="w-full" onSubmit={handleCreateUser}>
+                    {/* Linha 1: Nome + Username */}
                     <div className="flex flex-col md:flex-row gap-6">
+                      {/* Nome completo */}
                       <div className="relative z-0 mb-5 group w-full md:w-60">
-                        <input type="text" name="nome" id="user_full_name" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer" placeholder=" " value={form.nome} onChange={handleNomeChange} required />
-                        <label htmlFor="user_full_name" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Nome completo</label>
+                        <input type="text" name="nome" id="user_full_name" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.nome ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.nome ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`} placeholder=" " value={form.nome} onChange={(e) => { handleNomeChange(e); if (errors.nome) setErrors(prev => ({ ...prev, nome: null })); }} required />
+                        <label htmlFor="user_full_name" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.nome ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.nome ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.nome ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}>  <span className="leading-none">Nome completo</span>
+                          <span className="ml-1 self-start leading-none text-red-500">*</span>
+                        </label>
+                        {submitAttempted && errors.nome && <div className="text-xs text-red-500 mt-1">{errors.nome}</div>}
                       </div>
 
-                      {/* Username e sugestões */}
+                      {/* Username */}
                       <div className="relative z-0 mb-5 group w-full md:w-80">
-                        <input type="text" name="username" id="user_username" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer" placeholder=" " ref={usernameInputRef} value={form.username} onChange={handleUsernameChange} onKeyDown={handleUsernameKeyDown} autoComplete="off" required />
-                        <label htmlFor="user_username" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Username</label>
-
-                        {/* Mensagem de estado username */}
+                        <input type="text" name="username" id="user_username" ref={usernameInputRef} className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.username ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.username ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`} placeholder=" " value={form.username} onChange={(e) => { handleUsernameChange(e); if (errors.username) setErrors(prev => ({ ...prev, username: null })); }} onKeyDown={handleUsernameKeyDown} autoComplete="off" required />
+                        <label htmlFor="user_username" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.username ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.username ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.username ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}>  <span className="leading-none">Username</span>
+                          <span className="ml-1 self-start leading-none text-red-500">*</span>
+                        </label>
                         <div className="mt-2">
                           {usernameChecking && <span className="text-xs text-gray-500">Verificando...</span>}
                           {!usernameChecking && usernameExists && <div className="text-xs text-red-500">Esse username já existe</div>}
@@ -663,70 +785,65 @@ export default function PainelGestao() {
                             {usernameSuggestions.map((s, idx) => {
                               const highlighted = idx === highlightIndex;
                               return (
-                                <button key={s} type="button" role="option" aria-selected={highlighted}
-                                  onMouseDown={(ev) => { ev.preventDefault(); }}
-                                  onClick={() => pickSuggestion(s)}
-                                  onMouseEnter={() => setHighlightIndex(idx)}
-                                  className={`text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 py-1 px-2 rounded-full`}
-                                >
-                                  {s}
-                                </button>
+                                <button key={s} type="button" role="option" aria-selected={highlighted} onMouseDown={(ev) => ev.preventDefault()} onClick={() => pickSuggestion(s)} onMouseEnter={() => setHighlightIndex(idx)} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 py-1 px-2 rounded-full">{s}</button>
                               );
                             })}
                           </div>
                         )}
 
+                        {submitAttempted && errors.username && <div className="text-xs text-red-500 mt-1">{errors.username}</div>}
                       </div>
                     </div>
 
+                    {/* Linha 2: Email + Função */}
                     <div className="flex flex-col md:flex-row gap-6">
                       {/* Email */}
                       <div className="relative z-0 mb-5 group w-full md:w-60">
-                        <input
-                          type="email"
-                          name="email"
-                          id="user_email"
-                          className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer"
-                          placeholder=" "
-                          value={form.email}
-                          onChange={handleEmailChange}
-                          onFocus={() => setEmailFocused(true)}
-                          onBlur={() => setEmailFocused(false)}
-                          required
-                        />
-                        <label htmlFor="user_email" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Email</label>
+                        <input type="email" name="email" id="user_email" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.email ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.email ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`} placeholder=" " value={form.email} onChange={(e) => {
+                          handleEmailChange(e);
+                          if (errors.email) setErrors(prev => ({ ...prev, email: null }));
+                        }} onFocus={() => setEmailFocused(true)} onBlur={() => setEmailFocused(false)} required />
+                        <label
+                          htmlFor="user_email"
+                          className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.email ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.email ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.email ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
+                        ><span className="leading-none">Email</span>
+                          <span className="ml-1 self-start leading-none text-red-500">*</span>
+                        </label>
+                        {submitAttempted && errors.email && <div className="text-xs text-red-500 mt-1">{errors.email}</div>}
                         {emailFocused && !emailValid && <div className="text-xs text-red-500 mt-1">Email inválido</div>}
                       </div>
+
                       {/* Função */}
                       <div className="relative z-0 mb-5 group w-full md:w-60">
                         <input
                           type="text"
                           name="funcao"
                           id="user_function"
-                          className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer"
-                          placeholder=""
+                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
+          ${submitAttempted && errors.funcao ? 'border-red-500' : 'border-gray-300'}
+          dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
+                          placeholder=" "
                           value={form.funcao}
-                          onChange={handleFuncaoChange}
-                          autoComplete="off"
+                          onChange={(e) => {
+                            handleFuncaoChange(e);
+                            if (errors.funcao) setErrors(prev => ({ ...prev, funcao: null }));
+                          }}
                           onFocus={() => setFuncaoFocused(true)}
                           onBlur={() => setFuncaoFocused(false)}
                           required
                         />
-                        <label htmlFor="user_function" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Função</label>
-
-                        {/* sugestões de função
-                        {funcaoSuggestions.length > 0 && (
-                          <div className="mt-2 flex flex-col gap-1">
-                            {funcaoSuggestions.map(s => (
-                              <button key={s.func} type="button" onClick={() => pickFuncSuggestion(s.func)} className="text-xs text-left bg-gray-50 hover:bg-gray-100 py-1 px-2 rounded">{s.func} — {s.titulo}</button>
-                            ))}
-                          </div>
-                        )} */}
-
+                        <label
+                          htmlFor="user_function"
+                          className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.funcao ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.funcao ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.funcao ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
+                        ><span className="leading-none">Função</span>
+                          <span className="ml-1 self-start leading-none text-red-500">*</span>
+                        </label>
+                        {submitAttempted && errors.funcao && <div className="text-xs text-red-500 mt-1">{errors.funcao}</div>}
                         {funcaoFocused && !funcaoValid && <div className="text-xs text-red-500 mt-1">Escolha uma função existente</div>}
                       </div>
                     </div>
 
+                    {/* Linha 3: Senha + Confirmar senha */}
                     <div className="flex flex-col md:flex-row gap-6">
                       {/* Senha */}
                       <div className="relative z-0 mb-5 group w-full md:w-60">
@@ -734,27 +851,45 @@ export default function PainelGestao() {
                           type="password"
                           name="senha"
                           id="user_password"
-                          className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer"
-                          placeholder=" "
-                          value={form.senha}
-                          onChange={handleSenhaChange}
-                          required
-                        />
-                        <label htmlFor="user_password" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Senha</label>
+                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.senha ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.senha ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`} placeholder=" " value={form.senha} onChange={(e) => {
+                            handleSenhaChange(e);
+                            if (errors.senha) setErrors(prev => ({ ...prev, senha: null }));
+                          }} required />
+                        <label
+                          htmlFor="user_password"
+                          className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.senha ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.senha ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.senha ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}><span className="leading-none">Senha</span>
+                          <span className="ml-1 self-start leading-none text-red-500">*</span>
+                        </label>
+                        {submitAttempted && errors.senha && <div className="text-xs text-red-500 mt-1">{errors.senha}</div>}
                       </div>
 
+                      {/* Confirmar senha */}
                       <div className="relative z-0 mb-5 group w-full md:w-60">
-                        <input type="password" name="repeat_password" id="floating_repeat_password" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 focus:border-purple-500 peer" placeholder=" " value={form.repeat_password} onChange={handleRepeatPwdChange} required />
-                        <label htmlFor="floating_repeat_password" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Confirmar senha</label>
+                        <input
+                          type="password"
+                          name="repeat_password"
+                          id="floating_repeat_password"
+                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
+          ${submitAttempted && errors.repeat_password ? 'border-red-500' : 'border-gray-300'}
+          dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.repeat_password ? 'focus:border-red-500' : 'focus:border-purple-500'} peer`} placeholder=" " value={form.repeat_password}
+                          onChange={(e) => {
+                            handleRepeatPwdChange(e);
+                            if (errors.repeat_password) setErrors(prev => ({ ...prev, repeat_password: null }));
+                          }} required />
+                        <label htmlFor="floating_repeat_password" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.repeat_password ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.repeat_password ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.repeat_password ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
+                        ><span className="leading-none">Confirmar senha</span>
+                          <span className="ml-1 self-start leading-none text-red-500">*</span>
+                        </label>
+                        {submitAttempted && errors.repeat_password && <div className="text-xs text-red-500 mt-1">{errors.repeat_password}</div>}
                         {form.repeat_password.length > 0 && !passwordsMatch && <div className="text-xs text-red-500 mt-1">As duas senhas devem ser iguais</div>}
                       </div>
-
                     </div>
 
-
-                    <button type="submit" className="text-white bg-[#7F56D8] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-purple-500 dark:hover:bg-purple-500 dark:focus:ring-purple-500"><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>Criar Usuário</button>
+                    {/* Botão Criar */}
+                    <button type="submit" className="flex flex-row gap-2 items-center text-white bg-violet-500 hover:bg-violet-600 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-purple-500 dark:hover:bg-purple-500 dark:focus:ring-purple-500"><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                      Criar Usuário
+                    </button>
                   </form>
-
 
                 </div>
               </section>
@@ -764,17 +899,16 @@ export default function PainelGestao() {
               <section id="setores" className="flex flex-col">
                 <div className="-m-1.5 overflow-x-auto">
                   <div className="p-1.5 min-w-full inline-block align-middle">
-                    <div className="bg-white border border-gray-200 rounded-xl shadow-2xs overflow-hidden dark:border-gray-700 dark:bg-gray-800">
+                    <div className="bg-white border border-gray-200 rounded-xl shadow-2xs overflow-visible dark:border-gray-700 dark:bg-gray-800">
                       <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200 dark:border-gray-700 dark:bg-gray-800">
                         <div>
-                          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 dark:text-white">Setores / Pools</h2>
+                          <h2 className="text-xl poppins-semibold text-gray-800 dark:text-gray-200 dark:text-white">Setores / Pools</h2>
                           <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-200">Crie, edite e exclua setores.</p>
                         </div>
 
                         <div>
                           <div className="inline-flex gap-x-2">
-
-                            <button type="button" onClick={() => { setIsCreatingSetorRow(true); setNovoSetor({ titulo: "", descricao: "" }); }} className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none "><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>Criar setor</button>
+                            <button type="button" onClick={() => { setIsCreatingSetorRow(true); setNovoSetor({ titulo: "", descricao: "" }); }} className="py-2 px-3 inline-flex items-center gap-x-2 text-sm poppins-medium rounded-lg border border-transparent bg-violet-500 hover:bg-violet-600 text-white focus:outline-hidden focus:bg-violet-600 disabled:opacity-50 disabled:pointer-events-none "><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>Criar setor</button>
                           </div>
                         </div>
                       </div>
@@ -782,12 +916,12 @@ export default function PainelGestao() {
                         <thead className="bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
                           <tr>
                             <th scope="col" className="px-6 py-3 text-start">
-                              <p className="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-hidden focus:text-gray-500 dark:hover:text-gray-300 dark:focus:text-gray-300 dark:text-white " >Setor <svg className="shrink-0 size-3.5 text-gray-800 dark:text-gray-200 dark:text-gray-200 " width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" /></svg>
+                              <p className="group inline-flex items-center gap-x-2 text-xs poppins-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-hidden focus:text-gray-500 dark:hover:text-gray-300 dark:focus:text-gray-300 dark:text-white ">Setor<svg className="shrink-0 size-3.5 text-gray-800 dark:text-gray-200 dark:text-gray-200 " width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" /></svg>
                               </p>
                             </th>
 
                             <th scope="col" className="px-6 py-3 text-start">
-                              <p className="group inline-flex items-center gap-x-2 text-xs font-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-hidden focus:text-gray-500 dark:hover:text-gray-300 dark:focus:text-gray-300 dark:text-white">Descrição<svg className="shrink-0 size-3.5 text-gray-800 dark:text-gray-200 dark:text-gray-200" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" /></svg>
+                              <p className="group inline-flex items-center gap-x-2 text-xs poppins-semibold uppercase text-gray-800 hover:text-gray-500 focus:outline-hidden focus:text-gray-500 dark:hover:text-gray-300 dark:focus:text-gray-300 dark:text-white">Descrição<svg className="shrink-0 size-3.5 text-gray-800 dark:text-gray-200 dark:text-gray-200" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" /></svg>
                               </p>
                             </th>
 
@@ -805,81 +939,60 @@ export default function PainelGestao() {
                             </tr>
                           ) : (
                             setores.map((s) => (
-                              <tr key={s.id} className="bg-white hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800" >
+                              <tr key={s.id} className="bg-white hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800">
                                 {/* Coluna: Setor */}
-                                <td className="size-px whitespace-nowrap">
-                                  <a className="block relative z-10" href="#">
-                                    <div className="px-6 py-2">
-                                      <span className="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
-                                        {formatarLabel(s.titulo)}
-                                      </span>
-                                    </div>
-                                  </a>
-                                </td>
-
-                                {/* Coluna: Descrição */}
                                 <td className="align-top w-72 max-w-[18rem]">
-                                  <div className="block relative z-10">
-                                    <div className="px-6 py-2">
-                                      <p className="text-sm text-gray-500 dark:text-gray-300 whitespace-normal break-words">
-                                        {s.descricao || "—"}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </td>
-                                {editSetor && (
-                                  <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 p-4">
-                                    <form onSubmit={handleAtualizarSetor} className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-                                      <h3 className="text-lg font-semibold mb-4">Editar setor</h3>
-                                      <input type="text" value={editSetor.titulo} onChange={(e) => setEditSetor({ ...editSetor, titulo: e.target.value })} className="w-full border rounded-lg p-2 mb-3" />
-                                      <textarea value={editSetor.descricao} onChange={(e) => setEditSetor({ ...editSetor, descricao: e.target.value })} className="w-full border rounded-lg p-2 mb-3" />
-                                      <div className="flex justify-end gap-2">
-                                        <button type="button" onClick={() => setEditSetor(null)} className="px-4 py-2 border rounded-lg">
-                                          Cancelar
-                                        </button>
-                                        <button type="submit" className="px-4 py-2 bg-emerald-600 text-white rounded-lg">
-                                          Atualizar
-                                        </button>
-                                      </div>
-                                    </form>
-                                  </div>
-                                )}
-
-                                {/* Coluna: Ações */}
-                                <td className="size-px whitespace-nowrap">
-                                  <div className="px-6 py-2 relative">
-                                    <button
-                                      type="button"
-                                      onClick={() => setOpenDropdownId(openDropdownId === s.id ? null : s.id)}
-                                      className="py-1.5 px-2 inline-flex justify-center items-center gap-2 rounded-lg text-gray-700 align-middle disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-600 transition-all text-sm dark:text-gray-400 dark:hover:text-white dark:focus:ring-offset-gray-800"
-                                      aria-haspopup="menu"
-                                      aria-expanded={openDropdownId === s.id}
-                                    >
-                                      <svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <circle cx="12" cy="12" r="1" />
-                                        <circle cx="19" cy="12" r="1" />
-                                        <circle cx="5" cy="12" r="1" />
-                                      </svg>
-                                    </button>
-
-                                    {openDropdownId === s.id && (
-                                      <div
-                                        className="absolute right-0 mt-2 min-w-40 z-20 bg-white shadow-2xl rounded-lg p-2 divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-800 dark:border dark:border-gray-700"
-                                        role="menu"
-                                      >
-                                        <div className="py-2 first:pt-0 last:pb-0">
-                                          <span className="block py-2 px-3 text-xs font-medium uppercase text-gray-400 dark:text-gray-600">Ações</span>
-                                          <button onClick={() => { setEditSetor(s); setOpenDropdownId(null); }} className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-300 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-200 w-full text-left">Editar</button>
-
-                                          <button onClick={() => { handleExcluirSetor(s.id); setOpenDropdownId(null); }} className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-red-500 dark:hover:bg-gray-700 dark:focus:bg-gray-700 dark:focus:text-gray-300 w-full text-left">Excluir
-                                          </button>
-                                        </div>
-                                      </div>
+                                  <div className="px-6 py-2">
+                                    {editSetor?.id === s.id ? (
+                                      <input type="text" value={editSetor.titulo} onChange={(e) => setEditSetor({ ...editSetor, titulo: e.target.value })} className="w-full px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7F56D8]" required />
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-sm poppins-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">{formatarLabel(s.titulo)}</span>
                                     )}
                                   </div>
                                 </td>
+
+                                {/* Coluna: Descrição */}
+                                <td className="px-6 py-2 align-top">
+                                  {editSetor?.id === s.id ? (
+                                    <textarea value={editSetor.descricao} onChange={(e) => setEditSetor({ ...editSetor, descricao: e.target.value })} className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7F56D8]" rows={2} />
+                                  ) : (
+                                    <p className="text-sm text-gray-500 dark:text-gray-300 whitespace-normal break-words">{s.descricao || "—"}</p>
+                                  )}
+                                </td>
+
+                                {/* Coluna: Ações */}
+                                <td className="px-6 py-2 text-end">
+                                  {editSetor?.id === s.id ? (
+                                    <div className="inline-flex gap-2">
+                                      <button type="button" onClick={() => setEditSetor(null)} className="inline-flex items-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg text-sm  px-3 py-1.5">Cancelar</button>
+                                      <button type="button" onClick={handleAtualizarSetor} className="px-3 py-1 bg-violet-500 hover:bg-violet-600 text-white rounded-md">Salvar</button>
+                                    </div>
+                                  ) : (
+                                    <div className="relative">
+                                      <button type="button" onClick={() => setOpenSetorDropdownId(openSetorDropdownId === s.id ? null : s.id)} className="py-1.5 px-2 inline-flex  justify-center items-center gap-2 rounded-lg text-gray-700 dark:text-gray-400 dark:hover:text-white focus:outline-hidden focus:ring-2 focus:ring-violet-500 transition-all text-sm">
+                                        <svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24"
+                                          fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                          <circle cx="12" cy="12" r="1" />
+                                          <circle cx="19" cy="12" r="1" />
+                                          <circle cx="5" cy="12" r="1" />
+                                        </svg>
+                                      </button>
+
+                                      {openSetorDropdownId === s.id && (
+                                        <div className="absolute right-0 mt-2 min-w-40 z-20 bg-white shadow-2xl rounded-lg p-2 divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-800 dark:border dark:border-gray-700" role="menu">
+                                          <div className="py-2 first:pt-0 last:pb-0">
+                                            <span className="block py-2 px-3 text-xs text-left poppins-medium uppercase text-gray-400 dark:text-gray-600">Ações</span>
+                                            <button onClick={() => { setEditSetor(s); setOpenSetorDropdownId(null); }} className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-200 w-full text-left">Editar</button>
+                                            <button onClick={() => { confirmarExclusaoSetor(s.id); setOpenSetorDropdownId(null); }} className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-gray-100 dark:text-red-500 dark:hover:bg-gray-700 dark:focus:bg-gray-700 dark:focus:text-gray-300 w-full text-left">Excluir</button>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </td>
                               </tr>
                             ))
+
                           )}
 
                           {/* Linha de criação inline */}
@@ -891,7 +1004,7 @@ export default function PainelGestao() {
                                   <div className="px-6 py-2">
                                     <input type="text" placeholder="Título do setor" value={novoSetor.titulo}
                                       onChange={(e) => setNovoSetor(prev => ({ ...prev, titulo: e.target.value }))}
-                                      className="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-sm border-gray-200 dark:border-gray-700 font-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7F56D8] focus:border-[#7F56D8]"
+                                      className="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-sm border-gray-200 dark:border-gray-700 poppins-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7F56D8] focus:border-[#7F56D8]"
                                       required
                                     />
                                   </div>
@@ -920,7 +1033,7 @@ export default function PainelGestao() {
                                   <button type="button" onClick={async (e) => {
                                     // chama o handler de salvar (evita usar <form> aqui)
                                     await handleCriarSetorInline(e);
-                                  }} className="px-3 py-1 bg-blue-600 text-white rounded-md">
+                                  }} className="px-3 py-1 bg-violet-500 hover:bg-violet-600 text-white rounded-md">
                                     Salvar
                                   </button>
                                 </div>
@@ -931,7 +1044,7 @@ export default function PainelGestao() {
                       </table>
                       <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-gray-700">
                         <div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-200"><span className="font-semibold text-gray-800 dark:text-gray-200 dark:text-gray-200">{setores.length}</span> resultados</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-200"><span className="poppins-semibold text-gray-800 dark:text-gray-200 dark:text-gray-200">{setores.length}</span> resultados</p>
                         </div>
                       </div>
                     </div>
@@ -944,23 +1057,16 @@ export default function PainelGestao() {
                 <div className="flex flex-col">
                   <div className="-m-1.5 overflow-x-auto">
                     <div className="p-1.5 min-w-full inline-block align-middle">
-                      <div className="bg-white border border-gray-200 rounded-xl shadow-2xs overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+                      <div className="bg-white border border-gray-200 rounded-xl shadow-2xs overflow-visible dark:bg-gray-800 dark:border-gray-700">
                         <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200 dark:border-gray-700">
                           <div>
-                            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Prioridades</h2>
+                            <h2 className="text-xl poppins-semibold text-gray-800 dark:text-gray-200">Prioridades</h2>
                             <p className="text-sm text-gray-600 dark:text-gray-400">Edite as prioridades.</p>
                           </div>
 
                           <div>
                             <div className="inline-flex gap-x-2">
-                              <button
-                                type="button"
-                                onClick={() => setEditPrioridade({ id: null, nome: '', prazo_dias: 0 })} // Abre modal para nova prioridade ou edita existente
-                                className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                              >
-                                <svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
-                                Nova Prioridade
-                              </button>
+                              <button type="button" onClick={() => { setIsCreatingPrioridadeRow(true); setNovaPrioridade({ nome: "", horas_limite: 0 }); }} className="py-2 px-3 inline-flex items-center gap-x-2 text-sm poppins-medium rounded-lg border border-transparent bg-violet-500 hover:bg-violet-600 text-white"><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>Criar prioridade</button>
                             </div>
                           </div>
                         </div>
@@ -969,90 +1075,96 @@ export default function PainelGestao() {
                           <thead className="bg-gray-50 divide-y divide-gray-200 dark:bg-gray-700 dark:divide-gray-700 ">
                             <tr>
                               <th scope="col" className="px-6 py-3 text-start border-s border-gray-200 dark:border-gray-700">
-                                <span className="text-xs font-semibold uppercase text-gray-800 dark:text-gray-200">Nome</span>
+                                <span className="text-xs poppins-semibold uppercase text-gray-800 dark:text-gray-200">Nome</span>
                               </th>
 
                               <th scope="col" className="px-6 py-3 text-start">
-                                <span className="text-xs font-semibold uppercase text-gray-800 dark:text-gray-200">Prazo (horas)</span>
+                                <span className="text-xs poppins-semibold uppercase text-gray-800 dark:text-gray-200">Prazo (horas)</span>
                               </th>
 
                               <th scope="col" className="px-6 py-3 text-end"></th>
                             </tr>
                           </thead>
-
                           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                            {prioridades.length === 0 ? (
+                            {prioridades.length === 0 && !isCreatingPrioridadeRow ? (
                               <tr>
-                                <td colSpan="3" className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                                  Nenhuma prioridade encontrada.
-                                </td>
+                                <td colSpan="3" className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">Nenhuma prioridade encontrada.</td>
                               </tr>
                             ) : (
                               prioridades.map((p) => (
                                 <tr key={p.id} className="bg-white hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800">
-                                  <td className="h-px w-auto whitespace-nowrap">
-                                    <div className="px-6 py-2">
+
+                                  {/* Coluna: Nome */}
+                                  <td className="px-6 py-2">
+                                    {editPrioridade?.id === p.id ? (
+                                      <input type="text" value={editPrioridade.nome} onChange={(e) => setEditPrioridade({ ...editPrioridade, nome: e.target.value })} className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" required/>
+                                    ) : (
                                       <span className="text-sm text-gray-800 dark:text-gray-200">{formatarLabel(p.nome)}</span>
-                                    </div>
+                                    )}
                                   </td>
-                                  <td className="h-px w-auto whitespace-nowrap">
-                                    <div className="px-6 py-2">
+
+                                  {/* Coluna: Prazo */}
+                                  <td className="px-6 py-2">
+                                    {editPrioridade?.id === p.id ? (
+                                      <input type="number" value={editPrioridade.horas_limite} onChange={(e) => setEditPrioridade({ ...editPrioridade, horas_limite: Number(e.target.value) })} className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" required/>
+                                    ) : (
                                       <span className="text-sm text-gray-800 dark:text-gray-200">{p.horas_limite} horas</span>
-                                    </div>
+                                    )}
                                   </td>
-                                  <td className="size-px whitespace-nowrap text-end">
-                                    <div className="px-6 py-2">
-                                      <div className="hs-dropdown [--placement:bottom-right] relative inline-block">
-                                        <button
-                                          type="button"
-                                          onClick={() => setOpenDropdownId(openDropdownId === p.id ? null : p.id)}
-                                          className="py-1.5 px-2 inline-flex justify-center items-center gap-2 rounded-lg text-gray-700 align-middle disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-600 transition-all text-sm dark:text-gray-400 dark:hover:text-white dark:focus:ring-offset-gray-800"
-                                          aria-haspopup="menu"
-                                          aria-expanded={openDropdownId === p.id}
-                                        >
-                                          <svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" />
-                                          </svg>
-                                        </button>
-                                        {openDropdownId === p.id && (
-                                          <div
-                                            className="absolute right-0 mt-2 min-w-40 z-20 bg-white shadow-2xl rounded-lg p-2 divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-800 dark:border dark:border-gray-700"
-                                            role="menu"
+
+                                  {/* Coluna: Ações */}
+                                  <td className="px-6 py-2 text-end">
+                                    {editPrioridade?.id === p.id ? (
+                                      <div className="inline-flex gap-2">
+                                        <button type="button" onClick={() => setEditPrioridade(null)} className="px-3 py-1 border rounded-lg text-gray-500">Cancelar</button>
+                                        <button type="button" onClick={handleAtualizarPrioridade} className="px-3 py-1 bg-violet-500 hover:bg-violet-600 text-white rounded-md">Salvar</button>
+                                      </div>
+                                    ) : (
+                                      <div className="relative inline-block text-left" onClick={(e) => e.stopPropagation()}   // evita fechar ao clicar dentro
+                                      >
+                                        <button type="button" onClick={() => setOpenPrioridadeDropdownId(openPrioridadeDropdownId === p.id ? null : p.id) } className="py-1.5 px-2 inline-flex justify-center items-center gap-2 rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" aria-haspopup="menu" aria-expanded={openPrioridadeDropdownId === p.id} ><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg></button>
+
+                                        {openPrioridadeDropdownId === p.id && (
+                                          <div className="absolute right-0 top-8 z-20 min-w-40 bg-white dark:bg-gray-800 dark:border dark:border-gray-700 shadow-2xl rounded-lg p-2 divide-y divide-gray-200 dark:divide-gray-700" role="menu" onClick={(e) => e.stopPropagation()}  // não propagar para não fechar
                                           >
                                             <div className="py-2 first:pt-0 last:pb-0">
-                                              <span className="block py-2 px-3 text-xs font-medium uppercase text-gray-400 dark:text-gray-600">Ações</span>
-                                              <button onClick={() => { setEditPrioridade(p); setOpenDropdownId(null); }} className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 w-full text-left">Editar</button>
-                                              <button onClick={() => { handleExcluirPrioridade(p.id); setOpenDropdownId(null); }} className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-red-500 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700 dark:focus:text-gray-300 w-full text-left">Excluir</button>
+                                              <span className="block py-2 px-3 text-xs poppins-medium uppercase text-gray-400 dark:text-gray-600">Ações</span>
+                                              <button onClick={() => { setEditPrioridade({ ...p, horas_limite: Number(p.horas_limite) }); setOpenPrioridadeDropdownId(null); }} className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 dark:text-gray-200 w-full text-left">Editar</button>
+                                              <button onClick={() => { confirmarExclusaoPrioridade(p.id); setOpenPrioridadeDropdownId(null); }} className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-gray-100 dark:text-red-500 dark:hover:bg-gray-700 w-full text-left">Excluir</button>
                                             </div>
                                           </div>
                                         )}
                                       </div>
-                                    </div>
+                                    )}
                                   </td>
                                 </tr>
                               ))
                             )}
+
+                            {/* Linha de criação inline */}
+                            {isCreatingPrioridadeRow && (
+                              <tr className="bg-white dark:bg-gray-900">
+                                <td className="px-6 py-2">
+                                  <input type="text" placeholder="Nome da prioridade" value={novaPrioridade.nome} onChange={(e) => setNovaPrioridade(prev => ({ ...prev, nome: e.target.value }))} className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" required/>
+                                </td>
+                                <td className="px-6 py-2">
+                                  <input type="number" placeholder="Prazo em horas" value={novaPrioridade.horas_limite} onChange={(e) => setNovaPrioridade(prev => ({ ...prev, horas_limite: Number(e.target.value) }))} className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" required/>
+                                </td>
+                                <td className="px-6 py-2 text-end">
+                                  <div className="inline-flex gap-2">
+                                    <button type="button" onClick={() => { setIsCreatingPrioridadeRow(false); setNovaPrioridade({ nome: "", horas_limite: 0 }); }} className="px-3 py-1 border rounded-lg text-sm text-gray-500">Cancelar</button>
+                                    <button type="button" onClick={async () => { await handleCriarPrioridadeInline(); }} className="px-3 py-1 bg-violet-500 hover:bg-violet-600 text-white rounded-md">Salvar</button>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
                           </tbody>
+
                         </table>
-
-                        {editPrioridade && (
-                          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 p-4">
-                            <form onSubmit={handleAtualizarPrioridade} className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-                              <h3 className="text-lg font-semibold mb-4">Editar Prioridade</h3>
-                              <input type="text" value={editPrioridade.nome} onChange={(e) => setEditPrioridade({ ...editPrioridade, nome: e.target.value })} className="form-input mb-3" placeholder="Nome da Prioridade" />
-                              <input type="number" value={editPrioridade.horas_limite} onChange={(e) => setEditPrioridade({ ...editPrioridade, horas_limite: Number(e.target.value) })} className="form-input mb-3" placeholder="Prazo em horas" />
-                              <div className="flex justify-end gap-2">
-                                <button type="button" onClick={() => setEditPrioridade(null)} className="px-4 py-2 border rounded-lg">Cancelar</button>
-                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">Atualizar</button>
-                              </div>
-                            </form>
-                          </div>
-                        )}
-
                         <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-gray-700">
                           <div>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                              <span className="font-semibold text-gray-800 dark:text-gray-200">{prioridades.length}</span> resultados
+                              <span className="poppins-semibold text-gray-800 dark:text-gray-200">{prioridades.length}</span> resultados
                             </p>
                           </div>
                         </div>
@@ -1062,6 +1174,34 @@ export default function PainelGestao() {
                 </div>
               </div>
             </main>
+            {/* tem tz q deseja excluir o setor? */}
+            {mostrarModalConfirmacaoSetor && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                  <div className="text-center">
+                    <svg className="mx-auto mb-4 text-gray-400 w-12 h-12" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                    <h3 className="mb-5 text-lg poppins-regular text-gray-500">Tem certeza que deseja excluir este setor?</h3>
+                    <button onClick={() => { if (setorParaExcluir) excluirSetor(setorParaExcluir); setMostrarModalConfirmacaoSetor(false); setSetorParaExcluir(null); }} className="text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-[#7F56D8] poppins-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">Sim, excluir</button>
+                    <button onClick={() => { setMostrarModalConfirmacaoSetor(false); setSetorParaExcluir(null); }} className="py-2.5 px-5 ms-3 text-sm poppins-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100">Cancelar</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+             {/* tem tz q deseja excluir a prioridade? */}
+             {mostrarModalConfirmacaoPrioridade && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                  <div className="text-center">
+                    <svg className="mx-auto mb-4 text-gray-400 w-12 h-12" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                    <h3 className="mb-5 text-lg poppins-regular text-gray-500">Tem certeza que deseja excluir esta prioridade?</h3>
+                    <button onClick={() => { if (prioridadeParaExcluir) handleExcluirPrioridade(prioridadeParaExcluir); setMostrarModalConfirmacaoPrioridade(false); setPrioridadeParaExcluir(null); }} className="text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-[#7F56D8] poppins-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">Sim, excluir</button>
+                    <button onClick={() => { setMostrarModalConfirmacaoPrioridade(false); setPrioridadeParaExcluir(null); }} className="py-2.5 px-5 ms-3 text-sm poppins-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100">Cancelar</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       </div>

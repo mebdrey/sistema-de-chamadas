@@ -1,4 +1,4 @@
-import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool, buscarUsuarioPorEmail } from '../models/Admin.js'
+import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool, buscarUsuarioPorEmail, listarPrioridades, buscarPrioridadePorNome, atualizarPrioridade, excluirPrioridade } from '../models/Admin.js'
 import { criarNotificacao } from '../models/Notificacoes.js';
 import { readAll, readQuery, update, deleteRecord } from '../config/database.js'; // Importar deleteRecord
 
@@ -228,71 +228,74 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // normalização leve (mantém apenas a-z0-9, sem acentos)
 const normalizeIdentifier = (s) => String(s || '')
-  .toLowerCase()
-  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-  .replace(/[^a-z0-9]/g, '');
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
 
 export const criarUsuarioController = async (req, res) => {
-  try {
-    const { nome, username, email, senha, funcao, ftPerfil } = req.body;
+    try {
+        const { nome, username, email, senha, funcao, ftPerfil } = req.body;
 
-    // validações básicas
-    if (!nome || !email || !senha) {
-      return res.status(400).json({ message: 'nome, email e senha são obrigatórios' });
+        // validações básicas
+        if (!nome || !email || !senha) {
+            return res.status(400).json({ message: 'nome, email e senha são obrigatórios' });
+        }
+        if (!emailRegex.test(String(email).trim())) {
+            return res.status(400).json({ message: 'email inválido' });
+        }
+
+        // define desiredUsername (prefere campo username; senão, primeiro nome)
+        const desiredRaw = (username && String(username).trim().length) ? username : (String(nome).split(/\s+/)[0] || nome);
+        const desiredUsername = normalizeIdentifier(desiredRaw);
+
+        // 1) checa username duplicado
+        const existingUser = await buscarUsuarioPorUsername(desiredUsername);
+        if (existingUser) {
+            // gera sugestões com base no username desejado 
+            const sugestoes = await gerarSugestoesUsername(desiredUsername);
+            return res.status(409).json({ message: 'username já existe', sugestoes });
+        }
+
+        // 2) checa email duplicado
+        const existingEmail = await buscarUsuarioPorEmail(email);
+        if (existingEmail) {
+            return res.status(409).json({
+                message: 'Erros de validação',
+                fieldErrors: { email: 'Email já cadastrado' }
+            });
+        }
+
+        // 3) valida função e prepara payload
+        const allowedFunctions = ['admin', 'usuario', 'tecnico_externo', 'tecnico_manutencao', 'apoio_tecnico', 'auxiliar_limpeza'];
+        const finalFuncao = (funcao && allowedFunctions.includes(funcao)) ? funcao : 'usuario';
+
+        const payload = {
+            nome,
+            username: desiredUsername,
+            email,
+            senha,
+            funcao: finalFuncao,
+            ftPerfil: ftPerfil || null
+        };
+
+        // 4) cria usuário 
+        const userId = await criarUsuario(payload);
+
+        // 5) criar notificação 
+        await criarNotificacao({
+            usuario_id: userId,
+            tipo: 'notificacao_geral',
+            titulo: 'Bem-vindo ao Zelos',
+            descricao: 'Seu usuário foi criado com sucesso. Bem-vindo(a)!',
+            chamado_id: null
+        });
+
+        // 6) responder 201
+        return res.status(201).json({ id: userId, nome, username: desiredUsername, email, funcao: finalFuncao });
+    } catch (err) {
+        console.error('Erro criar usuário:', err);
+        return res.status(500).json({ message: 'Erro interno ao criar usuário', error: err && err.message ? err.message : 'unknown' });
     }
-    if (!emailRegex.test(String(email).trim())) {
-      return res.status(400).json({ message: 'email inválido' });
-    }
-
-    // define desiredUsername (prefere campo username; senão, primeiro nome)
-    const desiredRaw = (username && String(username).trim().length) ? username : (String(nome).split(/\s+/)[0] || nome);
-    const desiredUsername = normalizeIdentifier(desiredRaw);
-
-    // 1) checa username duplicado
-    const existingUser = await buscarUsuarioPorUsername(desiredUsername);
-    if (existingUser) {
-      // gera sugestões com base no username desejado 
-      const sugestoes = await gerarSugestoesUsername(desiredUsername);
-      return res.status(409).json({ message: 'username já existe', sugestoes });
-    }
-
-    // 2) checa email duplicado
-    const existingEmail = await buscarUsuarioPorEmail(email);
-    if (existingEmail) {
-      return res.status(409).json({ message: 'email já cadastrado' });
-    }
-
-    // 3) valida função e prepara payload
-    const allowedFunctions = ['admin', 'usuario', 'tecnico_externo', 'tecnico_manutencao', 'apoio_tecnico', 'auxiliar_limpeza'];
-    const finalFuncao = (funcao && allowedFunctions.includes(funcao)) ? funcao : 'usuario';
-
-    const payload = {
-      nome,
-      username: desiredUsername,
-      email,
-      senha,
-      funcao: finalFuncao,
-      ftPerfil: ftPerfil || null
-    };
-
-    // 4) cria usuário 
-    const userId = await criarUsuario(payload);
-
-    // 5) criar notificação 
-    await criarNotificacao({
-      usuario_id: userId,
-      tipo: 'notificacao_geral',
-      titulo: 'Bem-vindo ao Zelos',
-      descricao: 'Seu usuário foi criado com sucesso. Bem-vindo(a)!',
-      chamado_id: null
-    });
-
-    // 6) responder 201
-    return res.status(201).json({ id: userId, nome, username: desiredUsername, email, funcao: finalFuncao });
-  } catch (err) {
-    console.error('Erro criar usuário:', err);
-    return res.status(500).json({ message: 'Erro interno ao criar usuário', error: err && err.message ? err.message : 'unknown' });
-  }
 };
 
 export const verificarUsernameController = async (req, res) => {
@@ -328,162 +331,158 @@ export const sugerirUsernameController = async (req, res) => {
 // SETOR -------------------------------------------------------------------------------------------------
 // Criar setor
 export const criarSetorController = async (req, res) => {
-  try {
-    const { titulo, descricao } = req.body;
-    const created_by = req.user?.id || null;
+    try {
+        const { titulo, descricao } = req.body;
+        const created_by = req.user?.id || null;
 
-    if (!titulo || !titulo.trim()) {
-      return res.status(400).json({ message: "Título é obrigatório" });
+        if (!titulo || !titulo.trim()) {
+            return res.status(400).json({ message: "Título é obrigatório" });
+        }
+
+        const tituloNorm = titulo.trim();
+        const jaExiste = await existeSetorPorTitulo(tituloNorm);
+        if (jaExiste) {
+            return res.status(409).json({ message: "Já existe um setor com esse título" });
+        }
+
+        const id = await criarSetor({ titulo: tituloNorm, descricao, created_by });
+        return res.status(201).json({ id, titulo: tituloNorm, descricao });
+    } catch (err) {
+        console.error("Erro ao criar setor:", err);
+        res.status(500).json({ message: "Erro interno" });
     }
-
-    const tituloNorm = titulo.trim();
-    const jaExiste = await existeSetorPorTitulo(tituloNorm);
-    if (jaExiste) {
-      return res.status(409).json({ message: "Já existe um setor com esse título" });
-    }
-
-    const id = await criarSetor({ titulo: tituloNorm, descricao, created_by });
-    return res.status(201).json({ id, titulo: tituloNorm, descricao });
-  } catch (err) {
-    console.error("Erro ao criar setor:", err);
-    res.status(500).json({ message: "Erro interno" });
-  }
 };
 
 // Listar setores
 export const listarSetoresController = async (req, res) => {
-  try {
-    const setores = await listarSetores();
-    return res.status(200).json(setores);
-  } catch (err) {
-    console.error("Erro ao listar setores:", err);
-    res.status(500).json({ message: "Erro interno" });
-  }
+    try {
+        const setores = await listarSetores();
+        return res.status(200).json(setores);
+    } catch (err) {
+        console.error("Erro ao listar setores:", err);
+        res.status(500).json({ message: "Erro interno" });
+    }
 };
 
 // Atualizar setor
 export const atualizarSetorController = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const dados = req.body;
-    dados.updated_by = req.user?.id || null;
+    try {
+        const id = req.params.id;
+        const dados = req.body;
+        dados.updated_by = req.user?.id || null;
 
-    const affected = await atualizarSetor(id, dados);
-    if (affected === 0) {
-      return res.status(404).json({ message: "Setor não encontrado" });
+        const affected = await atualizarSetor(id, dados);
+        if (affected === 0) {
+            return res.status(404).json({ message: "Setor não encontrado" });
+        }
+
+        return res.status(200).json({ message: "Setor atualizado" });
+    } catch (err) {
+        console.error("Erro ao atualizar setor:", err);
+        res.status(500).json({ message: "Erro interno" });
     }
-
-    return res.status(200).json({ message: "Setor atualizado" });
-  } catch (err) {
-    console.error("Erro ao atualizar setor:", err);
-    res.status(500).json({ message: "Erro interno" });
-  }
 };
 
 // Excluir setor
 export const excluirSetorController = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const affected = await excluirSetor(id);
+    try {
+        const id = req.params.id;
+        const affected = await excluirSetor(id);
 
-    if (affected === 0) {
-      return res.status(404).json({ message: "Setor não encontrado ou já excluído" });
+        if (affected === 0) {
+            return res.status(404).json({ message: "Setor não encontrado ou já excluído" });
+        }
+
+        return res.status(200).json({ message: "Setor excluído" });
+    } catch (err) {
+        console.error("Erro ao excluir setor:", err);
+        res.status(500).json({ message: "Erro interno" });
     }
-
-    return res.status(200).json({ message: "Setor excluído" });
-  } catch (err) {
-    console.error("Erro ao excluir setor:", err);
-    res.status(500).json({ message: "Erro interno" });
-  }
 };
 
 // prioridades --------------------------------------------------------------------
-
+// Criar
 export const criarPrioridadeController = async (req, res) => {
     try {
-        const { nome, prazo_dias, horas_limite } = req.body;
-        if (!nome || !String(nome).trim()) {
-            return res.status(400).json({ message: 'nome obrigatório' });
-        }
-
-        const nomeNorm = String(nome).trim();
-        const rows = await readQuery('SELECT id FROM prioridades WHERE nome = ? LIMIT 1', [nomeNorm]);
-        const exists = Array.isArray(rows) ? rows.length > 0 : !!rows;
-        if (exists) {
-            return res.status(409).json({ message: 'prioridade com esse nome já existe' });
-        }
-
-        const created_by = req.user?.id || null;
-        // aceitar prazo_dias (legacy) ou horas_limite (preferido)
-        const horas = horas_limite !== undefined
-            ? Number(horas_limite)
-            : (prazo_dias !== undefined ? Number(prazo_dias) * 24 : 0);
-
-        const id = await criarPrioridade({ nome: nomeNorm, horas_limite: horas, created_by });
-
-        res.status(201).json({ id, nome: nomeNorm, horas_limite: horas });
+      const { nome, prazo_dias, horas_limite } = req.body;
+      if (!nome || !String(nome).trim()) {
+        return res.status(400).json({ message: "nome obrigatório" });
+      }
+  
+      const nomeNorm = String(nome).trim();
+      const exists = await buscarPrioridadePorNome(nomeNorm);
+      if (Array.isArray(exists) ? exists.length > 0 : !!exists) {
+        return res.status(409).json({ message: "prioridade já existe" });
+      }
+  
+      const horas =
+        horas_limite !== undefined
+          ? Number(horas_limite)
+          : prazo_dias !== undefined
+          ? Number(prazo_dias) * 24
+          : 0;
+  
+      const id = await criarPrioridade({ nome: nomeNorm, horas_limite: horas });
+  
+      res.status(201).json({ id, nome: nomeNorm, horas_limite: horas });
     } catch (err) {
-        console.error('Erro criar prioridade:', err);
-        res.status(500).json({ message: 'Erro interno' });
+      console.error("Erro criar prioridade:", err);
+      res.status(500).json({ message: "Erro interno" });
     }
-};
-
-export const atualizarPrioridadeController = async (req, res) => {
+  };
+  
+  // Atualizar
+  export const atualizarPrioridadeController = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { nome, prazo_dias, horas_limite } = req.body;
-        const updated_by = req.user?.id || null;
-
-        if (!nome && prazo_dias === undefined && horas_limite === undefined) {
-            return res.status(400).json({ message: 'Pelo menos um campo (nome ou horas_limite/prazo_dias) é obrigatório para atualização.' });
-        }
-
-        const dadosAtualizar = { updated_by };
-        if (nome) {
-            const nomeNorm = String(nome).trim();
-            const exists = await readQuery('SELECT id FROM prioridades WHERE nome = ? AND id != ? LIMIT 1', [nomeNorm, id]);
-            if (Array.isArray(exists) ? exists.length > 0 : !!exists) {
-                return res.status(409).json({ message: 'Já existe uma prioridade com este nome.' });
-            }
-            dadosAtualizar.nome = nomeNorm;
-        }
-        if (horas_limite !== undefined) {
-            dadosAtualizar.horas_limite = Number(horas_limite);
-        } else if (prazo_dias !== undefined) {
-            dadosAtualizar.horas_limite = Number(prazo_dias) * 24;
-        }
-
-        const affectedRows = await update('prioridades', dadosAtualizar, 'id = ?', [id]);
-
-        if (affectedRows === 0) {
-            return res.status(404).json({ message: 'Prioridade não encontrada ou nenhum dado para atualizar.' });
-        }
-
-        res.status(200).json({ message: 'Prioridade atualizada com sucesso.' });
-
+      const { id } = req.params;
+      const { nome, prazo_dias, horas_limite } = req.body;
+  
+      const dadosAtualizar = {};
+  
+      if (nome) dadosAtualizar.nome = String(nome).trim();
+  
+      // somente atualiza se for número finito
+      if (horas_limite !== undefined && Number.isFinite(Number(horas_limite))) {
+        dadosAtualizar.horas_limite = Number(horas_limite);
+      } else if (prazo_dias !== undefined && Number.isFinite(Number(prazo_dias))) {
+        dadosAtualizar.horas_limite = Number(prazo_dias) * 24;
+      }
+  
+      // se não há campos válidos para atualizar, responde 400/404
+      if (Object.keys(dadosAtualizar).length === 0) {
+        return res.status(400).json({ message: "Nada válido para atualizar." });
+      }
+  
+      const affectedRows = await atualizarPrioridade(id, dadosAtualizar);
+  
+      if (affectedRows === 0) {
+        return res.status(404).json({ message: "Prioridade não encontrada ou nada para atualizar." });
+      }
+  
+      res.status(200).json({ message: "Prioridade atualizada com sucesso." });
     } catch (err) {
-        console.error('Erro ao atualizar prioridade:', err);
-        res.status(500).json({ message: 'Erro interno ao atualizar prioridade.' });
+      console.error("Erro atualizar prioridade:", err);
+      res.status(500).json({ message: "Erro interno" });
     }
-};
-
-
-export const excluirPrioridadeController = async (req, res) => {
+  };
+  
+  
+  // Excluir
+  export const excluirPrioridadeController = async (req, res) => {
     try {
-        const { id } = req.params;
-        const affectedRows = await deleteRecord('prioridades', 'id = ?', [id]);
-
-        if (affectedRows === 0) {
-            return res.status(404).json({ message: 'Prioridade não encontrada.' });
-        }
-
-        res.status(200).json({ message: 'Prioridade excluída com sucesso.' });
-
+      const { id } = req.params;
+      const affectedRows = await excluirPrioridade(id);
+  
+      if (affectedRows === 0) {
+        return res.status(404).json({ message: "Prioridade não encontrada." });
+      }
+  
+      res.status(200).json({ message: "Prioridade excluída com sucesso." });
     } catch (err) {
-        console.error('Erro ao excluir prioridade:', err);
-        res.status(500).json({ message: 'Erro interno ao excluir prioridade.' });
+      console.error("Erro excluir prioridade:", err);
+      res.status(500).json({ message: "Erro interno" });
     }
-};
+  };
 
 //endpoint que recalcula e atualiza prazo de um chamado
 export const atualizarPrazoController = async (req, res) => {
@@ -497,8 +496,6 @@ export const atualizarPrazoController = async (req, res) => {
         res.status(500).json({ message: err.message || 'Erro interno' });
     }
 };
-
-
 
 //utilitário p calcular sem atualizar
 export const calcularDataLimiteController = async (req, res) => {
