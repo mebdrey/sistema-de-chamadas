@@ -403,35 +403,6 @@ export default function ChamadosAdmin() {
                   </div>
                 )}
               </div>
-              {/* Dropdown de Prioridade */}
-              {/* <div className="relative inline-block">
-                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="hover:cursor-pointer inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" id="dropdownPrioridadeButton">
-                  Prioridade
-                  <svg className="w-2.5 h-2.5 ms-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" /></svg>
-                </button>
-                {dropdownPrioridadeAberto && (
-                  <div id="dropdownPrioridade" className="absolute z-10 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-48">
-                    <ul className="p-3 space-y-1 text-sm text-gray-700" aria-labelledby="dropdownPrioridadeButton">
-                      {prioridades.map((prioridade, index) => (
-                        <li key={index}>
-                          <div className="flex p-2 rounded-sm hover:bg-gray-100 hover:cursor-pointer">
-                            <div className="flex items-center h-5">
-                              <input id={`prioridade-checkbox-${index}`} type="checkbox" name="prioridade" value={prioridade.value} checked={prioridadesSelecionadas.includes(prioridade.value)}
-                                onChange={(e) => {
-                                  const checked = e.target.checked;
-                                  const valor = prioridade.value;
-                                  if (checked) { setPrioridadesSelecionadas((prev) => [...prev, valor]); }
-                                  else { setPrioridadesSelecionadas((prev) => prev.filter((p) => p !== valor)); }
-                                }} className="hover:cursor-pointer w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#E6DAFF] focus:ring-2 " />
-                            </div>
-                            <div className="ms-2 text-sm"><label htmlFor={`prioridade-checkbox-${index}`} className="hover:cursor-pointer poppins-medium text-gray-900">{prioridade.label}</label></div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div> */}
             </div>
             {/* Barra de pesquisa */}
             <form className="flex items-center" onSubmit={(e) => e.preventDefault()}>{/* evita recarregar a página */}
@@ -445,18 +416,6 @@ export default function ChamadosAdmin() {
             </form>
           </div>
           <section>
-            {/* <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-700">
-              <ul className="flex flex-wrap -mb-px text-sm poppins-medium text-center">
-                {statusAbas.map((status) => {
-                  const statusId = normalizarId(status)
-                  return (
-                    <li className="me-2" role="presentation" key={status}>
-                      <button onClick={() => setAbaAtiva(statusId)} className={`inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 hover:cursor-pointer ${abaAtiva === statusId ? "active border-[#7F56D8] text-[#7F56D8]" : "border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 "}`} type="button" >{primeiraLetraMaiuscula(status)}</button>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div> */}
             {/* Desktop: mostra suas tabs originais (sem mudar nada nelas) */}
             <div className="hidden md:block">
               <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-700">
@@ -586,7 +545,7 @@ export default function ChamadosAdmin() {
               })}
             </div>
             {/* Drawer */}
-            <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen p-4 pb-8 overflow-y-auto transition-transform border-l border-gray-200 dark:border-neutral-700 bg-white w-80 dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
+            <div id="drawer-right-example" className={`fixed top-0 right-0 z-99 h-screen p-4 pb-8 overflow-y-auto transition-transform border-l border-gray-200 dark:border-gray-600 bg-white w-80 dark:bg-gray-800 ${isOpen ? "translate-x-0" : "translate-x-full"}`} tabIndex="-1" aria-labelledby="drawer-right-label" >
               <h5 id="drawer-right-label" className="inline-flex items-center mb-4 text-base poppins-semibold text-gray-500">
                 <svg className="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" /></svg>Detalhes do chamado</h5>
               <button type="button" onClick={() => setIsOpen(false)} className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center" >
