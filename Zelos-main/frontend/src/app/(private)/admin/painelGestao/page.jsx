@@ -782,7 +782,7 @@ export default function PainelGestao() {
 
           <div className="flex max-w-full dark:bg-gray-900 ">
             {/* ASIDE FIXO */}
-            <aside className="fixed top-23 left-[80px] w-64 bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-4 dark:bg-gray-800 dark:border-gray-700">
+            <aside className="hidden md:block fixed top-23 left-[80px] w-64 bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-4 dark:bg-gray-800 dark:border-gray-700">
               <h2 className="text-lg poppins-semibold mb-3 dark:text-white">Índice</h2>
               <nav className="flex flex-col gap-3 text-violet-500 dark:text-purple-500">
                 <a href="#criar-usuario" className="hover:underline">Criar Usuário</a>
@@ -791,7 +791,7 @@ export default function PainelGestao() {
               </nav>
             </aside>
 
-            <main className="flex-1 ml-[18rem] space-y-20">
+            <main className="flex-1 md:ml-[18rem] space-y-20">
               {/* Card: Usuários */}
               <section id="criar-usuario" className="scroll-mt-14 bg-white w-full rounded-2xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
                 <div className="flex items-center justify-between">
