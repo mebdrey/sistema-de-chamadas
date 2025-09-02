@@ -717,7 +717,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                   </div>
                   <div>
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
-                    {chamadoSelecionado?.imagem ? (<img src={`http://localhost:8080/${chamadoSelecionado.imagem}`} alt="Imagem do chamado" className="mb-6 rounded-lg w-full max-w-md" />) : (<p className="mb-6 text-sm poppins-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
+                    {chamadoSelecionado?.imagem ? (<img src={`http://localhost:8080/uploads/${chamadoSelecionado.imagem}`} alt="Imagem do chamado" className="mb-6 rounded-lg w-full max-w-md" />) : (<p className="mb-6 text-sm poppins-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
                   </div>
                   <div>
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Prioridade</p>

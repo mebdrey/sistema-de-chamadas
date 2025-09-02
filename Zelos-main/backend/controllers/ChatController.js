@@ -22,7 +22,7 @@ export const enviarMensagemController = async (req, res) => {
         // inicializa payload com ambos nulos e define a propriedade correta depois
         const payload = { id_chamado: idChamado, conteudo: conteudoMsg, id_tecnico: null, id_usuario: null };
 
-        if (["tecnico", "apoio_tecnico", "manutencao"].includes(func)) {
+        if (["tecnico", "apoio_tecnico", "manutencao", "externo", "auxiliar_limpeza"].includes(func)) {
             // técnico só pode enviar mensagens se for o técnico responsável do chamado (ou admin)
             if (!(Number(chamado.tecnico_id) === Number(user.id) || (user.funcao === "admin" || user.role === "admin"))) {
                 return res.status(403).json({ erro: "Você não tem permissão para enviar mensagem neste chamado" });

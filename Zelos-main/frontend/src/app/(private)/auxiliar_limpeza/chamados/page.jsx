@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import OrdenarPor from '@/components/DropDown/DropDown.jsx'
 import { useContext } from 'react';
 import { UserContext } from '@/components/ProtectedRoute/ProtectedRoute.jsx';
-
+import ToastMsg from "@/components/Toasts/Toasts";
 import ChatWidget from "@/components/ChatWidget/ChatWidget.jsx";
 
 export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'download'
@@ -27,24 +27,12 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
   const [apontamentos, setApontamentos] = useState([]);
   const [descricao, setDescricao] = useState('');
   const [apontamentoAtivo, setApontamentoAtivo] = useState(null);
-  const [toasts, setToasts] = useState([]); // { id, type: 'success'|'danger'|'warning', message }
   const { user, userId } = useContext(UserContext); // 
   const [mostrarModalConfirmacao, setMostrarModalConfirmacao] = useState(false);
+  const { UI: ToastsUI, showToast } = ToastMsg(); // pega UI e função showToast
 
   // effectiveCurrentUserId: string ou undefined
   const effectiveCurrentUserId = String(user?.id ?? userId ?? "");
-
-  // alias para showToast 
-  const showToastLocal = (type, message, timeout = 5000) => showToast(type, message, timeout);
-
-  const removeToast = (id) => { setToasts((prev) => prev.filter(t => t.id !== id)); };
-
-  const showToast = (type, message, timeout = 5000) => {
-    const id = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-    const newToast = { id, type, message };
-    setToasts((prev) => [newToast, ...prev]); // newest em cima (pode inverter)
-    if (timeout > 0) { setTimeout(() => removeToast(id), timeout); }
-  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -339,9 +327,11 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
       const data = await resp.json();
       if (!resp.ok) {
         // falha simples, mostra toast e retorna
-        showToastLocal('danger', data.erro || `Erro HTTP ${resp.status}`);
+        showToast("danger", data.erro || `Erro HTTP ${resp.status}`);
         return;
       }
+
+      showToast("success", "Chamado atribuído com sucesso.");
 
       // const atualizado = data.chamado || data || {};
 
@@ -377,7 +367,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
 
       await atualizarChamados();
     } catch (err) {
-      showToastLocal('danger', err.message || 'Erro ao carregar chamado');
+      showToast("danger", err.message || 'Erro ao carregar chamado');
     }
   };
 
@@ -394,15 +384,15 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
 
   const finalizarChamado = async () => {
     if (!chamadoSelecionado?.id) {
-      showToastLocal('danger', 'Nenhum chamado selecionado.');
+      showToast("warning", 'Nenhum chamado selecionado.');
       return;
     }
     if (chamadoSelecionado.status_chamado !== 'em andamento') {
-      showToastLocal('warning', 'Somente chamados em andamento podem ser finalizados.');
+      showToast('warning', 'Somente chamados em andamento podem ser finalizados.');
       return;
     }
     if (String(chamadoSelecionado.tecnico_id) !== String(effectiveCurrentUserId)) {
-      showToastLocal('danger', 'Você não tem permissão para finalizar este chamado.');
+      showToast('danger', 'Você não tem permissão para finalizar este chamado.');
       return;
     }
 
@@ -414,7 +404,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
       const body = await resp.json();
       if (!resp.ok) throw new Error(body.erro || 'Erro ao finalizar chamado.');
 
-      showToastLocal('success', body.mensagem || 'Chamado finalizado com sucesso.');
+      showToast('success', 'Chamado finalizado com sucesso.');
 
       // atualiza UI local para refletir conclusão imediata
       setChamadoSelecionado(prev => ({ ...prev, status_chamado: 'concluido', finalizado_em: (new Date()).toISOString() }));
@@ -423,22 +413,22 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
       await atualizarChamados();
     } catch (err) {
       console.error('finalizarChamado:', err);
-      showToastLocal('danger', err.message || 'Erro ao finalizar chamado.');
+      showToast('danger', 'Erro ao finalizar chamado.');
     }
     finally { setFinalizando(false); }
   };
 
   const baixarRelatorioPdf = async (format = 'pdf') => {
     if (!chamadoSelecionado?.id) {
-      showToastLocal('danger', 'Nenhum chamado selecionado.');
+      showToast('danger', 'Nenhum chamado selecionado.');
       return;
     }
     if (chamadoSelecionado.status_chamado !== 'concluido') {
-      showToastLocal('warning', 'Relatório disponível apenas para chamados concluídos.');
+      showToast('warning', 'Relatório disponível apenas para chamados concluídos.');
       return;
     }
     if (String(chamadoSelecionado.tecnico_id) !== String(effectiveCurrentUserId)) {
-      showToastLocal('danger', 'Você não tem permissão para gerar este relatório.');
+      showToast('danger', 'Você não tem permissão para gerar este relatório.');
       return;
     }
 
@@ -447,7 +437,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
       setBaixando(true);
       if (downloadMode === 'open') {
         window.open(url, '_blank');
-        showToastLocal('success', 'Relatório aberto em nova aba.');
+        showToast('success', 'Relatório aberto em nova aba.');
       } else {
         const resp = await fetch(url, { method: 'GET', credentials: 'include' });
         if (!resp.ok) {
@@ -468,11 +458,11 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
         link.click();
         link.remove();
         URL.revokeObjectURL(href);
-        showToastLocal('success', 'Download iniciado.');
+        showToast('success', 'Download iniciado.');
       }
     } catch (err) {
       console.error('baixarRelatorioPdf:', err);
-      showToastLocal('danger', err.message || 'Erro ao gerar/baixar relatório.');
+      showToast('danger', 'Erro ao gerar/baixar relatório.');
     }
     finally { setBaixando(false); }
   };
@@ -541,6 +531,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
 
   return ( //PÁGINA
     <>{/* conteudo da pagina */}
+      {ToastsUI}
       <div className="p-4 h-screen w-full ">
         <div className="p-4 mt-14">
           <div className='flex flex-row w-full justify-between mb-15'>
@@ -726,7 +717,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                   </div>
                   <div>
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
-                    {chamadoSelecionado?.imagem ? (<img src={`http://localhost:8080/${chamadoSelecionado.imagem}`} alt="Imagem do chamado" className="mb-6 rounded-lg w-full max-w-md" />) : (<p className="mb-6 text-sm poppins-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
+                    {chamadoSelecionado?.imagem ? (<img src={`http://localhost:8080/uploads/${chamadoSelecionado.imagem}`} alt="Imagem do chamado" className="mb-6 rounded-lg w-full max-w-md" />) : (<p className="mb-6 text-sm poppins-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
                   </div>
                   <div>
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Prioridade</p>
@@ -909,31 +900,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
           )}
         </div>
       </div >
-      {/* TOASTS: canto inferior direito */}
-      <div className="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-[60]">
-        {toasts.map(({ id, type, message }) => (
-          <div key={id} className={`flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800 border ${type === 'success' ? 'border-green-100' : type === 'danger' ? 'border-red-100' : 'border-orange-100'}`} role="alert">
-            <div className={`inline-flex items-center justify-center shrink-0 w-8 h-8 rounded-lg ${type === 'success' ? 'text-green-500 bg-green-100 dark:bg-green-800 dark:text-green-200' : type === 'danger' ? 'text-red-500 bg-red-100 dark:bg-red-800 dark:text-red-200' : 'text-orange-500 bg-orange-100 dark:bg-orange-700 dark:text-orange-200'}`} >
-              {type === 'success' && (
-                <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" /></svg>
-              )}
-              {type === 'danger' && (
-                <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z" /></svg>
-              )}
-              {type === 'warning' && (
-                <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z" /></svg>
-              )}
-            </div>
-            <div className="ms-3 text-sm font-normal max-w-xs break-words">{message}</div>
-            <button type="button" onClick={() => removeToast(id)} className="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" aria-label="Close">
-              <span className="sr-only">Close</span>
-              <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-              </svg>
-            </button>
-          </div>
-        ))}
-      </div>
+     
     </>
   )
 }
