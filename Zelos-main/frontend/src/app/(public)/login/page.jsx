@@ -159,7 +159,7 @@ export default function Login() {
             {/* inputs de email e senha */}
             <form onSubmit={login}>
               <div className="relative z-0 w-full mb-5 group">
-                <input type="nuber" name="floating_num" id="floating_num" className="block py-2.5 px-0 w-full text-sm text-gray-900 dark:text-gray-100 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:focus:border-[#7F56D8] focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer poppins-regular my-9" placeholder=" " required />
+                <input type="nuber" name="floating_num" id="floating_num" className="block py-2.5 px-0 w-full text-sm text-gray-900 dark:text-gray-100 bg-transparent border-0 border-b-2 border-gray-300 dark:border-gray-700 appearance-none dark:focus:border-[#7F56D8] focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer poppins-regular my-9" placeholder=" " required />
                 <label htmlFor="floating_num" className="peer-focus:poppins-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-8 scale-75 top-2.5 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-[#7F56D8] peer-focus:dark:text-[#7F56D8] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 poppins-regular">Username</label>
               </div>
 
@@ -172,7 +172,7 @@ export default function Login() {
                   onFocus={() => setShowEye(true)}     // mostra o olho ao focar
                   onBlur={() => { if (!password) setShowEye(false); }} // esconde se perder foco sem nada digitado
                   onChange={(e) => setPassword(e.target.value)} // controla valor
-                  className="block py-2.5 px-0 pr-10 w-full text-sm text-gray-900 dark:text-gray-100 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer poppins-regular my-9"
+                  className="block py-2.5 px-0 pr-10 w-full text-sm text-gray-900 dark:text-gray-100 bg-transparent border-0 border-b-2 border-gray-300 dark:border-gray-700 appearance-none focus:outline-none focus:ring-0 focus:border-[#7F56D8] peer poppins-regular my-9"
                   placeholder=" "
                   required
                 />

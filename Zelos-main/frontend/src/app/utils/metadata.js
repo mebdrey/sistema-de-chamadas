@@ -41,6 +41,7 @@ export function getMetadataFromPath(path) {
         title: 'Zelos - Meu Perfil',
         description: 'Painel técnico',
       };
+      
     default:
       return {
         title: 'Zelos',
