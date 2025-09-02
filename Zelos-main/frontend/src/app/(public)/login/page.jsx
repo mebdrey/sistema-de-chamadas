@@ -152,7 +152,7 @@ export default function Login() {
       </nav>
 
       {/* conteudo principal da pag de login */}
-      <section className="flex flex-row w-full h-full principal-container">
+      <section className="flex flex-row !w-full h-full principal-container dark:bg-gray-800">
         <section className="w-1/2 h-full justify-items-center content-center form-login bg-white dark:bg-gray-800">
           <div className='flex flex-col w-md form-login-container'>
             <h1 className="poppins-bold text-[3rem] text-[#2E2C34] dark:text-white mb-4">Entrar</h1>

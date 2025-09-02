@@ -534,7 +534,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
       {ToastsUI}
       <div className="p-4 h-screen w-full ">
         <div className="p-4 mt-14">
-          <div className='flex flex-row w-full justify-between mb-15'>
+          <div className='flex flex-row flex-wrap w-full justify-between mb-15 gap-5'>
             <div className="w-fit flex flex-row ">
 
               {/* select */}
