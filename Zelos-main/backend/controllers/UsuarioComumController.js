@@ -95,45 +95,92 @@ export const listarTiposServicoController = async (req, res) => {
 };
 
 // Controller para criar avaliação
+// export const criarAvaliacaoController = async (req, res) => {
+//     try {
+//         const { chamado_id, tecnico_id, nota, comentario } = req.body;
+//         const usuario_id = req.user?.id || null;
+
+//         // validações básicas
+//         if (!nota || nota < 1 || nota > 5) {
+//             return res.status(400).json({ message: "Nota deve ser entre 1 e 5" });
+//         }
+
+//         if (!tecnico_id || !chamado_id) {
+//             return res.status(400).json({ message: "chamado_id e tecnico_id são obrigatórios" });
+//         }
+
+//         if (!usuario_id) {
+//             return res.status(401).json({ message: "Usuário não autenticado" });
+//         }
+
+//         // verifica se já existe avaliação
+//         const jaExiste = await existeAvaliacao(usuario_id, tecnico_id, chamado_id);
+//         if (jaExiste) {
+//             return res.status(409).json({ message: "Você já avaliou este chamado" });
+//         }
+
+//         // cria avaliação
+//         const id = await criarAvaliacao({
+//             usuario_id,
+//             tecnico_id,
+//             nota,
+//             comentario: comentario || null,
+//         });
+
+//         res.status(201).json({ id, usuario_id, tecnico_id, nota, comentario });
+
+//     } catch (err) {
+//         console.error("Erro ao criar avaliação:", err);
+//         res.status(500).json({ message: "Erro interno" });
+//     }
+// };
+
+// Controller - criarAvaliacaoController
 export const criarAvaliacaoController = async (req, res) => {
     try {
-        const { chamado_id, tecnico_id, nota, comentario } = req.body;
-        const usuario_id = req.user?.id || null;
-
-        // validações básicas
-        if (!nota || nota < 1 || nota > 5) {
-            return res.status(400).json({ message: "Nota deve ser entre 1 e 5" });
-        }
-
-        if (!tecnico_id || !chamado_id) {
-            return res.status(400).json({ message: "chamado_id e tecnico_id são obrigatórios" });
-        }
-
-        if (!usuario_id) {
-            return res.status(401).json({ message: "Usuário não autenticado" });
-        }
-
-        // verifica se já existe avaliação
-        const jaExiste = await existeAvaliacao(usuario_id, tecnico_id, chamado_id);
-        if (jaExiste) {
-            return res.status(409).json({ message: "Você já avaliou este chamado" });
-        }
-
-        // cria avaliação
-        const id = await criarAvaliacao({
-            usuario_id,
-            tecnico_id,
-            nota,
-            comentario: comentario || null,
-        });
-
-        res.status(201).json({ id, usuario_id, tecnico_id, nota, comentario });
-
+      const { chamado_id, tecnico_id, nota, comentario } = req.body;
+      const usuario_id = req.user?.id || null;
+  
+      // validações básicas
+      if (!nota || nota < 1 || nota > 5) {
+        return res.status(400).json({ message: "Nota deve ser entre 1 e 5" });
+      }
+  
+      if (!tecnico_id || !chamado_id) {
+        return res.status(400).json({ message: "chamado_id e tecnico_id são obrigatórios" });
+      }
+  
+      if (!usuario_id) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+  
+      // Opcional: validar que o chamado existe e pertence ao técnico (recomendado)
+      // const chamado = await read('chamados', `id = ${Number(chamado_id)}`);
+      // if (!chamado) return res.status(404).json({ message: 'Chamado não encontrado' });
+      // if (Number(chamado.tecnico_id) !== Number(tecnico_id)) return res.status(400).json({ message: 'Técnico informado não corresponde ao chamado' });
+  
+      // verifica se já existe avaliação
+      const jaExiste = await existeAvaliacao(usuario_id, tecnico_id, chamado_id);
+      if (jaExiste) {
+        return res.status(409).json({ message: "Você já avaliou este chamado" });
+      }
+  
+      // cria avaliação — **inclui chamado_id**
+      const id = await criarAvaliacao({
+        usuario_id,
+        chamado_id: Number(chamado_id),
+        tecnico_id: Number(tecnico_id),
+        nota: Number(nota),
+        comentario: comentario || null,
+      });
+  
+      res.status(201).json({ id, usuario_id, chamado_id, tecnico_id, nota, comentario });
+  
     } catch (err) {
-        console.error("Erro ao criar avaliação:", err);
-        res.status(500).json({ message: "Erro interno" });
+      console.error("Erro ao criar avaliação:", err);
+      res.status(500).json({ message: "Erro interno" });
     }
-};
+  };
 
 // Controller para verificar se já existe avaliação (GET)
 export const existeAvaliacaoController = async (req, res) => {

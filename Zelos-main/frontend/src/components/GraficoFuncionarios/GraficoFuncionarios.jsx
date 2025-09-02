@@ -17,6 +17,7 @@ export default function LeadsCard({
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
   const [tiposServico, setTiposServico] = useState([]); // guarda o tipo de serviço que o usuario seleciona 
+  const [dropdownRelatorioOpen, setDropdownRelatorioOpen] = useState(false);
 
   const getBaseUrl = () => {
     const env = process.env.NEXT_PUBLIC_API_URL;
@@ -247,7 +248,7 @@ function formatarLabel(str) {
   }, []);
 
   return (
-    <div className=" w-2000 bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
+    <div className=" w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
       <div className="flex justify-between items-start pb-4 mb-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-start">
           <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center me-3">
@@ -279,15 +280,34 @@ function formatarLabel(str) {
         {!loading && apiData && apiData.categorias && apiData.categorias.length === 0 && (
           <div className="text-sm text-gray-500 mb-2 dark:text-gray-200">Nenhum funcionário com chamados nessa pool (no ano selecionado).</div>
         )}
-        <div id="column-chart" ref={chartRef} />
+        <div id="column-chart" ref={chartRef}  height="100%" />
       </div>
 
-      <div className="flex justify-between items-center ">
-        <div>
-          <button onClick={gerarCSV} className="text-sm px-3 py-2 rounded-md bg-[#7F56D8] text-white hover:cursor-pointer">Exportar CSV</button>
-          <button onClick={gerarPDF} className="ms-2 text-sm px-3 py-2 rounded-md border dark:border dark:border-white dark:text-white hover:cursor-pointer">Exportar PDF</button>
-        </div>
-      </div>
+    <div className="relative">
+            <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-violet-500 hover:bg-[#E6DAFF] px-3 py-2 hover:cursor-pointer dark:hover:bg-gray-700" onClick={() => setDropdownRelatorioOpen(prev => !prev)}>Gerar relatório
+              <svg className="w-3.5 h-3.5 text-violet-500 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+                <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" />
+                <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
+              </svg>
+            </button>
+
+            {/* Mostrar o dropdown só quando aberto */}
+            {dropdownRelatorioOpen && (
+              <div className="absolute z-10 mt-2 bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm w-40 dark:bg-gray-800">
+                <ul className="py-2 text-sm text-gray-700 dark:text-gray-400">
+                  <li>
+                    <button onClick={() => { gerarCSV(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700" >Exportar CSV
+                    </button>
+                  </li>
+                  <li>
+                    <button onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700">Exportar PDF
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+
     </div>
   );
 }

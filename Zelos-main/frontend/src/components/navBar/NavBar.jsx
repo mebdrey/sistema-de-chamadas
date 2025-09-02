@@ -27,7 +27,7 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                 </svg>)
             },
             {
-                label: 'Painel de Gestão', href: '/admin/painelGestao', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-[#7F56D8]" fill="currentColor" aria-hidden="true" viewBox="0 0 640 640"><path d="M259.1 73.5C262.1 58.7 275.2 48 290.4 48L350.2 48C365.4 48 378.5 58.7 381.5 73.5L396 143.5C410.1 149.5 423.3 157.2 435.3 166.3L503.1 143.8C517.5 139 533.3 145 540.9 158.2L570.8 210C578.4 223.2 575.7 239.8 564.3 249.9L511 297.3C511.9 304.7 512.3 312.3 512.3 320C512.3 327.7 511.8 335.3 511 342.7L564.4 390.2C575.8 400.3 578.4 417 570.9 430.1L541 481.9C533.4 495 517.6 501.1 503.2 496.3L435.4 473.8C423.3 482.9 410.1 490.5 396.1 496.6L381.7 566.5C378.6 581.4 365.5 592 350.4 592L290.6 592C275.4 592 262.3 581.3 259.3 566.5L244.9 496.6C230.8 490.6 217.7 482.9 205.6 473.8L137.5 496.3C123.1 501.1 107.3 495.1 99.7 481.9L69.8 430.1C62.2 416.9 64.9 400.3 76.3 390.2L129.7 342.7C128.8 335.3 128.4 327.7 128.4 320C128.4 312.3 128.9 304.7 129.7 297.3L76.3 249.8C64.9 239.7 62.3 223 69.8 209.9L99.7 158.1C107.3 144.9 123.1 138.9 137.5 143.7L205.3 166.2C217.4 157.1 230.6 149.5 244.6 143.4L259.1 73.5zM320.3 400C364.5 399.8 400.2 363.9 400 319.7C399.8 275.5 363.9 239.8 319.7 240C275.5 240.2 239.8 276.1 240 320.3C240.2 364.5 276.1 400.2 320.3 400z" /></svg>
+                label: 'Painel de Gestão', href: '/admin/painelGestao', icon: (<svg xmlns="http://www.w3.org/2000/svg" className="shrink-0 w-5 h-5 text-gray-500 transition-colors duration-200 group-hover:text-[#7F56D8]" fill="currentColor" aria-hidden="true" viewBox="0 0 640 640"><path d="M259.1 73.5C262.1 58.7 275.2 48 290.4 48L350.2 48C365.4 48 378.5 58.7 381.5 73.5L396 143.5C410.1 149.5 423.3 157.2 435.3 166.3L503.1 143.8C517.5 139 533.3 145 540.9 158.2L570.8 210C578.4 223.2 575.7 239.8 564.3 249.9L511 297.3C511.9 304.7 512.3 312.3 512.3 320C512.3 327.7 511.8 335.3 511 342.7L564.4 390.2C575.8 400.3 578.4 417 570.9 430.1L541 481.9C533.4 495 517.6 501.1 503.2 496.3L435.4 473.8C423.3 482.9 410.1 490.5 396.1 496.6L381.7 566.5C378.6 581.4 365.5 592 350.4 592L290.6 592C275.4 592 262.3 581.3 259.3 566.5L244.9 496.6C230.8 490.6 217.7 482.9 205.6 473.8L137.5 496.3C123.1 501.1 107.3 495.1 99.7 481.9L69.8 430.1C62.2 416.9 64.9 400.3 76.3 390.2L129.7 342.7C128.8 335.3 128.4 327.7 128.4 320C128.4 312.3 128.9 304.7 129.7 297.3L76.3 249.8C64.9 239.7 62.3 223 69.8 209.9L99.7 158.1C107.3 144.9 123.1 138.9 137.5 143.7L205.3 166.2C217.4 157.1 230.6 149.5 244.6 143.4L259.1 73.5zM320.3 400C364.5 399.8 400.2 363.9 400 319.7C399.8 275.5 363.9 239.8 319.7 240C275.5 240.2 239.8 276.1 240 320.3C240.2 364.5 276.1 400.2 320.3 400z" /></svg>
                 )
             }
         ];
@@ -264,30 +264,15 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                                     </g>
                                 </svg>
 
-
-                                {/* <img src="https://flowbite.com/docs/images/logo.svg" className="h-8 me-3" alt="FlowBite Logo" />
-                                <span className="self-center text-xl poppins-semibold sm:text-2xl whitespace-nowrap dark:text-white">Flowbite</span> */}
                             </a>
                         </div>
 
                         <div className='flex flex-row gap-10'>
-                            {/* notificacoes */}
-                            {/* <button id="dropdown-notification-button" onClick={() => setDropdownNotificationOpen(!dropdownNotificationOpen)} className="relative inline-flex items-center text-sm poppins-medium text-center text-gray-500 hover:text-gray-900 focus:outline-none dark:hover:text-white dark:text-gray-400" type="button">
-                                <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 14 20">
-                                    <path d="M12.133 10.632v-1.8A5.406 5.406 0 0 0 7.979 3.57.946.946 0 0 0 8 3.464V1.1a1 1 0 0 0-2 0v2.364a.946.946 0 0 0 .021.106 5.406 5.406 0 0 0-4.154 5.262v1.8C1.867 13.018 0 13.614 0 14.807 0 15.4 0 16 .538 16h12.924C14 16 14 15.4 14 14.807c0-1.193-1.867-1.789-1.867-4.175ZM3.823 17a3.453 3.453 0 0 0 6.354 0H3.823Z" />
-                                </svg>
-                                <div className="absolute block w-3 h-3 bg-red-500 border-2 border-white rounded-full -top-0.5 start-2.5 dark:border-gray-900"></div>
-                            </button> */}
-
                             {/* Botão do sino */}
                             <button id="dropdown-notification-button" onClick={() => setDropdownNotificationOpen(v => !v)} className="relative inline-flex items-center text-sm poppins-medium text-center text-gray-500 hover:text-gray-900 focus:outline-none dark:hover:text-white dark:text-gray-400" type="button">
                                 <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 14 20">
                                     <path d="M12.133 10.632v-1.8A5.406 5.406 0 0 0 7.979 3.57.946.946 0 0 0 8 3.464V1.1a1 1 0 0 0-2 0v2.364a.946.946 0 0 0 .021.106 5.406 5.406 0 0 0-4.154 5.262v1.8C1.867 13.018 0 13.614 0 14.807 0 15.4 0 16 .538 16h12.924C14 16 14 15.4 14 14.807c0-1.193-1.867-1.789-1.867-4.175ZM3.823 17a3.453 3.453 0 0 0 6.354 0H3.823Z" />
                                 </svg>
-                                {/* Pontinho vermelho se tiver notificações não lidas */}
-                                {/* {notificacoes.some(n => !n.lida) && (
-                                    <div className="absolute block w-3 h-3 bg-red-500 border-2 border-white rounded-full -top-0.5 start-2.5"></div>
-                                )} */}
                                 {unvisualizedCount > 0 && (
                                     <span title={`${unvisualizedCount} nova(s)`} className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-600 rounded-full">
                                         {unvisualizedCount > 9 ? '9+' : unvisualizedCount}
@@ -298,79 +283,6 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                             {dropdownNotificationOpen && (
                                 <div id="dropdownNotification" className="absolute right-0 mt-2 top-12 z-20 w-full max-w-sm bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-800 dark:divide-gray-700" aria-labelledby="dropdownNotificationButton">
                                     <div className="block px-4 py-2 poppins-medium text-center text-gray-700 rounded-t-lg bg-gray-50 dark:bg-gray-800 dark:text-white">Notificações</div>
-                                    {/* <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                                            <a href="#" className="flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                <div className="shrink-0">
-                                                    <img className="rounded-full w-11 h-11" src="/docs/images/people/profile-picture-1.jpg" alt="Jese image" />
-                                                    <div className="absolute flex items-center justify-center w-5 h-5 ms-6 -mt-5 bg-blue-600 border border-white rounded-full dark:border-gray-800">
-                                                        <svg className="w-2 h-2 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-                                                            <path d="M1 18h16a1 1 0 0 0 1-1v-6h-4.439a.99.99 0 0 0-.908.6 3.978 3.978 0 0 1-7.306 0 .99.99 0 0 0-.908-.6H0v6a1 1 0 0 0 1 1Z" />
-                                                            <path d="M4.439 9a2.99 2.99 0 0 1 2.742 1.8 1.977 1.977 0 0 0 3.638 0A2.99 2.99 0 0 1 13.561 9H17.8L15.977.783A1 1 0 0 0 15 0H3a1 1 0 0 0-.977.783L.2 9h4.239Z" />
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                                <div className="w-full ps-3">
-                                                    <div className="text-gray-500 text-sm mb-1.5 dark:text-gray-400">New message from <span className="poppins-semibold text-gray-900 dark:text-white">Jese Leos</span>: "Hey, what's up? All set htmlFor the presentation?"</div>
-                                                    <div className="text-xs text-blue-600 dark:text-blue-500">a few moments ago</div>
-                                                </div>
-                                            </a>
-                                            <a href="#" className="flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                <div className="shrink-0">
-                                                    <img className="rounded-full w-11 h-11" src="/docs/images/people/profile-picture-2.jpg" alt="Joseph image" />
-                                                    <div className="absolute flex items-center justify-center w-5 h-5 ms-6 -mt-5 bg-gray-900 border border-white rounded-full dark:border-gray-800">
-                                                        <svg className="w-2 h-2 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-                                                            <path d="M6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Zm11-3h-2V5a1 1 0 0 0-2 0v2h-2a1 1 0 1 0 0 2h2v2a1 1 0 0 0 2 0V9h2a1 1 0 1 0 0-2Z" />
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                                <div className="w-full ps-3">
-                                                    <div className="text-gray-500 text-sm mb-1.5 dark:text-gray-400"><span className="poppins-semibold text-gray-900 dark:text-white">Joseph Mcfall</span> and <span className="poppins-medium text-gray-900 dark:text-white">5 others</span> started following you.</div>
-                                                    <div className="text-xs text-blue-600 dark:text-blue-500">10 minutes ago</div>
-                                                </div>
-                                            </a>
-                                            <a href="#" className="flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                <div className="shrink-0">
-                                                    <img className="rounded-full w-11 h-11" src="/docs/images/people/profile-picture-3.jpg" alt="Bonnie image" />
-                                                    <div className="absolute flex items-center justify-center w-5 h-5 ms-6 -mt-5 bg-red-600 border border-white rounded-full dark:border-gray-800">
-                                                        <svg className="w-2 h-2 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-                                                            <path d="M17.947 2.053a5.209 5.209 0 0 0-3.793-1.53A6.414 6.414 0 0 0 10 2.311 6.482 6.482 0 0 0 5.824.5a5.2 5.2 0 0 0-3.8 1.521c-1.915 1.916-2.315 5.392.625 8.333l7 7a.5.5 0 0 0 .708 0l7-7a6.6 6.6 0 0 0 2.123-4.508 5.179 5.179 0 0 0-1.533-3.793Z" />
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                                <div className="w-full ps-3">
-                                                    <div className="text-gray-500 text-sm mb-1.5 dark:text-gray-400"><span className="poppins-semibold text-gray-900 dark:text-white">Bonnie Green</span> and <span className="poppins-medium text-gray-900 dark:text-white">141 others</span> love your story. See it and view more stories.</div>
-                                                    <div className="text-xs text-blue-600 dark:text-blue-500">44 minutes ago</div>
-                                                </div>
-                                            </a>
-                                            <a href="#" className="flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                <div className="shrink-0">
-                                                    <img className="rounded-full w-11 h-11" src="/docs/images/people/profile-picture-4.jpg" alt="Leslie image" />
-                                                    <div className="absolute flex items-center justify-center w-5 h-5 ms-6 -mt-5 bg-green-400 border border-white rounded-full dark:border-gray-800">
-                                                        <svg className="w-2 h-2 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-                                                            <path d="M18 0H2a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2v4a1 1 0 0 0 1.707.707L10.414 13H18a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5 4h2a1 1 0 1 1 0 2h-2a1 1 0 1 1 0-2ZM5 4h5a1 1 0 1 1 0 2H5a1 1 0 0 1 0-2Zm2 5H5a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2Zm9 0h-6a1 1 0 0 1 0-2h6a1 1 0 1 1 0 2Z" />
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                                <div className="w-full ps-3">
-                                                    <div className="text-gray-500 text-sm mb-1.5 dark:text-gray-400"><span className="poppins-semibold text-gray-900 dark:text-white">Leslie Livingston</span> mentioned you in a comment: <span className="poppins-medium text-blue-500" href="#">@bonnie.green</span> what do you say?</div>
-                                                    <div className="text-xs text-blue-600 dark:text-blue-500">1 hour ago</div>
-                                                </div>
-                                            </a>
-                                            <a href="#" className="flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                <div className="shrink-0">
-                                                    <img className="rounded-full w-11 h-11" src="/docs/images/people/profile-picture-5.jpg" alt="Robert image" />
-                                                    <div className="absolute flex items-center justify-center w-5 h-5 ms-6 -mt-5 bg-purple-500 border border-white rounded-full dark:border-gray-800">
-                                                        <svg className="w-2 h-2 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 14">
-                                                            <path d="M11 0H2a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm8.585 1.189a.994.994 0 0 0-.9-.138l-2.965.983a1 1 0 0 0-.685.949v8a1 1 0 0 0 .675.946l2.965 1.02a1.013 1.013 0 0 0 1.032-.242A1 1 0 0 0 20 12V2a1 1 0 0 0-.415-.811Z" />
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                                <div className="w-full ps-3">
-                                                    <div className="text-gray-500 text-sm mb-1.5 dark:text-gray-400"><span className="poppins-semibold text-gray-900 dark:text-white">Robert Brown</span> posted a new video: Glassmorphism - learn how to implement the new design trend.</div>
-                                                    <div className="text-xs text-blue-600 dark:text-blue-500">3 hours ago</div>
-                                                </div>
-                                            </a>
-                                        </div> */}
                                     <div className="divide-y divide-gray-100 dark:divide-gray-700 max-h-80 overflow-y-auto">
                                         {notificacoes.length > 0 ? (
                                             notificacoes.map((n) => (
@@ -422,7 +334,7 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                                     <div>
                                         <button type="button" id="dropdown-user-button" aria-expanded={dropdownUserOpen} onClick={() => setDropdownUserOpen(!dropdownUserOpen)} className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 ">
                                             <span className="sr-only">Open user menu</span>
-                                            <div className="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full">
+                                            <div className="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-700">
                                                 {user?.ftPerfil ? (
                                                     <img className="object-cover w-full h-full" src={`http://localhost:8080/${user.ftPerfil}`} alt="Foto de perfil" />
                                                 ) : (
@@ -461,7 +373,7 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                             </div>
 
                             {/* Botão hamburger – aparece só em telas < md */}
-                            <button id="mobile-menu-button" onClick={() => setIsMenuOpen(!isMenuOpen)} className="inline-flex items-center justify-center p-2 text-sm text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 md:hidden">
+                            <button id="mobile-menu-button" onClick={() => setIsMenuOpen(!isMenuOpen)} className="inline-flex items-center justify-center p-2 text-sm text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 md:hidden dark:bg-gray-800 dark:hover:bg-gray-700">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                                 </svg>
@@ -474,9 +386,9 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                         <ul className="space-y-2 poppins-medium">
                             {links.map((link) => (
                                 <li key={link.href}>
-                                    <a href={link.href} className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-[#E6DAFF] group">
+                                    <a href={link.href} className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-[#E6DAFF] dark:hover:bg-gray-700 group">
                                         {link.icon}
-                                        <span className="ml-3 transition-all duration-200 group-hover:text-[#7F56D8]">{link.label}</span>
+                                        <span className="ml-3 transition-all duration-200 group-hover:text-[#7F56D8] dark:text-gray-500 ">{link.label}</span>
                                     </a>
 
                                 </li>
@@ -504,11 +416,17 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                     <ul className="space-y-2 poppins-medium">
                         {links.map((link) => (
                             <li key={link.href}>
-                                <a href={link.href} className="flex items-center justify-center p-2 text-gray-900 rounded-lg hover:bg-[#E6DAFF] group">
+                                <a href={link.href} className="flex items-center p-2 text-gray-900 rounded-lg group hover:bg-[#E6DAFF] dark:hover:bg-gray-700 h-fit">
+                                    {/* <a href={link.href} className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-[#E6DAFF] group"> */}
                                     {link.icon}
-                                    <span className={"ml-3 transition-all duration-200 group-hover:text-[#7F56D8]" + (navFechada ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto")}>
+                                    {/* <span className={"ml-3 transition-all duration-200 group-hover:text-[#7F56D8] dark:text-gray-500 " + (navFechada ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto")}>
                                         {link.label}
-                                    </span>
+                                    </span> */}
+                                    {!navFechada && (
+                                        <span className="ml-3 whitespace-nowrap transition-colors duration-200 group-hover:text-[#7F56D8] dark:text-gray-500 ">
+                                            {link.label}
+                                        </span>
+                                    )}
                                 </a>
                             </li>
                         ))}

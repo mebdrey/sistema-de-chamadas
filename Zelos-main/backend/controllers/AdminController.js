@@ -1,6 +1,7 @@
 
-import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool, buscarUsuarioPorEmail, listarPrioridades, buscarPrioridadePorNome, atualizarPrioridade, excluirPrioridade, verAdmins } from '../models/Admin.js'
+import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool, buscarUsuarioPorEmail, listarPrioridades, buscarPrioridadePorNome, atualizarPrioridade, excluirPrioridade, verAdmins, calcularSlaCumprido } from '../models/Admin.js'
 import { criarNotificacao } from '../models/Notificacoes.js';
+import {getChamadoById} from '../models/Chamado.js'
 import { readAll, readQuery, update, deleteRecord } from '../config/database.js'; // Importar deleteRecord
 
 // usado para o adm -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -542,3 +543,24 @@ export async function contarChamadosPorPoolController(req, res) {
         return res.status(500).json({ erro: 'Erro interno ao montar relatório por pool.' });
     }
 }
+
+
+// export const slaCumpridoController = async (req, res) => {
+//     try {
+//       const dados = await calcularSlaCumprido();
+//       res.status(200).json(dados);
+//     } catch (err) {
+//       console.error("Erro controller SLA:", err);
+//       res.status(500).json({ erro: "Erro interno ao calcular SLA" });
+//     }
+//   };
+
+export const slaCumpridoController = async (req, res) => {
+    try {
+      const dados = await calcularSlaCumprido();
+      res.status(200).json(dados);
+    } catch (err) {
+      console.error("Erro controller SLA:", err);
+      res.status(500).json({ erro: "Erro interno ao calcular SLA" });
+    }
+  };

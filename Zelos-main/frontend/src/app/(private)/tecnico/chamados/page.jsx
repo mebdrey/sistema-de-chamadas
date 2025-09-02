@@ -168,27 +168,86 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
     return () => clearInterval(interval);
   }, [chamadoSelecionado]);
 
+  // helper: retorna horas limite a partir do id da prioridade (procura em tiposPrioridade)
+  function getHorasLimiteFromPrioridadeId(prioridade_id) {
+    if (!prioridade_id) return null;
+    const p = tiposPrioridade.find(pr => Number(pr.id) === Number(prioridade_id));
+    if (p && (p.horas_limite != null)) return Number(p.horas_limite);
+    return null;
+  }
 
+  // calcula data_limite ISO a partir de criado_em (ISO) + horas (int)
+  // retorna string ISO (toISOString) ou null
+  function computeDataLimiteFromCriadoISO(criadoEmISO, horasLimite) {
+    if (!criadoEmISO) return null;
+    const horas = Number(horasLimite) || 0;
+    // cria objeto Date seguro
+    const d = new Date(criadoEmISO);
+    if (isNaN(d.getTime())) return null;
+    return new Date(d.getTime() + horas * 60 * 60 * 1000).toISOString();
+  }
+
+  // const atualizarChamados = async () => {
+  //   try {
+  //     const fetchChamados = async (status) => {
+  //       const res = await fetch(`http://localhost:8080/chamados-funcionario?status=${status}`, { credentials: 'include' });
+
+  //       if (!res.ok) {
+  //         console.error(`Erro ao buscar chamados com status "${status}":`, res.status);
+  //         return []; // Retorna array vazio se der erro
+  //       }
+
+  //       const data = await res.json();
+  //       return Array.isArray(data) ? data : [];
+  //     };
+
+  //     if (abaAtiva === 'todos') {
+  //       const [pendente, andamento, concluido] = await Promise.all([fetchChamados('pendente'), fetchChamados('em-andamento'), fetchChamados('concluido')]);
+  //       setChamados([...pendente, ...andamento, ...concluido]);
+  //     } else {
+  //       const data = await fetchChamados(abaAtiva.replace('-', ' '));
+  //       setChamados(data);
+  //     }
+  //   } catch (err) {
+  //     console.error('Erro ao carregar chamados:', err);
+  //     setChamados([]);
+  //   }
+  // };
   const atualizarChamados = async () => {
     try {
-      const fetchChamados = async (status) => {
+      const fetchChamadosPorStatus = async (status) => {
         const res = await fetch(`http://localhost:8080/chamados-funcionario?status=${status}`, { credentials: 'include' });
-
         if (!res.ok) {
           console.error(`Erro ao buscar chamados com status "${status}":`, res.status);
-          return []; // Retorna array vazio se der erro
+          return [];
         }
-
         const data = await res.json();
         return Array.isArray(data) ? data : [];
       };
 
+      // função que adiciona data_limite_calculada baseada em prioridade localmente
+      const enrichWithCalculatedDeadline = (lista) => {
+        return lista.map(item => {
+          // se já tiver data_limite do backend, mantemos
+          if (item.data_limite) return item;
+          const horas = getHorasLimiteFromPrioridadeId(item.prioridade_id);
+          const calc = computeDataLimiteFromCriadoISO(item.criado_em, horas);
+          return { ...item, data_limite_calculada: calc || null };
+        });
+      };
+
       if (abaAtiva === 'todos') {
-        const [pendente, andamento, concluido] = await Promise.all([fetchChamados('pendente'), fetchChamados('em-andamento'), fetchChamados('concluido')]);
-        setChamados([...pendente, ...andamento, ...concluido]);
+        const [pendente, andamento, concluido] = await Promise.all([
+          fetchChamadosPorStatus('pendente'),
+          fetchChamadosPorStatus('em-andamento'),
+          fetchChamadosPorStatus('concluido'),
+        ]);
+        const unidos = [...pendente, ...andamento, ...concluido];
+        setChamados(enrichWithCalculatedDeadline(unidos));
       } else {
-        const data = await fetchChamados(abaAtiva.replace('-', ' '));
-        setChamados(data);
+        const statusParam = abaAtiva.replace('-', ' ');
+        const data = await fetchChamadosPorStatus(statusParam);
+        setChamados(enrichWithCalculatedDeadline(data));
       }
     } catch (err) {
       console.error('Erro ao carregar chamados:', err);
@@ -247,25 +306,79 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
     return mapa;
   }, [tiposServico]);
 
+  // const pegarChamado = async (chamadoId) => {
+  //   try {
+  //     const response = await fetch('http://localhost:8080/pegar-chamado', {
+  //       method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chamado_id: chamadoId }),
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) { throw new Error(data.erro || 'Erro ao pegar chamado'); }
+
+  //     // data.chamado contém o chamado atualizado com data_limite
+  //     const atualizado = data.chamado || data;
+  //     // atualiza a seleção para abrir drawer com prazo
+  //     setChamadoSelecionado(atualizado);
+  //     showToast('success', data.mensagem || 'Chamado pego com sucesso');
+
+  //     // atualiza listas (mantém comportamento atual)
+  //     await atualizarChamados();
+  //   } catch (err) { showToast('danger', err.message || 'Erro desconhecido'); }
+  // };
+
   const pegarChamado = async (chamadoId) => {
     try {
-      const response = await fetch('http://localhost:8080/pegar-chamado', {
-        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chamado_id: chamadoId }),
+      const resp = await fetch('http://localhost:8080/pegar-chamado', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chamado_id: chamadoId }),
       });
 
-      const data = await response.json();
+      const data = await resp.json();
+      if (!resp.ok) {
+        // falha simples, mostra toast e retorna
+        showToastLocal('danger', data.erro || `Erro HTTP ${resp.status}`);
+        return;
+      }
 
-      if (!response.ok) { throw new Error(data.erro || 'Erro ao pegar chamado'); }
+      // const atualizado = data.chamado || data || {};
 
-      // data.chamado contém o chamado atualizado com data_limite
-      const atualizado = data.chamado || data;
-      // atualiza a seleção para abrir drawer com prazo
+      // // prioridade 1: se backend já retornou data_limite, usa
+      // if (!atualizado.data_limite && atualizado.data_limite_calculada) {
+      //   atualizado.data_limite = atualizado.data_limite_calculada;
+      // }
+
+      // // RECEBE 'atualizado' do backend
+      // // Simples: confia em atualizado.data_limite e atualizado.prioridade_horas_limite
+      // if (!atualizado.data_limite) {
+      //   // Se backend já devolveu prioridade_horas_limite (deve sempre devolver),
+      //   // calcula somente como fallback local — mas ideal é o backend enviar data_limite.
+      //   if (atualizado.prioridade_horas_limite != null && atualizado.criado_em) {
+      //     atualizado.data_limite = computeDataLimiteFromCriado(atualizado.criado_em, atualizado.prioridade_horas_limite);
+      //   } else {
+      //     // não temos informação suficiente — manter nulo (UI vai mostrar "Prazo não definido")
+      //     atualizado.data_limite = null;
+      //   }
+      // }
+      const atualizado = data.chamado || data || {};
+
+      // se backend não retornou data_limite, tenta usar prioridade_horas_limite ou tiposPrioridade
+      if (!atualizado.data_limite) {
+        const horas = atualizado.prioridade_horas_limite ?? getHorasLimiteFromPrioridadeId(atualizado.prioridade_id);
+        if (horas && atualizado.criado_em) {
+          atualizado.data_limite_calculada = computeDataLimiteFromCriadoISO(atualizado.criado_em, horas);
+        } else {
+          atualizado.data_limite_calculada = null;
+        }
+      }
       setChamadoSelecionado(atualizado);
-      showToast('success', data.mensagem || 'Chamado pego com sucesso');
 
-      // atualiza listas (mantém comportamento atual)
       await atualizarChamados();
-    } catch (err) { showToast('danger', err.message || 'Erro desconhecido'); }
+    } catch (err) {
+      showToastLocal('danger', err.message || 'Erro ao carregar chamado');
+    }
   };
 
   // FECHAR O DRAWER COM ESC 
@@ -398,36 +511,33 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
 
   // calcula tempo restante / data limite
   const [tempoRestante, setTempoRestante] = useState("");
+  const prazoISO = chamadoSelecionado?.data_limite || chamadoSelecionado?.data_limite_calculada || null;
 
   useEffect(() => {
-    if (!chamadoSelecionado?.data_limite) return;
+    // se não tem chamado selecionado, limpa
+    if (!chamadoSelecionado?.id) { setTempoRestante(''); return; }
 
-    const atualizarTempo = () => {
+    // usa a variável compartilhada definida no escopo do componente
+    if (!prazoISO) { setTempoRestante('Prazo não definido'); return; }
+
+    // valida a data
+    const limiteDate = new Date(prazoISO);
+    if (isNaN(limiteDate.getTime())) { setTempoRestante('Prazo inválido'); return; }
+
+    const atualizar = () => {
       const agora = new Date();
-      const limite = new Date(chamadoSelecionado.data_limite);
-      const diferenca = limite - agora;
-
-      if (diferenca <= 0) {
-        setTempoRestante("Prazo expirado");
-        return;
-      }
-
-      const horas = Math.floor(diferenca / (1000 * 60 * 60));
-      const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
-      const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
-
-      setTempoRestante(
-        `${horas.toString().padStart(2, "0")}:${minutos
-          .toString()
-          .padStart(2, "0")}:${segundos.toString().padStart(2, "0")}`
-      );
+      const diff = limiteDate.getTime() - agora.getTime();
+      if (diff <= 0) { setTempoRestante('Prazo expirado'); return; }
+      const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const horas = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutos = Math.floor((diff / (1000 * 60)) % 60);
+      setTempoRestante(dias > 0 ? `${dias}d ${horas}h ${minutos}m` : `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`);
     };
 
-    atualizarTempo();
-    const intervalo = setInterval(atualizarTempo, 1000);
-
-    return () => clearInterval(intervalo);
-  }, [chamadoSelecionado]);
+    atualizar();
+    const id = setInterval(atualizar, 60 * 1000);
+    return () => clearInterval(id);
+  }, [chamadoSelecionado, prazoISO]);
 
   return ( //PÁGINA
     <>{/* conteudo da pagina */}
@@ -461,7 +571,8 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                               }}
                                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" /> */}
                               <input className="cursor-pointer has-checked: text-violet-500 focus: outline-none focus:ring-0" id={`prioridade-checkbox-${prioridade.id}`} type="checkbox" name="prioridade" value={prioridade.id} checked={prioridadesSelecionadas.includes(prioridade.id)}
-                                onChange={(e) => { const checked = e.target.checked;
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
                                   const valor = prioridade.id; // ✅ usar ID, não nome
                                   if (checked) { setPrioridadesSelecionadas((prev) => [...prev, valor]); }
                                   else { setPrioridadesSelecionadas((prev) => prev.filter((p) => p !== valor)); }
@@ -540,7 +651,13 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                     {chamadosFiltrados.length === 0 ? (<div className="p-4 md:p-5"><p className="text-gray-500 dark:text-neutral-400">Nenhum chamado encontrado.</p></div>
                     ) : (
                       chamadosFiltrados.map((chamado) => ( //CARD DOS CHAMADOS
-                        <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl  dark:bg-gray-800 dark:border-gray-700 dark:border-t-violet-500 dark:shadow-neutral-700/70 cursor-pointer">
+                        <div key={chamado.id} onClick={() => {
+                          // adiciona deadline calculada se o backend não tiver
+                          const horas = getHorasLimiteFromPrioridadeId(chamado.prioridade_id);
+                          const calc = chamado.data_limite || computeDataLimiteFromCriadoISO(chamado.criado_em, horas);
+                          setChamadoSelecionado({ ...chamado, data_limite_calculada: (!chamado.data_limite ? calc : null) });
+                          setIsOpen(true);
+                        }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl  dark:bg-gray-800 dark:border-gray-700 dark:border-t-violet-500 dark:shadow-neutral-700/70 cursor-pointer">
                           <div className="flex items-center flex-wrap gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:border-neutral-700">
                             <h3 className="wrap-break-word break-normal whitespace-normal text-base poppins-bold text-gray-800 dark:text-white">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
                             <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 cursor-pointer">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
@@ -609,7 +726,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                   </div>
                   <div>
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
-                    {chamadoSelecionado?.imagem ? (<img src={`http://localhost:8080/uploads/${chamadoSelecionado.imagem}`} alt="Imagem do chamado" className="mb-6 rounded-lg w-full max-w-md" />) : (<p className="mb-6 text-sm poppins-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
+                    {chamadoSelecionado?.imagem ? (<img src={`http://localhost:8080/${chamadoSelecionado.imagem}`} alt="Imagem do chamado" className="mb-6 rounded-lg w-full max-w-md" />) : (<p className="mb-6 text-sm poppins-medium text-gray-600 dark:text-gray-400">Nenhuma imagem foi enviada para este chamado.</p>)}
                   </div>
                   <div>
                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Prioridade</p>
@@ -645,39 +762,53 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                       <div className="relative">
                         {/* Conteúdo */}
                         <div className={` grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mb-10 transition-all duration-300 overflow-hidden ${expandido ? "max-h-full" : "max-h-48 md:max-h-full"} `}>
-                          <div>
+                          <div className="px-8">
                             <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Usuário</p>
-                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.nome_usuario || "Nome não encontrado"}</p>
+                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400 wrap-break-word break-normal whitespace-normal">{chamadoSelecionado?.nome_usuario || "Nome não encontrado"}</p>
                           </div>
-                          <div>
+                          <div className="px-8">
                             <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Assunto</p>
-                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400 break-all">{chamadoSelecionado?.assunto}</p>
+                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400 wrap-break-word break-normal whitespace-normal">{chamadoSelecionado?.assunto}</p>
                           </div>
-                          <div>
+                          <div className="px-8">
                             <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Tipo de serviço</p>
-                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{formatarLabel(tiposServico.find(p => p.id === chamadoSelecionado.tipo_id)?.titulo || "Serviço não informado")}</p>
+                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400 wrap-break-word break-normal whitespace-normal">{formatarLabel(tiposServico.find(p => p.id === chamadoSelecionado.tipo_id)?.titulo || "Serviço não informado")}</p>
                           </div>
-                          <div>
+                          <div className="px-8">
                             <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Patrimônio</p>
-                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{chamadoSelecionado?.patrimonio}</p>
+                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400 wrap-break-word break-normal whitespace-normal">{chamadoSelecionado?.patrimonio}</p>
                           </div>
-                          <div>
+                          <div className="px-8">
                             <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Prioridade</p>
-                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{formatarLabel(tiposPrioridade.find(p => p.id === chamadoSelecionado.prioridade_id)?.nome || "Sem prioridade")}</p>
+                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400 wrap-break-word break-normal whitespace-normal">{formatarLabel(tiposPrioridade.find(p => p.id === chamadoSelecionado.prioridade_id)?.nome || "Sem prioridade")}</p>
                           </div>
-                          <div>
+                          <div className="px-8">
                             <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Criado em</p>
-                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">
+                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400 wrap-break-word break-normal whitespace-normal">
                               {new Date(chamadoSelecionado?.criado_em).toLocaleDateString("pt-BR").replace(/(\d{4})$/, (ano) => ano.slice(-2))}
                             </p>
                           </div>
-                          <div>
+                          <div className="px-8">
                             <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Prazo (data limite)</p>
-                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">{tempoRestante}</p>
+
+                            {prazoISO
+                              ? (
+                                <p className="mb-1 text-lg poppins-bold text-gray-800 dark:text-gray-400">
+                                  {new Date(prazoISO).toLocaleString('pt-BR')}
+                                </p>
+                              )
+                              : (
+                                <p className="mb-1 text-lg poppins-bold text-gray-800 dark:text-gray-400">
+                                  Prazo não definido
+                                </p>
+                              )
+                            }
+
+                            <p className="mb-6 text-sm text-gray-600">{tempoRestante || ''}</p>
                           </div>
-                          <div>
+                          <div className="px-8">
                             <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Chamado ID</p>
-                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400">#{chamadoSelecionado?.id}</p>
+                            <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400 wrap-break-word break-normal whitespace-normal">#{chamadoSelecionado?.id}</p>
                           </div>
                         </div>
                         {/* Fade + botão só em telas pequenas */}
@@ -711,19 +842,30 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
                             </li>
                           ))}
                         </ol>
-                        {!apontamentoAtivo && (
+                        {/* {!apontamentoAtivo && (
                           <div className="mb-6">
                             <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-gray-200">Nova atividade realizada</label>
                             <textarea id="descricao" rows="4" value={descricao} onChange={(e) => setDescricao(e.target.value)} className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-violet-500 focus:border-violet-500" placeholder="Descreva o que foi feito..." />
                             <button onClick={iniciarApontamento} className="mt-4 flex flex-row gap-2 items-center px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pass-fill" viewBox="0 0 16 16">
                               <path d="M10 0a2 2 0 1 1-4 0H3.5A1.5 1.5 0 0 0 2 1.5v13A1.5 1.5 0 0 0 3.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 12.5 0zM4.5 5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1m0 2h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1 0-1" /></svg>Adicionar apontamento</button>
                           </div>
+                        )} */}
+                        {!apontamentoAtivo && normalizarId(chamadoSelecionado?.status_chamado) !== 'concluido' && (
+                          <div className="mb-6">
+                            <label htmlFor="descricao" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-gray-200">Nova atividade realizada</label>
+                            <textarea id="descricao" rows="4" value={descricao} onChange={(e) => setDescricao(e.target.value)} className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-violet-500 focus:border-violet-500" placeholder="Descreva o que foi feito..." />
+                            <button onClick={iniciarApontamento} className="mt-4 flex flex-row gap-2 items-center px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pass-fill" viewBox="0 0 16 16">
+                                <path d="M10 0a2 2 0 1 1-4 0H3.5A1.5 1.5 0 0 0 2 1.5v13A1.5 1.5 0 0 0 3.5 16h9a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 12.5 0zM4.5 5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1m0 2h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1 0-1" />
+                              </svg>
+                              Adicionar apontamento
+                            </button>
+                          </div>
                         )}
                         {apontamentoAtivo && (
                           <div className="mt-6">
-                            <p className="text-sm text-gray-700 mb-2"> Apontamento em andamento desde:{' '}{new Date(apontamentoAtivo.comeco).toLocaleString('pt-BR')}</p>
-                            <button onClick={() => finalizarApontamento(apontamentoAtivo.id)} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
-                              Fechar apontamento</button>
+                            <p className="text-sm text-gray-700 mb-2 dark:text-gray-400"> Apontamento em andamento desde:{' '}{new Date(apontamentoAtivo.comeco).toLocaleString('pt-BR')}</p>
+                            <button onClick={() => finalizarApontamento(apontamentoAtivo.id)} className="px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition mb-5 mt-4">Fechar apontamento</button>
                           </div>
                         )}
                       </div>
@@ -734,39 +876,38 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
 
                         {podeGerarRelatorio && (
                           <>
-                            <button onClick={(e) => { e.stopPropagation(); baixarRelatorioPdf("pdf");}} disabled={baixando} className="inline-flex items-center px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60">
-                              {baixando ? "Gerando PDF..." : "Gerar / Baixar PDF"}
+                            <button onClick={(e) => { e.stopPropagation(); baixarRelatorioPdf("pdf"); }} disabled={baixando} className="flex flex-row text-sm font-medium gap-2 items-center py-2.5 px-5 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition">
+                              {baixando ? "Gerando PDF..." : "Exportar PDF"}
                             </button>
-                            <button onClick={(e) => { e.stopPropagation(); baixarRelatorioPdf("csv"); }} disabled={baixando} className="inline-flex items-center px-3 py-2 text-sm text-white bg-gray-600 rounded-lg hover:bg-gray-700 disabled:opacity-60">
-                              {baixando ? "Gerando CSV..." : "Baixar CSV"}
+                            <button onClick={(e) => { e.stopPropagation(); baixarRelatorioPdf("csv"); }} disabled={baixando} className="py-2.5 px-5 text-sm font-medium text-violet-600 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-violet-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                              {baixando ? "Gerando CSV..." : "Exportar CSV"}
                             </button>
                           </>
                         )}
                       </div>
                     </div>
                   </div>
-                  {/* === Modal de confirmação Finalizar Chamado === */}
-                  {mostrarModalConfirmacao && (
-                    <div className="fixed inset-0 z-[999] h-screen flex items-center justify-center bg-black/30">
-                      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-                        <div className="text-center">
-                          <svg className="mx-auto mb-4 text-gray-400 w-12 h-12" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                          <h3 className="mb-5 text-lg poppins-regular text-gray-500">Tem certeza que deseja finalizar este chamado?</h3>
-                          <button onClick={async () => { setMostrarModalConfirmacao(false); await finalizarChamado();}} disabled={finalizando} className="text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-[#7F56D8] poppins-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center disabled:opacity-60">
-                            {finalizando ? "Finalizando..." : "Sim, finalizar"}
-                          </button>
-                          <button onClick={() => setMostrarModalConfirmacao(false)} className="py-2.5 px-5 ms-3 text-sm poppins-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100">
-                            Cancelar
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )
             )}
           </section>
-        </div >
+          {mostrarModalConfirmacao && (
+            <div className="fixed inset-0 z-[999] h-screen flex items-center justify-center bg-black/30">
+              <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md dark:bg-gray-800">
+                <div className="text-center">
+                  <svg className="mx-auto mb-4 text-gray-400 w-12 h-12" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                  <h3 className="mb-5 text-lg poppins-regular text-gray-500">Tem certeza que deseja finalizar este chamado?</h3>
+                  <button onClick={async () => { setMostrarModalConfirmacao(false); await finalizarChamado(); }} disabled={finalizando} className="text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-[#7F56D8] poppins-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center disabled:opacity-60">
+                    {finalizando ? "Finalizando..." : "Sim, finalizar"}
+                  </button>
+                  <button onClick={() => setMostrarModalConfirmacao(false)} className="py-2.5 px-5 ms-3 text-sm poppins-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div >
       {/* TOASTS: canto inferior direito */}
       <div className="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-[60]">

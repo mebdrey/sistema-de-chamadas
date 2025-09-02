@@ -274,3 +274,55 @@ export const getApontamentosByChamado = async (chamado_id) => {
   const rows = await readQuery(sql, [chamado_id]);
   return Array.isArray(rows) ? rows : [];
 };
+
+// getChamadoById (ou controller) — garante prioridade_horas_limite e data_limite
+export const getChamadoById = async (chamado_id) => {
+  const sql = `
+    SELECT c.*,
+           u.nome AS nome_usuario,
+           t.nome AS tecnico_nome,
+           p.titulo AS setor_nome,
+           pr.id AS prioridade_id,
+           pr.nome AS prioridade_nome,
+           pr.horas_limite AS prioridade_horas_limite
+    FROM chamados c
+    LEFT JOIN usuarios u ON u.id = c.usuario_id
+    LEFT JOIN usuarios t ON t.id = c.tecnico_id
+    LEFT JOIN pool p ON p.id = c.tipo_id
+    LEFT JOIN prioridades pr ON pr.id = c.prioridade_id
+    WHERE c.id = ?
+    LIMIT 1
+  `;
+  const rows = await readQuery(sql, [chamado_id]);
+  if (!rows || !rows[0]) return null;
+  const row = rows[0];
+
+  // normaliza criado_em
+  const criadoEm = row.criado_em ? new Date(row.criado_em) : null;
+
+  // pega horas_limite direto do join (se veio nulo, faz um SELECT por id como fallback)
+  let horasLimite = null;
+  if (row.prioridade_horas_limite != null) horasLimite = Number(row.prioridade_horas_limite);
+  if (!Number.isFinite(horasLimite) && row.prioridade_id) {
+    const prRows = await readQuery('SELECT horas_limite FROM prioridades WHERE id = ? LIMIT 1', [row.prioridade_id]);
+    if (prRows && prRows[0] && prRows[0].horas_limite != null) {
+      horasLimite = Number(prRows[0].horas_limite);
+    }
+  }
+
+  // fallback seguro se por algum motivo estiver faltando (não recomendado manter)
+  if (!Number.isFinite(horasLimite) || horasLimite <= 0) horasLimite = 24;
+
+  // calcula data_limite se não existe no DB
+  let dataLimiteFinal = row.data_limite ? new Date(row.data_limite) : null;
+  if (!dataLimiteFinal && criadoEm) {
+    dataLimiteFinal = new Date(criadoEm.getTime() + Math.round(horasLimite * 60 * 60 * 1000));
+  }
+
+  // normaliza strings ISO
+  row.criado_em = criadoEm ? criadoEm.toISOString() : null;
+  row.data_limite = (dataLimiteFinal && !Number.isNaN(dataLimiteFinal.getTime())) ? dataLimiteFinal.toISOString() : null;
+  row.prioridade_horas_limite = Number(horasLimite);
+
+  return row;
+};

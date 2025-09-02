@@ -325,17 +325,17 @@ export default function ChamadosCliente() {
             }
 
             // sucesso
-            alert("Avaliação enviada com sucesso!");
+            showToast("success", "Avaliação enviada com sucesso");
+            // alert("Avaliação enviada com sucesso!");
             setOpenAvaliacao(false);
             setRating(0);
             setComentario("");
             setJaAvaliado(true);
 
-            // (opcional) atualizar localmente lista de avaliações ou chamados
-            // — por enquanto apenas mantém flag jaAvaliado
         } catch (err) {
             console.error("Erro ao enviar avaliação:", err);
-            alert("Erro ao enviar avaliação!");
+            showToast("danger", "Erro ao enviar avaliação");
+            // alert("Erro ao enviar avaliação!");
         }
     };
 
@@ -782,10 +782,13 @@ export default function ChamadosCliente() {
                                         <div className="space-y-4" >
                                             <div className="flex items-center justify-center mb-2">
                                                 <a href="#">
-                                                    <img className="w-35 h-35 rounded-full" src="/docs/images/people/profile-picture-1.jpg" alt="" />
+                                                    <img className="w-35 h-35 rounded-full object-cover" src={ chamadoSelecionado?.tecnico_foto ? `http://localhost:8080/${chamadoSelecionado.tecnico_foto}` : (<svg className="absolute w-10 h-10 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                    </svg>) 
+                } alt={chamadoSelecionado?.tecnico_nome || 'Técnico'}/>
                                                 </a>
                                             </div>
-                                            <p className="text-base text-center font-semibold leading-none text-gray-900 dark:text-white">Leos</p>
+                                            <p className="text-base text-center font-semibold leading-none text-gray-900 dark:text-white">{chamadoSelecionado?.tecnico_nome || 'Técnico não informado'}</p>
                                             <div className="flex justify-center items-center mb-5">
                                                 {[1, 2, 3, 4, 5].map((star) => (
                                                     <svg key={star} className={`w-6 h-6 ms-2 cursor-pointer ${(hover || rating) >= star ? 'text-yellow-300' : 'text-gray-300 dark:text-gray-500'}`} xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20"
@@ -804,7 +807,7 @@ export default function ChamadosCliente() {
                                             <div className="flex justify-end mt-4">
                                                 <button
                                                     onClick={enviarAvaliacao}
-                                                    className="px-4 py-2 bg-[#7F56D8] text-white rounded-lg hover:bg-[#5a39a6]"
+                                                    className="px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600"
                                                 >
                                                     Enviar Avaliação
                                                 </button>
