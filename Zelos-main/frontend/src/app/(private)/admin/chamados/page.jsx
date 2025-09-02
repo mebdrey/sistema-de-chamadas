@@ -601,7 +601,7 @@ export default function ChamadosAdmin() {
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Imagem</p>
                 {chamadoSelecionado?.imagem ? (
                   <div className="mb-6">
-                    <img src={`http://localhost:8080/${chamadoSelecionado.imagem}`} alt={`Anexo chamado #${chamadoSelecionado?.id}`} className="max-w-full max-h-48 object-contain rounded-md" />
+                    <img src={`http://localhost:8080/uploads/${chamadoSelecionado.imagem}`} alt={`Anexo chamado #${chamadoSelecionado?.id}`} className="max-w-full max-h-48 object-contain rounded-md" />
                   </div>
                 ) : (<p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-300">Nenhum anexo foi enviado para o chamado</p>)}
               </div>

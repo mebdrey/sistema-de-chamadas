@@ -146,13 +146,13 @@ insert into usuarios (nome, senha, username, email, funcao) values /* usuarios f
 select *from usuarios;
 
 /* fts de perfil */
-UPDATE usuarios SET ftPerfil = 'uploads/fernandaaalves.jpg' WHERE username = 'fernandaaalves';
-UPDATE usuarios SET ftPerfil = 'uploads/henriquealves.jpg' WHERE username = 'henriquealves';
-UPDATE usuarios SET ftPerfil = 'uploads/eliascoca.jpg' WHERE username = 'eliascoca';
-UPDATE usuarios SET ftPerfil = 'uploads/mariaoliveira.jpg' WHERE username = 'mariaoliveira';
-UPDATE usuarios SET ftPerfil = 'uploads/anacosta.jpg' WHERE username = 'anacosta';
-UPDATE usuarios SET ftPerfil = 'uploads/lucianapereira.jpg' WHERE username = 'lucianapereira';
-UPDATE usuarios SET ftPerfil = 'uploads/carlosmendes.jpg' WHERE username = 'carlosmendes';
+UPDATE usuarios SET ftPerfil = 'fernandaaalves.jpg' WHERE username = 'fernandaaalves';
+UPDATE usuarios SET ftPerfil = 'henriquealves.jpg' WHERE username = 'henriquealves';
+UPDATE usuarios SET ftPerfil = 'eliascoca.jpg' WHERE username = 'eliascoca';
+UPDATE usuarios SET ftPerfil = 'mariaoliveira.jpg' WHERE username = 'mariaoliveira';
+UPDATE usuarios SET ftPerfil = 'anacosta.jpg' WHERE username = 'anacosta';
+UPDATE usuarios SET ftPerfil = 'lucianapereira.jpg' WHERE username = 'lucianapereira';
+UPDATE usuarios SET ftPerfil = 'carlosmendes.jpg' WHERE username = 'carlosmendes';
 
 CREATE TABLE prioridades (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -219,12 +219,12 @@ VALUES
 (1000003,'Desinfecção de estações','Limpeza com álcool nas estações de trabalho do 2º andar.',4,NULL,16,NULL,1,'concluido','2025-08-04 08:30:00','2025-08-04 09:30:00'),
 (1000006,'Limpeza da copa','Solicita-se limpeza da copa no fim do expediente.',4,NULL,19,NULL,1,'concluido','2025-08-07 17:00:00','2025-08-07 18:00:00'),
 (1000007,'Limpeza da área externa','Área próxima ao estacionamento precisa de varrição.',4,11,20,NULL,2,'concluido','2025-08-08 13:20:00','2025-08-08 15:00:00'),
-(1000009,'Problema na impressora','Impressora não está imprimindo.',3,NULL,22,'uploads/impressoraNaoFunciona.webp',3,'concluido','2025-08-10 08:00:00','2025-08-15 10:00:00'), -- atrasado
-(1000010,'Computador lento','PC demora muito para iniciar.',3,NULL,23,'uploads/pcDemora.jpg',1,'concluido','2025-08-10 08:30:00','2025-08-10 12:00:00'),
-(1000011,'Sem acesso à internet','Conexão caiu repentinamente.',3,NULL,24,'uploads/semInternet.jpg',3,'concluido','2025-08-10 09:00:00','2025-08-10 11:30:00'),
-(1000012,'Monitor apagado','Tela do monitor não acende.',2,NULL,25,'uploads/monitorNaoAcende.webp',1,'concluido','2025-08-10 09:30:00','2025-08-10 10:30:00'),
+(1000009,'Problema na impressora','Impressora não está imprimindo.',3,NULL,22,'impressoraNaoFunciona.webp',3,'concluido','2025-08-10 08:00:00','2025-08-15 10:00:00'), -- atrasado
+(1000010,'Computador lento','PC demora muito para iniciar.',3,NULL,23,'pcDemora.jpg',1,'concluido','2025-08-10 08:30:00','2025-08-10 12:00:00'),
+(1000011,'Sem acesso à internet','Conexão caiu repentinamente.',3,NULL,24,'semInternet.jpg',3,'concluido','2025-08-10 09:00:00','2025-08-10 11:30:00'),
+(1000012,'Monitor apagado','Tela do monitor não acende.',2,NULL,25,'monitorNaoAcende.webp',1,'concluido','2025-08-10 09:30:00','2025-08-10 10:30:00'),
 (1000013,'Limpeza dos vidros da recepção','Vidros da entrada precisam ser limpos.',4,NULL,14,NULL,2,'concluido','2025-08-10 10:00:00','2025-08-10 12:00:00'),
-(1000014,'Limpeza das janelas da TI','Janelas da sala de TI estão com muita poeira.',4,10,15,'uploads/limpezaJanelas.webp',1,'concluido','2025-08-02 10:00:00','2025-08-02 12:00:00'),
+(1000014,'Limpeza das janelas da TI','Janelas da sala de TI estão com muita poeira.',4,10,15,'limpezaJanelas.webp',1,'concluido','2025-08-02 10:00:00','2025-08-02 12:00:00'),
 (1000015,'Teclado com teclas falhando','Algumas teclas não funcionam.',2,NULL,16,NULL,2,'concluido','2025-08-11 08:00:00','2025-08-11 10:00:00'),
 (1000016,'Erro no sistema','Sistema trava ao abrir módulo do curso.',3,NULL,17,NULL,3,'concluido','2025-08-11 08:30:00','2025-08-15 11:00:00'), -- atrasado
 (1000017,'Telefone sem linha','Telefone fixo não recebe chamadas.',3,NULL,18,NULL,2,'concluido','2025-08-11 09:00:00','2025-08-11 10:30:00'),
@@ -267,15 +267,15 @@ VALUES
 (1000060,'Faxina geral do prédio','Faxina nos andares 1 a 3.',4,10,25,NULL,3,'concluido','2025-06-20 17:00:00','2025-06-20 20:00:00'),
 -- extras para completar 14 (reusando padrões existentes, mantendo só as 3 colunas permitidas diferentes)
 (1000061,'Limpeza de banheiros','Higienização completa dos banheiros do térreo.',4,NULL,14,NULL,2,'concluido','2025-06-07 09:00:00','2025-06-07 10:00:00'),
-(1000062,'Computador lento','PC demora muito para iniciar.',3,NULL,23,'uploads/pcDemora.jpg',1,'concluido','2025-06-08 08:30:00','2025-06-08 11:30:00'),
-(1000063,'Problema na impressora','Impressora não está imprimindo.',3,NULL,22,'uploads/impressoraNaoFunciona.webp',3,'concluido','2025-06-09 08:00:00','2025-06-14 10:00:00'), -- atrasado
+(1000062,'Computador lento','PC demora muito para iniciar.',3,NULL,23,'pcDemora.jpg',1,'concluido','2025-06-08 08:30:00','2025-06-08 11:30:00'),
+(1000063,'Problema na impressora','Impressora não está imprimindo.',3,NULL,22,'impressoraNaoFunciona.webp',3,'concluido','2025-06-09 08:00:00','2025-06-14 10:00:00'), -- atrasado
 (1000064,'Limpeza de carpetes','Carpetes da recepção precisam de aspiração.',4,9,18,NULL,2,'concluido','2025-06-15 10:30:00','2025-06-15 12:00:00'),
 
 -- =========================
 -- MAIO/2025 (28 – todos concluídos; alguns atrasados)
 -- =========================
 (1000053,'Limpeza de garagem','Remoção de resíduos da garagem subterrânea.',4,12,18,NULL,2,'concluido','2025-05-05 13:00:00','2025-05-05 15:00:00'),
-(1000056,'Limpeza das janelas internas','Limpeza geral das janelas dos corredores.',4,11,21,'uploads/limpezaJanelas.webp',1,'concluido','2025-05-06 16:00:00','2025-05-06 18:00:00'),
+(1000056,'Limpeza das janelas internas','Limpeza geral das janelas dos corredores.',4,11,21,'limpezaJanelas.webp',1,'concluido','2025-05-06 16:00:00','2025-05-06 18:00:00'),
 -- 26 linhas adicionais de maio (reuso de padrões)
 (1000065,'Limpeza após reunião','Sala de reunião 3 precisa de limpeza após uso.',4,13,17,NULL,1,'concluido','2025-05-01 09:00:00','2025-05-01 10:00:00'),
 (1000066,'Reposição de materiais','Faltando papel toalha nos banheiros femininos.',4,12,21,NULL,3,'concluido','2025-05-01 11:00:00','2025-05-04 09:25:00'), -- atrasado
@@ -297,8 +297,8 @@ VALUES
 (1000082,'Reparo de equipamento de comunicação','Correção de falha em equipamento de comunicação.',1,5,14,NULL,3,'concluido','2025-05-14 13:00:00','2025-05-14 14:30:00'),
 (1000083,'Limpeza do refeitório','Solicita-se limpeza pós-almoço.',4,11,15,NULL,2,'concluido','2025-05-15 11:00:00','2025-05-15 12:00:00'),
 (1000084,'Limpeza dos vidros da recepção','Vidros da entrada precisam ser limpos.',4,NULL,14,NULL,2,'concluido','2025-05-16 10:00:00','2025-05-16 12:00:00'),
-(1000085,'Sem acesso à internet','Conexão caiu repentinamente.',3,NULL,24,'uploads/semInternet.jpg',3,'concluido','2025-05-17 09:00:00','2025-05-17 11:30:00'),
-(1000086,'Monitor apagado','Tela do monitor não acende.',2,NULL,25,'uploads/monitorNaoAcende.webp',1,'concluido','2025-05-18 09:30:00','2025-05-18 10:30:00'),
+(1000085,'Sem acesso à internet','Conexão caiu repentinamente.',3,NULL,24,'semInternet.jpg',3,'concluido','2025-05-17 09:00:00','2025-05-17 11:30:00'),
+(1000086,'Monitor apagado','Tela do monitor não acende.',2,NULL,25,'monitorNaoAcende.webp',1,'concluido','2025-05-18 09:30:00','2025-05-18 10:30:00'),
 (1000087,'Erro no sistema','Sistema trava ao abrir módulo do curso.',3,NULL,17,NULL,3,'concluido','2025-05-19 08:30:00','2025-05-23 11:00:00'), -- atrasado
 (1000088,'Telefone sem linha','Telefone fixo não recebe chamadas.',3,NULL,18,NULL,2,'concluido','2025-05-20 09:00:00','2025-05-20 10:30:00'),
 (1000089,'Queda de energia','Sala ficou sem luz após curto-circuito.',2,NULL,19,NULL,3,'concluido','2025-05-21 09:30:00','2025-05-21 11:30:00'),

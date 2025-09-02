@@ -1196,10 +1196,13 @@ export default function PainelGestao() {
                             {isCreatingPrioridadeRow && (
                               <tr className="bg-white dark:bg-gray-900">
                                 <td className="px-6 py-2">
-                                  <input type="text" placeholder="Nome da prioridade" value={novaPrioridade.nome} onChange={(e) => setNovaPrioridade(prev => ({ ...prev, nome: e.target.value }))} className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" required />
+                                  <input type="text" placeholder="Nome da prioridade" value={novaPrioridade.nome} onChange={(e) => setNovaPrioridade(prev => ({ ...prev, nome: e.target.value }))} className={`inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-sm ${novaPrioridadeErrors.nome ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-[#7F56D8] focus:border-[#7F56D8]'} poppins-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 focus:outline-none `} required />
+                                  {novaPrioridadeErrors.nome && <div className="text-xs text-red-500 mt-1">Preencha este campo</div>}
                                 </td>
                                 <td className="px-6 py-2">
-                                  <input type="number" placeholder="Prazo em horas" value={novaPrioridade.horas_limite} onChange={(e) => setNovaPrioridade(prev => ({ ...prev, horas_limite: Number(e.target.value) }))} className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" required />
+                                  <input type="number" placeholder="Prazo em horas" value={novaPrioridade.horas_limite} onChange={(e) => setNovaPrioridade(prev => ({ ...prev, horas_limite: Number(e.target.value) }))} className={`inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-sm ${novaPrioridadeErrors.horas_limite ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-[#7F56D8] focus:border-[#7F56D8]'} poppins-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 focus:outline-none `} required />
+                                  {novaPrioridadeErrors.horas_limite && <div className="text-xs text-red-500 mt-1">Preencha este campo</div>}
+
                                 </td>
                                 <td className="px-6 py-2 text-end">
                                   <div className="inline-flex gap-2">
