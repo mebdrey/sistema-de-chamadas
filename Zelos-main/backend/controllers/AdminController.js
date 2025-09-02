@@ -1,6 +1,7 @@
 
 import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool, buscarUsuarioPorEmail, listarPrioridades, buscarPrioridadePorNome, atualizarPrioridade, excluirPrioridade, verAdmins, calcularSlaCumprido } from '../models/Admin.js'
 import { criarNotificacao } from '../models/Notificacoes.js';
+import {getChamadoById} from '../models/Chamado.js'
 import { readAll, readQuery, update, deleteRecord } from '../config/database.js'; // Importar deleteRecord
 
 // usado para o adm -------------------------------------------------------------------------------------------------------------------------------------------------------------------------

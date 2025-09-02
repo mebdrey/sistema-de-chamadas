@@ -64,7 +64,7 @@ const OrdenarPor = ({ ordenarPor, setOrdenarPor }) => {
 
   return (
     <div id="ordenarDropdownWrapper" className="relative inline-block">
-      <button onClick={(e) => { e.stopPropagation(); setShowDropdown(!showDropdown); }} className="inline-flex items-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none hover:bg-gray-100 dark:hover:bg-gray-600 focus:ring-4 focus:ring-[#F8FAFB] dark:focus:ring-gray-800 focus:text-[#7F56D8] dark:focus:text-white poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" aria-haspopup="true" aria-expanded={showDropdown}> <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" >
+      <button onClick={(e) => { e.stopPropagation(); setShowDropdown(!showDropdown); }} className="cursor-pointer text-white bg-violet-700 hover:bg-violet-800 focus:ring-4 focus:outline-none focus:ring-violet-300 poppins-medium rounded-lg text-sm px-8 py-2.5 text-center inline-flex items-center dark:bg-violet-600 dark:hover:bg-violet-700 dark:focus:ring-violet-800 " type="button" aria-haspopup="true" aria-expanded={showDropdown}> <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" >
         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" /></svg><p className='hidden md:inline focus:text-[#7F56D8] poppins-medium text-sm ms-3 '>Ordenar por</p>
       </button>
 

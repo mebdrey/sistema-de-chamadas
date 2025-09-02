@@ -135,9 +135,9 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
   };
 
   return (
-    <div className="p-4 w-full dark:bg-gray-900">
+    <div className="p-4 w-full dark:bg-gray-900 pb-10">
       <div className="p-4 mt-14">
-        <div className="grid grid-cols-3 lg:items-center gap-4 mb-4 ">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:items-center gap-4 mb-4 ">
           {qndtChamados.map((nChamados, index) => (
             <div key={index} className="flex items-center justify-center h-fit ">
               <div className="w-full p-6 border border-gray-100 rounded-xl bg-white dark:bg-gray-800 dark:border dark:border-gray-700">
@@ -158,10 +158,10 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
               <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-[#7F56D8] hover:bg-[#E6DAFF] px-3 py-2 hover:cursor-pointer" onClick={() => setDropdownChamadosStatusOpen(prev => !prev)}>Gerar relatório <svg className="w-3.5 h-3.5 text-[#7F56D8] me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20"><path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" /><path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" /></svg>
               </button>
               {dropdownChamadosStatusOpen && (
-                <div className="absolute z-10 mt-2 bg-white border border-gray-200 rounded-lg shadow-sm w-40">
-                  <ul className="py-2 text-sm text-gray-700">
-                    <li><button onClick={() => { exportarCsvChamadosPorStatus(); setDropdownChamadosStatusOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar CSV</button></li>
-                    <li><button onClick={() => { gerarRelatorioChamadoPorStatus(); setDropdownChamadosStatusOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">Exportar PDF</button></li>
+                <div className="absolute z-10 mt-2 bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm w-40 dark:bg-gray-800">
+                  <ul className="py-2 text-sm text-gray-700 dark:text-gray-400">
+                    <li><button onClick={() => { exportarCsvChamadosPorStatus(); setDropdownChamadosStatusOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700">Exportar CSV</button></li>
+                    <li><button onClick={() => { gerarRelatorioChamadoPorStatus(); setDropdownChamadosStatusOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700">Exportar PDF</button></li>
                   </ul>
                 </div>
               )}
@@ -171,7 +171,7 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
               <label htmlFor="toggle-count-switch" className="text-sm text-gray-800 dark:text-white">Mensal</label>
               <label htmlFor="toggle-count-switch" className="relative inline-block w-11 h-6 cursor-pointer">
                 <input type="checkbox" id="toggle-count-switch" className="peer sr-only" checked={modo === 'anual'} onChange={handleToggle} />
-                <span className="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-[#7F56D8]"></span>
+                <span className="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-[#7F56D8] dark:bg-gray-800"></span>
                 <span className="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
               </label>
               <label htmlFor="toggle-count-switch" className="text-sm text-gray-800 dark:text-white">Anual</label>
@@ -180,11 +180,12 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
         </div>
       </div>
       { /*CARDS DA QUANTIDADE DE CHAMADOS p mes*/}
-      <div className="grid grid-cols-3 gap-4 mb-4 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 items-start">
         <div className="col-span-2 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600"><GraficoChamadosPorAno /></div>
         <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600"><KpiSla /></div>
       </div>
-      <div className="grid grid-cols-2 gap-1 mb-4">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 md:items-center items-start">
         <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 mb-4 g-700 dark:bg-gray-800 dark:border dark:border-gray-600">
           <ChamadosPorPrioridade />
         </div>
