@@ -380,35 +380,6 @@ export default function ChamadosAdmin() {
                   </div>
                 )}
               </div>
-              {/* Dropdown de Prioridade */}
-              <div className="relative inline-block">
-                <button onClick={() => setDropdownPrioridadeAberto(!dropdownPrioridadeAberto)} className="hover:cursor-pointer inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" id="dropdownPrioridadeButton">
-                  Prioridade
-                  <svg className="w-2.5 h-2.5 ms-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" /></svg>
-                </button>
-                {dropdownPrioridadeAberto && (
-                  <div id="dropdownPrioridade" className="absolute z-10 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-48">
-                    <ul className="p-3 space-y-1 text-sm text-gray-700" aria-labelledby="dropdownPrioridadeButton">
-                      {prioridades.map((prioridade, index) => (
-                        <li key={index}>
-                          <div className="flex p-2 rounded-sm hover:bg-gray-100 hover:cursor-pointer">
-                            <div className="flex items-center h-5">
-                              <input id={`prioridade-checkbox-${index}`} type="checkbox" name="prioridade" value={prioridade.value} checked={prioridadesSelecionadas.includes(prioridade.value)}
-                                onChange={(e) => {
-                                  const checked = e.target.checked;
-                                  const valor = prioridade.value;
-                                  if (checked) { setPrioridadesSelecionadas((prev) => [...prev, valor]); }
-                                  else { setPrioridadesSelecionadas((prev) => prev.filter((p) => p !== valor)); }
-                                }} className="hover:cursor-pointer w-4 h-4 text-[#7F56D8] bg-gray-100 border-gray-300 rounded-sm focus:ring-[#E6DAFF] focus:ring-2 " />
-                            </div>
-                            <div className="ms-2 text-sm"><label htmlFor={`prioridade-checkbox-${index}`} className="hover:cursor-pointer poppins-medium text-gray-900">{prioridade.label}</label></div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
             </div>
             {/* Barra de pesquisa */}
             <form className="flex items-center" onSubmit={(e) => e.preventDefault()}>{/* evita recarregar a página */}
