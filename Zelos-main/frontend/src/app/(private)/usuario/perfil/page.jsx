@@ -267,16 +267,25 @@ export default function MeuPerfil() {
     }
     const nomes = pegarPrimeiroEUltimoNome(usuario.nome);
 
-    //   const avatarSrcServer = usuario.ftPerfil ? `http://localhost:8080/${usuario.ftPerfil}` : "/img/user.png";
-    //   const avatarHeaderSrc = previewTemp || avatarSrcServer;
-    // se não houver foto no servidor, deixamos null — assim a renderização condicional escolhe o placeholder
     const avatarSrcServer = usuario.ftPerfil ? `http://localhost:8080/${usuario.ftPerfil}` : null;
     const avatarHeaderSrc = previewTemp || avatarSrcServer;
 
+    
+    function formatarLabel(str) {
+        const texto = str.replace(/_/g, ' ').toLowerCase();
+    
+        const correcoes = { "auxiliar limpeza": "Auxiliar de Limpeza", "apoio tecnico": "Apoio Técnico", "tecnico": "Técnico", "manutencao": "Manutenção", "usuario": "Usuário" };
+    
+        if (correcoes[texto]) { return correcoes[texto]; }
+    
+        // capitaliza cada palavra caso não tenha uma correção personalizada
+        return texto
+          .split(' ').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+      }
     return (
         <div className="p-4 h-screen w-full ">
             <div className="p-4 mt-14">
-                <div className="max-w-5xl mx-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
+                <div className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
                     {/* header */}
                     <div className="flex items-center gap-6 p-6 border-b border-gray-100 dark:border-gray-800">
                         <div className="relative">
@@ -320,7 +329,7 @@ export default function MeuPerfil() {
                                 <div>
                                     <div className="text-xs text-gray-400">Bem vindo</div>
                                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{nomes.primeiroNome} <span className="text-gray-500">{nomes.ultimoNome}</span></h2>
-                                    <div className="text-sm text-gray-500 mt-1">{usuario.funcao}</div>
+                                    <div className="text-sm text-gray-500 mt-1">{formatarLabel(usuario.funcao)}</div>
                                 </div>
                             </div>
                         </div>
@@ -343,7 +352,7 @@ export default function MeuPerfil() {
                             <InlineField
                                 label="Departamento"
                                 fieldKey="funcao"
-                                value={usuario.funcao}
+                                value={formatarLabel(usuario.funcao)}
                                 editable={false} // NÃO editável conforme pedido
                                 isEditing={false}
                                 onStartEdit={() => { }}

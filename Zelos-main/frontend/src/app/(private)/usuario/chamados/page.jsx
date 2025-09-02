@@ -339,7 +339,6 @@ export default function ChamadosCliente() {
         }
     };
 
-
     return (
         <>
             {ToastsUI}
@@ -385,7 +384,7 @@ export default function ChamadosCliente() {
                             {/* Select responsivo: visível em tablet/móvel */}
                             <div className="md:hidden relative" ref={dropdownRef}>
                                 {/* Botão do dropdown */}
-                                <button onClick={() => setOpenAbas(!openAbas)} className="text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 w-full justify-between" type="button">
+                                <button onClick={() => setOpenAbas(!openAbas)} className="text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-[#7F56D8] font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-violet-600 dark:hover:bg-violet-700 dark:focus:ring-violet-800 w-full justify-between" type="button">
                                     {primeiraLetraMaiuscula(statusAbas.find(s => normalizarId(s) === abaAtiva))}
                                     <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"
                                     ><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
@@ -409,7 +408,7 @@ export default function ChamadosCliente() {
                                 )}
                             </div>
                             {/* modal - criar chamado*/}
-                            <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" className=" hidden md:flex flex-row items-center block text-white bg-violet-500 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm px-5 py-2.5 h-fit text-center dark:bg-violet-600 dark:hover:bg-violet-700 dark:focus:ring-violet-800" type="button"><svg className="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>Novo chamado</button>
+                            <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" className=" hidden md:flex flex-row items-center block text-white bg-violet-500 focus:ring-4 focus:outline-none focus:ring-violet-300 poppins-medium rounded-lg text-sm px-5 py-2.5 h-fit text-center dark:bg-violet-600 dark:hover:bg-violet-700 dark:focus:ring-violet-800" type="button"><svg className="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path></svg>Novo chamado</button>
 
                             <div id="crud-modal" tabIndex="-1" aria-hidden="true" className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
                                 <div className="fixed inset-0 bg-black/50 dark:bg-black/60"></div>
@@ -432,14 +431,14 @@ export default function ChamadosCliente() {
                                                 <div className="col-span-2">
                                                     <label htmlFor="name" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Assunto<span className="text-red-500">*</span></label>
                                                     <input type="text" name="name" id="name" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.assunto
-                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
                                                         : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
                                                         }`} placeholder="Digite o assunto" required="" value={assunto} onChange={(e) => { setAssunto(e.target.value); setCamposInvalidos({ ...camposInvalidos, assunto: false }); }} />
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="servico" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Tipo de serviço<span className="text-red-500">*</span></label>
                                                     <select id="servico" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.tipo
-                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
                                                         : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
                                                         }`} value={tipoSelecionadoId} onChange={(e) => { setTipoSelecionadoId(e.target.value); setCamposInvalidos({ ...camposInvalidos, tipo: false }); }} required>
                                                         <option value="">Selecione tipo de serviço</option>
@@ -451,7 +450,7 @@ export default function ChamadosCliente() {
                                                     </select></div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="prioridade" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Prioridade<span className="text-red-500">*</span></label>
-                                                    <select id="prioridade" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-violet-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.prioridade ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-violet-500 focus:ring-violet-500"
+                                                    <select id="prioridade" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-violet-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.prioridade ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500" : "border-gray-300 focus:border-violet-500 focus:ring-violet-500"
                                                         }`} value={prioridadeSelecionadaId} onChange={(e) => { setPrioridadeSelecionadaId(e.target.value); setCamposInvalidos({ ...camposInvalidos, prioridade: false }); }} required>
                                                         <option value="">Selecione prioridade</option>
                                                         {tiposPrioridade.map(tipo => (
@@ -464,14 +463,14 @@ export default function ChamadosCliente() {
                                                 <div className="col-span-2">
                                                     <label htmlFor="patrimonio" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Patrimônio<span className="text-red-500">*</span></label>
                                                     <input type="text" name="patrimonio" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.patrimonio
-                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
                                                         : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
                                                         }`} placeholder="Digite o número de patrimônio" required="" value={patrimonio} onChange={(e) => { setPatrimonio(e.target.value.replace(/\D/g, "")); setCamposInvalidos({ ...camposInvalidos, patrimonio: false }); }} maxLength={7} pattern="\d{7}" />
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="description" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Descrição<span className="text-red-500">*</span></label>
                                                     <textarea id="description" rows="4" className={`block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:border-violet-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-violet-500 dark:focus:border-violet-500 ${camposInvalidos.descricao
-                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
                                                         : "border-gray-300 focus:border-violet-500 focus:ring-violet-500"
                                                         }`} placeholder="Escreva a descrição do chamado" value={descricao} onChange={(e) => { setDescricao(e.target.value); setCamposInvalidos({ ...camposInvalidos, descricao: false }); }}></textarea>
                                                 </div>
@@ -535,24 +534,54 @@ export default function ChamadosCliente() {
                                     });
 
                                 return (
-                                    <div key={statusId} className={`${abaAtiva === statusId ? "block" : "hidden"} flex flex-col rounded-xl dark:bg-gray-900 gap-6 `}>
-                                        {chamadosFiltrados.length === 0 ? (
-                                            <div className="p-4 md:p-5 ">
-                                                <p className="text-gray-500 dark:text-neutral-400">Nenhum chamado encontrado. </p>
-                                            </div>) : (
-                                            chamadosFiltrados.map((chamado) => (
+                                    // <div key={statusId} className={`${abaAtiva === statusId ? "block" : "hidden"} flex flex-col rounded-xl dark:bg-gray-900 gap-6 `}>
+                                    //     {chamadosFiltrados.length === 0 ? (
+                                    //         <div className="p-4 md:p-5 ">
+                                    //             <p className="text-gray-500 dark:text-neutral-400">Nenhum chamado encontrado. </p>
+                                    //         </div>) : (
+                                    //         chamadosFiltrados.map((chamado) => (
 
-                                                <div key={chamado.id || `${chamado.assunto}-${Math.random()}`} className="border-b bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:border-t-violet-500 dark:shadow-neutral-700/70">
-                                                    <div className="flex flex-row">
+                                    //             <div key={chamado.id || `${chamado.assunto}-${Math.random()}`} className="border-b bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:border-t-violet-500 dark:shadow-neutral-700/70">
+                                    <div
+                                        key={statusId}
+                                        className={`${abaAtiva === statusId ? "block" : "hidden"} grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6`}
+                                    >
+                                        {chamadosFiltrados.length === 0 ? (
+                                            <div className="p-4 md:p-5 col-span-full">
+                                                <p className="text-gray-500 dark:text-neutral-400">
+                                                    Nenhum chamado encontrado.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            chamadosFiltrados.map((chamado) => (
+                                                <div
+                                                    key={chamado.id || `${chamado.assunto}-${Math.random()}`}
+                                                    className="flex flex-col justify-between border-b bg-white border border-gray-200 shadow-2xs rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:border-t-violet-500 dark:shadow-neutral-700/70"
+                                                >
+                                                    <div className="flex flex-col">
                                                         <div className="px-4 pt-4 md:px-5 md:pt-5 border-gray-200 dark:border-neutral-700">
                                                             <h3 className="wrap-break-word break-normal whitespace-normal text-lg poppins-bold text-gray-800 dark:text-white">Chamado #{chamado.id} - {primeiraLetraMaiuscula(chamado.status_chamado)}</h3>
                                                             <h6 className="wrap-break-word break-normal whitespace-normal text-base poppins-bold text-gray-800 dark:text-white break-all">{chamado.assunto}</h6>
                                                             <p className="wrap-break-word break-normal whitespace-normal mt-2 text-gray-500 dark:text-neutral-400 break-all">{chamado.descricao}</p>
 
                                                         </div>
-                                                        <div className="px-4 pt-4 md:px-5 md:pt-5">
+                                                        {/* <div className="px-4 pt-4 md:px-5 md:pt-5">
                                                             <img src={`http://localhost:8080/uploads/${chamado.imagem}`} className="mt-6 w-60 h-60 object-cover rounded-lg" alt="Imagem do chamado" />
+                                                        </div> */}
+                                                        <div className="px-4 pt-4 md:px-5 md:pt-5">
+                                                            {chamado.imagem ? (
+                                                                <img
+                                                                    src={`http://localhost:8080/uploads/${chamado.imagem}`}
+                                                                    className="mt-6 w-60 h-60 object-cover rounded-lg"
+                                                                    alt="Imagem do chamado"
+                                                                />
+                                                            ) : (
+                                                                <p className="mt-6 text-gray-500 dark:text-neutral-400 italic">
+                                                                    Não há imagens anexadas
+                                                                </p>
+                                                            )}
                                                         </div>
+
                                                     </div>
 
 
@@ -627,14 +656,14 @@ export default function ChamadosCliente() {
                                                 <div className="col-span-2">
                                                     <label htmlFor="name" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Assunto<span className="text-red-500">*</span></label>
                                                     <input type="text" name="name" id="name" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.assunto
-                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
                                                         : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
                                                         }`} placeholder="Digite o assunto" required="" value={assunto} onChange={(e) => { setAssunto(e.target.value); setCamposInvalidos({ ...camposInvalidos, assunto: false }); }} />
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="servico" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Tipo de serviço<span className="text-red-500">*</span></label>
                                                     <select id="servico" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.tipo
-                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
                                                         : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
                                                         }`} value={tipoSelecionadoId} onChange={(e) => { setTipoSelecionadoId(e.target.value); setCamposInvalidos({ ...camposInvalidos, tipo: false }); }} required>
                                                         <option value="">Selecione tipo de serviço</option>
@@ -646,7 +675,7 @@ export default function ChamadosCliente() {
                                                     </select></div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="prioridade" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Prioridade<span className="text-red-500">*</span></label>
-                                                    <select id="prioridade" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.prioridade ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
+                                                    <select id="prioridade" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.prioridade ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500" : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
                                                         }`} value={prioridadeSelecionadaId} onChange={(e) => { setPrioridadeSelecionadaId(e.target.value); setCamposInvalidos({ ...camposInvalidos, prioridade: false }); }} required>
                                                         <option value="">Selecione prioridade</option>
                                                         {tiposPrioridade.map(tipo => (
@@ -659,14 +688,14 @@ export default function ChamadosCliente() {
                                                 <div className="col-span-2">
                                                     <label htmlFor="patrimonio" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Patrimônio<span className="text-red-500">*</span></label>
                                                     <input type="text" name="patrimonio" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-1 focus:border-[#7F56D8] block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 ${camposInvalidos.patrimonio
-                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
                                                         : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
                                                         }`} placeholder="Digite o número de patrimônio" required="" value={patrimonio} onChange={(e) => { setPatrimonio(e.target.value.replace(/\D/g, "")); setCamposInvalidos({ ...camposInvalidos, patrimonio: false }); }} maxLength={7} pattern="\d{7}" />
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label htmlFor="description" className="block mb-2 text-sm poppins-medium text-gray-900 dark:text-white">Descrição<span className="text-red-500">*</span></label>
-                                                    <textarea id="description" rows="4" className={`block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:border-[#7F56D8] dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 ${camposInvalidos.descricao
-                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                                                    <textarea id="description" rows="4" className={`block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:border-[#7F56D8] dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-violet-500 dark:focus:border-violet-500 ${camposInvalidos.descricao
+                                                        ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
                                                         : "border-gray-300 focus:border-[#7F56D8] focus:ring-[#7F56D8]"
                                                         }`} placeholder="Escreva a descrição do chamado" value={descricao} onChange={(e) => { setDescricao(e.target.value); setCamposInvalidos({ ...camposInvalidos, descricao: false }); }}></textarea>
                                                 </div>
@@ -782,10 +811,10 @@ export default function ChamadosCliente() {
                                         <div className="space-y-4" >
                                             <div className="flex items-center justify-center mb-2">
                                                 <a href="#">
-                                                    <img className="w-35 h-35 rounded-full object-cover" src={ chamadoSelecionado?.tecnico_foto ? `http://localhost:8080/${chamadoSelecionado.tecnico_foto}` : (<svg className="absolute w-10 h-10 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <img className="w-35 h-35 rounded-full object-cover" src={chamadoSelecionado?.tecnico_foto ? `http://localhost:8080/${chamadoSelecionado.tecnico_foto}` : (<svg className="absolute w-10 h-10 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                                                    </svg>) 
-                } alt={chamadoSelecionado?.tecnico_nome || 'Técnico'}/>
+                                                    </svg>)
+                                                    } alt={chamadoSelecionado?.tecnico_nome || 'Técnico'} />
                                                 </a>
                                             </div>
                                             <p className="text-base text-center font-semibold leading-none text-gray-900 dark:text-white">{chamadoSelecionado?.tecnico_nome || 'Técnico não informado'}</p>
@@ -802,7 +831,7 @@ export default function ChamadosCliente() {
 
                                             <div className="col-span-2">
                                                 <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Detalhes da avaliação</label>
-                                                <textarea id="description" value={comentario} onChange={(e) => setComentario(e.target.value)} rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:border-[#7F56D8] dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Descreva de forma detalhada os motivos de sua avaliação"></textarea>
+                                                <textarea id="description" value={comentario} onChange={(e) => setComentario(e.target.value)} rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:border-[#7F56D8] dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-violet-500 dark:focus:border-violet-500" placeholder="Descreva de forma detalhada os motivos de sua avaliação"></textarea>
                                             </div>
                                             <div className="flex justify-end mt-4">
                                                 <button
