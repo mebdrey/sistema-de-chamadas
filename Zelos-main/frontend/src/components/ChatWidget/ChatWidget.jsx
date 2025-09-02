@@ -530,14 +530,14 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
       <div
         className={[
           "fixed z-50 w-[92vw] max-w-sm rounded-2xl border border-gray-200",
-          "bg-white shadow-xl dark:bg-zinc-900 dark:border-zinc-700",
+          "bg-white shadow-xl dark:bg-zinc-900 dark:border-gray-500 ",
           "transition-all duration-200",
           pos.panel,
           open ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none",
         ].join(" ")}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-zinc-700">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700 dark:bg-gray-900 rounded-t-2xl">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-zinc-100">
             {mensagens && mensagens.length > 0
               ? (() => {
@@ -550,7 +550,7 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
               })()
               : "Chat"}
           </h2>
-          <button onClick={() => setOpen(false)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800">
+          <button onClick={() => setOpen(false)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 dark:text-gray-300">
             <span className="sr-only">Fechar</span>—
           </button>
         </div>
@@ -559,7 +559,7 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
         {mensagens === null ? (
           <p className="p-3 text-gray-500">Carregando...</p>
         ) : (
-          <div ref={listRef} className="h-72 overflow-y-auto p-3 space-y-2 text-sm">
+          <div ref={listRef} className="h-72 overflow-y-auto p-3 space-y-2 text-sm dark:bg-gray-800">
             {mensagens.length === 0 && <div className="text-center text-xs text-gray-400">Sem mensagens</div>}
 
             {mensagens.map((msg, idx) => {
@@ -584,7 +584,7 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
         )}
 
         {/* Input */}
-        <form onSubmit={enviarMsg} className="p-2 border-t border-gray-200 dark:border-zinc-700 flex gap-2">
+        <form onSubmit={enviarMsg} className="p-2 border-t border-gray-200 dark:border-gray-600 flex gap-2 dark:bg-gray-900 dark:text-white rounded-b-2xl">
           <input
             value={conteudo}
             onChange={(e) => setConteudo(e.target.value)}
