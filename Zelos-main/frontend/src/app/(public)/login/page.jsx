@@ -80,8 +80,10 @@ export default function Login() {
 
         if (funcao === 'admin') {
           router.push('/admin/dashboard');
-        } else if (funcao === 'tecnico' || funcao === 'auxiliar_limpeza') {
+        } else if (funcao === 'tecnico') {
           router.push('/tecnico/chamados');
+        }else if (funcao === 'auxiliar_limpeza'){
+          router.push('/auxiliar_limpeza/chamados');
         } else {
           router.push('/usuario/chamados');
         }
