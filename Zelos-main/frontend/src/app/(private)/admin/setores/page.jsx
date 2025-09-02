@@ -101,7 +101,7 @@ export default function Setores() {
                                     </div>
                                 </div>
                             )} */}
-                        <button id="dropdownHelperButton" className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-[#F8FAFB] focus:text-violet-500 poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
+                        <button id="dropdownHelperButton" className="inline-flex items-center text-gray-200 bg-violet-600 border border-gray-700 focus:outline-none hover:bg-violet-700  poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
                             <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" ><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" /></svg>
                         </button>
                         {/* Dropdown menu */}
@@ -202,19 +202,19 @@ export default function Setores() {
                                         </div>
                                     </td>
                                     <td className="relative">
-                                        <button onClick={() => setDropdownAbertoId((prev) => (prev === usuario.id ? null : usuario.id))} className="inline-flex items-center p-2 text-sm poppins-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-50 " type="button" aria-expanded={dropdownAbertoId === usuario.id} aria-haspopup="true" >
+                                        <button onClick={() => setDropdownAbertoId((prev) => (prev === usuario.id ? null : usuario.id))} className="inline-flex items-center p-2 text-sm poppins-medium text-center text-gray-900 bg-white dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-50 " type="button" aria-expanded={dropdownAbertoId === usuario.id} aria-haspopup="true" >
                                             <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3" ><path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" /></svg>
                                         </button>
                                         {/* Dropdown */}
                                         {dropdownAbertoId === usuario.id && (
-                                            <div className="z-10 absolute right-0 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44" role="menu" aria-orientation="vertical" aria-labelledby="dropdownMenuIconHorizontalButton" >
-                                                <ul className="py-2 text-sm text-gray-700 ">
+                                            <div className="z-10 absolute right-0 mt-2 bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 rounded-lg shadow-sm w-44" role="menu" aria-orientation="vertical" aria-labelledby="dropdownMenuIconHorizontalButton" >
+                                                <ul className="py-2 text-sm text-gray-700 dark:text-gray-400 ">
                                                     <li>
-                                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100" role="menuitem">Ver perfil</a>
+                                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">Ver perfil</a>
                                                     </li>
                                                 </ul>
                                                 <div className="py-2">
-                                                    <a onClick={() => { setUsuarioParaDeletar(usuario.id); setMostrarModalConfirmacao(true); }} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Deletar usuário</a>
+                                                    <a onClick={() => { setUsuarioParaDeletar(usuario.id); setMostrarModalConfirmacao(true); }} className="block px-4 py-2 text-sm dark:text-gray-400 text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">Deletar usuário</a>
                                                 </div>
                                             </div>
                                         )}
@@ -227,14 +227,14 @@ export default function Setores() {
                 {/* tem tz q deseja excluir o usuario? */}
                 {mostrarModalConfirmacao && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-                        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md dark:bg-gray-700">
                             <div className="text-center">
                                 <svg className="mx-auto mb-4 text-gray-400 w-12 h-12 " fill="none" viewBox="0 0 20 20"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
                                 <h3 className="mb-5 text-lg poppins-regular text-gray-500">Tem certeza que deseja excluir este usuário?</h3>
                                 <button onClick={() => { deletarUsuario(usuarioParaDeletar); setMostrarModalConfirmacao(false); }} className="text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-[#7F56D8] poppins-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
                                     Sim, excluir
                                     </button>
-                                <button onClick={() => { setMostrarModalConfirmacao(false); setUsuarioParaDeletar(null); }} className="py-2.5 px-5 ms-3 text-sm poppins-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100" >
+                                <button onClick={() => { setMostrarModalConfirmacao(false); setUsuarioParaDeletar(null); }} className="py-2.5 px-5 ms-3 text-sm poppins-medium text-gray-900 focus:outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100" >
                                     Cancelar
                                 </button>
                             </div>

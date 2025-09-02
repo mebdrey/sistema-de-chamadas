@@ -37,6 +37,43 @@ insert into pool (titulo, descricao) values
 ('apoio_tecnico', 'Suporte e atendimento técnico' ),
 ('limpeza', 'Serviços de limpeza' );
 
+/*
+CREATE TABLE funcao_pool (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    funcao VARCHAR(100) NOT NULL,
+    pool_id INT NOT NULL,
+    FOREIGN KEY (pool_id) REFERENCES pool(id) ON DELETE CASCADE
+);
+
+-- Técnico tem acesso a externo, manutenção, apoio técnico
+INSERT INTO funcao_pool (funcao, pool_id)
+SELECT 'tecnico', id FROM pool WHERE titulo IN ('externo', 'manutencao', 'apoio_tecnico');
+
+-- Auxiliar de limpeza tem acesso apenas a limpeza
+INSERT INTO funcao_pool (funcao, pool_id)
+SELECT 'auxiliar_limpeza', id FROM pool WHERE titulo = 'limpeza';
+
+-- Admin tem acesso a todos
+INSERT INTO funcao_pool (funcao, pool_id)
+SELECT 'admin', id FROM pool;
+
+-- Usuário comum pode solicitar todos os serviços
+INSERT INTO funcao_pool (funcao, pool_id)
+SELECT 'usuario', id FROM pool;
+
+
+DELIMITER $$
+CREATE TRIGGER after_usuario_insert
+AFTER INSERT ON usuarios
+FOR EACH ROW
+BEGIN
+    INSERT INTO usuario_servico (usuario_id, servico_id)
+    SELECT NEW.id, pool_id FROM funcao_pool
+    WHERE funcao = NEW.funcao;
+END$$
+
+DELIMITER ;
+*/
 CREATE TABLE usuario_servico (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
@@ -278,7 +315,6 @@ VALUES
 (1000068,'Limpeza interna do PC','Retirando poeira e trocando pasta térmica.',4,9,17,NULL,1,'concluido','2025-04-07 08:30:00','2025-04-07 10:00:00'),
 (1000070,'Instalação de software','Instalando novo sistema de gestão.',3,5,25,NULL,2,'concluido','2025-04-08 09:30:00','2025-04-08 11:00:00'),
 (1000074,'Troca de mouse','Mouse defeituoso substituído.',2,4,14,NULL,1,'concluido','2025-04-09 08:00:00','2025-04-09 08:10:00');
-
 
 -- Criação da tabela `apontamentos`
 CREATE TABLE apontamentos (

@@ -185,7 +185,7 @@ export default function GraficoChamadosPorAno() {
       <div className="grid grid-cols-1 border-t border-gray-200 pt-5">
         <div className="flex justify-between items-center">
           <div className="relative">
-            <button onClick={() => setDropdownPrioridadeOpen(!dropdownPrioridadeOpen)} className="text-sm gap-2 poppins-medium text-gray-500 hover:text-gray-900 inline-flex items-center dark:hover:text-gray-500 dark:text-gray-400">
+            <button onClick={() => setDropdownPrioridadeOpen(!dropdownPrioridadeOpen)} className="text-sm gap-2 poppins-medium text-gray-500 hover:text-gray-900 inline-flex items-center dark:text-gray-400 dark:hover:text-white">
               {prioridadeSelecionada ? (
                 <span className="inline-flex items-center gap-1">
                   Prioridade {prioridadeSelecionada}

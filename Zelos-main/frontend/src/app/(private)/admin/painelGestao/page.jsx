@@ -117,28 +117,28 @@ export default function PainelGestao() {
   });
 
   // para criação de setor inline
-const [novoSetorErrors, setNovoSetorErrors] = useState({
-  titulo: false,
-  descricao: false,
-  showMessage: false
-});
+  const [novoSetorErrors, setNovoSetorErrors] = useState({
+    titulo: false,
+    descricao: false,
+    showMessage: false
+  });
 
-// para criação de prioridade inline
-const [novaPrioridadeErrors, setNovaPrioridadeErrors] = useState({
-  nome: false,
-  horas_limite: false,
-  showMessage: false
-});
+  // para criação de prioridade inline
+  const [novaPrioridadeErrors, setNovaPrioridadeErrors] = useState({
+    nome: false,
+    horas_limite: false,
+    showMessage: false
+  });
 
-const handleNovoSetorChange = (field, value) => {
-  setNovoSetor(prev => ({ ...prev, [field]: value }));
-  setNovoSetorErrors(prev => ({ ...prev, [field]: false, showMessage: false }));
-};
+  const handleNovoSetorChange = (field, value) => {
+    setNovoSetor(prev => ({ ...prev, [field]: value }));
+    setNovoSetorErrors(prev => ({ ...prev, [field]: false, showMessage: false }));
+  };
 
-const handleNovaPrioridadeChange = (field, value) => {
-  setNovaPrioridade(prev => ({ ...prev, [field]: value }));
-  setNovaPrioridadeErrors(prev => ({ ...prev, [field]: false, showMessage: false }));
-};
+  const handleNovaPrioridadeChange = (field, value) => {
+    setNovaPrioridade(prev => ({ ...prev, [field]: value }));
+    setNovaPrioridadeErrors(prev => ({ ...prev, [field]: false, showMessage: false }));
+  };
 
   useEffect(() => {
     loadAll();
@@ -564,47 +564,47 @@ const handleNovaPrioridadeChange = (field, value) => {
 
 
   // ---------- Outras funções existentes (setores, prioridades, etc) são mantidas e apenas adaptadas se necessário ----------
-const handleCriarSetorInline = async (e) => {
-  if (e && e.preventDefault) e.preventDefault();
+  const handleCriarSetorInline = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
 
-  const tituloTrim = String(novoSetor.titulo || "").trim();
-  const descricaoTrim = String(novoSetor.descricao || "").trim();
+    const tituloTrim = String(novoSetor.titulo || "").trim();
+    const descricaoTrim = String(novoSetor.descricao || "").trim();
 
-  const errors = {
-    titulo: !tituloTrim,
-    descricao: !descricaoTrim,
-    showMessage: false
+    const errors = {
+      titulo: !tituloTrim,
+      descricao: !descricaoTrim,
+      showMessage: false
+    };
+
+    if (errors.titulo || errors.descricao) {
+      errors.showMessage = true;
+      setNovoSetorErrors(errors);
+      return;
+    }
+
+    // reset errors antes de enviar
+    setNovoSetorErrors({ titulo: false, descricao: false, showMessage: false });
+
+    try {
+      const payload = { titulo: tituloTrim, descricao: descricaoTrim };
+      const res = await fetchWithTimeout(`${API_BASE_URL}/pool`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload)
+      }, 10000);
+
+      addToast({ title: "Sucesso", msg: "Setor criado", type: "success" });
+
+      setSetores(prev => [{ id: res.id || Date.now(), titulo: res.titulo || payload.titulo, descricao: res.descricao || payload.descricao }, ...prev]);
+
+      setNovoSetor({ titulo: "", descricao: "" });
+      setIsCreatingSetorRow(false);
+    } catch (err) {
+      console.error('[handleCriarSetorInline] erro:', err);
+      showToast("danger", "Erro ao criar setor");
+    }
   };
-
-  if (errors.titulo || errors.descricao) {
-    errors.showMessage = true;
-    setNovoSetorErrors(errors);
-    return;
-  }
-
-  // reset errors antes de enviar
-  setNovoSetorErrors({ titulo: false, descricao: false, showMessage: false });
-
-  try {
-    const payload = { titulo: tituloTrim, descricao: descricaoTrim };
-    const res = await fetchWithTimeout(`${API_BASE_URL}/pool`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(payload)
-    }, 10000);
-
-    addToast({ title: "Sucesso", msg: "Setor criado", type: "success" });
-
-    setSetores(prev => [{ id: res.id || Date.now(), titulo: res.titulo || payload.titulo, descricao: res.descricao || payload.descricao }, ...prev]);
-
-    setNovoSetor({ titulo: "", descricao: "" });
-    setIsCreatingSetorRow(false);
-  } catch (err) {
-    console.error('[handleCriarSetorInline] erro:', err);
-    showToast("danger", "Erro ao criar setor");
-  }
-};
 
   // States
   const [setorParaExcluir, setSetorParaExcluir] = useState(null);
@@ -652,45 +652,45 @@ const handleCriarSetorInline = async (e) => {
     setPrioridadeForm({ ...prioridadeForm, [e.target.name]: e.target.value });
   };
 
-const handleCriarPrioridadeInline = async () => {
-  const nomeTrim = String(novaPrioridade.nome || '').trim();
-  const horas = novaPrioridade.horas_limite;
+  const handleCriarPrioridadeInline = async () => {
+    const nomeTrim = String(novaPrioridade.nome || '').trim();
+    const horas = novaPrioridade.horas_limite;
 
-  const errors = {
-    nome: !nomeTrim,
-    horas_limite: (horas === '' || horas === null || isNaN(Number(horas)) || Number(horas) <= 0),
-    showMessage: false
+    const errors = {
+      nome: !nomeTrim,
+      horas_limite: (horas === '' || horas === null || isNaN(Number(horas)) || Number(horas) <= 0),
+      showMessage: false
+    };
+
+    if (errors.nome || errors.horas_limite) {
+      errors.showMessage = true;
+      setNovaPrioridadeErrors(errors);
+      return;
+    }
+
+    // reset errors antes de enviar
+    setNovaPrioridadeErrors({ nome: false, horas_limite: false, showMessage: false });
+
+    try {
+      const payload = { nome: nomeTrim, horas_limite: Number(horas) };
+      const res = await fetchWithTimeout(`${API_BASE_URL}/prioridades`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload)
+      }, 10000);
+
+      showToast("success", "Prioridade adicionada com sucesso");
+      setIsCreatingPrioridadeRow(false);
+      setNovaPrioridade({ nome: "", horas_limite: 0 });
+
+      // recarrega a lista para garantir consistência
+      await loadAll();
+    } catch (err) {
+      console.error('[handleCriarPrioridadeInline] erro:', err);
+      showToast("danger", "Erro ao criar prioridade");
+    }
   };
-
-  if (errors.nome || errors.horas_limite) {
-    errors.showMessage = true;
-    setNovaPrioridadeErrors(errors);
-    return;
-  }
-
-  // reset errors antes de enviar
-  setNovaPrioridadeErrors({ nome: false, horas_limite: false, showMessage: false });
-
-  try {
-    const payload = { nome: nomeTrim, horas_limite: Number(horas) };
-    const res = await fetchWithTimeout(`${API_BASE_URL}/prioridades`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(payload)
-    }, 10000);
-
-    showToast("success", "Prioridade adicionada com sucesso");
-    setIsCreatingPrioridadeRow(false);
-    setNovaPrioridade({ nome: "", horas_limite: 0 });
-
-    // recarrega a lista para garantir consistência
-    await loadAll();
-  } catch (err) {
-    console.error('[handleCriarPrioridadeInline] erro:', err);
-    showToast("danger", "Erro ao criar prioridade");
-  }
-};
 
   // Edit Prioridade
   const [editPrioridade, setEditPrioridade] = useState(null);
@@ -1047,8 +1047,8 @@ const handleCriarPrioridadeInline = async () => {
                                   <div className="px-6 py-2">
                                     <input type="text" placeholder="Título do setor" value={novoSetor.titulo} onChange={(e) => handleNovoSetorChange('titulo', e.target.value)}
                                       className={`inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-sm ${novoSetorErrors.titulo ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-[#7F56D8] focus:border-[#7F56D8]'} poppins-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 focus:outline-none `}
-                                      required/>
-                                      {novoSetorErrors.titulo && <div className="text-xs text-red-500 mt-1">Preencha este campo</div>}
+                                      required />
+                                    {novoSetorErrors.titulo && <div className="text-xs text-red-500 mt-1">Preencha este campo</div>}
                                   </div>
                                 </div>
                               </td>
@@ -1057,7 +1057,7 @@ const handleCriarPrioridadeInline = async () => {
                               <td className="px-6 py-2">
                                 <textarea placeholder="Descrição do setor"
                                   value={novoSetor.descricao} onChange={(e) => handleNovoSetorChange('descricao', e.target.value)} className={`inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-sm ${novoSetorErrors.descricao ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-[#7F56D8] focus:border-[#7F56D8]'} poppins-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 focus:outline-none `} rows={2} />
-                                  {novoSetorErrors.descricao && <div className="text-xs text-red-500 mt-1">Preencha este campo</div>}
+                                {novoSetorErrors.descricao && <div className="text-xs text-red-500 mt-1">Preencha este campo</div>}
                               </td>
 
                               {/* Coluna: Ações (Salvar / Cancelar) */}
@@ -1138,12 +1138,12 @@ const handleCriarPrioridadeInline = async () => {
                                   {/* Coluna: Nome */}
                                   <td className="px-6 py-2">
                                     {editPrioridade?.id === p.id ? (
-      <>
-                                      <input type="text" value={editPrioridade.nome} onChange={(e) => handleNovaPrioridadeChange('nome', e.target.value)} className={`dark:bg-gray-900 w-full p-2 border rounded-lg text-sm ${novaPrioridadeErrors.nome ? 'border-red-500 ring-1 ring-red-500' : 'focus:outline-none focus:ring-2 focus:ring-violet-500'}`} required />
-                                       {novaPrioridadeErrors.horas_limite && (
-        <div className="text-xs text-red-500 mt-1">Preencha este campo</div>
-      )}
-      </>
+                                      <>
+                                        <input type="text" value={editPrioridade.nome} onChange={(e) => handleNovaPrioridadeChange('nome', e.target.value)} className={`dark:bg-gray-900 w-full p-2 border rounded-lg text-sm ${novaPrioridadeErrors.nome ? 'border-red-500 ring-1 ring-red-500' : 'focus:outline-none focus:ring-2 focus:ring-violet-500'}`} required />
+                                        {novaPrioridadeErrors.horas_limite && (
+                                          <div className="text-xs text-red-500 mt-1">Preencha este campo</div>
+                                        )}
+                                      </>
                                     ) : (
                                       <span className="text-sm text-gray-800 dark:text-gray-200">{formatarLabel(p.nome)}</span>
                                     )}
@@ -1153,11 +1153,11 @@ const handleCriarPrioridadeInline = async () => {
                                   <td className="px-6 py-2">
                                     {editPrioridade?.id === p.id ? (
                                       <>
-                                      <input type="number" value={editPrioridade.horas_limite} onChange={(e) => handleNovaPrioridadeChange('horas_limite', e.target.value)} className={`dark:bg-gray-900 w-full p-2 border rounded-lg text-sm ${novaPrioridadeErrors.horas_limite ? 'border-red-500 ring-1 ring-red-500' : 'focus:outline-none focus:ring-2 focus:ring-violet-500'}`}  required />
-                                       {novaPrioridadeErrors.horas_limite && (
-        <div className="text-xs text-red-500 mt-1">Preencha este campo</div>
-      )}
-      </>
+                                        <input type="number" value={editPrioridade.horas_limite} onChange={(e) => handleNovaPrioridadeChange('horas_limite', e.target.value)} className={`dark:bg-gray-900 w-full p-2 border rounded-lg text-sm ${novaPrioridadeErrors.horas_limite ? 'border-red-500 ring-1 ring-red-500' : 'focus:outline-none focus:ring-2 focus:ring-violet-500'}`} required />
+                                        {novaPrioridadeErrors.horas_limite && (
+                                          <div className="text-xs text-red-500 mt-1">Preencha este campo</div>
+                                        )}
+                                      </>
                                     ) : (
                                       <span className="text-sm text-gray-800 dark:text-gray-200">{p.horas_limite} horas</span>
                                     )}
