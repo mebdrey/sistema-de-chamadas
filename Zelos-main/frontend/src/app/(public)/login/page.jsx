@@ -213,13 +213,13 @@ export default function Login() {
                 <p className="text-red-500 text-sm mb-10 poppins-regular">{erro}</p>
               )}
               {/* concordancia com os termos */}
-              <div className="flex justify-between items-center mb-4 mb-10">
+              {/* <div className="flex justify-between items-center mb-4 mb-10">
                 <div className="flex items-center">
                   <input type="checkbox" id="hs-default-checkbox" className="accent-[#7F56D8] shrink-0 border-[#7F56D8] rounded-sm focus:ring-[#7F56D8] disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:focus:ring-offset-gray-800" />
                   <label htmlFor="hs-default-checkbox" className="text-sm text-gray-500 ms-3 dark:text-neutral-400 poppins-regular">Eu li e concordo com os <a href="#" className="text-[#7F56D8] hover:underline poppins-regular">termos</a>.</label>
                 </div>
                 <div><Link href="/forgotPassword"><p className="text-sm text-[#7F56D8] hover:underline poppins-regular">Esqueci a senha</p></Link></div>
-              </div>
+              </div> */}
 
               {/* botao de entrar */}
               <button type="submit" disabled={loading} className="text-white bg-violet-500 hover:bg-violet-600 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-full text-sm w-full px-5 py-4 text-center dark:bg-violet-500 dark:hover:bg-violet-600 dark:focus:ring-violet-500 poppins-regular px-18"> {loading ? (

@@ -168,27 +168,86 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
     return () => clearInterval(interval);
   }, [chamadoSelecionado]);
 
+  // helper: retorna horas limite a partir do id da prioridade (procura em tiposPrioridade)
+  function getHorasLimiteFromPrioridadeId(prioridade_id) {
+    if (!prioridade_id) return null;
+    const p = tiposPrioridade.find(pr => Number(pr.id) === Number(prioridade_id));
+    if (p && (p.horas_limite != null)) return Number(p.horas_limite);
+    return null;
+  }
 
+  // calcula data_limite ISO a partir de criado_em (ISO) + horas (int)
+  // retorna string ISO (toISOString) ou null
+  function computeDataLimiteFromCriadoISO(criadoEmISO, horasLimite) {
+    if (!criadoEmISO) return null;
+    const horas = Number(horasLimite) || 0;
+    // cria objeto Date seguro
+    const d = new Date(criadoEmISO);
+    if (isNaN(d.getTime())) return null;
+    return new Date(d.getTime() + horas * 60 * 60 * 1000).toISOString();
+  }
+
+  // const atualizarChamados = async () => {
+  //   try {
+  //     const fetchChamados = async (status) => {
+  //       const res = await fetch(`http://localhost:8080/chamados-funcionario?status=${status}`, { credentials: 'include' });
+
+  //       if (!res.ok) {
+  //         console.error(`Erro ao buscar chamados com status "${status}":`, res.status);
+  //         return []; // Retorna array vazio se der erro
+  //       }
+
+  //       const data = await res.json();
+  //       return Array.isArray(data) ? data : [];
+  //     };
+
+  //     if (abaAtiva === 'todos') {
+  //       const [pendente, andamento, concluido] = await Promise.all([fetchChamados('pendente'), fetchChamados('em-andamento'), fetchChamados('concluido')]);
+  //       setChamados([...pendente, ...andamento, ...concluido]);
+  //     } else {
+  //       const data = await fetchChamados(abaAtiva.replace('-', ' '));
+  //       setChamados(data);
+  //     }
+  //   } catch (err) {
+  //     console.error('Erro ao carregar chamados:', err);
+  //     setChamados([]);
+  //   }
+  // };
   const atualizarChamados = async () => {
     try {
-      const fetchChamados = async (status) => {
+      const fetchChamadosPorStatus = async (status) => {
         const res = await fetch(`http://localhost:8080/chamados-funcionario?status=${status}`, { credentials: 'include' });
-
         if (!res.ok) {
           console.error(`Erro ao buscar chamados com status "${status}":`, res.status);
-          return []; // Retorna array vazio se der erro
+          return [];
         }
-
         const data = await res.json();
         return Array.isArray(data) ? data : [];
       };
 
+      // função que adiciona data_limite_calculada baseada em prioridade localmente
+      const enrichWithCalculatedDeadline = (lista) => {
+        return lista.map(item => {
+          // se já tiver data_limite do backend, mantemos
+          if (item.data_limite) return item;
+          const horas = getHorasLimiteFromPrioridadeId(item.prioridade_id);
+          const calc = computeDataLimiteFromCriadoISO(item.criado_em, horas);
+          return { ...item, data_limite_calculada: calc || null };
+        });
+      };
+
       if (abaAtiva === 'todos') {
-        const [pendente, andamento, concluido] = await Promise.all([fetchChamados('pendente'), fetchChamados('em-andamento'), fetchChamados('concluido')]);
-        setChamados([...pendente, ...andamento, ...concluido]);
+        const [pendente, andamento, concluido] = await Promise.all([
+          fetchChamadosPorStatus('pendente'),
+          fetchChamadosPorStatus('em-andamento'),
+          fetchChamadosPorStatus('concluido'),
+        ]);
+        const unidos = [...pendente, ...andamento, ...concluido];
+        setChamados(enrichWithCalculatedDeadline(unidos));
       } else {
-        const data = await fetchChamados(abaAtiva.replace('-', ' '));
-        setChamados(data);
+        const statusParam = abaAtiva.replace('-', ' ');
+        const data = await fetchChamadosPorStatus(statusParam);
+        setChamados(enrichWithCalculatedDeadline(data));
       }
     } catch (err) {
       console.error('Erro ao carregar chamados:', err);
@@ -267,58 +326,60 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
   //     await atualizarChamados();
   //   } catch (err) { showToast('danger', err.message || 'Erro desconhecido'); }
   // };
-  
-// soma horas corridas: cria_em + horas_limite
-const computeDataLimiteFromCriado = (criadoEmISO, horasLimite) => {
-  if (!criadoEmISO) return null;
-  const horas = Number(horasLimite) || 24;
-  const d = new Date(criadoEmISO);
-  d.setHours(d.getHours() + horas);
-  return d.toISOString();
-};
 
-const pegarChamado = async (chamadoId) => {
-  try {
-    const resp = await fetch('http://localhost:8080/pegar-chamado', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chamado_id: chamadoId }),
-    });
+  const pegarChamado = async (chamadoId) => {
+    try {
+      const resp = await fetch('http://localhost:8080/pegar-chamado', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chamado_id: chamadoId }),
+      });
 
-    const data = await resp.json();
-    if (!resp.ok) {
-      // falha simples, mostra toast e retorna
-      showToastLocal('danger', data.erro || `Erro HTTP ${resp.status}`);
-      return;
+      const data = await resp.json();
+      if (!resp.ok) {
+        // falha simples, mostra toast e retorna
+        showToastLocal('danger', data.erro || `Erro HTTP ${resp.status}`);
+        return;
+      }
+
+      // const atualizado = data.chamado || data || {};
+
+      // // prioridade 1: se backend já retornou data_limite, usa
+      // if (!atualizado.data_limite && atualizado.data_limite_calculada) {
+      //   atualizado.data_limite = atualizado.data_limite_calculada;
+      // }
+
+      // // RECEBE 'atualizado' do backend
+      // // Simples: confia em atualizado.data_limite e atualizado.prioridade_horas_limite
+      // if (!atualizado.data_limite) {
+      //   // Se backend já devolveu prioridade_horas_limite (deve sempre devolver),
+      //   // calcula somente como fallback local — mas ideal é o backend enviar data_limite.
+      //   if (atualizado.prioridade_horas_limite != null && atualizado.criado_em) {
+      //     atualizado.data_limite = computeDataLimiteFromCriado(atualizado.criado_em, atualizado.prioridade_horas_limite);
+      //   } else {
+      //     // não temos informação suficiente — manter nulo (UI vai mostrar "Prazo não definido")
+      //     atualizado.data_limite = null;
+      //   }
+      // }
+      const atualizado = data.chamado || data || {};
+
+      // se backend não retornou data_limite, tenta usar prioridade_horas_limite ou tiposPrioridade
+      if (!atualizado.data_limite) {
+        const horas = atualizado.prioridade_horas_limite ?? getHorasLimiteFromPrioridadeId(atualizado.prioridade_id);
+        if (horas && atualizado.criado_em) {
+          atualizado.data_limite_calculada = computeDataLimiteFromCriadoISO(atualizado.criado_em, horas);
+        } else {
+          atualizado.data_limite_calculada = null;
+        }
+      }
+      setChamadoSelecionado(atualizado);
+
+      await atualizarChamados();
+    } catch (err) {
+      showToastLocal('danger', err.message || 'Erro ao carregar chamado');
     }
-
-    const atualizado = data.chamado || data || {};
-
-    // prioridade 1: se backend já retornou data_limite, usa
-    if (!atualizado.data_limite && atualizado.data_limite_calculada) {
-      atualizado.data_limite = atualizado.data_limite_calculada;
-    }
-
-   // RECEBE 'atualizado' do backend
-// Simples: confia em atualizado.data_limite e atualizado.prioridade_horas_limite
-if (!atualizado.data_limite) {
-  // Se backend já devolveu prioridade_horas_limite (deve sempre devolver),
-  // calcula somente como fallback local — mas ideal é o backend enviar data_limite.
-  if (atualizado.prioridade_horas_limite != null && atualizado.criado_em) {
-    atualizado.data_limite = computeDataLimiteFromCriado(atualizado.criado_em, atualizado.prioridade_horas_limite);
-  } else {
-    // não temos informação suficiente — manter nulo (UI vai mostrar "Prazo não definido")
-    atualizado.data_limite = null;
-  }
-}
-setChamadoSelecionado(atualizado);
-
-    await atualizarChamados();
-  } catch (err) {
-    showToastLocal('danger', err.message || 'Erro ao carregar chamado');
-  }
-};
+  };
 
   // FECHAR O DRAWER COM ESC 
   useEffect(() => {
@@ -450,27 +511,33 @@ setChamadoSelecionado(atualizado);
 
   // calcula tempo restante / data limite
   const [tempoRestante, setTempoRestante] = useState("");
+  const prazoISO = chamadoSelecionado?.data_limite || chamadoSelecionado?.data_limite_calculada || null;
 
-useEffect(() => {
-  if (!chamadoSelecionado?.id) { setTempoRestante(''); return; }
-  const prazoISO = chamadoSelecionado.data_limite || chamadoSelecionado.data_limite_calculada;
-  if (!prazoISO) { setTempoRestante('Prazo não definido'); return; }
+  useEffect(() => {
+    // se não tem chamado selecionado, limpa
+    if (!chamadoSelecionado?.id) { setTempoRestante(''); return; }
 
-  const atualizar = () => {
-    const agora = new Date();
-    const limite = new Date(prazoISO);
-    const diff = limite - agora;
-    if (diff <= 0) { setTempoRestante('Prazo expirado'); return; }
-    const dias = Math.floor(diff / (1000*60*60*24));
-    const horas = Math.floor((diff / (1000*60*60)) % 24);
-    const minutos = Math.floor((diff / (1000*60)) % 60);
-    setTempoRestante(dias > 0 ? `${dias}d ${horas}h ${minutos}m` : `${String(horas).padStart(2,'0')}:${String(minutos).padStart(2,'0')}`);
-  };
+    // usa a variável compartilhada definida no escopo do componente
+    if (!prazoISO) { setTempoRestante('Prazo não definido'); return; }
 
-  atualizar();
-  const id = setInterval(atualizar, 60 * 1000);
-  return () => clearInterval(id);
-}, [chamadoSelecionado]);
+    // valida a data
+    const limiteDate = new Date(prazoISO);
+    if (isNaN(limiteDate.getTime())) { setTempoRestante('Prazo inválido'); return; }
+
+    const atualizar = () => {
+      const agora = new Date();
+      const diff = limiteDate.getTime() - agora.getTime();
+      if (diff <= 0) { setTempoRestante('Prazo expirado'); return; }
+      const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const horas = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutos = Math.floor((diff / (1000 * 60)) % 60);
+      setTempoRestante(dias > 0 ? `${dias}d ${horas}h ${minutos}m` : `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`);
+    };
+
+    atualizar();
+    const id = setInterval(atualizar, 60 * 1000);
+    return () => clearInterval(id);
+  }, [chamadoSelecionado, prazoISO]);
 
   return ( //PÁGINA
     <>{/* conteudo da pagina */}
@@ -584,7 +651,13 @@ useEffect(() => {
                     {chamadosFiltrados.length === 0 ? (<div className="p-4 md:p-5"><p className="text-gray-500 dark:text-neutral-400">Nenhum chamado encontrado.</p></div>
                     ) : (
                       chamadosFiltrados.map((chamado) => ( //CARD DOS CHAMADOS
-                        <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl  dark:bg-gray-800 dark:border-gray-700 dark:border-t-violet-500 dark:shadow-neutral-700/70 cursor-pointer">
+                        <div key={chamado.id} onClick={() => {
+                          // adiciona deadline calculada se o backend não tiver
+                          const horas = getHorasLimiteFromPrioridadeId(chamado.prioridade_id);
+                          const calc = chamado.data_limite || computeDataLimiteFromCriadoISO(chamado.criado_em, horas);
+                          setChamadoSelecionado({ ...chamado, data_limite_calculada: (!chamado.data_limite ? calc : null) });
+                          setIsOpen(true);
+                        }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-blue-600 shadow-2xs rounded-xl  dark:bg-gray-800 dark:border-gray-700 dark:border-t-violet-500 dark:shadow-neutral-700/70 cursor-pointer">
                           <div className="flex items-center flex-wrap gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:border-neutral-700">
                             <h3 className="wrap-break-word break-normal whitespace-normal text-base poppins-bold text-gray-800 dark:text-white">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
                             <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 cursor-pointer">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
@@ -717,16 +790,21 @@ useEffect(() => {
                           </div>
                           <div className="px-8">
                             <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Prazo (data limite)</p>
-                            {/* <p className="mb-6 text-lg poppins-bold text-gray-800 dark:text-gray-400 wrap-break-word break-normal whitespace-normal"> */}
-                               {chamadoSelecionado?.data_limite
-    ? <p className="mb-1 text-lg poppins-bold text-gray-800 dark:text-gray-400">
-        {new Date(chamadoSelecionado.data_limite).toLocaleString('pt-BR')}
-      </p>
-    : <p className="mb-1 text-lg poppins-bold text-gray-800 dark:text-gray-400">Prazo não definido</p>
-  }
 
-  <p className="mb-6 text-sm text-gray-600">{tempoRestante || ''}</p>
-  {/* </p> */}
+                            {prazoISO
+                              ? (
+                                <p className="mb-1 text-lg poppins-bold text-gray-800 dark:text-gray-400">
+                                  {new Date(prazoISO).toLocaleString('pt-BR')}
+                                </p>
+                              )
+                              : (
+                                <p className="mb-1 text-lg poppins-bold text-gray-800 dark:text-gray-400">
+                                  Prazo não definido
+                                </p>
+                              )
+                            }
+
+                            <p className="mb-6 text-sm text-gray-600">{tempoRestante || ''}</p>
                           </div>
                           <div className="px-8">
                             <p className="mb-2 text-base text-gray-500 dark:text-gray-400">Chamado ID</p>

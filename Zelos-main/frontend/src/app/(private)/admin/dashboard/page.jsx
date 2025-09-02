@@ -155,7 +155,7 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
           <div className="flex items-center justify-content mt-5 mb-4 gap-4 flex-wrap">
             {/* Botão com dropdown */}
             <div className="relative">
-              <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-[#7F56D8] hover:bg-[#E6DAFF] px-3 py-2 hover:cursor-pointer" onClick={() => setDropdownChamadosStatusOpen(prev => !prev)}>Gerar relatório <svg className="w-3.5 h-3.5 text-[#7F56D8] me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20"><path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" /><path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" /></svg>
+              <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-[#7F56D8] hover:bg-[#E6DAFF] dark:hover:bg-gray-700 px-3 py-2 hover:cursor-pointer" onClick={() => setDropdownChamadosStatusOpen(prev => !prev)}>Gerar relatório <svg className="w-3.5 h-3.5 text-[#7F56D8] me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20"><path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" /><path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" /></svg>
               </button>
               {dropdownChamadosStatusOpen && (
                 <div className="absolute z-10 mt-2 bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm w-40 dark:bg-gray-800">
@@ -180,19 +180,65 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
         </div>
       </div>
       { /*CARDS DA QUANTIDADE DE CHAMADOS p mes*/}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 items-start">
-        <div className="col-span-2 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600"><GraficoChamadosPorAno /></div>
-        <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600"><KpiSla /></div>
-      </div>
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 items-start">
+        <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600"><GraficoChamadosPorAno /></div>
+        <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600"><KpiSla /></div>
+      </div> */}
+{/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 md:items-stretch items-start">
+  <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col">
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 md:items-center items-start">
+    <div className="flex-1">
+      <GraficoChamadosPorAno />
+    </div>
+  </div>
+
+  <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col">
+    <div className="flex-1">
+      <KpiSla />
+    </div>
+  </div>
+</div> */}
+
+
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 md:items-center items-start">
         <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 mb-4 g-700 dark:bg-gray-800 dark:border dark:border-gray-600">
           <ChamadosPorPrioridade />
         </div>
         <div className="col-span-1 flex items-center justify-start mb-4 rounded-sm dark:bg-gray-800 dark:border dark:border-gray-600">
           <GraficoFuncionarios />
         </div>
-      </div>
+      </div> */}
+      
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 md:items-stretch items-start">
+  <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col md:min-h-[360px]">
+    <div className="flex-1">
+      <GraficoChamadosPorAno />
+    </div>
+  </div>
+
+  <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col md:min-h-[360px]">
+    <div className="flex-1">
+      <KpiSla />
+    </div>
+  </div>
+</div>
+
+{/* próximo bloco */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 md:items-stretch items-start">
+  <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col md:min-h-[360px]">
+    <div className="flex-1">
+      <ChamadosPorPrioridade />
+    </div>
+  </div>
+
+  <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col md:min-h-[360px]">
+    <div className="flex-1">
+      <GraficoFuncionarios />
+    </div>
+  </div>
+</div>
+
     </div>
   );
 }

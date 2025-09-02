@@ -26,7 +26,7 @@ export const listarChamadosDisponiveisController = async (req, res) => {
 //         res.status(200).json({ mensagem: 'Chamado atribuído com sucesso.', chamado: chamadoAtualizado });
 //     } catch (error) { res.status(400).json({ erro: error.message }); }
 // };
-// Substitua pelo bloco abaixo no controller
+
 export const pegarChamadoController = async (req, res) => {
   const usuario_id = req.user?.id;
   const { chamado_id } = req.body;

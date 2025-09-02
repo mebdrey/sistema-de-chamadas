@@ -463,34 +463,37 @@ export async function contarChamadosPorPool({
 export async function calcularSlaCumprido() {
   try {
     const sql = `
-      SELECT 
-        COUNT(*) AS total,
-        SUM(CASE 
-              WHEN status_chamado = 'concluido' 
-               AND finalizado_em <= data_limite 
+      SELECT
+        COUNT(*) AS totalConcluidos,
+        SUM(CASE
+              WHEN c.finalizado_em <= COALESCE(c.data_limite,
+                  DATE_ADD(c.criado_em, INTERVAL COALESCE(p.horas_limite, 72) HOUR))
               THEN 1 ELSE 0 END) AS dentro_sla,
-        SUM(CASE 
-              WHEN status_chamado = 'concluido' 
-               AND finalizado_em > data_limite 
+        SUM(CASE
+              WHEN c.finalizado_em > COALESCE(c.data_limite,
+                  DATE_ADD(c.criado_em, INTERVAL COALESCE(p.horas_limite, 72) HOUR))
               THEN 1 ELSE 0 END) AS fora_sla
-      FROM chamados;
+      FROM chamados c
+      LEFT JOIN prioridades p ON c.prioridade_id = p.id
+      WHERE c.status_chamado = 'concluido' AND c.finalizado_em IS NOT NULL;
     `;
+
     const [row] = await readQuery(sql);
-    const total = row?.total || 0;
-    const dentro = row?.dentro_sla || 0;
-    const fora = row?.fora_sla || 0;
+
+    const total = Number(row?.totalConcluidos || 0);
+    const dentro = Number(row?.dentro_sla || 0);
+    const fora = Number(row?.fora_sla || 0);
 
     const percDentro = total > 0 ? Math.round((dentro / total) * 100) : 0;
     const percFora = total > 0 ? Math.round((fora / total) * 100) : 0;
 
     return {
-      total,
-      dentro: Number(dentro),
-      fora: Number(fora),
+      totalConcluidos: total,
+      dentro,
+      fora,
       percDentro,
       percFora
     };
-    
   } catch (err) {
     console.error("Erro no model calcularSlaCumprido:", err);
     throw err;

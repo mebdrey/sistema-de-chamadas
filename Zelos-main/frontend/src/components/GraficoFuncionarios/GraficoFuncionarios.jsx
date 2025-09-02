@@ -248,7 +248,7 @@ function formatarLabel(str) {
   }, []);
 
   return (
-    <div className=" w-2000 bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
+    <div className=" w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
       <div className="flex justify-between items-start pb-4 mb-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-start">
           <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center me-3">
@@ -280,7 +280,7 @@ function formatarLabel(str) {
         {!loading && apiData && apiData.categorias && apiData.categorias.length === 0 && (
           <div className="text-sm text-gray-500 mb-2 dark:text-gray-200">Nenhum funcionário com chamados nessa pool (no ano selecionado).</div>
         )}
-        <div id="column-chart" ref={chartRef} />
+        <div id="column-chart" ref={chartRef}  height="100%" />
       </div>
 
     <div className="relative">

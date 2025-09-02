@@ -334,7 +334,7 @@ const SideBar = ({ user, setUser, userType, navFechada, setNavFechada }) => {
                                     <div>
                                         <button type="button" id="dropdown-user-button" aria-expanded={dropdownUserOpen} onClick={() => setDropdownUserOpen(!dropdownUserOpen)} className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 ">
                                             <span className="sr-only">Open user menu</span>
-                                            <div className="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full">
+                                            <div className="relative w-8 h-8 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-700">
                                                 {user?.ftPerfil ? (
                                                     <img className="object-cover w-full h-full" src={`http://localhost:8080/${user.ftPerfil}`} alt="Foto de perfil" />
                                                 ) : (
