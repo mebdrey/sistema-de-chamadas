@@ -267,8 +267,7 @@ export const criarUsuarioController = async (req, res) => {
         }
 
         // 3) valida função e prepara payload
-        const allowedFunctions = ['admin', 'usuario', 'tecnico_externo', 'tecnico_manutencao', 'apoio_tecnico', 'auxiliar_limpeza'];
-        const finalFuncao = (funcao && allowedFunctions.includes(funcao)) ? funcao : 'usuario';
+        const finalFuncao = funcao
 
         const payload = {
             nome,
