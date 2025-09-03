@@ -499,3 +499,31 @@ export async function calcularSlaCumprido() {
     throw err;
   }
 }
+
+
+export async function obterAvaliacoesPorSetor({ ano = null } = {}) {
+  try {
+    let sql = `
+      SELECT
+        p.titulo AS setor,
+        COUNT(a.id) AS qtd,
+        ROUND(AVG(a.nota), 2) AS media_nota
+      FROM avaliacoes a
+      JOIN chamados c ON a.chamado_id = c.id
+      JOIN pool p     ON c.tipo_id = p.id
+      WHERE 1 = 1
+    `;
+    const params = [];
+    if (ano && Number.isInteger(Number(ano))) {
+      sql += ` AND YEAR(a.data_avaliacao) = ?`;
+      params.push(Number(ano));
+    }
+    sql += ` GROUP BY p.id, p.titulo
+             ORDER BY media_nota DESC, p.titulo ASC`;
+    const rows = await readQuery(sql, params);
+    return Array.isArray(rows) ? rows : [];
+  } catch (err) {
+    console.error('Erro model obterAvaliacoesPorSetor:', err);
+    throw err;
+  }
+}

@@ -1,5 +1,5 @@
 
-import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool, buscarUsuarioPorEmail, listarPrioridades, buscarPrioridadePorNome, atualizarPrioridade, excluirPrioridade, verAdmins, calcularSlaCumprido } from '../models/Admin.js'
+import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool, buscarUsuarioPorEmail, listarPrioridades, buscarPrioridadePorNome, atualizarPrioridade, excluirPrioridade, verAdmins, calcularSlaCumprido, obterAvaliacoesPorSetor } from '../models/Admin.js'
 import { criarNotificacao } from '../models/Notificacoes.js';
 import {getChamadoById} from '../models/Chamado.js'
 import { readAll, readQuery, update, deleteRecord } from '../config/database.js'; // Importar deleteRecord
@@ -563,3 +563,29 @@ export const slaCumpridoController = async (req, res) => {
       res.status(500).json({ erro: "Erro interno ao calcular SLA" });
     }
   };
+
+  export async function avaliacoesPorSetorController(req, res) {
+    try {
+      const ano = req.query.ano ? Number(req.query.ano) : null;
+      const dados = await obterAvaliacoesPorSetor({ ano });
+  
+      // categorias = nomes dos setores
+      const categorias = dados.map(d => d.setor);
+  
+      // série única: média de notas por setor
+      const series = [
+        { name: 'Média de notas', data: dados.map(d => Number(d.media_nota)) }
+      ];
+  
+      // opcional: enviar também tabela completa (setor, qtd, media_nota)
+      return res.status(200).json({
+        filtros: { ano: ano || 'todos' },
+        categorias,
+        series,
+        tabela: dados
+      });
+    } catch (err) {
+      console.error('Erro controller avaliacoesPorSetorController:', err);
+      return res.status(500).json({ erro: 'Erro interno ao montar relatório de avaliações por setor.' });
+    }
+  }
