@@ -8,6 +8,7 @@ import AnimatedNumber from '@/components/AnimatedValue/AnimatedValue';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import GraficoFuncionarios from '@/components/GraficoFuncionarios/GraficoFuncionarios';
+import AvaliacoesPorSetorChart from "@/components/AvaliacoesSetor/AvaliacoesSetor";
 
 export default function admDashboard() {
   const [modo, setModo] = useState('mensal'); // 'mensal' ou 'anual'
@@ -228,7 +229,8 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 md:items-stretch items-start">
   <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col md:min-h-[360px]">
     <div className="flex-1">
-      <ChamadosPorPrioridade />
+      {/* <ChamadosPorPrioridade /> */}
+      <AvaliacoesPorSetorChart />
     </div>
   </div>
 

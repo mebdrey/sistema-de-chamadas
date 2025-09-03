@@ -208,11 +208,6 @@ export default function Setores() {
                                         {/* Dropdown */}
                                         {dropdownAbertoId === usuario.id && (
                                             <div className="z-10 absolute right-0 mt-2 bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 rounded-lg shadow-sm w-44" role="menu" aria-orientation="vertical" aria-labelledby="dropdownMenuIconHorizontalButton" >
-                                                <ul className="py-2 text-sm text-gray-700 dark:text-gray-400 ">
-                                                    <li>
-                                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">Ver perfil</a>
-                                                    </li>
-                                                </ul>
                                                 <div className="py-2">
                                                     <a onClick={() => { setUsuarioParaDeletar(usuario.id); setMostrarModalConfirmacao(true); }} className="block px-4 py-2 text-sm dark:text-gray-400 text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" role="menuitem">Deletar usuário</a>
                                                 </div>

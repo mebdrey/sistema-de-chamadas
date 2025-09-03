@@ -22,6 +22,7 @@ export default function ChamadosAdmin() {
   const [usuariosPorSetor, setUsuariosPorSetor] = useState({ tecnicos: [], auxiliares: [] });
   const [tipoServico, setTipoServico] = useState(""); // recebe do chamado
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
+  const [usuarioAtribuido, setUsuarioAtribuido] = useState(null);
   const [openAtribuirDropdown, setOpenAtribuirDropdown] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ prioridade_id: "", tecnico_id: "", tipo_id: "", descricao: "", assunto: "", status_chamado: "", data_limite: "" });
@@ -514,7 +515,7 @@ export default function ChamadosAdmin() {
                     {chamadosFiltrados.length === 0 ? (
                       <div className="p-4 md:p-5 "><p className="text-gray-500"> Nenhum chamado encontrado.</p></div>
                     ) : (chamadosFiltrados.map((chamado) => (
-                      <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-violet-600 shadow-2xs rounded-xl dark:bg-gray-800 dark:border dark:border-gray-700 dark:border-neutral-700 dark:border-t-violet-500 dark:shadow-neutral-700/70 cursor-pointer dark:hover:border-violet-500">
+                      <div key={chamado.id} onClick={() => { setChamadoSelecionado(chamado); setIsOpen(true); }} className="justify-between p-4 md:p-5 flex flex-col bg-white border border-gray-200 border-t-4 border-t-violet-600 shadow-2xs rounded-xl dark:bg-gray-800 dark:border dark:border-gray-700 dark:border-neutral-700 dark:border-t-violet-500 dark:shadow-neutral-700/70 cursor-pointer hover:border-violet-500">
                         <div className="flex items-center gap-4 justify-between pt-2 pb-4 mb-4 border-b border-gray-200 dark:bg-gray-800 ">
                           <h3 className="text-base poppins-bold text-gray-800 dark:text-gray-200   ">{primeiraLetraMaiuscula(chamado.assunto)}</h3>
                           <button type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 poppins-medium rounded-full text-sm px-5 py-1 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-500 hover:cursor-pointer">{primeiraLetraMaiuscula(chamado.status_chamado)}</button>
@@ -526,7 +527,14 @@ export default function ChamadosAdmin() {
                           </div>
                           <div>
                             <p className="text-xs text-gray-500 dark:text-gray-100">Criado em</p>
-                            <p className="text-sm poppins-bold  dark:text-gray-200">{formatarDataSimples(chamado.criado_em)} </p>
+                            <p className="text-sm poppins-bold  dark:text-gray-200">{new Date(chamado.criado_em).toLocaleString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    })}
+                            </p>
                           </div>
                           <div>
                             <p className="text-xs text-gray-500 dark:text-gray-100">Prioridade</p>
@@ -613,7 +621,13 @@ export default function ChamadosAdmin() {
                 <p className="text-xs text-gray-400">Data limite</p>
                 {chamadoSelecionado?.data_limite ? (
                   <div className="mb-6">
-                    <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-300">{chamadoSelecionado?.data_limite}</p></div>
+                    <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-300">{new Date(chamadoSelecionado.data_limite).toLocaleString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    })}</p></div>
                 ) : (<p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-300">Chamado sem data limite.</p>)}
               </div>
               {/* Técnico / Atribuir */}
@@ -623,9 +637,19 @@ export default function ChamadosAdmin() {
                   {isEditing ? (
                     <>
                       <>
-                        <div className="flex items-center gap-2">
+                        {/* <div className="flex items-center gap-2">
                           <button onClick={() => setOpenAtribuirDropdown((v) => !v)} aria-expanded={openAtribuirDropdown} aria-controls="dropdownUsers" className="mt-2 py-2 px-6 inline-flex items-center gap-x-1 text-xs poppins-medium rounded-full border border-dashed border-gray-200 bg-white text-gray-800 hover:bg-gray-50 focus:outline-none">
                             Adicionar
+                          </button>
+                        </div> */}
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setOpenAtribuirDropdown((v) => !v)}
+                            aria-expanded={openAtribuirDropdown}
+                            aria-controls="dropdownUsers"
+                            className="mt-2 py-2 px-6 inline-flex items-center gap-x-1 text-xs poppins-medium rounded-full border border-dashed border-gray-200 bg-white text-gray-800 hover:bg-gray-50 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-500 dark:text-gray-300"
+                          >
+                            {usuarioAtribuido ? usuarioAtribuido.nome : "Adicionar"}
                           </button>
                         </div>
                         {openAtribuirDropdown && (
@@ -636,11 +660,11 @@ export default function ChamadosAdmin() {
                                   const selected = usuarioSelecionado === u.id;
                                   return (
                                     <li key={u.id}>
-                                      <button type="button" onClick={() => { setUsuarioSelecionado(u.id); setFormData(prev => ({ ...prev, tecnico_id: u.id })); }} className={`w-full text-left flex items-center px-4 py-2 focus:outline-none ${selected ? "bg-violet-100 dark:bg-violet-400 text-violet-800" : "hover:bg-gray-100 dark:hover:bg-violet-700"}`}>
+                                      <button type="button" onClick={() => { setUsuarioSelecionado(u.id); setFormData(prev => ({ ...prev, tecnico_id: u.id })); }} className={`w-full text-left flex items-center px-4 py-2 focus:outline-none ${selected ? "bg-violet-100 dark:bg-violet-400 text-violet-800" : "hover:bg-gray-100 dark:hover:bg-violet-500"}`}>
                                         <div className="relative w-8 h-8 overflow-hidden bg-gray-200 dark:bg-gray-700 rounded-full mr-4">
                                           {u.ftPerfil ? (
 
-                                            <img className="object-cover w-full h-full" src={`http://localhost:8080/${u.ftPerfil}`} alt={u.nome} />
+                                            <img className="object-cover w-full h-full" src={`http://localhost:8080/uploads/${u.ftPerfil}`} alt={u.nome} />
 
                                           ) : (<svg className="absolute w-10 h-10 text-gray-400  -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>)}
                                         </div>
@@ -653,11 +677,30 @@ export default function ChamadosAdmin() {
                               }
                             </ul>
                             <div className="border-t border-gray-200">
-                              <button type="button" onClick={() => {//fecha o dropdown e mantém a seleção em formData(o PATCH será feito pelo botão Salvar)
+                              {/* <button type="button" onClick={() => {//fecha o dropdown e mantém a seleção em formData(o PATCH será feito pelo botão Salvar)
                                 setOpenAtribuirDropdown(false);
                               }} disabled={!usuarioSelecionado} className={`w-full px-4 py-3 text-sm poppins-medium ${usuarioSelecionado ? "text-violet-600 bg-gray-50 dark:bg-gray-500" : "text-gray-400 bg-gray-100 dark:bg-gray-600 cursor-not-allowed"}`}>
-                                Selecionar
-                              </button>
+                                Atribuir
+                              </button> */}
+                              <button
+  type="button"
+  onClick={() => {
+    const user = usuariosFiltrados.find((u) => u.id === usuarioSelecionado);
+    if (user) {
+      setUsuarioAtribuido(user);
+    }
+    setOpenAtribuirDropdown(false);
+  }}
+  disabled={!usuarioSelecionado}
+  className={`w-full px-4 py-3 text-sm poppins-medium ${
+    usuarioSelecionado
+      ? "text-violet-600 bg-gray-50 dark:bg-gray-400"
+      : "text-gray-400 bg-gray-100 dark:bg-gray-600 cursor-not-allowed"
+  }`}
+>
+  Atribuir
+</button>
+
                             </div>
                           </div>
                         )}
@@ -675,7 +718,13 @@ export default function ChamadosAdmin() {
               </div>
               <div>
                 <p className="mb-2 text-sm text-gray-400 ">Criado em</p>
-                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-200">{formatarDataSimples(chamadoSelecionado?.criado_em)} </p>
+                <p className="mb-6 text-sm poppins-bold text-gray-800 dark:text-gray-200">{new Date(chamadoSelecionado?.criado_em).toLocaleString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    })}</p>
               </div>
               {/* Status (select se editando) */}
               <div className="mb-4">
@@ -702,10 +751,10 @@ export default function ChamadosAdmin() {
                   </>
                 ) : (
                   <>
-                    <button onClick={handleSave} className="px-4 py-2 text-sm poppins-medium text-center text-white bg-[#7F56D8] rounded-lg">
+                    <button onClick={handleSave} className="px-4 py-2 text-sm poppins-medium text-center text-white bg-violet-500 hover:bg-violet-600 rounded-lg">
                       Salvar
                     </button>
-                    <button onClick={handleCancel} className="px-4 py-2 text-sm poppins-medium text-center text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-[#7F56D8]">
+                    <button onClick={handleCancel} className="px-4 py-2 text-sm poppins-medium text-center text-gray-900 bg-white dark:bg-gray-700 dark:text-gray-300 dark:hover:text-gray-300 dark:hover:bg-gray-600 border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-[#7F56D8]">
                       Cancelar
                     </button>
                   </>
