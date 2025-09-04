@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable"; 
 
+
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function KpiSla() {

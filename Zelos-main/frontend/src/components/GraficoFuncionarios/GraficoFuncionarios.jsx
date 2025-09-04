@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+
+
 const ApexCharts = dynamic(() => import("apexcharts"), { ssr: false });
 
 export default function LeadsCard({

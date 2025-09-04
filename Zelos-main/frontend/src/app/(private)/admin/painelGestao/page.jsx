@@ -3,6 +3,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import ToastMsg from "@/components/Toasts/Toasts";
 
+
+
 const API_BASE_URL = 'http://localhost:8080';
 
 // fetch com timeout reutilizado
@@ -98,6 +100,11 @@ export default function PainelGestao() {
 
   const { UI: ToastsUI, showToast } = ToastMsg(); // pega UI e função showToast
 
+  const [funcoes, setFuncoes] = useState([]);
+  const [filteredFuncoes, setFilteredFuncoes] = useState([]);
+  // mostra texto no input (legível)
+  const [displayFuncao, setDisplayFuncao] = useState('');
+
   // states para validação
   const [errors, setErrors] = useState({
     nome: null,
@@ -147,14 +154,16 @@ export default function PainelGestao() {
   const loadAll = async () => {
     setLoading(true);
     try {
-      const [u, p, s] = await Promise.all([
-        fetchWithTimeout(`${API_BASE_URL}/usuarios`, { method: 'GET', credentials: 'include' }, 10000).catch(e => { addToast({ title: 'Erro listar usuários', msg: e.message, type: 'error' }); return []; }),
-        fetchWithTimeout(`${API_BASE_URL}/prioridades`, { method: 'GET', credentials: 'include' }, 10000).catch(e => { addToast({ title: 'Erro listar prioridades', msg: e.message, type: 'error' }); return []; }),
-        fetchWithTimeout(`${API_BASE_URL}/pool`, { method: 'GET', credentials: 'include' }, 10000).catch(e => { addToast({ title: 'Erro listar setores', msg: e.message, type: 'error' }); return []; }),
+      const [u, p, s, f] = await Promise.all([
+        fetchWithTimeout(`${API_BASE_URL}/usuarios`, { method: 'GET', credentials: 'include' }, 10000).catch(() => []),
+        fetchWithTimeout(`${API_BASE_URL}/prioridades`, { method: 'GET', credentials: 'include' }, 10000).catch(() => []),
+        fetchWithTimeout(`${API_BASE_URL}/pool`, { method: 'GET', credentials: 'include' }, 10000).catch(() => []),
+        fetchWithTimeout(`${API_BASE_URL}/funcoes`, { method: 'GET', credentials: 'include' }, 10000).catch(() => []),
       ]);
       setUsuarios(u || []);
       setPrioridades(p || []);
       setSetores(s || []);
+      setFuncoes(f || []);
     } catch (err) {
       addToast({ title: 'Erro geral', msg: err.message, type: 'error' });
     } finally {
@@ -185,6 +194,7 @@ export default function PainelGestao() {
         return null;
       case 'funcao':
         if (!String(value || '').trim()) return 'Função é obrigatória';
+        if (!funcoes || !funcoes.includes(value)) return 'Função inválida';
         return null;
       case 'senha':
         if (!String(value || '').trim()) return 'Senha é obrigatória';
@@ -562,6 +572,72 @@ export default function PainelGestao() {
     }
   };
 
+  // quando o usuário digita no input
+  // const onFuncaoInput = (e) => {
+  //   const val = e.target.value || '';
+
+  //   // só atualiza o texto visível
+  //   setDisplayFuncao(val);
+
+  //   setForm(prev => ({ ...prev, funcao: val }));
+
+  //   // filtra funções (case-insensitive)
+  //   const filtered = funcoes.filter(ff => ff.toLowerCase().includes(val.toLowerCase()));
+  //   setFilteredFuncoes(filtered);
+  //   setHighlightIndex(filtered.length ? 0 : -1);
+
+  //   if (errors.funcao) setErrors(prev => ({ ...prev, funcao: null }));
+  // };
+
+  // // selecionar função da lista
+  // const selectFuncao = (valorCanonico) => {
+  //   // setamos valor canônico pra envio
+  //   setForm(prev => ({ ...prev, funcao: valorCanonico }));
+  //   // e mostramos a label bonitinha no input
+  //   setDisplayFuncao(formatarLabel(valorCanonico));
+  //   setFilteredFuncoes([]);
+  //   setFuncaoFocused(false);
+  //   setHighlightIndex(-1);
+  //   if (errors.funcao) setErrors(prev => ({ ...prev, funcao: null }));
+  // }
+
+  // // navegação por teclado (ArrowUp/Down, Enter, Escape)
+  // const onFuncaoKeyDown = (e) => {
+  //   if (!filteredFuncoes.length) return;
+  //   if (e.key === 'ArrowDown') {
+  //     e.preventDefault();
+  //     setHighlightIndex(idx => Math.min(idx + 1, filteredFuncoes.length - 1));
+  //   } else if (e.key === 'ArrowUp') {
+  //     e.preventDefault();
+  //     setHighlightIndex(idx => Math.max(idx - 1, 0));
+  //   } else if (e.key === 'Enter') {
+  //     // se houver item destacado, seleciona; caso contrário, permite submit normal
+  //     if (highlightIndex >= 0 && highlightIndex < filteredFuncoes.length) {
+  //       e.preventDefault();
+  //       selectFuncao(filteredFuncoes[highlightIndex]);
+  //     }
+  //   } else if (e.key === 'Escape') {
+  //     setFilteredFuncoes([]);
+  //     setHighlightIndex(-1);
+  //     setFuncaoFocused(false);
+  //   }
+  // };
+
+  // fechar sugestões ao clicar fora — opcional (melhora UX)
+  useEffect(() => {
+    const handler = (ev) => {
+      if (!ev.target.closest) return;
+      const inside = ev.target.closest('#funcao-input-wrapper');
+      if (!inside) {
+        setFilteredFuncoes([]);
+        setFuncaoFocused(false);
+        setHighlightIndex(-1);
+      }
+    };
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, []);
+
 
   // ---------- Outras funções existentes (setores, prioridades, etc) são mantidas e apenas adaptadas se necessário ----------
   const handleCriarSetorInline = async (e) => {
@@ -605,6 +681,269 @@ export default function PainelGestao() {
       showToast("danger", "Erro ao criar setor");
     }
   };
+
+
+  // adiciona função como tag, evitando duplicatas (case-insensitive)
+  // const addFuncaoTag = (f) => {
+  //   const v = String(f || "").trim();
+  //   if (!v) return;
+  //   if (setorFuncoes.some(x => x.toLowerCase() === v.toLowerCase())) return;
+  //   setSetorFuncoes(prev => [...prev, v]);
+  //   setSetorFuncoesInput("");
+  //   setFilteredFuncoes([]);
+  //   setHighlightIndex(-1);
+  // };
+
+  // // selecionar uma sugestão (clicando ou com Enter)
+  // const selectFuncao = (f) => {
+  //   addFuncaoTag(f);
+  //   // mantém foco no input
+  //   setTimeout(() => {
+  //     const el = document.getElementById("setor-funcao-input");
+  //     if (el) el.focus();
+  //   }, 0);
+  // };
+
+  // quando digita no input — filtra sugestões
+  const onFuncaoInput = (e) => {
+    const v = e.target.value;
+    setSetorFuncoesInput(v);
+
+    const q = String(v || "").trim().toLowerCase();
+    // supondo que 'funcoes' exista no component (lista de todas as funções do pool)
+    const base = Array.isArray(funcoes) ? funcoes : [];
+    const matches = q === ""
+      ? base.slice(0, 50) // limita número de sugestões
+      : base.filter(f => f.toLowerCase().includes(q)).slice(0, 50);
+
+    setFilteredFuncoes(matches);
+    setHighlightIndex(matches.length ? 0 : -1);
+  };
+
+  const [setorFilteredFuncoes, setSetorFilteredFuncoes] = useState([]);
+  const [setorFuncaoFocused, setSetorFuncaoFocused] = useState(false);
+  const [setorHighlightIndex, setSetorHighlightIndex] = useState(-1);
+
+  // adiciona função como tag (evita duplicatas)
+  const addFuncaoTag = (f) => {
+    const v = String(f || "").trim();
+    if (!v) return;
+    if (setorFuncoes.some(x => x.toLowerCase() === v.toLowerCase())) return;
+    setSetorFuncoes(prev => [...prev, v]);
+    setSetorFuncoesInput("");
+    setSetorFilteredFuncoes([]);
+    setSetorHighlightIndex(-1);
+  };
+
+  // selecionar sugestão
+  const selectFuncao = (f) => {
+    addFuncaoTag(f);
+    setTimeout(() => {
+      const el = document.getElementById("setor-funcao-input");
+      if (el) el.focus();
+    }, 0);
+  };
+
+  // ao digitar (filtra a lista global `funcoes` que você já carrega)
+  const onSetorFuncaoInput = (e) => {
+    const v = e.target.value;
+    setSetorFuncoesInput(v);
+
+    const q = String(v || "").trim().toLowerCase();
+    const base = Array.isArray(funcoes) ? funcoes : []; // ajuste se seu array tiver outro nome
+    const matches = q === ""
+      ? base.slice(0, 50)
+      : base.filter(f => f.toLowerCase().includes(q)).slice(0, 50);
+
+    setSetorFilteredFuncoes(matches);
+    setSetorHighlightIndex(matches.length ? 0 : -1);
+  };
+
+  // keyboard nav específico do modal
+  const onSetorFuncaoKeyDown = (e) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (setorFilteredFuncoes.length === 0) return;
+      setSetorHighlightIndex(i => Math.min(setorFilteredFuncoes.length - 1, i + 1));
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (setorFilteredFuncoes.length === 0) return;
+      setSetorHighlightIndex(i => Math.max(0, i - 1));
+      return;
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (setorHighlightIndex >= 0 && setorHighlightIndex < setorFilteredFuncoes.length) {
+        selectFuncao(setorFilteredFuncoes[setorHighlightIndex]);
+      } else if (setorFuncoesInput.trim() !== "") {
+        addFuncaoTag(setorFuncoesInput.trim());
+      }
+      return;
+    }
+    if (e.key === "Escape") {
+      setSetorFilteredFuncoes([]);
+      setSetorHighlightIndex(-1);
+      setSetorFuncaoFocused(false);
+      return;
+    }
+    if (e.key === "Backspace" && setorFuncoesInput === "" && setorFuncoes.length > 0) {
+      setSetorFuncoes(prev => prev.slice(0, -1));
+    }
+  };
+
+  // navegação por teclado (ArrowUp/Down, Enter, Esc, Backspace para remover tag se input vazio)
+  const onFuncaoKeyDown = (e) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (filteredFuncoes.length === 0) return;
+      setHighlightIndex(i => Math.min(filteredFuncoes.length - 1, i + 1));
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (filteredFuncoes.length === 0) return;
+      setHighlightIndex(i => Math.max(0, i - 1));
+      return;
+    }
+    if (e.key === "Enter") {
+      // se há highlight, seleciona; senão adiciona texto livre
+      e.preventDefault();
+      if (highlightIndex >= 0 && highlightIndex < filteredFuncoes.length) {
+        selectFuncao(filteredFuncoes[highlightIndex]);
+      } else if (setorFuncoesInput.trim() !== "") {
+        addFuncaoTag(setorFuncoesInput.trim());
+      }
+      return;
+    }
+    if (e.key === "Escape") {
+      setFilteredFuncoes([]);
+      setHighlightIndex(-1);
+      setFuncaoFocused(false);
+      return;
+    }
+    if (e.key === "Backspace" && setorFuncoesInput === "" && setorFuncoes.length > 0) {
+      // remover última tag
+      setSetorFuncoes(prev => prev.slice(0, -1));
+    }
+  };
+
+const [submitAttemptedSetor, setSubmitAttemptedSetor] = useState(false);
+const [setorErrors, setSetorErrors] = useState({
+  titulo: null,
+  descricao: null,
+  funcoes: null
+});
+
+
+  const [setorModalData, setSetorModalData] = useState({ titulo: "", descricao: "" });
+  const [setorFuncoesInput, setSetorFuncoesInput] = useState("");
+  const [setorFuncoes, setSetorFuncoes] = useState([]);
+  const [setorSubmitting, setSetorSubmitting] = useState(false);
+
+// limpa o erro de um campo quando o usuário começa a editar
+const clearSetorError = (field) => {
+  setSetorErrors(prev => ({ ...prev, [field]: null }));
+};
+
+  const handleSetorModalChange = (e) => {
+    const { name, value } = e.target;
+    setSetorModalData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddFuncao = (ev) => {
+    ev?.preventDefault?.();
+    const v = String(setorFuncoesInput || "").trim();
+    if (!v) return;
+    // evita duplicatas (case-insensitive)
+    if (setorFuncoes.some(f => f.toLowerCase() === v.toLowerCase())) {
+      setSetorFuncoesInput("");
+      return;
+    }
+    setSetorFuncoes(prev => [...prev, v]);
+    setSetorFuncoesInput("");
+  };
+
+  const handleRemoveFuncao = (idx) => {
+    setSetorFuncoes(prev => prev.filter((_, i) => i !== idx));
+  };
+
+const handleCriarSetorModal = async (e) => {
+  if (e && e.preventDefault) e.preventDefault();
+
+  setSubmitAttemptedSetor(true);
+
+  // validação local
+  const tituloTrim = String(setorModalData.titulo || "").trim();
+  const descricaoTrim = String(setorModalData.descricao || "").trim();
+  const funcoesArr = Array.isArray(setorFuncoes) ? setorFuncoes : [];
+
+  const newErrors = { titulo: null, descricao: null, funcoes: null };
+  if (!tituloTrim) newErrors.titulo = "Título é obrigatório";
+  if (!descricaoTrim) newErrors.descricao = "Descrição é obrigatória";
+  if (!funcoesArr.length) newErrors.funcoes = "Adicione pelo menos 1 função";
+
+  setSetorErrors(newErrors);
+
+  // se tiver erro, não envia
+  if (newErrors.titulo || newErrors.descricao || newErrors.funcoes) {
+    if (newErrors.titulo) {
+      const el = document.querySelector('input[name="titulo"]');
+      if (el) el.focus();
+    } else if (newErrors.descricao) {
+      const el = document.querySelector('textarea[name="descricao"]');
+      if (el) el.focus();
+    }
+    return;
+  }
+
+  setSetorSubmitting(true);
+  try {
+    const payload = { titulo: tituloTrim, descricao: descricaoTrim, funcoes: funcoesArr };
+    const res = await fetchWithTimeout(`${API_BASE_URL}/pool`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(payload)
+    }, 10000);
+
+    const data = res;
+
+    // atualiza setores local
+    setSetores(prev => [{ id: data.id || Date.now(), titulo: data.titulo || payload.titulo, descricao: data.descricao || payload.descricao }, ...prev]);
+
+    try {
+      const fRes = await fetchWithTimeout(`${API_BASE_URL}/funcoes`, { method: 'GET', credentials: 'include' }, 10000);
+      const allFuncoes = fRes;
+      if (Array.isArray(allFuncoes)) setFuncoes(allFuncoes);
+    } catch (err) {
+      if (Array.isArray(data.funcoes) && data.funcoes.length) {
+        setFuncoes(prev => {
+          const missing = data.funcoes.filter(f => !prev.includes(f));
+          return [...missing, ...prev];
+        });
+      }
+    }
+
+    showToast("success", "Setor criado");
+
+    // reset modal e estado de validação
+    setSetorModalData({ titulo: "", descricao: "" });
+    setSetorFuncoes([]);
+    setSetorFuncoesInput("");
+    setSubmitAttemptedSetor(false);
+    setSetorErrors({ titulo: null, descricao: null, funcoes: null });
+    setShowSetorModal(false);
+  } catch (err) {
+    console.error('[handleCriarSetorModal] erro:', err);
+    showToast("danger", "Erro ao criar setor");
+  } finally {
+    setSetorSubmitting(false);
+  }
+};
+
+
 
   // States
   const [setorParaExcluir, setSetorParaExcluir] = useState(null);
@@ -747,7 +1086,7 @@ export default function PainelGestao() {
   function formatarLabel(str) {
     const texto = str.replace(/_/g, ' ').toLowerCase();
 
-    const correcoes = { "auxiliar_limpeza": "Auxiliar de Limpeza", "apoio_tecnico": "Apoio Técnico", "tecnico": "Técnico", "manutencao": "Manutenção", "media": "Média" };
+    const correcoes = { "auxiliar_limpeza": "Auxiliar de Limpeza", "auxiliar limpeza": "Auxiliar de Limpeza", "apoio_tecnico": "Apoio Técnico", "tecnico": "Técnico", "manutencao": "Manutenção", "media": "Média" };
 
     if (correcoes[texto]) { return correcoes[texto]; }
 
@@ -777,6 +1116,143 @@ export default function PainelGestao() {
   return (
     <>
       {ToastsUI}
+      {showSetorModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setShowSetorModal(false)} // clique no backdrop fecha
+          aria-modal="true"
+        >
+          <div
+            className="w-full max-w-md p-4"
+            onClick={(ev) => ev.stopPropagation()} // evita fechar ao clicar dentro
+          >
+            <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b dark:border-gray-600">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Criar Setor</h3>
+                <button type="button" onClick={() => setShowSetorModal(false)} className="text-gray-400 hover:bg-gray-200 rounded-lg w-8 h-8 inline-flex justify-center items-center">
+                  <svg className="w-4 h-4" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1l12 12M13 1L1 13" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Body / Form */}
+              <form onSubmit={handleCriarSetorModal} className="p-4 space-y-4">
+                <div>
+                  <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">Título<span className="ml-1 self-start leading-none text-red-500">*</span></label>
+                  <input name="titulo" value={setorModalData.titulo} onChange={(e) => { handleSetorModalChange(e); if (setorErrors.titulo) clearSetorError('titulo'); }}
+                    className={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-600 dark:border-gray-500 text-sm dark:text-white focus:outline-none focus:ring-0 ${submitAttemptedSetor && setorErrors.titulo ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'}`} placeholder="Ex: manutencao" required />
+                      {submitAttemptedSetor && setorErrors.titulo && <div className="text-xs text-red-500 mt-1">{setorErrors.titulo}</div>}
+                </div>
+
+                <div>
+                  <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">Descrição<span className="ml-1 self-start leading-none text-red-500">*</span></label>
+                  <textarea name="descricao" value={setorModalData.descricao} onChange={handleSetorModalChange}
+                    className={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-600 dark:border-gray-500 text-sm dark:text-white focus:outline-none focus:ring-0 ${submitAttemptedSetor && setorErrors.titulo ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'}`} rows={4} placeholder="Descrição do setor" />
+                     {submitAttemptedSetor && setorErrors.descricao && <div className="text-xs text-red-500 mt-1">{setorErrors.descricao}</div>}
+                </div>
+
+                <div>
+                          
+                  <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">Funções (tags)<span className="ml-1 self-start leading-none text-red-500">*</span></label>
+
+                  <div className="relative">
+                    <div className="flex gap-2">
+                      <input
+                        id="setor-funcao-input"
+                        type="text"
+                        value={setorFuncoesInput}
+                        onChange={onSetorFuncaoInput}
+                        onFocus={() => {
+                          setSetorFuncaoFocused(true);
+                          const all = Array.isArray(funcoes) ? funcoes.slice(0, 50) : [];
+                          setSetorFilteredFuncoes(all);
+                          setSetorHighlightIndex(all.length ? 0 : -1);
+                        }}
+                        onBlur={() => {
+                          setTimeout(() => {
+                            setSetorFuncaoFocused(false);
+                            setSetorFilteredFuncoes([]);
+                            setSetorHighlightIndex(-1);
+                          }, 150);
+                        }}
+                        onKeyDown={onSetorFuncaoKeyDown}
+                        autoComplete="off"
+                        placeholder="Digite uma função"
+                        aria-autocomplete="list"
+                        aria-controls="setor-funcao-suggestions"
+                        aria-expanded={setorFuncaoFocused && setorFilteredFuncoes.length > 0}
+                        className={`flex-1 px-3 py-2 rounded-lg border bg-white dark:bg-gray-600 dark:border-gray-500 text-sm dark:text-white focus:outline-none focus:ring-0 ${submitAttemptedSetor && setorErrors.titulo ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => addFuncaoTag(setorFuncoesInput)}
+                        className="py-2 px-3 inline-flex items-center gap-x-2 text-sm poppins-medium rounded-lg border border-transparent bg-violet-500 hover:bg-violet-600 text-white focus:outline-hidden focus:bg-violet-600 disabled:opacity-50 disabled:pointer-events-none "
+                      ><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg></button>
+                    </div>
+
+                    {setorFuncaoFocused && setorFilteredFuncoes.length > 0 && (
+                      <ul
+                        id="setor-funcao-suggestions"
+                        role="listbox"
+                        aria-label="Sugestões de função"
+                        className="absolute z-[999] mt-2 w-full max-h-48 overflow-auto rounded-md shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                      >
+                        {setorFilteredFuncoes.map((f, idx) => {
+                          const isHighlighted = setorHighlightIndex === idx;
+                          return (
+                            <li
+                              key={f + idx}
+                              id={`setor-funcao-option-${idx}`}
+                              role="option"
+                              aria-selected={isHighlighted}
+                              onMouseDown={(ev) => { ev.preventDefault(); }}
+                              onClick={() => selectFuncao(f)}
+                              onMouseEnter={() => setSetorHighlightIndex(idx)}
+                              className={`px-3 py-2 cursor-pointer select-none text-sm ${isHighlighted ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                            >
+                              <div className="dark:text-gray-300">{formatarLabel(f)}</div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {setorFuncoes.map((f, idx) => (
+                      <span key={f + idx} className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-sm dark:text-gray-100">
+                        <span>{formatarLabel(f)}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFuncao(idx)}
+                          className="w-5 h-5 inline-flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
+                          aria-label={`Remover ${f}`}
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                     {submitAttemptedSetor && setorErrors.funcoes && <div className="text-xs text-red-500 mt-1">{setorErrors.funcoes}</div>}
+                </div>
+
+
+                {/* Actions */}
+                <div className="flex justify-end gap-2">
+                  <button type="button" onClick={() => { setShowSetorModal(false); }} className="inline-flex items-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg text-sm  px-3 py-1.5">Cancelar</button>
+                  <button type="submit" disabled={setorSubmitting} className="py-2 px-3 inline-flex items-center gap-x-2 text-sm poppins-medium rounded-lg border border-transparent bg-violet-500 hover:bg-violet-600 text-white focus:outline-hidden focus:bg-violet-600 disabled:opacity-50 disabled:pointer-events-none ">
+                    {setorSubmitting ? 'Salvando...' : 'Criar setor'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+
       <div className="p-4 w-full dark:bg-gray-900">
         <div className="p-4 mt-14">
 
@@ -815,13 +1291,13 @@ export default function PainelGestao() {
                       {/* Username */}
                       <div className="relative z-0 mb-5 group w-full md:w-80">
                         <input type="text" name="username" id="user_username" ref={usernameInputRef} className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.username ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.username ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.username} onChange={(e) => { handleUsernameChange(e); if (errors.username) setErrors(prev => ({ ...prev, username: null })); }} onKeyDown={handleUsernameKeyDown} autoComplete="off" required />
-                        <label htmlFor="user_username" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.username ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.username ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.username ? 'peer-focus:text-red-500' : 'peer-focus:text-violet-500 peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}>  <span className="leading-none">Username</span>
+                        <label htmlFor="user_username" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.username ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.username ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.username ? 'peer-focus:text-red-500' : 'peer-focus:text-violet-500 peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}><span className="leading-none">Username</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
                         </label>
                         <div className="mt-2">
                           {usernameChecking && <span className="text-xs text-gray-500">Verificando...</span>}
                           {!usernameChecking && usernameExists && <div className="text-xs text-red-500">Esse username já existe</div>}
-                          {!usernameChecking && !usernameExists && form.username && <div className="text-xs text-green-600">Disponível</div>}
+                          {!usernameChecking && !usernameExists && form.username && <div className="text-xs text-green-600"></div>}
                         </div>
 
                         {usernameSuggestions.length > 0 && (
@@ -858,38 +1334,86 @@ export default function PainelGestao() {
                       </div>
 
                       {/* Função */}
-                      <div className="relative z-0 mb-5 group w-full md:w-60">
-                        <input
-                          type="text"
-                          name="funcao"
-                          id="user_function"
-                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
-          ${submitAttempted && errors.funcao ? 'border-red-500' : 'border-gray-300'}
-          dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
-                          placeholder=" "
-                          value={form.funcao}
-                          onChange={(e) => {
-                            handleFuncaoChange(e);
-                            if (errors.funcao) setErrors(prev => ({ ...prev, funcao: null }));
-                          }}
-                          onFocus={() => setFuncaoFocused(true)}
-                          onBlur={() => setFuncaoFocused(false)}
-                          required
-                        />
-                        <label
-                          htmlFor="user_function"
-                          className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.funcao ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.funcao ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.funcao ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
-                        ><span className="leading-none">Função</span>
-                          <span className="ml-1 self-start leading-none text-red-500">*</span>
-                        </label>
-                        {submitAttempted && errors.funcao && <div className="text-xs text-red-500 mt-1">{errors.funcao}</div>}
+                      <div className="relative mb-5 group w-full md:w-60 overflow-visible">
+                        <div id="funcao-input-wrapper" className="relative">
+                          <input
+                            type="text"
+                            name="funcao"
+                            id="user_function"
+                            autoComplete="off"
+                            className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
+      ${submitAttempted && errors.funcao ? 'border-red-500' : 'border-gray-300'}
+      dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
+                            placeholder=" "
+                            // value={form.funcao}
+                            value={displayFuncao}
+                            onChange={onFuncaoInput}
+                            onFocus={() => {
+                              setFuncaoFocused(true);
+                              // quando foca, preenche filtered com todas as funcoes (se input vazio)
+                              const all = funcoes.filter(f => f.toLowerCase().includes((form.funcao || '').toLowerCase()));
+                              setFilteredFuncoes(all);
+                              setHighlightIndex(all.length ? 0 : -1);
+                            }}
+                            onBlur={() => {
+                              // delay para permitir click em item antes de limpar
+                              setTimeout(() => {
+                                setFuncaoFocused(false);
+                                setFilteredFuncoes([]);
+                                setHighlightIndex(-1);
+                              }, 150);
+                            }}
+                            onKeyDown={onFuncaoKeyDown}
+                            required
+                            aria-autocomplete="list"
+                            aria-controls="funcao-suggestions"
+                            aria-expanded={funcaoFocused && filteredFuncoes.length > 0}
+                            aria-haspopup="listbox"
+                          />
+
+                          <label
+                            htmlFor="user_function"
+                            className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.funcao ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.funcao ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.funcao ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
+                          ><span className="leading-none">Função</span>
+                            <span className="ml-1 self-start leading-none text-red-500">*</span>
+                          </label>
+
+                          {/* lista de sugestões */}
+                          {funcaoFocused && filteredFuncoes.length > 0 && (
+                            <ul
+                              id="funcao-suggestions"
+                              role="listbox"
+                              aria-label="Sugestões de função"
+                              className="absolute z-[999] mt-2 w-full max-h-48 overflow-auto rounded-md shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                            >
+                              {filteredFuncoes.map((f, idx) => (
+                                <li
+                                  key={f}
+                                  id={`funcao-option-${idx}`}
+                                  role="option"
+                                  aria-selected={highlightIndex === idx}
+                                  onMouseDown={(e) => { e.preventDefault(); /* evita blur antes do click */ }}
+                                  onClick={() => selectFuncao(f)}
+                                  onMouseEnter={() => setHighlightIndex(idx)}
+                                  className={`px-3 py-2 cursor-pointer select-none ${highlightIndex === idx ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                                    }`}
+                                >
+                                  <div className="text-sm dark:text-gray-300">{formatarLabel(f)}</div>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+
+
+                          {submitAttempted && errors.funcao && <div className="text-xs text-red-500 mt-1">{errors.funcao}</div>}
+                        </div>
                       </div>
                     </div>
 
                     {/* Linha 3: Senha + Confirmar senha */}
-                    <div className="flex flex-col md:flex-row gap-6">
+                    <div className="flex flex-col md:flex-row gap-6 overflow-visible">
                       {/* Senha */}
-                      <div className="relative z-0 mb-5 group w-full md:w-60">
+                      <div className="relative overflow-visible mb-5 group w-full md:w-60">
                         <input
                           type="password"
                           name="senha"
@@ -951,7 +1475,7 @@ export default function PainelGestao() {
 
                         <div>
                           <div className="inline-flex gap-x-2">
-                            <button type="button" onClick={() => { setIsCreatingSetorRow(true); setNovoSetor({ titulo: "", descricao: "" }); }} className="py-2 px-3 inline-flex items-center gap-x-2 text-sm poppins-medium rounded-lg border border-transparent bg-violet-500 hover:bg-violet-600 text-white focus:outline-hidden focus:bg-violet-600 disabled:opacity-50 disabled:pointer-events-none "><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>Criar setor</button>
+                            <button type="button" onClick={() => { setShowSetorModal(true); setNovoSetor({ titulo: "", descricao: "" }); }} className="py-2 px-3 inline-flex items-center gap-x-2 text-sm poppins-medium rounded-lg border border-transparent bg-violet-500 hover:bg-violet-600 text-white focus:outline-hidden focus:bg-violet-600 disabled:opacity-50 disabled:pointer-events-none "><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>Criar setor</button>
                           </div>
                         </div>
                       </div>

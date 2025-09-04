@@ -192,6 +192,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import './forgotPassword.css';
 
+
+
 export default function ForgotPassword() {
   useEffect(() => {
     document.title = 'Zelos - Esqueci a senha';

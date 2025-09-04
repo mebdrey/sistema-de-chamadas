@@ -37,43 +37,23 @@ insert into pool (titulo, descricao) values
 ('apoio_tecnico', 'Suporte e atendimento técnico' ),
 ('limpeza', 'Serviços de limpeza' );
 
-/*
 CREATE TABLE funcao_pool (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    funcao VARCHAR(100) NOT NULL,
-    pool_id INT NOT NULL,
-    FOREIGN KEY (pool_id) REFERENCES pool(id) ON DELETE CASCADE
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  funcao VARCHAR(100) NOT NULL,
+  pool_id INT NOT NULL,
+  FOREIGN KEY (pool_id) REFERENCES pool(id) ON DELETE CASCADE
 );
 
--- Técnico tem acesso a externo, manutenção, apoio técnico
+-- Exemplos de preenchimento:
 INSERT INTO funcao_pool (funcao, pool_id)
-SELECT 'tecnico', id FROM pool WHERE titulo IN ('externo', 'manutencao', 'apoio_tecnico');
+SELECT 'tecnico', id FROM pool WHERE titulo IN ('externo','manutencao','apoio_tecnico');
 
--- Auxiliar de limpeza tem acesso apenas a limpeza
 INSERT INTO funcao_pool (funcao, pool_id)
 SELECT 'auxiliar_limpeza', id FROM pool WHERE titulo = 'limpeza';
 
--- Admin tem acesso a todos
 INSERT INTO funcao_pool (funcao, pool_id)
-SELECT 'admin', id FROM pool;
+SELECT 'admin', id FROM pool;  -- admin acessa todos
 
--- Usuário comum pode solicitar todos os serviços
-INSERT INTO funcao_pool (funcao, pool_id)
-SELECT 'usuario', id FROM pool;
-
-
-DELIMITER $$
-CREATE TRIGGER after_usuario_insert
-AFTER INSERT ON usuarios
-FOR EACH ROW
-BEGIN
-    INSERT INTO usuario_servico (usuario_id, servico_id)
-    SELECT NEW.id, pool_id FROM funcao_pool
-    WHERE funcao = NEW.funcao;
-END$$
-
-DELIMITER ;
-*/
 CREATE TABLE usuario_servico (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
@@ -82,37 +62,23 @@ CREATE TABLE usuario_servico (
     FOREIGN KEY (servico_id) REFERENCES pool(id) ON DELETE CASCADE
 );
 
--- trigger
 DELIMITER $$
-
 CREATE TRIGGER after_usuario_insert
 AFTER INSERT ON usuarios
 FOR EACH ROW
 BEGIN
-    DECLARE servicoId INT;
-
-    -- Técnico: externo, apoio técnico, manutenção
-    IF NEW.funcao = 'tecnico' THEN
-        INSERT INTO usuario_servico (usuario_id, servico_id)
-        SELECT NEW.id, id FROM pool
-        WHERE titulo IN ('externo', 'apoio_tecnico', 'manutencao');
-    -- Auxiliar de limpeza: apenas limpeza
-    ELSEIF NEW.funcao = 'auxiliar_limpeza' THEN
-        INSERT INTO usuario_servico (usuario_id, servico_id)
-        SELECT NEW.id, id FROM pool
-        WHERE titulo = 'limpeza';
-    -- Admin: todos os serviços
-    ELSEIF NEW.funcao = 'admin' THEN
-        INSERT INTO usuario_servico (usuario_id, servico_id)
-        SELECT NEW.id, id FROM pool;
-    -- Usuário comum: pode apenas solicitar (todos os serviços)
-    ELSEIF NEW.funcao = 'usuario' THEN
-        INSERT INTO usuario_servico (usuario_id, servico_id)
-        SELECT NEW.id, id FROM pool;
-    END IF;
+  INSERT INTO usuario_servico (usuario_id, servico_id)
+  SELECT NEW.id, pool_id FROM funcao_pool WHERE funcao = NEW.funcao;
 END$$
-
 DELIMITER ;
+
+-- BACKFILL para usuários existentes (executar ONCE)
+INSERT INTO usuario_servico (usuario_id, servico_id)
+SELECT u.id, fp.pool_id
+FROM usuarios u
+JOIN funcao_pool fp ON fp.funcao = u.funcao
+LEFT JOIN usuario_servico us ON us.usuario_id = u.id AND us.servico_id = fp.pool_id
+WHERE us.id IS NULL;
 
 insert usuarios (nome, senha, username, email, funcao) values
 ("Julia Alves de Oliveira", "Senai@123", 'juliaalves', "juliaalvesdeo447@gmail.com", "admin"), /* administrador*/

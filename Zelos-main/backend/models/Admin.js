@@ -241,14 +241,59 @@ export const gerarSugestoesUsername = async (input) => {
 //SETORES
 export const criarSetor = async (dados) => {
   try {
-    // dados: { titulo, descricao, created_by }
-    const id = await create("pool", dados);
+    const id = await create('pool', dados);
     return id;
   } catch (err) {
     console.error("Erro ao criar setor!", err);
     throw err;
   }
 };
+
+// insere múltiplas linhas em funcao_pool
+export const adicionarFuncoesAoPool = async (poolId, funcoes = []) => {
+  if (!funcoes.length) return 0;
+  try {
+    // construir placeholders
+    const placeholders = funcoes.map(() => '(?, ?)').join(', ');
+    const params = funcoes.flatMap(f => [f, poolId]);
+    // use INSERT IGNORE para MySQL
+    const sql = `INSERT IGNORE INTO funcao_pool (funcao, pool_id) VALUES ${placeholders}`;
+    return await readQuery(sql, params);
+  } catch (err) {
+    console.error('Erro adicionarFuncoesAoPool:', err);
+    throw err;
+  }
+};
+
+export function toCanonicalFuncName(label) {
+  if (!label) return '';
+  // remover espaços nas pontas e forçar minúsculas
+  let s = String(label).trim().toLowerCase();
+  // remover acentos
+  s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  // substituir qualquer caractere não alfanumérico por underscore
+  s = s.replace(/[^a-z0-9]+/g, '_');
+  // colapsar underscores múltiplos e trim underscores
+  s = s.replace(/_+/g, '_').replace(/^_+|_+$/g, '');
+  return s;
+}
+
+
+//wrapper que cria o setor e já adiciona funcoes 
+export const criarSetorComFuncoes = async (dados, funcoes = []) => {
+  try {
+    const id = await criarSetor(dados);
+    if (funcoes && funcoes.length) {
+      await adicionarFuncoesAoPool(id, funcoes);
+    }
+    return id;
+  } catch (err) {
+    console.error('Erro criarSetorComFuncoes:', err);
+    throw err;
+  }
+};
+
+
 
 export const existeSetorPorTitulo = async (titulo) => {
   try {
@@ -499,3 +544,21 @@ export async function calcularSlaCumprido() {
     throw err;
   }
 }
+
+export const listarFuncoes = async () => {
+  const rows = await readQuery('SELECT DISTINCT funcao FROM funcao_pool ORDER BY funcao');
+  return rows.map(r => r.funcao);
+};
+
+export const funcaoExiste = async (funcao) => {
+  if (!funcao) return false;
+  const rows = await readQuery('SELECT 1 FROM funcao_pool WHERE funcao = ? LIMIT 1', [funcao]);
+  return Array.isArray(rows) && rows.length > 0;
+};
+
+export const listarPoolsPorFuncao = async (funcao) => {
+  return await readQuery(`
+    SELECT p.* FROM pool p
+    JOIN funcao_pool fp ON p.id = fp.pool_id
+    WHERE fp.funcao = ?`, [funcao]);
+};

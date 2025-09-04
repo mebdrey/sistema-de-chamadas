@@ -1,5 +1,5 @@
 
-import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool, buscarUsuarioPorEmail, listarPrioridades, buscarPrioridadePorNome, atualizarPrioridade, excluirPrioridade, verAdmins, calcularSlaCumprido } from '../models/Admin.js'
+import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool, buscarUsuarioPorEmail, listarPrioridades, buscarPrioridadePorNome, atualizarPrioridade, excluirPrioridade, verAdmins, calcularSlaCumprido, listarFuncoes, listarPoolsPorFuncao, adicionarFuncoesAoPool, toCanonicalFuncName } from '../models/Admin.js'
 import { criarNotificacao } from '../models/Notificacoes.js';
 import {getChamadoById} from '../models/Chamado.js'
 import { readAll, readQuery, update, deleteRecord } from '../config/database.js'; // Importar deleteRecord
@@ -330,27 +330,60 @@ export const sugerirUsernameController = async (req, res) => {
 
 // SETOR -------------------------------------------------------------------------------------------------
 // Criar setor
+// export const criarSetorController = async (req, res) => {
+//     try {
+//         const { titulo, descricao } = req.body;
+//         const created_by = req.user?.id || null;
+
+//         if (!titulo || !titulo.trim()) {
+//             return res.status(400).json({ message: "Título é obrigatório" });
+//         }
+
+//         const tituloNorm = titulo.trim();
+//         const jaExiste = await existeSetorPorTitulo(tituloNorm);
+//         if (jaExiste) {
+//             return res.status(409).json({ message: "Já existe um setor com esse título" });
+//         }
+
+//         const id = await criarSetor({ titulo: tituloNorm, descricao, created_by });
+//         return res.status(201).json({ id, titulo: tituloNorm, descricao });
+//     } catch (err) {
+//         console.error("Erro ao criar setor:", err);
+//         res.status(500).json({ message: "Erro interno" });
+//     }
+// };
 export const criarSetorController = async (req, res) => {
-    try {
-        const { titulo, descricao } = req.body;
-        const created_by = req.user?.id || null;
+  try {
+    const { titulo, descricao, funcoes } = req.body;
+    const created_by = req.user?.id || null;
+    if (!titulo || !titulo.trim()) return res.status(400).json({ message: 'Título é obrigatório' });
 
-        if (!titulo || !titulo.trim()) {
-            return res.status(400).json({ message: "Título é obrigatório" });
-        }
+    const tituloNorm = titulo.trim();
+    if (await existeSetorPorTitulo(tituloNorm)) return res.status(409).json({ message: 'Já existe um setor com esse título' });
 
-        const tituloNorm = titulo.trim();
-        const jaExiste = await existeSetorPorTitulo(tituloNorm);
-        if (jaExiste) {
-            return res.status(409).json({ message: "Já existe um setor com esse título" });
-        }
-
-        const id = await criarSetor({ titulo: tituloNorm, descricao, created_by });
-        return res.status(201).json({ id, titulo: tituloNorm, descricao });
-    } catch (err) {
-        console.error("Erro ao criar setor:", err);
-        res.status(500).json({ message: "Erro interno" });
+    // normalizar funcoes (se existirem)
+    let funcoesNorm = [];
+    if (Array.isArray(funcoes)) {
+      funcoesNorm = funcoes
+        .map(f => toCanonicalFuncName(String(f || '')))
+        .filter(f => f && f.length > 0);
+      // evitar duplicatas
+      funcoesNorm = Array.from(new Set(funcoesNorm));
     }
+
+    // criar setor
+    const id = await criarSetor({ titulo: tituloNorm, descricao, created_by });
+
+    // adicionar mapeamentos (cria novas funções em funcao_pool se necessário)
+    if (funcoesNorm.length) {
+      await adicionarFuncoesAoPool(id, funcoesNorm);
+    }
+
+    return res.status(201).json({ id, titulo: tituloNorm, descricao, funcoes: funcoesNorm });
+  } catch (err) {
+    console.error('Erro ao criar setor:', err);
+    res.status(500).json({ message: 'Erro interno' });
+  }
 };
 
 // Listar setores
@@ -563,3 +596,23 @@ export const slaCumpridoController = async (req, res) => {
       res.status(500).json({ erro: "Erro interno ao calcular SLA" });
     }
   };
+
+export const listarFuncoesController = async (req, res) => {
+  try {
+    const funcoes = await listarFuncoes();
+    res.status(200).json(funcoes);
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+};
+
+export const listarPoolsPorFuncaoController = async (req, res) => {
+  try {
+    const { funcao } = req.params;
+    if (!funcao) return res.status(400).json({ erro: 'função requerida' });
+    const pools = await listarPoolsPorFuncao(funcao);
+    res.json(pools);
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+};

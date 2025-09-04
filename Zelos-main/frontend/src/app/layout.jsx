@@ -1,5 +1,6 @@
 import "./globals.css";
 import Head from 'next/head'
+import ClientFetchInterceptor from '@/components/ClientFetchInterceptor/ClientFetchInterceptor'
 
 export default function RootLayout({ children }) {
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
       </Head>
       <body>
         {children}
+        <ClientFetchInterceptor />
         <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossOrigin="anonymous"></script>
       </body>

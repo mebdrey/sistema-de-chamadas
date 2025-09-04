@@ -1,6 +1,8 @@
 "use client"
 import { useEffect, useState } from "react";
 
+
+
 export default function Setores() {
     const [setoresSelecionados, setSetoresSelecionados] = useState({ auxiliares: true, tecnicos: true, }); // Estado que guarda quais setores estão selecionados no dropdown, inicialmente todos true para mostrar todos ao entrar na página
     const [setores, setSetores] = useState({}); // Dados completos dos usuários por setor vindo da API

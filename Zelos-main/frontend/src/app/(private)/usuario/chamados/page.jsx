@@ -6,6 +6,7 @@ import OrdenarPor from '@/components/DropDown/DropDown.jsx'
 import ToastMsg from "@/components/Toasts/Toasts";
 import ChatWidget from '@/components/ChatWidget/ChatWidget'
 
+
 export default function ChamadosCliente() {
     const [isMounted, setIsMounted] = useState(false); // espera o componente estar carregado no navegador p evitar erros de renderizacao
     const [chamados, setChamados] = useState([]) // p selecionar os chamados com base no status

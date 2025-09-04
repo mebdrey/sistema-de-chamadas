@@ -9,6 +9,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import GraficoFuncionarios from '@/components/GraficoFuncionarios/GraficoFuncionarios';
 
+
 export default function admDashboard() {
   const [modo, setModo] = useState('mensal'); // 'mensal' ou 'anual'
   const [qndtChamados, setQndtChamados] = useState([]);

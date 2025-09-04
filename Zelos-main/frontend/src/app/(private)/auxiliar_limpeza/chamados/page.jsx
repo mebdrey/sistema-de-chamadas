@@ -8,6 +8,7 @@ import { UserContext } from '@/components/ProtectedRoute/ProtectedRoute.jsx';
 import ToastMsg from "@/components/Toasts/Toasts";
 import ChatWidget from "@/components/ChatWidget/ChatWidget.jsx";
 
+
 export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'download'
 }) {
   const [isOpen, setIsOpen] = useState(false); // p drawer abrir e fechar

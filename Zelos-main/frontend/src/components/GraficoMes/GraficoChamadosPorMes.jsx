@@ -7,6 +7,8 @@ import '@/app/globals.css'
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+
+
 const ApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 export default function GraficoChamadosPorAno() {
