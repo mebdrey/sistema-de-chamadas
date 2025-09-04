@@ -269,7 +269,7 @@ export default function MeuPerfil() {
     }
     const nomes = pegarPrimeiroEUltimoNome(usuario.nome);
 
-    const avatarSrcServer = usuario.ftPerfil ? `http://localhost:8080/${usuario.ftPerfil}` : null;
+    const avatarSrcServer = usuario.ftPerfil ? `http://localhost:8080/uploads/${usuario.ftPerfil}` : null;
     const avatarHeaderSrc = previewTemp || avatarSrcServer;
 
     
@@ -397,7 +397,7 @@ export default function MeuPerfil() {
                                     <div className="text-xs text-gray-500">Foto atual</div>
                                     <div className="relative w-36 h-36 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-700">
                                         {usuario?.ftPerfil ? (
-                                            <img className="object-cover w-full h-full" src={`http://localhost:8080/${usuario.ftPerfil}`} alt="Foto de perfil" />
+                                            <img className="object-cover w-full h-full" src={`http://localhost:8080/uploads/${usuario.ftPerfil}`} alt="Foto de perfil" />
                                         ) : (
                                             <svg
                                                 className="absolute left-[-12%] top-[-12%] w-[124%] h-[124%] text-gray-400"

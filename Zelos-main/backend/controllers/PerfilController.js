@@ -51,7 +51,7 @@ const editarPerfilController = async (req, res) => {
         return res.status(400).json({ mensagem: 'Nenhuma imagem enviada.' });
     }
 
-    const caminhoFoto = `uploads/${req.file.filename}`;
+    const caminhoFoto = `${req.file.filename}`;
     const id = req.user.id; // vindo do middleware de autenticação
 
     try {
