@@ -106,63 +106,63 @@ export default function PainelGestao() {
   const [displayFuncao, setDisplayFuncao] = useState('');
 
   // --- States novos para o input de Função do formulário de usuário ---
-const [funcaoInput, setFuncaoInput] = useState(''); // controla o que o usuário digita no input do form
+  const [funcaoInput, setFuncaoInput] = useState(''); // controla o que o usuário digita no input do form
 
-// quando o usuário digita no input do form
-const onFuncaoInput = (e) => {
-  const val = e.target.value || '';
-  setFuncaoInput(val);
+  // quando o usuário digita no input do form
+  const onFuncaoInput = (e) => {
+    const val = e.target.value || '';
+    setFuncaoInput(val);
 
-  // guarda o valor "canônico" no form para enviar (se desejar gravar imediatamente)
-  setForm(prev => ({ ...prev, funcao: val }));
+    // guarda o valor "canônico" no form para enviar (se desejar gravar imediatamente)
+    setForm(prev => ({ ...prev, funcao: val }));
 
-  // filtra as funções (case-insensitive) e limita a 50 itens
-  const base = Array.isArray(funcoes) ? funcoes : [];
-  const filtered = val.trim() === '' ? base.slice(0, 50) : base.filter(ff => ff.toLowerCase().includes(val.toLowerCase())).slice(0, 50);
+    // filtra as funções (case-insensitive) e limita a 50 itens
+    const base = Array.isArray(funcoes) ? funcoes : [];
+    const filtered = val.trim() === '' ? base.slice(0, 50) : base.filter(ff => ff.toLowerCase().includes(val.toLowerCase())).slice(0, 50);
 
-  setFilteredFuncoes(filtered);
-  setHighlightIndex(filtered.length ? 0 : -1);
+    setFilteredFuncoes(filtered);
+    setHighlightIndex(filtered.length ? 0 : -1);
 
-  // limpa erro de validação se havia
-  if (errors.funcao) setErrors(prev => ({ ...prev, funcao: null }));
-};
+    // limpa erro de validação se havia
+    if (errors.funcao) setErrors(prev => ({ ...prev, funcao: null }));
+  };
 
-// selecionar função a partir da lista de sugestões (usuário)
-const selectFuncaoUser = (valorCanonico) => {
-  // gravar valor canônico para envio
-  setForm(prev => ({ ...prev, funcao: valorCanonico }));
-  // mostrar label amigável no input
-  setFuncaoInput(formatarLabel(valorCanonico));
-  // esconder sugestões e resetar highlight
-  setFilteredFuncoes([]);
-  setFuncaoFocused(false);
-  setHighlightIndex(-1);
-  if (errors.funcao) setErrors(prev => ({ ...prev, funcao: null }));
-};
-
-// navegação por teclado para o input do form (setas, enter, escape)
-const onFuncaoKeyDown = (e) => {
-  if (!filteredFuncoes || filteredFuncoes.length === 0) {
-    // se não houver sugestões, se quiser deixar Enter mandar submit, não previna
-    return;
-  }
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    setHighlightIndex(i => Math.min(i + 1, filteredFuncoes.length - 1));
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    setHighlightIndex(i => Math.max(i - 1, 0));
-  } else if (e.key === 'Enter') {
-    if (highlightIndex >= 0 && highlightIndex < filteredFuncoes.length) {
-      e.preventDefault();
-      selectFuncaoUser(filteredFuncoes[highlightIndex]);
-    }
-  } else if (e.key === 'Escape') {
+  // selecionar função a partir da lista de sugestões (usuário)
+  const selectFuncaoUser = (valorCanonico) => {
+    // gravar valor canônico para envio
+    setForm(prev => ({ ...prev, funcao: valorCanonico }));
+    // mostrar label amigável no input
+    setFuncaoInput(formatarLabel(valorCanonico));
+    // esconder sugestões e resetar highlight
     setFilteredFuncoes([]);
-    setHighlightIndex(-1);
     setFuncaoFocused(false);
-  }
-};
+    setHighlightIndex(-1);
+    if (errors.funcao) setErrors(prev => ({ ...prev, funcao: null }));
+  };
+
+  // navegação por teclado para o input do form (setas, enter, escape)
+  const onFuncaoKeyDown = (e) => {
+    if (!filteredFuncoes || filteredFuncoes.length === 0) {
+      // se não houver sugestões, se quiser deixar Enter mandar submit, não previna
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightIndex(i => Math.min(i + 1, filteredFuncoes.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightIndex(i => Math.max(i - 1, 0));
+    } else if (e.key === 'Enter') {
+      if (highlightIndex >= 0 && highlightIndex < filteredFuncoes.length) {
+        e.preventDefault();
+        selectFuncaoUser(filteredFuncoes[highlightIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      setFilteredFuncoes([]);
+      setHighlightIndex(-1);
+      setFuncaoFocused(false);
+    }
+  };
 
   // states para validação
   const [errors, setErrors] = useState({
@@ -808,7 +808,7 @@ const onFuncaoKeyDown = (e) => {
   //   setSetorFuncoesInput(f);      // mostra valor no input
   //   setSetorFilteredFuncoes([]);  // esconde lista de sugestões
   //   setSetorHighlightIndex(-1);   // reseta highlight
-  
+
   //   setTimeout(() => {
   //     const el = document.getElementById("setor-funcao-input");
   //     if (el) el.focus();
@@ -819,7 +819,7 @@ const onFuncaoKeyDown = (e) => {
     setSetorFuncoesInput(f);     // mostra valor no input
     setSetorFilteredFuncoes([]); // esconde lista
     setSetorHighlightIndex(-1);
-  
+
     setTimeout(() => {
       const el = document.getElementById("setor-funcao-input");
       if (el) el.focus();
@@ -829,13 +829,13 @@ const onFuncaoKeyDown = (e) => {
   const onSetorFuncaoInput = (e) => {
     const v = e.target.value;
     setSetorFuncoesInput(v);
-  
+
     const q = String(v || "").trim().toLowerCase();
     const base = Array.isArray(funcoes) ? funcoes : [];
     const matches = q === ""
       ? base.slice(0, 50)
       : base.filter(f => f.toLowerCase().includes(q)).slice(0, 50);
-  
+
     setSetorFilteredFuncoes(matches);
     setSetorHighlightIndex(matches.length ? 0 : -1);
   };
@@ -910,12 +910,12 @@ const onFuncaoKeyDown = (e) => {
   //   }
   // };
 
-const [submitAttemptedSetor, setSubmitAttemptedSetor] = useState(false);
-const [setorErrors, setSetorErrors] = useState({
-  titulo: null,
-  descricao: null,
-  funcoes: null
-});
+  const [submitAttemptedSetor, setSubmitAttemptedSetor] = useState(false);
+  const [setorErrors, setSetorErrors] = useState({
+    titulo: null,
+    descricao: null,
+    funcoes: null
+  });
 
 
   const [setorModalData, setSetorModalData] = useState({ titulo: "", descricao: "" });
@@ -923,10 +923,10 @@ const [setorErrors, setSetorErrors] = useState({
   const [setorFuncoes, setSetorFuncoes] = useState([]);
   const [setorSubmitting, setSetorSubmitting] = useState(false);
 
-// limpa o erro de um campo quando o usuário começa a editar
-const clearSetorError = (field) => {
-  setSetorErrors(prev => ({ ...prev, [field]: null }));
-};
+  // limpa o erro de um campo quando o usuário começa a editar
+  const clearSetorError = (field) => {
+    setSetorErrors(prev => ({ ...prev, [field]: null }));
+  };
 
   const handleSetorModalChange = (e) => {
     const { name, value } = e.target;
@@ -950,79 +950,79 @@ const clearSetorError = (field) => {
     setSetorFuncoes(prev => prev.filter((_, i) => i !== idx));
   };
 
-const handleCriarSetorModal = async (e) => {
-  if (e && e.preventDefault) e.preventDefault();
+  const handleCriarSetorModal = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
 
-  setSubmitAttemptedSetor(true);
+    setSubmitAttemptedSetor(true);
 
-  // validação local
-  const tituloTrim = String(setorModalData.titulo || "").trim();
-  const descricaoTrim = String(setorModalData.descricao || "").trim();
-  const funcoesArr = Array.isArray(setorFuncoes) ? setorFuncoes : [];
+    // validação local
+    const tituloTrim = String(setorModalData.titulo || "").trim();
+    const descricaoTrim = String(setorModalData.descricao || "").trim();
+    const funcoesArr = Array.isArray(setorFuncoes) ? setorFuncoes : [];
 
-  const newErrors = { titulo: null, descricao: null, funcoes: null };
-  if (!tituloTrim) newErrors.titulo = "Título é obrigatório";
-  if (!descricaoTrim) newErrors.descricao = "Descrição é obrigatória";
-  if (!funcoesArr.length) newErrors.funcoes = "Adicione pelo menos 1 função";
+    const newErrors = { titulo: null, descricao: null, funcoes: null };
+    if (!tituloTrim) newErrors.titulo = "Título é obrigatório";
+    if (!descricaoTrim) newErrors.descricao = "Descrição é obrigatória";
+    if (!funcoesArr.length) newErrors.funcoes = "Adicione pelo menos 1 função";
 
-  setSetorErrors(newErrors);
+    setSetorErrors(newErrors);
 
-  // se tiver erro, não envia
-  if (newErrors.titulo || newErrors.descricao || newErrors.funcoes) {
-    if (newErrors.titulo) {
-      const el = document.querySelector('input[name="titulo"]');
-      if (el) el.focus();
-    } else if (newErrors.descricao) {
-      const el = document.querySelector('textarea[name="descricao"]');
-      if (el) el.focus();
-    }
-    return;
-  }
-
-  setSetorSubmitting(true);
-  try {
-    const payload = { titulo: tituloTrim, descricao: descricaoTrim, funcoes: funcoesArr };
-    const res = await fetchWithTimeout(`${API_BASE_URL}/pool`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(payload)
-    }, 10000);
-
-    const data = res;
-
-    // atualiza setores local
-    setSetores(prev => [{ id: data.id || Date.now(), titulo: data.titulo || payload.titulo, descricao: data.descricao || payload.descricao }, ...prev]);
-
-    try {
-      const fRes = await fetchWithTimeout(`${API_BASE_URL}/funcoes`, { method: 'GET', credentials: 'include' }, 10000);
-      const allFuncoes = fRes;
-      if (Array.isArray(allFuncoes)) setFuncoes(allFuncoes);
-    } catch (err) {
-      if (Array.isArray(data.funcoes) && data.funcoes.length) {
-        setFuncoes(prev => {
-          const missing = data.funcoes.filter(f => !prev.includes(f));
-          return [...missing, ...prev];
-        });
+    // se tiver erro, não envia
+    if (newErrors.titulo || newErrors.descricao || newErrors.funcoes) {
+      if (newErrors.titulo) {
+        const el = document.querySelector('input[name="titulo"]');
+        if (el) el.focus();
+      } else if (newErrors.descricao) {
+        const el = document.querySelector('textarea[name="descricao"]');
+        if (el) el.focus();
       }
+      return;
     }
 
-    showToast("success", "Setor criado");
+    setSetorSubmitting(true);
+    try {
+      const payload = { titulo: tituloTrim, descricao: descricaoTrim, funcoes: funcoesArr };
+      const res = await fetchWithTimeout(`${API_BASE_URL}/pool`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload)
+      }, 10000);
 
-    // reset modal e estado de validação
-    setSetorModalData({ titulo: "", descricao: "" });
-    setSetorFuncoes([]);
-    setSetorFuncoesInput("");
-    setSubmitAttemptedSetor(false);
-    setSetorErrors({ titulo: null, descricao: null, funcoes: null });
-    setShowSetorModal(false);
-  } catch (err) {
-    console.error('[handleCriarSetorModal] erro:', err);
-    showToast("danger", "Erro ao criar setor");
-  } finally {
-    setSetorSubmitting(false);
-  }
-};
+      const data = res;
+
+      // atualiza setores local
+      setSetores(prev => [{ id: data.id || Date.now(), titulo: data.titulo || payload.titulo, descricao: data.descricao || payload.descricao }, ...prev]);
+
+      try {
+        const fRes = await fetchWithTimeout(`${API_BASE_URL}/funcoes`, { method: 'GET', credentials: 'include' }, 10000);
+        const allFuncoes = fRes;
+        if (Array.isArray(allFuncoes)) setFuncoes(allFuncoes);
+      } catch (err) {
+        if (Array.isArray(data.funcoes) && data.funcoes.length) {
+          setFuncoes(prev => {
+            const missing = data.funcoes.filter(f => !prev.includes(f));
+            return [...missing, ...prev];
+          });
+        }
+      }
+
+      showToast("success", "Setor criado");
+
+      // reset modal e estado de validação
+      setSetorModalData({ titulo: "", descricao: "" });
+      setSetorFuncoes([]);
+      setSetorFuncoesInput("");
+      setSubmitAttemptedSetor(false);
+      setSetorErrors({ titulo: null, descricao: null, funcoes: null });
+      setShowSetorModal(false);
+    } catch (err) {
+      console.error('[handleCriarSetorModal] erro:', err);
+      showToast("danger", "Erro ao criar setor");
+    } finally {
+      setSetorSubmitting(false);
+    }
+  };
 
 
 
@@ -1224,18 +1224,18 @@ const handleCriarSetorModal = async (e) => {
                   <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">Título<span className="ml-1 self-start leading-none text-red-500">*</span></label>
                   <input name="titulo" value={setorModalData.titulo} onChange={(e) => { handleSetorModalChange(e); if (setorErrors.titulo) clearSetorError('titulo'); }}
                     className={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-600 dark:border-gray-500 text-sm dark:text-white focus:outline-none focus:ring-0 ${submitAttemptedSetor && setorErrors.titulo ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'}`} placeholder="Ex: manutencao" required />
-                      {submitAttemptedSetor && setorErrors.titulo && <div className="text-xs text-red-500 mt-1">{setorErrors.titulo}</div>}
+                  {submitAttemptedSetor && setorErrors.titulo && <div className="text-xs text-red-500 mt-1">{setorErrors.titulo}</div>}
                 </div>
 
                 <div>
                   <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">Descrição<span className="ml-1 self-start leading-none text-red-500">*</span></label>
                   <textarea name="descricao" value={setorModalData.descricao} onChange={handleSetorModalChange}
                     className={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-600 dark:border-gray-500 text-sm dark:text-white focus:outline-none focus:ring-0 ${submitAttemptedSetor && setorErrors.titulo ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'}`} rows={4} placeholder="Descrição do setor" />
-                     {submitAttemptedSetor && setorErrors.descricao && <div className="text-xs text-red-500 mt-1">{setorErrors.descricao}</div>}
+                  {submitAttemptedSetor && setorErrors.descricao && <div className="text-xs text-red-500 mt-1">{setorErrors.descricao}</div>}
                 </div>
 
                 <div>
-                          
+
                   <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">Funções (tags)<span className="ml-1 self-start leading-none text-red-500">*</span></label>
 
                   <div className="relative">
@@ -1316,7 +1316,7 @@ const handleCriarSetorModal = async (e) => {
                       </span>
                     ))}
                   </div>
-                     {submitAttemptedSetor && setorErrors.funcoes && <div className="text-xs text-red-500 mt-1">{setorErrors.funcoes}</div>}
+                  {submitAttemptedSetor && setorErrors.funcoes && <div className="text-xs text-red-500 mt-1">{setorErrors.funcoes}</div>}
                 </div>
 
 
@@ -1451,37 +1451,37 @@ const handleCriarSetorModal = async (e) => {
                             aria-expanded={funcaoFocused && filteredFuncoes.length > 0}
                             aria-haspopup="listbox"
                           /> */}
-<input
-  type="text"
-  name="funcao"
-  id="user_function"
-  autoComplete="off"
-  className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
+                          <input
+                            type="text"
+                            name="funcao"
+                            id="user_function"
+                            autoComplete="off"
+                            className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
     ${submitAttempted && errors.funcao ? 'border-red-500' : 'border-gray-300'}
     dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
-  placeholder=" "
-  value={funcaoInput}                 // <--- agora controlado
-  onChange={onFuncaoInput}            // <--- handler novo
-  onFocus={() => {
-    setFuncaoFocused(true);
-    const all = Array.isArray(funcoes) ? funcoes.slice(0,50) : [];
-    setFilteredFuncoes(all);
-    setHighlightIndex(all.length ? 0 : -1);
-  }}
-  onBlur={() => {
-    setTimeout(() => {
-      setFuncaoFocused(false);
-      setFilteredFuncoes([]);
-      setHighlightIndex(-1);
-    }, 150);
-  }}
-  onKeyDown={onFuncaoKeyDown}         // <--- handler novo
-  required
-  aria-autocomplete="list"
-  aria-controls="funcao-suggestions"
-  aria-expanded={funcaoFocused && filteredFuncoes.length > 0}
-  aria-haspopup="listbox"
-/>
+                            placeholder=" "
+                            value={funcaoInput}                 // <--- agora controlado
+                            onChange={onFuncaoInput}            // <--- handler novo
+                            onFocus={() => {
+                              setFuncaoFocused(true);
+                              const all = Array.isArray(funcoes) ? funcoes.slice(0, 50) : [];
+                              setFilteredFuncoes(all);
+                              setHighlightIndex(all.length ? 0 : -1);
+                            }}
+                            onBlur={() => {
+                              setTimeout(() => {
+                                setFuncaoFocused(false);
+                                setFilteredFuncoes([]);
+                                setHighlightIndex(-1);
+                              }, 150);
+                            }}
+                            onKeyDown={onFuncaoKeyDown}         // <--- handler novo
+                            required
+                            aria-autocomplete="list"
+                            aria-controls="funcao-suggestions"
+                            aria-expanded={funcaoFocused && filteredFuncoes.length > 0}
+                            aria-haspopup="listbox"
+                          />
 
                           <label
                             htmlFor="user_function"
@@ -1513,21 +1513,21 @@ const handleCriarSetorModal = async (e) => {
                                   <div className="text-sm dark:text-gray-300">{formatarLabel(f)}</div>
                                 </li>
                               ))} */}
-                            {filteredFuncoes.map((f, idx) => (
-  <li
-    key={f + idx}
-    id={`funcao-option-${idx}`}
-    role="option"
-    aria-selected={highlightIndex === idx}
-    onMouseDown={(e) => { e.preventDefault(); }}
-    onClick={() => selectFuncaoUser(f)}   // <-- chama o select do form
-    onMouseEnter={() => setHighlightIndex(idx)}
-    className={`px-3 py-2 cursor-pointer select-none ${highlightIndex === idx ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-    }`}
-  >
-    <div className="text-sm dark:text-gray-300">{formatarLabel(f)}</div>
-  </li>
-))}
+                              {filteredFuncoes.map((f, idx) => (
+                                <li
+                                  key={f + idx}
+                                  id={`funcao-option-${idx}`}
+                                  role="option"
+                                  aria-selected={highlightIndex === idx}
+                                  onMouseDown={(e) => { e.preventDefault(); }}
+                                  onClick={() => selectFuncaoUser(f)}   // <-- chama o select do form
+                                  onMouseEnter={() => setHighlightIndex(idx)}
+                                  className={`px-3 py-2 cursor-pointer select-none ${highlightIndex === idx ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                                    }`}
+                                >
+                                  <div className="text-sm dark:text-gray-300">{formatarLabel(f)}</div>
+                                </li>
+                              ))}
 
                             </ul>
                           )}
@@ -1555,9 +1555,9 @@ const handleCriarSetorModal = async (e) => {
                           className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.senha ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.senha ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.senha ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}><span className="leading-none">Senha</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
                         </label> */}
-<label
-  htmlFor="user_password"
-  className={`peer-focus:poppins-medium absolute text-sm
+                        <label
+                          htmlFor="user_password"
+                          className={`peer-focus:poppins-medium absolute text-sm
     ${submitAttempted && errors.senha ? 'text-red-500' : 'text-gray-500'}
     ${submitAttempted && errors.senha ? '' : 'dark:text-gray-400'}
     duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0]
@@ -1565,10 +1565,10 @@ const handleCriarSetorModal = async (e) => {
     ${submitAttempted && errors.senha ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'}
     peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0
     peer-focus:scale-75 peer-focus:-translate-y-6`}
->
-  <span className="leading-none">Senha</span>
-  <span className="ml-1 self-start leading-none text-red-500">*</span>
-</label>
+                        >
+                          <span className="leading-none">Senha</span>
+                          <span className="ml-1 self-start leading-none text-red-500">*</span>
+                        </label>
                         {submitAttempted && errors.senha && <div className="text-xs text-red-500 mt-1">{errors.senha}</div>}
                       </div>
 
