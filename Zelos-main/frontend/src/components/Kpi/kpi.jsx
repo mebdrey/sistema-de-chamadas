@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable"; 
+import autoTable from "jspdf-autotable";
 
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -11,29 +11,29 @@ export default function KpiSla() {
   const [series, setSeries] = useState([0, 0]);
   const [slaData, setSlaData] = useState(null);
   const [loading, setLoading] = useState(false);
-// dropdown de relatórios (mantém no mesmo arquivo)
-const [dropdownRelatorioOpen, setDropdownRelatorioOpen] = useState(false);
-const dropdownRef = useRef(null);
+  // dropdown de relatórios (mantém no mesmo arquivo)
+  const [dropdownRelatorioOpen, setDropdownRelatorioOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-// Fecha o dropdown ao clicar fora
-useEffect(() => {
-  function handleClickOutside(e) {
-    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-      setDropdownRelatorioOpen(false);
+  // Fecha o dropdown ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownRelatorioOpen(false);
+      }
     }
-  }
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => document.removeEventListener("mousedown", handleClickOutside);
-}, []);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-// Fecha com ESC
-useEffect(() => {
-  function handleEsc(e) {
-    if (e.key === "Escape") setDropdownRelatorioOpen(false);
-  }
-  document.addEventListener("keydown", handleEsc);
-  return () => document.removeEventListener("keydown", handleEsc);
-}, []);
+  // Fecha com ESC
+  useEffect(() => {
+    function handleEsc(e) {
+      if (e.key === "Escape") setDropdownRelatorioOpen(false);
+    }
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, []);
 
 
   const chartOptions = {
@@ -143,7 +143,7 @@ useEffect(() => {
       margin: { left: 14, right: 14 },
     });
 
-    
+
     let finalY = doc.lastAutoTable?.finalY || 80;
 
     if (slaData?.monthly && Array.isArray(slaData.monthly) && slaData.monthly.length > 0) {
@@ -194,51 +194,64 @@ useEffect(() => {
 
   return (
     <div className="bg-white p-4 rounded-lg shadow dark:bg-gray-800">
-      <h3 className="text-lg poppins-medium text-gray-600 mb-4 dark:text-white">
+      
+      <div className="flex items-start">
+          <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center me-3">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-gray-500 dark:text-gray-400">
+        <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clipRule="evenodd" />
+      </svg>
+          </div>
+          <div>
+      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
         Cumprimento de SLA anual
       </h3>
+      <p className="text-sm text-gray-500 dark:text-gray-400">
+        Percentual de atendimentos concluídos dentro do prazo durante o ano.
+      </p>
+      </div>
+      </div>
       
       <Chart
         options={chartOptions}
         series={series}
         type="donut"
-         height="100%"
+        height="100%"
       />
 
       {/* botão */}
-<div ref={dropdownRef} className="relative inline-block">
-  <button
-    onClick={() => setDropdownRelatorioOpen((s) => !s)}
-    aria-haspopup="true"
-    aria-expanded={dropdownRelatorioOpen} className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-[#7F56D8] hover:bg-[#E6DAFF] dark:hover:bg-gray-700 px-3 py-2 hover:cursor-pointer"
-  >Gerar relatório <svg className="w-3.5 h-3.5 text-[#7F56D8] me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20"><path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" /><path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" /></svg></button>
+      <div ref={dropdownRef} className="relative inline-block">
+        <button
+          onClick={() => setDropdownRelatorioOpen((s) => !s)}
+          aria-haspopup="true"
+          aria-expanded={dropdownRelatorioOpen} className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-[#7F56D8] hover:bg-[#E6DAFF] dark:hover:bg-gray-700 px-3 py-2 hover:cursor-pointer"
+        >Gerar relatório <svg className="w-3.5 h-3.5 text-[#7F56D8] me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20"><path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" /><path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" /></svg></button>
 
-  <div ref={dropdownRef} className="relative inline-block">
-  {dropdownRelatorioOpen && (
-    <div className="absolute z-10 mt-2 bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm w-40 dark:bg-gray-800">
-      <ul className="py-2 text-sm text-gray-700 dark:text-gray-400">
-        <li>
-          <button
-            onClick={() => { gerarCSV(); setDropdownRelatorioOpen(false); }}
-            className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700"
-          >
-            Exportar CSV
-          </button>
-        </li>
-        <li>
-          <button
-            onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }}
-            className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700"
-          >
-            Exportar PDF
-          </button>
-        </li>
-      </ul>
-    </div>
-  )}
-</div>
+        <div ref={dropdownRef} className="relative inline-block">
+          {dropdownRelatorioOpen && (
+            <div className="absolute z-10 mt-2 bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm w-40 dark:bg-gray-800">
+              <ul className="py-2 text-sm text-gray-700 dark:text-gray-400">
+                <li>
+                  <button
+                    onClick={() => { gerarCSV(); setDropdownRelatorioOpen(false); }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700"
+                  >
+                    Exportar CSV
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700"
+                  >
+                    Exportar PDF
+                  </button>
+                </li>
+              </ul>
+            </div>
+          )}
+        </div>
 
-</div>
+      </div>
 
     </div>
   );

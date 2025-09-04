@@ -153,7 +153,7 @@ export default function AvaliacoesPorSetorChart({ apiUrl = 'http://localhost:808
         bar: {
           horizontal: true,
           borderRadius: 6,
-           barHeight: '35%', 
+          barHeight: '35%',
           columnWidth: '60%',
         },
       },
@@ -190,169 +190,174 @@ export default function AvaliacoesPorSetorChart({ apiUrl = 'http://localhost:808
           }
         }
       },
-     grid: {
-  borderColor: isDark ? '#334155' : '#E5E7EB', // cor mais suave
-  strokeDashArray: 3,                           // tracejado mais sutil
-  padding: { left: 8, right: 8, top: -10 },
-  row: { colors: ['transparent', 'transparent'] }, // sem bandas de cor
-  xaxis: { lines: { show: true } },
-  yaxis: { lines: { show: true } }
-},
+      grid: {
+        borderColor: isDark ? '#334155' : '#E5E7EB', // cor mais suave
+        strokeDashArray: 3,                           // tracejado mais sutil
+        padding: { left: 8, right: 8, top: -10 },
+        row: { colors: ['transparent', 'transparent'] }, // sem bandas de cor
+        xaxis: { lines: { show: true } },
+        yaxis: { lines: { show: true } }
+      },
 
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoriasFormatadas, isDark, tabela]); // corPorMedia usa isDark internamente
 
 
-function _formatarDataAgora() {
-  const d = new Date();
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
-}
-
-function _capitalizarPalavras(str) {
-  if (!str && str !== '') return '';
-  return String(str).replace(/_/g, ' ')
-    .split(' ')
-    .map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
-    .join(' ');
-}
-
-/** gerarCSV: cria CSV com colunas: Setor, Média, Quantidade (se houver) */
-const gerarCSV = () => {
-  const dados = Array.isArray(tabela) && tabela.length ? tabela : null;
-
-  // fallback: use series/categorias if tabela vazia
-  const rows = [];
-  if (dados) {
-    // tenta mapear campos comuns: setor/titulo, media_nota/valor, qtd/qtd
-    for (const r of dados) {
-      const setorRaw = r.setor ?? r.titulo ?? r.nome ?? '';
-      const setor = _capitalizarPalavras(setorRaw);
-      const media = Number(r.media_nota ?? r.valor ?? r.media ?? 0);
-      const qtd = Number(r.qtd ?? r.quantidade ?? r.total ?? 0);
-      rows.push({ Setor: setor, Média: isNaN(media) ? '' : media.toFixed(2), Quantidade: isNaN(qtd) ? '' : qtd });
-    }
-  } else if (Array.isArray(series?.[0]?.data) && series[0].data.length && categoriasFormatadas.length) {
-    series[0].data.forEach((val, i) => {
-      rows.push({ Setor: categoriasFormatadas[i] ?? (`Setor ${i+1}`), Média: Number(val).toFixed(2), Quantidade: '' });
-    });
+  function _formatarDataAgora() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
   }
 
-  if (!rows.length) {
-    return alert('Sem dados para exportar.');
+  function _capitalizarPalavras(str) {
+    if (!str && str !== '') return '';
+    return String(str).replace(/_/g, ' ')
+      .split(' ')
+      .map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
+      .join(' ');
   }
 
-  const headers = Object.keys(rows[0]);
-  const separator = ';'; // bom para Excel PT-BR
-  const bom = '\uFEFF';
-  const titulo = `Relatório - Avaliações por setor`;
-  const dataGeracao = `Gerado em: ${new Date().toLocaleString('pt-BR')}`;
+  /** gerarCSV: cria CSV com colunas: Setor, Média, Quantidade (se houver) */
+  const gerarCSV = () => {
+    const dados = Array.isArray(tabela) && tabela.length ? tabela : null;
 
-  const lines = [
-    titulo,
-    dataGeracao,
-    headers.join(separator),
-    ...rows.map(r => headers.map(h => {
-      const v = r[h] ?? '';
-      // escape " e ; por segurança
-      return String(v).includes(separator) || String(v).includes('"') ? `"${String(v).replace(/"/g, '""')}"` : v;
-    }).join(separator))
-  ];
-
-  const csv = bom + lines.join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const nome = `relatorio_avaliacoes_por_setor_${_formatarDataAgora()}.csv`;
-  const a = document.createElement('a');
-  a.href = url;
-  a.setAttribute('download', nome);
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-};
-
-const gerarPDF = async () => {
-  const dados = Array.isArray(tabela) && tabela.length ? tabela : null;
-  const rows = [];
-
-  if (dados) {
-    for (const r of dados) {
-      const setorRaw = r.setor ?? r.titulo ?? r.nome ?? '';
-      const setor = _capitalizarPalavras(setorRaw);
-      const media = Number(r.media_nota ?? r.valor ?? r.media ?? 0);
-      const qtd = Number(r.qtd ?? r.quantidade ?? r.total ?? 0);
-      rows.push([setor, isNaN(media) ? '' : Number(media).toFixed(2), isNaN(qtd) ? '' : qtd]);
-    }
-  } else if (Array.isArray(series?.[0]?.data) && series[0].data.length && categoriasFormatadas.length) {
-    series[0].data.forEach((val, i) => {
-      rows.push([categoriasFormatadas[i] ?? (`Setor ${i+1}`), Number(val).toFixed(2), '']);
-    });
-  }
-
-  if (!rows.length) {
-    return alert('Sem dados para gerar PDF.');
-  }
-
-  try {
-    // Importa dinamicamente só no client
-    const { jsPDF } = await import('jspdf');
-    const autoTable = (await import('jspdf-autotable')).default || (await import('jspdf-autotable'));
-
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-    const pageWidth = doc.internal.pageSize.getWidth();
-
-    // Título
-    doc.setFontSize(16);
-    doc.setTextColor(isDark ? 230 : 20, isDark ? 238 : 20, isDark ? 248 : 20); // tenta adequar; jsPDF aceita 0-255
-    doc.text('Relatório — Avaliações por setor', 40, 48);
-
-    // info geração
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 40, 64);
-
-    // total avaliações (se tabela tiver qtd)
-    const totalAvaliacoes = tabela && tabela.length ? tabela.reduce((s, r) => s + (Number(r.qtd ?? r.quantidade ?? r.total ?? 0) || 0), 0) : null;
-    if (totalAvaliacoes !== null) {
-      doc.text(`Total avaliações: ${totalAvaliacoes}`, pageWidth - 40, 64, { align: 'right' });
+    // fallback: use series/categorias if tabela vazia
+    const rows = [];
+    if (dados) {
+      // tenta mapear campos comuns: setor/titulo, media_nota/valor, qtd/qtd
+      for (const r of dados) {
+        const setorRaw = r.setor ?? r.titulo ?? r.nome ?? '';
+        const setor = _capitalizarPalavras(setorRaw);
+        const media = Number(r.media_nota ?? r.valor ?? r.media ?? 0);
+        const qtd = Number(r.qtd ?? r.quantidade ?? r.total ?? 0);
+        rows.push({ Setor: setor, Média: isNaN(media) ? '' : media.toFixed(2), Quantidade: isNaN(qtd) ? '' : qtd });
+      }
+    } else if (Array.isArray(series?.[0]?.data) && series[0].data.length && categoriasFormatadas.length) {
+      series[0].data.forEach((val, i) => {
+        rows.push({ Setor: categoriasFormatadas[i] ?? (`Setor ${i + 1}`), Média: Number(val).toFixed(2), Quantidade: '' });
+      });
     }
 
-    // tabela com autotable
-    autoTable(doc, {
-      startY: 80,
-      head: [['#', 'Setor', 'Média', 'Quantidade']],
-      body: rows.map((r, idx) => [idx + 1, r[0], r[1], r[2]]),
-      styles: { fontSize: 10, cellPadding: 6 },
-      headStyles: { fillColor: isDark ? [40, 40, 40] : [127, 86, 216], textColor: isDark ? [255,255,255] : [255,255,255], fontStyle: 'bold' },
-      alternateRowStyles: { fillColor: isDark ? [30,30,30] : [245,245,250] },
-      theme: 'striped',
-      margin: { left: 40, right: 40 },
-      // se a tabela for muito longa o autoTable paginará automaticamente
-    });
-
-    const pageCount = doc.internal.getNumberOfPages();
-    doc.setFontSize(9);
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setTextColor(120);
-      doc.text(`Página ${i} de ${pageCount}`, pageWidth - 40, doc.internal.pageSize.getHeight() - 30, { align: 'right' });
-      doc.text('Gerado automaticamente pelo sistema', 40, doc.internal.pageSize.getHeight() - 30);
+    if (!rows.length) {
+      return alert('Sem dados para exportar.');
     }
 
-    const filename = `relatorio_avaliacoes_por_setor_${_formatarDataAgora()}.pdf`;
-    doc.save(filename);
-  } catch (err) {
-    console.error('Erro ao gerar PDF', err);
-    alert('Erro ao gerar PDF. Verifique se a dependência jspdf e jspdf-autotable estão instaladas.');
-  }
-};
+    const headers = Object.keys(rows[0]);
+    const separator = ';'; // bom para Excel PT-BR
+    const bom = '\uFEFF';
+    const titulo = `Relatório - Avaliações por setor`;
+    const dataGeracao = `Gerado em: ${new Date().toLocaleString('pt-BR')}`;
+
+    const lines = [
+      titulo,
+      dataGeracao,
+      headers.join(separator),
+      ...rows.map(r => headers.map(h => {
+        const v = r[h] ?? '';
+        // escape " e ; por segurança
+        return String(v).includes(separator) || String(v).includes('"') ? `"${String(v).replace(/"/g, '""')}"` : v;
+      }).join(separator))
+    ];
+
+    const csv = bom + lines.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const nome = `relatorio_avaliacoes_por_setor_${_formatarDataAgora()}.csv`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.setAttribute('download', nome);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const gerarPDF = async () => {
+    const dados = Array.isArray(tabela) && tabela.length ? tabela : null;
+    const rows = [];
+
+    if (dados) {
+      for (const r of dados) {
+        const setorRaw = r.setor ?? r.titulo ?? r.nome ?? '';
+        const setor = _capitalizarPalavras(setorRaw);
+        const media = Number(r.media_nota ?? r.valor ?? r.media ?? 0);
+        const qtd = Number(r.qtd ?? r.quantidade ?? r.total ?? 0);
+        rows.push([setor, isNaN(media) ? '' : Number(media).toFixed(2), isNaN(qtd) ? '' : qtd]);
+      }
+    } else if (Array.isArray(series?.[0]?.data) && series[0].data.length && categoriasFormatadas.length) {
+      series[0].data.forEach((val, i) => {
+        rows.push([categoriasFormatadas[i] ?? (`Setor ${i + 1}`), Number(val).toFixed(2), '']);
+      });
+    }
+
+    if (!rows.length) {
+      return alert('Sem dados para gerar PDF.');
+    }
+
+    try {
+      // Importa dinamicamente só no client
+      const { jsPDF } = await import('jspdf');
+      const autoTable = (await import('jspdf-autotable')).default || (await import('jspdf-autotable'));
+
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      // Título
+      doc.setFontSize(16);
+      doc.setTextColor(isDark ? 230 : 20, isDark ? 238 : 20, isDark ? 248 : 20); // tenta adequar; jsPDF aceita 0-255
+      doc.text('Relatório — Avaliações por setor', 40, 48);
+
+      // info geração
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 40, 64);
+
+      // total avaliações (se tabela tiver qtd)
+      const totalAvaliacoes = tabela && tabela.length ? tabela.reduce((s, r) => s + (Number(r.qtd ?? r.quantidade ?? r.total ?? 0) || 0), 0) : null;
+      if (totalAvaliacoes !== null) {
+        doc.text(`Total avaliações: ${totalAvaliacoes}`, pageWidth - 40, 64, { align: 'right' });
+      }
+
+      // tabela com autotable
+      autoTable(doc, {
+        startY: 80,
+        head: [['#', 'Setor', 'Média', 'Quantidade']],
+        body: rows.map((r, idx) => [idx + 1, r[0], r[1], r[2]]),
+        styles: { fontSize: 10, cellPadding: 6 },
+        headStyles: { fillColor: isDark ? [40, 40, 40] : [127, 86, 216], textColor: isDark ? [255, 255, 255] : [255, 255, 255], fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: isDark ? [30, 30, 30] : [245, 245, 250] },
+        theme: 'striped',
+        margin: { left: 40, right: 40 },
+        // se a tabela for muito longa o autoTable paginará automaticamente
+      });
+
+      const pageCount = doc.internal.getNumberOfPages();
+      doc.setFontSize(9);
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setTextColor(120);
+        doc.text(`Página ${i} de ${pageCount}`, pageWidth - 40, doc.internal.pageSize.getHeight() - 30, { align: 'right' });
+        doc.text('Gerado automaticamente pelo sistema', 40, doc.internal.pageSize.getHeight() - 30);
+      }
+
+      const filename = `relatorio_avaliacoes_por_setor_${_formatarDataAgora()}.pdf`;
+      doc.save(filename);
+    } catch (err) {
+      console.error('Erro ao gerar PDF', err);
+      alert('Erro ao gerar PDF. Verifique se a dependência jspdf e jspdf-autotable estão instaladas.');
+    }
+  };
 
 
   return (
     <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 md:p-6">
-      <div className="flex justify-between border-b border-gray-200 dark:border-gray-700 pb-3 mb-2">
+      <div className="flex items-start  border-b border-gray-200 dark:border-gray-700 pb-3 mb-2">
+        <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center me-3">
+          <svg className='w-6 h-6 text-gray-500 dark:text-gray-400' viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9.44071 14.5436C9.16931 14.3792 8.829 14.3792 8.55761 14.5437L4.39532 17.0665C3.75017 17.4575 2.95263 16.8789 3.12406 16.1443L4.22755 11.4153C4.29924 11.1081 4.19529 10.7864 3.95739 10.5792L0.293637 7.38862C-0.273873 6.8944 0.031211 5.96091 0.781053 5.89724L5.60934 5.48723C5.92375 5.46053 6.19766 5.26223 6.3212 4.97188L8.21606 0.518403C8.51015 -0.172802 9.48985 -0.172801 9.78395 0.518404L11.6788 4.97188C11.8023 5.26224 12.0762 5.46053 12.3907 5.48723L17.2189 5.89724C17.9688 5.96091 18.2739 6.8944 17.7064 7.38862L14.0426 10.5792C13.8047 10.7864 13.7008 11.1081 13.7725 11.4153L14.876 16.1446C15.0474 16.8792 14.25 17.4578 13.6048 17.0668L9.44071 14.5436Z" fill="currentColor" />
+          </svg>
+        </div>
         <dl>
           <dt className="text-2xl font-bold text-gray-900 dark:text-white">Avaliações por setor</dt>
           <dt className="text-sm text-gray-500 dark:text-gray-400">Média de avaliações por setor</dt>
@@ -381,30 +386,30 @@ const gerarPDF = async () => {
                 ) : '—'}
               </span>
 
-<div className="relative">
-            <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-violet-500 hover:bg-[#E6DAFF] px-3 py-2 hover:cursor-pointer dark:hover:bg-gray-700" onClick={() => setDropdownRelatorioOpen(prev => !prev)}>Gerar relatório
-              <svg className="w-3.5 h-3.5 text-violet-500 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
-                <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" />
-                <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
-              </svg>
-            </button>
+              <div className="relative">
+                <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-violet-500 hover:bg-[#E6DAFF] px-3 py-2 hover:cursor-pointer dark:hover:bg-gray-700" onClick={() => setDropdownRelatorioOpen(prev => !prev)}>Gerar relatório
+                  <svg className="w-3.5 h-3.5 text-violet-500 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+                    <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" />
+                    <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
+                  </svg>
+                </button>
 
-            {/* Mostrar o dropdown só quando aberto */}
-            {dropdownRelatorioOpen && (
-              <div className="absolute z-10 mt-2 bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm w-40 dark:bg-gray-800">
-                <ul className="py-2 text-sm text-gray-700 dark:text-gray-400">
-                  <li>
-                    <button onClick={() => { gerarCSV(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700" >Exportar CSV
-                    </button>
-                  </li>
-                  <li>
-                    <button onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700">Exportar PDF
-                    </button>
-                  </li>
-                </ul>
+                {/* Mostrar o dropdown só quando aberto */}
+                {dropdownRelatorioOpen && (
+                  <div className="absolute z-10 mt-2 bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm w-40 dark:bg-gray-800">
+                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-400">
+                      <li>
+                        <button onClick={() => { gerarCSV(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700" >Exportar CSV
+                        </button>
+                      </li>
+                      <li>
+                        <button onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700">Exportar PDF
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
             </div>
           </div>
         </div>

@@ -180,7 +180,26 @@ export default function GraficoChamadosPorAno() {
 
   return (
     <>
-      <div className="flex justify-between"><div><p className="text-lg poppins-medium text-gray-500 mb-3 dark:text-white"> Quantidade de chamados neste ano</p></div></div>
+      {/* <div className="flex justify-between">
+        <div><p className="text-2xl font-bold text-gray-900 dark:text-white"> Quantidade de chamados neste ano</p>
+        </div>
+        </div> */}
+        <div className="h-full flex flex-col justify-between">
+        <div className="flex items-start">
+          <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center me-3">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-gray-500 dark:text-gray-400">
+  <path fillRule="evenodd" d="M5.478 5.559A1.5 1.5 0 0 1 6.912 4.5H9A.75.75 0 0 0 9 3H6.912a3 3 0 0 0-2.868 2.118l-2.411 7.838a3 3 0 0 0-.133.882V18a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-4.162c0-.299-.045-.596-.133-.882l-2.412-7.838A3 3 0 0 0 17.088 3H15a.75.75 0 0 0 0 1.5h2.088a1.5 1.5 0 0 1 1.434 1.059l2.213 7.191H17.89a3 3 0 0 0-2.684 1.658l-.256.513a1.5 1.5 0 0 1-1.342.829h-3.218a1.5 1.5 0 0 1-1.342-.83l-.256-.512a3 3 0 0 0-2.684-1.658H3.265l2.213-7.191Z" clipRule="evenodd" />
+  <path fillRule="evenodd" d="M12 2.25a.75.75 0 0 1 .75.75v6.44l1.72-1.72a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 0 1 1.06-1.06l1.72 1.72V3a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
+</svg>
+
+          </div>
+          <div>
+      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Quantidade de chamados neste ano</h3>
+      <p className="text-sm text-gray-500 dark:text-gray-400">Número de solicitações registradas durante o ano corrente.</p>
+      </div>
+      </div>
+
+      <div>
       <div id="grafico-pdf" className="bg-white p-4 rounded-lg shadow dark:bg-gray-800">
         <ApexChart options={options} series={series} type="area"  height="100%" />
       </div>
@@ -243,6 +262,8 @@ export default function GraficoChamadosPorAno() {
             )}
           </div>
         </div>
+      </div>
+      </div>
       </div>
     </>
   );

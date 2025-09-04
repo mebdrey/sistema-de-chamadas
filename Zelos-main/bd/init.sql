@@ -119,6 +119,7 @@ UPDATE usuarios SET ftPerfil = 'mariaoliveira.jpg' WHERE username = 'mariaolivei
 UPDATE usuarios SET ftPerfil = 'anacosta.jpg' WHERE username = 'anacosta';
 UPDATE usuarios SET ftPerfil = 'lucianapereira.jpg' WHERE username = 'lucianapereira';
 UPDATE usuarios SET ftPerfil = 'carlosmendes.jpg' WHERE username = 'carlosmendes';
+UPDATE usuarios SET ftPerfil = 'cinnamo.png' WHERE username = 'mariabrito';
 
 CREATE TABLE prioridades (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -304,8 +305,8 @@ create table mensagens (
 	id_chamado int, -- isso vai ser o identificador do chat
 	data_envio datetime default current_timestamp,
 	lida boolean default false,
-	FOREIGN KEY (id_tecnico) REFERENCES usuarios(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE,
+	FOREIGN KEY (id_tecnico) REFERENCES usuarios(id) ON DELETE SET NULL,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE SET NULL,
     FOREIGN KEY (id_chamado) REFERENCES chamados(id) ON DELETE CASCADE
 );
 
@@ -323,7 +324,7 @@ create table relatorios(
 
 CREATE TABLE notificacoes (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  usuario_id INT NOT NULL,
+  usuario_id INT NULL,
   tipo ENUM('status_atualizado', 'tecnico_atribuido', 'resposta_tecnico', 'prazo_alterado', 'notificacao_geral', 'novo_chamado_atribuido', 'resposta_usuario', 'urgencia_chamado',
   'chamado_editado_usuario', 'chamado_atrasado', 'tecnico_removido', 'avaliacao_negativa') NOT NULL,
   titulo VARCHAR(255) NOT NULL,
@@ -332,7 +333,7 @@ CREATE TABLE notificacoes (
   lida BOOLEAN DEFAULT FALSE,
   visualizada BOOLEAN DEFAULT FALSE,
   criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL,
   FOREIGN KEY (chamado_id) REFERENCES chamados(id)
 );
 
@@ -346,13 +347,13 @@ CREATE TABLE redefinir_tokens (
 
 CREATE TABLE avaliacoes (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL, -- quem avaliou
+    usuario_id INT NULL, -- quem avaliou
     chamado_id INT NOT NULL,
     tecnico_id INT NOT NULL,  -- técnico avaliado
     nota INT NOT NULL CHECK (nota BETWEEN 1 AND 5), -- nota de 1 a 5
     comentario TEXT, -- comentário opcional
     data_avaliacao DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL,
     FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     foreign key (chamado_id) references chamados(id) on delete cascade
 );

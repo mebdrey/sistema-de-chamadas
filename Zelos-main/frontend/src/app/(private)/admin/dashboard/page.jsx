@@ -182,65 +182,35 @@ Esse resultado demonstra uma tendência relevante no comportamento dos chamados,
         </div>
       </div>
       { /*CARDS DA QUANTIDADE DE CHAMADOS p mes*/}
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 items-start">
-        <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600"><GraficoChamadosPorAno /></div>
-        <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600"><KpiSla /></div>
-      </div> */}
-{/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 md:items-stretch items-start">
-  <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col">
-
-    <div className="flex-1">
-      <GraficoChamadosPorAno />
-    </div>
-  </div>
-
-  <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col">
-    <div className="flex-1">
-      <KpiSla />
-    </div>
-  </div>
-</div> */}
-
-
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 md:items-center items-start">
-        <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 mb-4 g-700 dark:bg-gray-800 dark:border dark:border-gray-600">
-          <ChamadosPorPrioridade />
-        </div>
-        <div className="col-span-1 flex items-center justify-start mb-4 rounded-sm dark:bg-gray-800 dark:border dark:border-gray-600">
-          <GraficoFuncionarios />
-        </div>
-      </div> */}
-      
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 md:items-stretch items-start">
-  <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col md:min-h-[360px]">
-    <div className="flex-1">
-      <GraficoChamadosPorAno />
-    </div>
-  </div>
+        <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col h-full">
+          <div className="flex-1">
+            <GraficoChamadosPorAno />
+          </div>
+        </div>
 
-  <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col md:min-h-[360px]">
-    <div className="flex-1">
-      <KpiSla />
-    </div>
-  </div>
-</div>
+        <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col h-full">
+          <div className="flex-1 content-center">
+            <KpiSla />
+          </div>
+        </div>
+      </div>
 
-{/* próximo bloco */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 md:items-stretch items-start">
-  <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col md:min-h-[360px]">
-    <div className="flex-1">
-      {/* <ChamadosPorPrioridade /> */}
-      <AvaliacoesPorSetorChart />
-    </div>
-  </div>
+      {/* próximo bloco */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 md:items-stretch items-start">
+        <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col h-full">
+          <div className="flex-1">
+            {/* <ChamadosPorPrioridade /> */}
+            <AvaliacoesPorSetorChart />
+          </div>
+        </div>
 
-  <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col md:min-h-[360px]">
-    <div className="flex-1">
-      <GraficoFuncionarios />
-    </div>
-  </div>
-</div>
+        <div className="col-span-1 bg-white rounded-lg shadow-sm p-4 md:p-6 dark:bg-gray-800 dark:border dark:border-gray-600 flex flex-col h-full">
+          <div className="flex-1">
+            <GraficoFuncionarios />
+          </div>
+        </div>
+      </div>
 
     </div>
   );

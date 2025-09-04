@@ -246,7 +246,7 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700 dark:bg-gray-900 rounded-t-2xl">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-zinc-100">
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-400">
             {mensagens && mensagens.length > 0
               ? (() => {
                 const primeira = mensagens[0];

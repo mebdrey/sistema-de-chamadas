@@ -20,6 +20,12 @@ export default function LeadsCard({
   const chartInstanceRef = useRef(null);
   const [tiposServico, setTiposServico] = useState([]); // guarda o tipo de serviço que o usuario seleciona 
   const [dropdownRelatorioOpen, setDropdownRelatorioOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const isDark = document.documentElement.classList.contains("dark");
+    setDarkMode(isDark);
+  }, []);
 
   const getBaseUrl = () => {
     const env = process.env.NEXT_PUBLIC_API_URL;
@@ -45,12 +51,12 @@ export default function LeadsCard({
           throw new Error(`API retornou ${res.status} ${txt || ""}`);
         }
         const json = await res.json();
-        if (!canceled) { setApiData(normalizeApiResponse(json));}
+        if (!canceled) { setApiData(normalizeApiResponse(json)); }
       } catch (err) {
         console.error("Erro ao carregar dados:", err);
         if (!canceled) setErro("Falha ao carregar dados do servidor.");
         if (!canceled) setApiData({ categorias: [], series: [{ name: "Em andamento", data: [] }, { name: "Concluído", data: [] }], tabela: [], total: 0 });
-      } finally {if (!canceled) setLoading(false);}
+      } finally { if (!canceled) setLoading(false); }
     }
     if (setor) fetchDados();
     return () => { canceled = true; };
@@ -77,7 +83,7 @@ export default function LeadsCard({
       colors: ["#C8AFFF", "#8b5cf6"],
       series: apiData.series || [],
       chart: { type: "bar", height: 340, fontFamily: "Inter, sans-serif", toolbar: { show: false } },
-      plotOptions: {bar: {horizontal: false, columnWidth: "40%", borderRadiusApplication: "end", borderRadius: 8},},
+      plotOptions: { bar: { horizontal: false, columnWidth: "40%", borderRadiusApplication: "end", borderRadius: 8 }, },
       xaxis: { categories: apiData.categorias || [], labels: { rotate: -15 } },
       dataLabels: { enabled: false },
       legend: { show: true },
@@ -96,150 +102,150 @@ export default function LeadsCard({
   }, [apiData]);
 
   // CSV/PDF helpers
-// Função para capitalizar a primeira letra de cada palavra
-function capitalizarPalavras(str) {
-  return str
-    .replace(/_/g, " ") // substitui underscores por espaço
-    .split(" ")
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
-}
-
-function gerarCSV() {
-  const tabela = apiData?.tabela || [];
-  if (!Array.isArray(tabela) || tabela.length === 0) {
-    alert("Sem dados para exportar.");
-    return;
-  }
-
-  // formata o nome do setor corretamente
-  const setorFormatado = capitalizarPalavras(setor);
-
-  // seleciona apenas os campos necessários
-  const rows = tabela.map(r => ({
-    Nome: r.funcionario_nome ?? "",
-    "QTD de chamados em andamento": r.em_andamento ?? 0,
-    "QTD de chamados finalizados": r.concluido ?? 0,
-    Total: r.total ?? (Number(r.em_andamento || 0) + Number(r.concluido || 0))
-  }));
-
-  const headers = Object.keys(rows[0]);
-  const separator = ";";
-
-  // título e data de geração
-  const titulo = `Relatório anual do Setor ${setorFormatado}`;
-  const dataGeracao = `Gerado em: ${new Date().toLocaleString("pt-BR")}`;
-
-  // adiciona BOM para Excel reconhecer UTF-8
-  const bom = "\uFEFF";
-
-  // monta o CSV
-  const lines = [
-    titulo,
-    dataGeracao,
-    headers.join(separator),
-    ...rows.map(r => headers.map(h => r[h]).join(separator))
-  ];
-
-  const csv = bom + lines.join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.setAttribute("download", `relatorio_${setorFormatado}_${modo}.csv`);
-  document.body.appendChild(a);
-  a.click();
-  a.remove()
-  URL.revokeObjectURL(url)
-}
-
-function gerarPDF() {
-  const tabela = apiData?.tabela || [];
-  if (!Array.isArray(tabela) || tabela.length === 0) {
-    alert("Sem dados para gerar PDF.");
-    return;
-  }
-
-  // Função para formatar o setor
-  function formatarSetor(str) {
-    if (!str) return "";
-    const correcoes = { manutencao: "Manutenção", apoio_tecnico: "Apoio Técnico" };
-    const palavras = str.replace(/_/g, " ").split(" ");
-    return palavras
-      .map(p => correcoes[p.toLowerCase()] || p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+  // Função para capitalizar a primeira letra de cada palavra
+  function capitalizarPalavras(str) {
+    return str
+      .replace(/_/g, " ") // substitui underscores por espaço
+      .split(" ")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(" ");
   }
 
-  const setorFormatado = formatarSetor(setor);
-  const dataHoraAtual = new Date().toLocaleString("pt-BR", {
-    day: "2-digit", month: "2-digit", year: "numeric",
-    hour: "2-digit", minute: "2-digit", second: "2-digit"
-  });
+  function gerarCSV() {
+    const tabela = apiData?.tabela || [];
+    if (!Array.isArray(tabela) || tabela.length === 0) {
+      alert("Sem dados para exportar.");
+      return;
+    }
 
-  const totalChamados = tabela.reduce((acc, r) => acc + (r.total || (Number(r.em_andamento || 0) + Number(r.concluido || 0))), 0);
+    // formata o nome do setor corretamente
+    const setorFormatado = capitalizarPalavras(setor);
 
-  const doc = new jsPDF()
-  const pageWidth = doc.internal.pageSize.getWidth();
+    // seleciona apenas os campos necessários
+    const rows = tabela.map(r => ({
+      Nome: r.funcionario_nome ?? "",
+      "QTD de chamados em andamento": r.em_andamento ?? 0,
+      "QTD de chamados finalizados": r.concluido ?? 0,
+      Total: r.total ?? (Number(r.em_andamento || 0) + Number(r.concluido || 0))
+    }));
 
-  // --- TÍTULO ---
-  doc.setFontSize(18);
-  doc.setTextColor(0, 0, 0);
-  doc.text(`Relatório anual do Setor ${setorFormatado}`, pageWidth / 2, 20, { align: "center" });
+    const headers = Object.keys(rows[0]);
+    const separator = ";";
 
-  // --- INFORMAÇÕES ---
-  doc.setFontSize(12);
-  doc.setTextColor(40, 40, 40);
-  doc.text(`Gerado em: ${dataHoraAtual}`, 14, 30);
-  doc.text(`Total de Chamados: ${totalChamados}`, 14, 38);
+    // título e data de geração
+    const titulo = `Relatório anual do Setor ${setorFormatado}`;
+    const dataGeracao = `Gerado em: ${new Date().toLocaleString("pt-BR")}`;
 
-  // --- TABELA ---
-  autoTable(doc, {
-    startY: 50,
-    head: [["#", "Funcionário", "Em andamento", "Concluído", "Total"]],
-    body: tabela.map((r, i) => [
-      i + 1,
-      r.funcionario_nome || "",
-      r.em_andamento || 0,
-      r.concluido || 0,
-      r.total || (Number(r.em_andamento || 0) + Number(r.concluido || 0))
-    ]),
-    styles: { fontSize: 11, cellPadding: 5, halign: "center", valign: "middle" },
-    headStyles: { fillColor: [127, 86, 216], textColor: [255, 255, 255], fontStyle: "bold" },
-    alternateRowStyles: { fillColor: [245, 240, 255] },
-    bodyStyles: { textColor: [50, 50, 50] }
-  });
+    // adiciona BOM para Excel reconhecer UTF-8
+    const bom = "\uFEFF";
 
-  // --- RODAPÉ ---
-  const pageCount = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(9);
-    doc.setTextColor(120);
-    doc.text(`Página ${i} de ${pageCount}`, pageWidth - 14, 290, { align: "right" });
-    doc.text("Relatório gerado automaticamente pelo sistema", 14, 290);
+    // monta o CSV
+    const lines = [
+      titulo,
+      dataGeracao,
+      headers.join(separator),
+      ...rows.map(r => headers.map(h => r[h]).join(separator))
+    ];
+
+    const csv = bom + lines.join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.setAttribute("download", `relatorio_${setorFormatado}_${modo}.csv`);
+    document.body.appendChild(a);
+    a.click();
+    a.remove()
+    URL.revokeObjectURL(url)
   }
 
-  // --- SALVAR PDF ---
-  doc.save(`relatorio_setor_${setorFormatado.replace(/ /g, "_")}_${modo}.pdf`)
-}
+  function gerarPDF() {
+    const tabela = apiData?.tabela || [];
+    if (!Array.isArray(tabela) || tabela.length === 0) {
+      alert("Sem dados para gerar PDF.");
+      return;
+    }
 
-   // formata os tipos de servico
-function formatarLabel(str) {
-  if (!str) return ""
+    // Função para formatar o setor
+    function formatarSetor(str) {
+      if (!str) return "";
+      const correcoes = { manutencao: "Manutenção", apoio_tecnico: "Apoio Técnico" };
+      const palavras = str.replace(/_/g, " ").split(" ");
+      return palavras
+        .map(p => correcoes[p.toLowerCase()] || p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+        .join(" ");
+    }
+
+    const setorFormatado = formatarSetor(setor);
+    const dataHoraAtual = new Date().toLocaleString("pt-BR", {
+      day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit", second: "2-digit"
+    });
+
+    const totalChamados = tabela.reduce((acc, r) => acc + (r.total || (Number(r.em_andamento || 0) + Number(r.concluido || 0))), 0);
+
+    const doc = new jsPDF()
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // --- TÍTULO ---
+    doc.setFontSize(18);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Relatório anual do Setor ${setorFormatado}`, pageWidth / 2, 20, { align: "center" });
+
+    // --- INFORMAÇÕES ---
+    doc.setFontSize(12);
+    doc.setTextColor(40, 40, 40);
+    doc.text(`Gerado em: ${dataHoraAtual}`, 14, 30);
+    doc.text(`Total de Chamados: ${totalChamados}`, 14, 38);
+
+    // --- TABELA ---
+    autoTable(doc, {
+      startY: 50,
+      head: [["#", "Funcionário", "Em andamento", "Concluído", "Total"]],
+      body: tabela.map((r, i) => [
+        i + 1,
+        r.funcionario_nome || "",
+        r.em_andamento || 0,
+        r.concluido || 0,
+        r.total || (Number(r.em_andamento || 0) + Number(r.concluido || 0))
+      ]),
+      styles: { fontSize: 11, cellPadding: 5, halign: "center", valign: "middle" },
+      headStyles: { fillColor: [127, 86, 216], textColor: [255, 255, 255], fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [245, 240, 255] },
+      bodyStyles: { textColor: [50, 50, 50] }
+    });
+
+    // --- RODAPÉ ---
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(9);
+      doc.setTextColor(120);
+      doc.text(`Página ${i} de ${pageCount}`, pageWidth - 14, 290, { align: "right" });
+      doc.text("Relatório gerado automaticamente pelo sistema", 14, 290);
+    }
+
+    // --- SALVAR PDF ---
+    doc.save(`relatorio_setor_${setorFormatado.replace(/ /g, "_")}_${modo}.pdf`)
+  }
+
+  // formata os tipos de servico
+  function formatarLabel(str) {
+    if (!str) return ""
     const correcoes = {
       manutencao: "Manutenção",
       apoio_tecnico: "Apoio Técnico"
     };
 
-  const palavras = str.replace(/_/g, " ").split(" ")
+    const palavras = str.replace(/_/g, " ").split(" ")
 
-  return palavras
-  .map(palavra => {
-    const semAcento = palavra.toLowerCase();
-    return correcoes[semAcento] || (palavra.charAt(0).toUpperCase() + palavra.slice(1));
-  })
-  .join(" ")
-}
+    return palavras
+      .map(palavra => {
+        const semAcento = palavra.toLowerCase();
+        return correcoes[semAcento] || (palavra.charAt(0).toUpperCase() + palavra.slice(1));
+      })
+      .join(" ")
+  }
 
   // busca os tipos de servico
   useEffect(() => {
@@ -282,33 +288,33 @@ function formatarLabel(str) {
         {!loading && apiData && apiData.categorias && apiData.categorias.length === 0 && (
           <div className="text-sm text-gray-500 mb-2 dark:text-gray-200">Nenhum funcionário com chamados nessa pool (no ano selecionado).</div>
         )}
-        <div id="column-chart" ref={chartRef}  height="100%" />
+        <div id="column-chart" ref={chartRef} height="100%" />
       </div>
 
-    <div className="relative">
-            <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-violet-500 hover:bg-[#E6DAFF] px-3 py-2 hover:cursor-pointer dark:hover:bg-gray-700" onClick={() => setDropdownRelatorioOpen(prev => !prev)}>Gerar relatório
-              <svg className="w-3.5 h-3.5 text-violet-500 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
-                <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" />
-                <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
-              </svg>
-            </button>
+      <div className="relative">
+        <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-violet-500 hover:bg-[#E6DAFF] px-3 py-2 hover:cursor-pointer dark:hover:bg-gray-700" onClick={() => setDropdownRelatorioOpen(prev => !prev)}>Gerar relatório
+          <svg className="w-3.5 h-3.5 text-violet-500 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+            <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" />
+            <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
+          </svg>
+        </button>
 
-            {/* Mostrar o dropdown só quando aberto */}
-            {dropdownRelatorioOpen && (
-              <div className="absolute z-10 mt-2 bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm w-40 dark:bg-gray-800">
-                <ul className="py-2 text-sm text-gray-700 dark:text-gray-400">
-                  <li>
-                    <button onClick={() => { gerarCSV(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700" >Exportar CSV
-                    </button>
-                  </li>
-                  <li>
-                    <button onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700">Exportar PDF
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            )}
+        {/* Mostrar o dropdown só quando aberto */}
+        {dropdownRelatorioOpen && (
+          <div className="absolute z-10 mt-2 bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm w-40 dark:bg-gray-800">
+            <ul className="py-2 text-sm text-gray-700 dark:text-gray-400">
+              <li>
+                <button onClick={() => { gerarCSV(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700" >Exportar CSV
+                </button>
+              </li>
+              <li>
+                <button onClick={() => { gerarPDF(); setDropdownRelatorioOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:cursor-pointer dark:hover:bg-gray-700">Exportar PDF
+                </button>
+              </li>
+            </ul>
           </div>
+        )}
+      </div>
 
     </div>
   );
