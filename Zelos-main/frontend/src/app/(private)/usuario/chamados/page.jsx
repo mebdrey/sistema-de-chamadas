@@ -812,7 +812,7 @@ export default function ChamadosCliente() {
                                         <div className="space-y-4" >
                                             <div className="flex items-center justify-center mb-2">
                                                 <a href="#">
-                                                    <img className="w-35 h-35 rounded-full object-cover" src={chamadoSelecionado?.tecnico_foto ? `http://localhost:8080/${chamadoSelecionado.tecnico_foto}` : (<svg className="absolute w-10 h-10 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <img className="w-35 h-35 rounded-full object-cover" src={chamadoSelecionado?.tecnico_foto ? `http://localhost:8080/uploads/${chamadoSelecionado.tecnico_foto}` : (<svg className="absolute w-10 h-10 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                                                     </svg>)
                                                     } alt={chamadoSelecionado?.tecnico_nome || 'Técnico'} />
