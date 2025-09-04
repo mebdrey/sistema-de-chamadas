@@ -1,7 +1,6 @@
 "use client"
 import { useEffect, useState } from "react";
-
-
+import ToastMsg from '@/components/Toasts/Toasts';
 
 export default function Setores() {
     const [setoresSelecionados, setSetoresSelecionados] = useState({ auxiliares: true, tecnicos: true, }); // Estado que guarda quais setores estão selecionados no dropdown, inicialmente todos true para mostrar todos ao entrar na página
@@ -11,7 +10,7 @@ export default function Setores() {
     const [busca, setBusca] = useState(""); // armazena o que htmlFor digitado no campo de busca
     const [mostrarModalConfirmacao, setMostrarModalConfirmacao] = useState(false);
     const [usuarioParaDeletar, setUsuarioParaDeletar] = useState(null);
-
+    const toast = ToastMsg(); 
     // Carrega dados da API ao montar componente
     useEffect(() => {
         fetch("http://localhost:8080/usuarios-por-setor", { credentials: 'include' })
@@ -20,7 +19,7 @@ export default function Setores() {
     }, []);
 
     // Função para lidar com check/uncheck dos setores no dropdown
-    function toggleSetor(nomeSetor) {setSetoresSelecionados((prev) => ({...prev, [nomeSetor]: !prev[nomeSetor], }));}
+    function toggleSetor(nomeSetor) { setSetoresSelecionados((prev) => ({ ...prev, [nomeSetor]: !prev[nomeSetor], })); }
 
     // Juntar usuários só dos setores selecionados para exibir numa tabela só
     const usuariosFiltrados = Object.entries(setores)
@@ -34,7 +33,6 @@ export default function Setores() {
             );
         });
 
-
     function deletarUsuario(id) {
         fetch(`http://localhost:8080/usuarios/${id}`, { method: "DELETE", credentials: 'include' })
             .then((res) => {
@@ -42,18 +40,21 @@ export default function Setores() {
                 return res.json();
             })
             .then((data) => {
-                alert(data.mensagem);
+                toast.showToast('success', data.mensagem); // ✅ sucesso
                 setSetores((prev) => {
                     const atualizado = { ...prev };
-                    for (const setor in atualizado) { atualizado[setor] = atualizado[setor].filter((u) => u.id !== id); }
+                    for (const setor in atualizado) {
+                        atualizado[setor] = atualizado[setor].filter((u) => u.id !== id);
+                    }
                     return atualizado;
                 });
             })
             .catch((err) => {
                 console.error(err);
-                alert("Não foi possível excluir o usuário.");
+                toast.showToast('danger', "Não foi possível excluir o usuário."); // ✅ erro
             });
     }
+
 
     function primeiraLetraMaiuscula(str) {
         if (!str) return '';
@@ -74,6 +75,8 @@ export default function Setores() {
             .join(' ');
     }
     return (
+        <>
+        {toast.UI}
         <div className="p-4 h-screen w-full dark:bg-gray-900">
             <div className="p-4  rounded-lg dark:border-gray-700 mt-14">
                 <div className="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 p-4 ">
@@ -230,7 +233,7 @@ export default function Setores() {
                                 <h3 className="mb-5 text-lg poppins-regular text-gray-500">Tem certeza que deseja excluir este usuário?</h3>
                                 <button onClick={() => { deletarUsuario(usuarioParaDeletar); setMostrarModalConfirmacao(false); }} className="text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-[#7F56D8] poppins-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
                                     Sim, excluir
-                                    </button>
+                                </button>
                                 <button onClick={() => { setMostrarModalConfirmacao(false); setUsuarioParaDeletar(null); }} className="py-2.5 px-5 ms-3 text-sm poppins-medium text-gray-900 focus:outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100" >
                                     Cancelar
                                 </button>
@@ -240,5 +243,6 @@ export default function Setores() {
                 )}
             </div>
         </div>
+        </>
     );
 }
