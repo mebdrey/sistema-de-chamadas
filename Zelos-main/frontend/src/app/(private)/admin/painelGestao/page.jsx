@@ -105,6 +105,65 @@ export default function PainelGestao() {
   // mostra texto no input (legível)
   const [displayFuncao, setDisplayFuncao] = useState('');
 
+  // --- States novos para o input de Função do formulário de usuário ---
+const [funcaoInput, setFuncaoInput] = useState(''); // controla o que o usuário digita no input do form
+
+// quando o usuário digita no input do form
+const onFuncaoInput = (e) => {
+  const val = e.target.value || '';
+  setFuncaoInput(val);
+
+  // guarda o valor "canônico" no form para enviar (se desejar gravar imediatamente)
+  setForm(prev => ({ ...prev, funcao: val }));
+
+  // filtra as funções (case-insensitive) e limita a 50 itens
+  const base = Array.isArray(funcoes) ? funcoes : [];
+  const filtered = val.trim() === '' ? base.slice(0, 50) : base.filter(ff => ff.toLowerCase().includes(val.toLowerCase())).slice(0, 50);
+
+  setFilteredFuncoes(filtered);
+  setHighlightIndex(filtered.length ? 0 : -1);
+
+  // limpa erro de validação se havia
+  if (errors.funcao) setErrors(prev => ({ ...prev, funcao: null }));
+};
+
+// selecionar função a partir da lista de sugestões (usuário)
+const selectFuncaoUser = (valorCanonico) => {
+  // gravar valor canônico para envio
+  setForm(prev => ({ ...prev, funcao: valorCanonico }));
+  // mostrar label amigável no input
+  setFuncaoInput(formatarLabel(valorCanonico));
+  // esconder sugestões e resetar highlight
+  setFilteredFuncoes([]);
+  setFuncaoFocused(false);
+  setHighlightIndex(-1);
+  if (errors.funcao) setErrors(prev => ({ ...prev, funcao: null }));
+};
+
+// navegação por teclado para o input do form (setas, enter, escape)
+const onFuncaoKeyDown = (e) => {
+  if (!filteredFuncoes || filteredFuncoes.length === 0) {
+    // se não houver sugestões, se quiser deixar Enter mandar submit, não previna
+    return;
+  }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    setHighlightIndex(i => Math.min(i + 1, filteredFuncoes.length - 1));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    setHighlightIndex(i => Math.max(i - 1, 0));
+  } else if (e.key === 'Enter') {
+    if (highlightIndex >= 0 && highlightIndex < filteredFuncoes.length) {
+      e.preventDefault();
+      selectFuncaoUser(filteredFuncoes[highlightIndex]);
+    }
+  } else if (e.key === 'Escape') {
+    setFilteredFuncoes([]);
+    setHighlightIndex(-1);
+    setFuncaoFocused(false);
+  }
+};
+
   // states para validação
   const [errors, setErrors] = useState({
     nome: null,
@@ -705,61 +764,82 @@ export default function PainelGestao() {
   // };
 
   // quando digita no input — filtra sugestões
-  const onFuncaoInput = (e) => {
-    const v = e.target.value;
-    setSetorFuncoesInput(v);
+  // const onFuncaoInput = (e) => {
+  //   const v = e.target.value;
+  //   setSetorFuncoesInput(v);
 
-    const q = String(v || "").trim().toLowerCase();
-    // supondo que 'funcoes' exista no component (lista de todas as funções do pool)
-    const base = Array.isArray(funcoes) ? funcoes : [];
-    const matches = q === ""
-      ? base.slice(0, 50) // limita número de sugestões
-      : base.filter(f => f.toLowerCase().includes(q)).slice(0, 50);
+  //   const q = String(v || "").trim().toLowerCase();
+  //   // supondo que 'funcoes' exista no component (lista de todas as funções do pool)
+  //   const base = Array.isArray(funcoes) ? funcoes : [];
+  //   const matches = q === ""
+  //     ? base.slice(0, 50) // limita número de sugestões
+  //     : base.filter(f => f.toLowerCase().includes(q)).slice(0, 50);
 
-    setFilteredFuncoes(matches);
-    setHighlightIndex(matches.length ? 0 : -1);
-  };
+  //   setFilteredFuncoes(matches);
+  //   setHighlightIndex(matches.length ? 0 : -1);
+  // };
 
   const [setorFilteredFuncoes, setSetorFilteredFuncoes] = useState([]);
   const [setorFuncaoFocused, setSetorFuncaoFocused] = useState(false);
   const [setorHighlightIndex, setSetorHighlightIndex] = useState(-1);
 
   // adiciona função como tag (evita duplicatas)
+  // const addFuncaoTag = (f) => {
+  //   const v = String(f || "").trim();
+  //   if (!v) return;
+  //   if (setorFuncoes.some(x => x.toLowerCase() === v.toLowerCase())) return;
+  //   setSetorFuncoes(prev => [...prev, v]);
+  //   setSetorFuncoesInput("");
+  //   setSetorFilteredFuncoes([]);
+  //   setSetorHighlightIndex(-1);
+  // };
   const addFuncaoTag = (f) => {
     const v = String(f || "").trim();
     if (!v) return;
     if (setorFuncoes.some(x => x.toLowerCase() === v.toLowerCase())) return;
     setSetorFuncoes(prev => [...prev, v]);
-    setSetorFuncoesInput("");
     setSetorFilteredFuncoes([]);
     setSetorHighlightIndex(-1);
   };
 
   // selecionar sugestão
+  // const selectFuncao = (f) => {
+  //   addFuncaoTag(f);              // mantém sua lógica de tags
+  //   setSetorFuncoesInput(f);      // mostra valor no input
+  //   setSetorFilteredFuncoes([]);  // esconde lista de sugestões
+  //   setSetorHighlightIndex(-1);   // reseta highlight
+  
+  //   setTimeout(() => {
+  //     const el = document.getElementById("setor-funcao-input");
+  //     if (el) el.focus();
+  //   }, 0);
+  // };
   const selectFuncao = (f) => {
     addFuncaoTag(f);
+    setSetorFuncoesInput(f);     // mostra valor no input
+    setSetorFilteredFuncoes([]); // esconde lista
+    setSetorHighlightIndex(-1);
+  
     setTimeout(() => {
       const el = document.getElementById("setor-funcao-input");
       if (el) el.focus();
     }, 0);
   };
 
-  // ao digitar (filtra a lista global `funcoes` que você já carrega)
   const onSetorFuncaoInput = (e) => {
     const v = e.target.value;
     setSetorFuncoesInput(v);
-
+  
     const q = String(v || "").trim().toLowerCase();
-    const base = Array.isArray(funcoes) ? funcoes : []; // ajuste se seu array tiver outro nome
+    const base = Array.isArray(funcoes) ? funcoes : [];
     const matches = q === ""
       ? base.slice(0, 50)
       : base.filter(f => f.toLowerCase().includes(q)).slice(0, 50);
-
+  
     setSetorFilteredFuncoes(matches);
     setSetorHighlightIndex(matches.length ? 0 : -1);
   };
 
-  // keyboard nav específico do modal
   const onSetorFuncaoKeyDown = (e) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -779,6 +859,7 @@ export default function PainelGestao() {
         selectFuncao(setorFilteredFuncoes[setorHighlightIndex]);
       } else if (setorFuncoesInput.trim() !== "") {
         addFuncaoTag(setorFuncoesInput.trim());
+        setSetorFuncoesInput(""); // limpa input só nesse caso
       }
       return;
     }
@@ -794,40 +875,40 @@ export default function PainelGestao() {
   };
 
   // navegação por teclado (ArrowUp/Down, Enter, Esc, Backspace para remover tag se input vazio)
-  const onFuncaoKeyDown = (e) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      if (filteredFuncoes.length === 0) return;
-      setHighlightIndex(i => Math.min(filteredFuncoes.length - 1, i + 1));
-      return;
-    }
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-      if (filteredFuncoes.length === 0) return;
-      setHighlightIndex(i => Math.max(0, i - 1));
-      return;
-    }
-    if (e.key === "Enter") {
-      // se há highlight, seleciona; senão adiciona texto livre
-      e.preventDefault();
-      if (highlightIndex >= 0 && highlightIndex < filteredFuncoes.length) {
-        selectFuncao(filteredFuncoes[highlightIndex]);
-      } else if (setorFuncoesInput.trim() !== "") {
-        addFuncaoTag(setorFuncoesInput.trim());
-      }
-      return;
-    }
-    if (e.key === "Escape") {
-      setFilteredFuncoes([]);
-      setHighlightIndex(-1);
-      setFuncaoFocused(false);
-      return;
-    }
-    if (e.key === "Backspace" && setorFuncoesInput === "" && setorFuncoes.length > 0) {
-      // remover última tag
-      setSetorFuncoes(prev => prev.slice(0, -1));
-    }
-  };
+  // const onFuncaoKeyDown = (e) => {
+  //   if (e.key === "ArrowDown") {
+  //     e.preventDefault();
+  //     if (filteredFuncoes.length === 0) return;
+  //     setHighlightIndex(i => Math.min(filteredFuncoes.length - 1, i + 1));
+  //     return;
+  //   }
+  //   if (e.key === "ArrowUp") {
+  //     e.preventDefault();
+  //     if (filteredFuncoes.length === 0) return;
+  //     setHighlightIndex(i => Math.max(0, i - 1));
+  //     return;
+  //   }
+  //   if (e.key === "Enter") {
+  //     // se há highlight, seleciona; senão adiciona texto livre
+  //     e.preventDefault();
+  //     if (highlightIndex >= 0 && highlightIndex < filteredFuncoes.length) {
+  //       selectFuncao(filteredFuncoes[highlightIndex]);
+  //     } else if (setorFuncoesInput.trim() !== "") {
+  //       addFuncaoTag(setorFuncoesInput.trim());
+  //     }
+  //     return;
+  //   }
+  //   if (e.key === "Escape") {
+  //     setFilteredFuncoes([]);
+  //     setHighlightIndex(-1);
+  //     setFuncaoFocused(false);
+  //     return;
+  //   }
+  //   if (e.key === "Backspace" && setorFuncoesInput === "" && setorFuncoes.length > 0) {
+  //     // remover última tag
+  //     setSetorFuncoes(prev => prev.slice(0, -1));
+  //   }
+  // };
 
 const [submitAttemptedSetor, setSubmitAttemptedSetor] = useState(false);
 const [setorErrors, setSetorErrors] = useState({
@@ -1336,7 +1417,7 @@ const handleCriarSetorModal = async (e) => {
                       {/* Função */}
                       <div className="relative mb-5 group w-full md:w-60 overflow-visible">
                         <div id="funcao-input-wrapper" className="relative">
-                          <input
+                          {/* <input
                             type="text"
                             name="funcao"
                             id="user_function"
@@ -1347,7 +1428,7 @@ const handleCriarSetorModal = async (e) => {
                             placeholder=" "
                             // value={form.funcao}
                             value={displayFuncao}
-                            onChange={onFuncaoInput}
+                            onChange={onSetorFuncaoInput}
                             onFocus={() => {
                               setFuncaoFocused(true);
                               // quando foca, preenche filtered com todas as funcoes (se input vazio)
@@ -1363,13 +1444,44 @@ const handleCriarSetorModal = async (e) => {
                                 setHighlightIndex(-1);
                               }, 150);
                             }}
-                            onKeyDown={onFuncaoKeyDown}
+                            onKeyDown={onSetorFuncaoKeyDown}
                             required
                             aria-autocomplete="list"
                             aria-controls="funcao-suggestions"
                             aria-expanded={funcaoFocused && filteredFuncoes.length > 0}
                             aria-haspopup="listbox"
-                          />
+                          /> */}
+<input
+  type="text"
+  name="funcao"
+  id="user_function"
+  autoComplete="off"
+  className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
+    ${submitAttempted && errors.funcao ? 'border-red-500' : 'border-gray-300'}
+    dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
+  placeholder=" "
+  value={funcaoInput}                 // <--- agora controlado
+  onChange={onFuncaoInput}            // <--- handler novo
+  onFocus={() => {
+    setFuncaoFocused(true);
+    const all = Array.isArray(funcoes) ? funcoes.slice(0,50) : [];
+    setFilteredFuncoes(all);
+    setHighlightIndex(all.length ? 0 : -1);
+  }}
+  onBlur={() => {
+    setTimeout(() => {
+      setFuncaoFocused(false);
+      setFilteredFuncoes([]);
+      setHighlightIndex(-1);
+    }, 150);
+  }}
+  onKeyDown={onFuncaoKeyDown}         // <--- handler novo
+  required
+  aria-autocomplete="list"
+  aria-controls="funcao-suggestions"
+  aria-expanded={funcaoFocused && filteredFuncoes.length > 0}
+  aria-haspopup="listbox"
+/>
 
                           <label
                             htmlFor="user_function"
@@ -1386,13 +1498,13 @@ const handleCriarSetorModal = async (e) => {
                               aria-label="Sugestões de função"
                               className="absolute z-[999] mt-2 w-full max-h-48 overflow-auto rounded-md shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                             >
-                              {filteredFuncoes.map((f, idx) => (
+                              {/* {filteredFuncoes.map((f, idx) => (
                                 <li
                                   key={f}
                                   id={`funcao-option-${idx}`}
                                   role="option"
                                   aria-selected={highlightIndex === idx}
-                                  onMouseDown={(e) => { e.preventDefault(); /* evita blur antes do click */ }}
+                                  onMouseDown={(e) => { e.preventDefault(); 
                                   onClick={() => selectFuncao(f)}
                                   onMouseEnter={() => setHighlightIndex(idx)}
                                   className={`px-3 py-2 cursor-pointer select-none ${highlightIndex === idx ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -1400,7 +1512,23 @@ const handleCriarSetorModal = async (e) => {
                                 >
                                   <div className="text-sm dark:text-gray-300">{formatarLabel(f)}</div>
                                 </li>
-                              ))}
+                              ))} */}
+                            {filteredFuncoes.map((f, idx) => (
+  <li
+    key={f + idx}
+    id={`funcao-option-${idx}`}
+    role="option"
+    aria-selected={highlightIndex === idx}
+    onMouseDown={(e) => { e.preventDefault(); }}
+    onClick={() => selectFuncaoUser(f)}   // <-- chama o select do form
+    onMouseEnter={() => setHighlightIndex(idx)}
+    className={`px-3 py-2 cursor-pointer select-none ${highlightIndex === idx ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+    }`}
+  >
+    <div className="text-sm dark:text-gray-300">{formatarLabel(f)}</div>
+  </li>
+))}
+
                             </ul>
                           )}
 
@@ -1422,11 +1550,25 @@ const handleCriarSetorModal = async (e) => {
                             handleSenhaChange(e);
                             if (errors.senha) setErrors(prev => ({ ...prev, senha: null }));
                           }} required />
-                        <label
+                        {/* <label
                           htmlFor="user_password"
                           className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.senha ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.senha ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.senha ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}><span className="leading-none">Senha</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
-                        </label>
+                        </label> */}
+<label
+  htmlFor="user_password"
+  className={`peer-focus:poppins-medium absolute text-sm
+    ${submitAttempted && errors.senha ? 'text-red-500' : 'text-gray-500'}
+    ${submitAttempted && errors.senha ? '' : 'dark:text-gray-400'}
+    duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0]
+    peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto
+    ${submitAttempted && errors.senha ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'}
+    peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0
+    peer-focus:scale-75 peer-focus:-translate-y-6`}
+>
+  <span className="leading-none">Senha</span>
+  <span className="ml-1 self-start leading-none text-red-500">*</span>
+</label>
                         {submitAttempted && errors.senha && <div className="text-xs text-red-500 mt-1">{errors.senha}</div>}
                       </div>
 
