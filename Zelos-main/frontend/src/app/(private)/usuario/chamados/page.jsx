@@ -281,18 +281,18 @@ export default function ChamadosCliente() {
     // Envia a avaliação para o backend (POST)
     const enviarAvaliacao = async () => {
         if (jaAvaliado) {
-            alert("Você já avaliou este chamado!");
+            showToast("warning", "Você já avaliou este chamado!");
             return;
         }
 
         if (!rating || rating < 1) {
-            alert("Escolha uma nota antes de enviar!");
+            showToast("warning", "Escolha uma nota antes de enviar!");
             return;
         }
 
         // precisa ter chamadoSelecionado (com id e tecnico_id)
         if (!chamadoSelecionado) {
-            alert("Nenhum chamado selecionado para avaliação.");
+            showToast("warning", "Nenhum chamado selecionado para avaliação.");
             return;
         }
 
@@ -316,12 +316,12 @@ export default function ChamadosCliente() {
             if (!res.ok) {
                 // trata 409 (já avaliado) e outros erros
                 if (res.status === 409) {
-                    alert(data.message || "Você já avaliou este chamado.");
+                    showToast("warning", data.message || "Você já avaliou este chamado.");
                     setJaAvaliado(true);
                     setOpenAvaliacao(false);
                     return;
                 }
-                alert(data.message || "Erro ao enviar avaliação!");
+               showToast("warning", data.message || "Erro ao enviar avaliação!");
                 return;
             }
 

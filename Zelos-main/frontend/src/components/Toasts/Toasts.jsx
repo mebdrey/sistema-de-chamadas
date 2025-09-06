@@ -31,7 +31,7 @@ const ToastMsg = () => {
         UI: (
             <>
                 {/* TOASTS: canto inferior direito */}
-                <div className="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-[60]">
+                <div className="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-[99]">
                     {toasts.map(({ id, type, message, leaving  }) => (
                         <div key={id} className={`flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800 border ${type === 'success' ? 'border-green-100' : type === 'danger' ? 'border-red-100' : 'border-orange-100'}`} role="alert">
                             <div className={`inline-flex items-center justify-center shrink-0 w-8 h-8 rounded-lg ${type === 'success' ? 'text-green-500 bg-green-100 dark:bg-green-800 dark:text-green-200' : type === 'danger' ? 'text-red-500 bg-red-100 dark:bg-red-800 dark:text-red-200' : 'text-orange-500 bg-orange-100 dark:bg-orange-700 dark:text-orange-200'} toast-card ${leaving ? "toast-out" : "toast-in"}`}>

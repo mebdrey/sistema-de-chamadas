@@ -8,22 +8,58 @@ import ToastMsg from "@/components/Toasts/Toasts";
 const API_BASE_URL = 'http://localhost:8080';
 
 // fetch com timeout reutilizado
-const fetchWithTimeout = async (url, options, timeout = 7000) => {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
+// const fetchWithTimeout = async (url, options, timeout = 7000) => {
+//   const controller = new AbortController();
+//   const id = setTimeout(() => controller.abort(), timeout);
+//   try {
+//     const response = await fetch(url, { ...options, signal: controller.signal });
+//     clearTimeout(id);
+//     // quando não ok, tentar extrair body e jogar erro
+//     if (!response.ok) {
+//       const errorBody = await response.json().catch(() => ({ message: 'Erro desconhecido' }));
+//       const error = new Error(errorBody.message || 'Erro na requisição');
+//       error.body = errorBody;
+//       throw error;
+//     }
+//     return response.json();
+//   } catch (error) {
+//     clearTimeout(id);
+//     throw error;
+//   }
+// };
+// fetchWithTimeout atualizado: aceita options.signal externo
+const fetchWithTimeout = async (url, options = {}, timeout = 7000) => {
+  // se caller forneceu signal, use-o; senão crie um controller para timeout
+  const externalSignal = options.signal;
+  let controller;
+  let timerId = null;
+
+  if (externalSignal) {
+    // não criamos controller; mas ainda sim usamos timeout para abortar via setTimeout
+    controller = null;
+    timerId = setTimeout(() => {
+      // se caller forneceu signal, não podemos abortá-lo diretamente - então apenas reject
+      // melhor abordagem: caller deve passar controller se quiser abort por timeout também.
+    }, timeout);
+  } else {
+    controller = new AbortController();
+    options.signal = controller.signal;
+    timerId = setTimeout(() => controller.abort(), timeout);
+  }
+
   try {
-    const response = await fetch(url, { ...options, signal: controller.signal });
-    clearTimeout(id);
-    // quando não ok, tentar extrair body e jogar erro
+    const response = await fetch(url, options);
+    if (timerId) clearTimeout(timerId);
+
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({ message: 'Erro desconhecido' }));
       const error = new Error(errorBody.message || 'Erro na requisição');
       error.body = errorBody;
       throw error;
     }
-    return response.json();
+    return await response.json();
   } catch (error) {
-    clearTimeout(id);
+    if (timerId) clearTimeout(timerId);
     throw error;
   }
 };
@@ -97,6 +133,10 @@ export default function PainelGestao() {
 
   // passwords match
   const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+  const [showEye, setShowEye] = useState(false); // controla se o olho aparece
+  const [password, setPassword] = useState("");
 
   const { UI: ToastsUI, showToast } = ToastMsg(); // pega UI e função showToast
 
@@ -202,7 +242,14 @@ export default function PainelGestao() {
   };
 
   const handleNovaPrioridadeChange = (field, value) => {
-    setNovaPrioridade(prev => ({ ...prev, [field]: value }));
+    // se estivermos editando uma prioridade (editPrioridade não nulo), atualiza ela
+    if (editPrioridade && editPrioridade.id) {
+      setEditPrioridade(prev => ({ ...prev, [field]: value }));
+    } else {
+      setNovaPrioridade(prev => ({ ...prev, [field]: value }));
+    }
+
+    // limpa o erro correspondente (mantém o mesmo objeto de erros)
     setNovaPrioridadeErrors(prev => ({ ...prev, [field]: false, showMessage: false }));
   };
 
@@ -351,17 +398,28 @@ export default function PainelGestao() {
         const baseForSuggestion = String(usernameArg || form.nome || form.username || '').trim();
         console.log('[checkUsername] vai buscar sugestões (server disse que existe). nome usado para sugestao:', baseForSuggestion);
 
-        // cancel previous suggestion fetch
+        // if (suggestionAbortRef.current) suggestionAbortRef.current.abort();
+        // suggestionAbortRef.current = new AbortController();
+
+        // try {
+        //   const suggestionsResp = await fetchWithTimeout(`${API_BASE_URL}/usuarios/sugerir-username`, {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     credentials: 'include',
+        //     body: JSON.stringify({ username: u })
+        //   }, 7000);
+        // cancelar requisições anteriores
         if (suggestionAbortRef.current) suggestionAbortRef.current.abort();
         suggestionAbortRef.current = new AbortController();
-
         try {
           const suggestionsResp = await fetchWithTimeout(`${API_BASE_URL}/usuarios/sugerir-username`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ username: u })
+            body: JSON.stringify({ username: u }),
+            signal: suggestionAbortRef.current.signal
           }, 7000);
+
 
           console.log('[checkUsername] resposta /usuarios/sugerir-username:', suggestionsResp);
 
@@ -1339,15 +1397,23 @@ export default function PainelGestao() {
 
           <div className="flex max-w-full dark:bg-gray-900 ">
             {/* ASIDE FIXO */}
-            <aside className="hidden md:block fixed top-23 left-[80px] w-64 bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-4 dark:bg-gray-800 dark:border-gray-700">
+            {/* <aside className="hidden md:block fixed top-23 left-[80px] w-64 bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-4 dark:bg-gray-800 dark:border-gray-700">
               <h2 className="text-lg poppins-semibold mb-3 dark:text-white">Índice</h2>
               <nav className="flex flex-col gap-3 text-violet-500 dark:text-purple-500">
                 <a href="#criar-usuario" className="hover:underline">Criar Usuário</a>
                 <a href="#setores" className="hover:underline">Setores</a>
                 <a href="#prioridade" className="hover:underline">Prioridade</a>
               </nav>
+            </aside> */}
+            <aside className="hidden md:block fixed top-23 left-[80px] w-64 rounded-md border bg-white px-6 py-6 shadow-md dark:bg-gray-800 dark:border-gray-700 lg:w-56">
+              <div className="pb-2 text-xl font-medium text-violet-600 dark:text-purple-400">Índice</div>
+              <hr className="h-1 w-10 bg-violet-600 dark:bg-purple-500 my-2" />
+              <nav className="mt-4 flex flex-col gap-3">
+                <a className="text-sm font-medium text-violet-600 dark:text-purple-400 hover:text-violet-500" href="#criar-usuario">Criar Usuário</a>
+                <a className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-violet-500" href="#setores">Setores</a>
+                <a className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-violet-500" href="#prioridade">Prioridade</a>
+              </nav>
             </aside>
-
             <main className="flex-1 md:ml-[18rem] space-y-20">
               {/* Card: Usuários */}
               <section id="criar-usuario" className="scroll-mt-14 bg-white w-full rounded-2xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
@@ -1543,7 +1609,9 @@ export default function PainelGestao() {
                       {/* Senha */}
                       <div className="relative overflow-visible mb-5 group w-full md:w-60">
                         <input
-                          type="password"
+                          type={showPassword ? "text" : "password"}
+                          onFocus={() => setShowEye(true)}     // mostra o olho ao focar
+                          onBlur={() => { if (!form.senha) setShowEye(false); }} // esconde se perder foco sem nada digitado
                           name="senha"
                           id="user_password"
                           className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.senha ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.senha ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`} placeholder=" " value={form.senha} onChange={(e) => {
@@ -1569,13 +1637,40 @@ export default function PainelGestao() {
                           <span className="leading-none">Senha</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
                         </label>
+                        {/* botão do olho, aparece só se showEye = true */}
+                        {showEye && (
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                          >
+                            {showPassword ? (
+                              // olho aberto
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+                                <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                                <path fillRule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clipRule="evenodd" />
+                              </svg>
+
+                            ) : (
+                              // olho fechado
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+                                <path d="M3.53 2.47a.75.75 0 0 0-1.06 1.06l18 18a.75.75 0 1 0 1.06-1.06l-18-18ZM22.676 12.553a11.249 11.249 0 0 1-2.631 4.31l-3.099-3.099a5.25 5.25 0 0 0-6.71-6.71L7.759 4.577a11.217 11.217 0 0 1 4.242-.827c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113Z" />
+                                <path d="M15.75 12c0 .18-.013.357-.037.53l-4.244-4.243A3.75 3.75 0 0 1 15.75 12ZM12.53 15.713l-4.243-4.244a3.75 3.75 0 0 0 4.244 4.243Z" />
+                                <path d="M6.75 12c0-.619.107-1.213.304-1.764l-3.1-3.1a11.25 11.25 0 0 0-2.63 4.31c-.12.362-.12.752 0 1.114 1.489 4.467 5.704 7.69 10.675 7.69 1.5 0 2.933-.294 4.242-.827l-2.477-2.477A5.25 5.25 0 0 1 6.75 12Z" />
+                              </svg>
+
+                            )}
+                          </button>
+                        )}
                         {submitAttempted && errors.senha && <div className="text-xs text-red-500 mt-1">{errors.senha}</div>}
                       </div>
 
                       {/* Confirmar senha */}
                       <div className="relative z-0 mb-5 group w-full md:w-60">
                         <input
-                          type="password"
+                          type={showRepeatPassword ? "text" : "password"}
+                          onFocus={() => setShowEye(true)}     // mostra o olho ao focar
+                          onBlur={() => { if (!form.repeat_password) setShowEye(false); }} // esconde se perder foco sem nada digitado
                           name="repeat_password"
                           id="floating_repeat_password"
                           className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
@@ -1589,6 +1684,31 @@ export default function PainelGestao() {
                         ><span className="leading-none">Confirmar senha</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
                         </label>
+                         {/* botão do olho, aparece só se showEye = true */}
+                {showEye && (
+                  <button
+                    type="button"
+                    onClick={() => setShowRepeatPassword(!showRepeatPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    {showRepeatPassword ? (
+                      // olho aberto
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+                        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                        <path fillRule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clipRule="evenodd" />
+                      </svg>
+
+                    ) : (
+                      // olho fechado
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+                        <path d="M3.53 2.47a.75.75 0 0 0-1.06 1.06l18 18a.75.75 0 1 0 1.06-1.06l-18-18ZM22.676 12.553a11.249 11.249 0 0 1-2.631 4.31l-3.099-3.099a5.25 5.25 0 0 0-6.71-6.71L7.759 4.577a11.217 11.217 0 0 1 4.242-.827c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113Z" />
+                        <path d="M15.75 12c0 .18-.013.357-.037.53l-4.244-4.243A3.75 3.75 0 0 1 15.75 12ZM12.53 15.713l-4.243-4.244a3.75 3.75 0 0 0 4.244 4.243Z" />
+                        <path d="M6.75 12c0-.619.107-1.213.304-1.764l-3.1-3.1a11.25 11.25 0 0 0-2.63 4.31c-.12.362-.12.752 0 1.114 1.489 4.467 5.704 7.69 10.675 7.69 1.5 0 2.933-.294 4.242-.827l-2.477-2.477A5.25 5.25 0 0 1 6.75 12Z" />
+                      </svg>
+
+                    )}
+                  </button>
+                )}
                         {submitAttempted && errors.repeat_password && <div className="text-xs text-red-500 mt-1">{errors.repeat_password}</div>}
                         {form.repeat_password.length > 0 && !passwordsMatch && <div className="text-xs text-red-500 mt-1">As duas senhas devem ser iguais</div>}
                       </div>
@@ -1805,7 +1925,7 @@ export default function PainelGestao() {
                                   <td className="px-6 py-2">
                                     {editPrioridade?.id === p.id ? (
                                       <>
-                                        <input type="text" value={editPrioridade.nome} onChange={(e) => handleNovaPrioridadeChange('nome', e.target.value)} className={`dark:bg-gray-900 w-full p-2 border rounded-lg text-sm ${novaPrioridadeErrors.nome ? 'border-red-500 ring-1 ring-red-500' : 'focus:outline-none focus:ring-2 focus:ring-violet-500'}`} required />
+                                        <input type="text" value={editPrioridade.nome} onChange={(e) => handleNovaPrioridadeChange('nome', e.target.value)} className={`dark:bg-gray-900 w-full p-2 border rounded-lg text-sm dark:text-gray-300 ${novaPrioridadeErrors.nome ? 'border-red-500 ring-1 ring-red-500' : 'focus:outline-none focus:ring-2 focus:ring-violet-500'}`} required />
                                         {novaPrioridadeErrors.horas_limite && (
                                           <div className="text-xs text-red-500 mt-1">Preencha este campo</div>
                                         )}
@@ -1819,7 +1939,7 @@ export default function PainelGestao() {
                                   <td className="px-6 py-2">
                                     {editPrioridade?.id === p.id ? (
                                       <>
-                                        <input type="number" value={editPrioridade.horas_limite} onChange={(e) => handleNovaPrioridadeChange('horas_limite', e.target.value)} className={`dark:bg-gray-900 w-full p-2 border rounded-lg text-sm ${novaPrioridadeErrors.horas_limite ? 'border-red-500 ring-1 ring-red-500' : 'focus:outline-none focus:ring-2 focus:ring-violet-500'}`} required />
+                                        <input type="number" value={editPrioridade.horas_limite} onChange={(e) => handleNovaPrioridadeChange('horas_limite', e.target.value)} className={`dark:bg-gray-900 w-full p-2 border rounded-lg text-sm dark:text-gray-300  ${novaPrioridadeErrors.horas_limite ? 'border-red-500 ring-1 ring-red-500' : 'focus:outline-none focus:ring-2 focus:ring-violet-500'}`} required />
                                         {novaPrioridadeErrors.horas_limite && (
                                           <div className="text-xs text-red-500 mt-1">Preencha este campo</div>
                                         )}
@@ -1846,7 +1966,7 @@ export default function PainelGestao() {
                                           >
                                             <div className="py-2 first:pt-0 last:pb-0">
                                               <span className="block py-2 px-3 text-xs poppins-medium uppercase text-gray-400 dark:text-gray-600">Ações</span>
-                                              <button onClick={() => { setEditPrioridade({ ...p, horas_limite: Number(p.horas_limite) }); setOpenPrioridadeDropdownId(null); }} className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 dark:text-gray-200 w-full text-left">Editar</button>
+                                              <button onClick={() => { setEditPrioridade({ ...p, horas_limite: Number(p.horas_limite) }); setOpenPrioridadeDropdownId(null); }} className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-200 w-full text-left">Editar</button>
                                               <button onClick={() => { confirmarExclusaoPrioridade(p.id); setOpenPrioridadeDropdownId(null); }} className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-gray-100 dark:text-red-500 dark:hover:bg-gray-700 w-full text-left">Excluir</button>
                                             </div>
                                           </div>
@@ -1897,12 +2017,12 @@ export default function PainelGestao() {
             {/* tem tz q deseja excluir o setor? */}
             {mostrarModalConfirmacaoSetor && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md dark:bg-gray-700">
                   <div className="text-center">
                     <svg className="mx-auto mb-4 text-gray-400 w-12 h-12" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
                     <h3 className="mb-5 text-lg poppins-regular text-gray-500">Tem certeza que deseja excluir este setor?</h3>
                     <button onClick={() => { if (setorParaExcluir) excluirSetor(setorParaExcluir); setMostrarModalConfirmacaoSetor(false); setSetorParaExcluir(null); }} className="text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-[#7F56D8] poppins-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">Sim, excluir</button>
-                    <button onClick={() => { setMostrarModalConfirmacaoSetor(false); setSetorParaExcluir(null); }} className="py-2.5 px-5 ms-3 text-sm poppins-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100">Cancelar</button>
+                    <button onClick={() => { setMostrarModalConfirmacaoSetor(false); setSetorParaExcluir(null); }} className="py-2.5 px-5 ms-3 text-sm poppins-medium text-gray-900 focus:outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100">Cancelar</button>
                   </div>
                 </div>
               </div>
@@ -1911,12 +2031,12 @@ export default function PainelGestao() {
             {/* tem tz q deseja excluir a prioridade? */}
             {mostrarModalConfirmacaoPrioridade && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md dark:bg-gray-700">
                   <div className="text-center">
                     <svg className="mx-auto mb-4 text-gray-400 w-12 h-12" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
                     <h3 className="mb-5 text-lg poppins-regular text-gray-500">Tem certeza que deseja excluir esta prioridade?</h3>
                     <button onClick={() => { if (prioridadeParaExcluir) handleExcluirPrioridade(prioridadeParaExcluir); setMostrarModalConfirmacaoPrioridade(false); setPrioridadeParaExcluir(null); }} className="text-white bg-[#7F56D8] focus:ring-4 focus:outline-none focus:ring-[#7F56D8] poppins-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">Sim, excluir</button>
-                    <button onClick={() => { setMostrarModalConfirmacaoPrioridade(false); setPrioridadeParaExcluir(null); }} className="py-2.5 px-5 ms-3 text-sm poppins-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100">Cancelar</button>
+                    <button onClick={() => { setMostrarModalConfirmacaoPrioridade(false); setPrioridadeParaExcluir(null); }} className="py-2.5 px-5 ms-3 text-sm poppins-medium text-gray-900 focus:outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-[#7F56D8] focus:z-10 focus:ring-4 focus:ring-gray-100">Cancelar</button>
                   </div>
                 </div>
               </div>

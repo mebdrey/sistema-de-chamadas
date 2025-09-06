@@ -3,14 +3,8 @@ import "./globals.css";
 import Head from 'next/head'
 import { useEffect } from "react";
 import ClientFetchInterceptor from '@/components/ClientFetchInterceptor/ClientFetchInterceptor'
-import { I18nextProvider } from 'react-i18next';
-import i18n from './i18n';
 
 export default function RootLayout({ children }) {
- // Inicializa i18n no client
- useEffect(() => {
-  i18n.init();
-}, []);
 
 
   return (
@@ -26,9 +20,7 @@ export default function RootLayout({ children }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       <body>
-      <I18nextProvider i18n={i18n}>
         {children}
-        </I18nextProvider>
         {/* <ClientFetchInterceptor /> */}
         <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossOrigin="anonymous"></script>

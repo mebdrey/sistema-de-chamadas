@@ -100,7 +100,7 @@ const InlineField = React.memo(function InlineField({
                             className="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300
              focus:outline-none focus:ring-2 focus:ring-violet-600 focus:border-violet-600
              dark:focus:ring-violet-500"
-  autoComplete="off"
+                            autoComplete="off"
                         />
                     )}
 
@@ -277,15 +277,15 @@ export default function MeuPerfil() {
 
     function formatarLabel(str) {
         const texto = str.replace(/_/g, ' ').toLowerCase();
-    
+
         const correcoes = { "auxiliar limpeza": "Auxiliar de Limpeza", "apoio tecnico": "Apoio Técnico", "tecnico": "Técnico", "manutencao": "Manutenção", "usuario": "Usuário" };
-    
+
         if (correcoes[texto]) { return correcoes[texto]; }
-    
+
         // capitaliza cada palavra caso não tenha uma correção personalizada
         return texto
-          .split(' ').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
-      }
+            .split(' ').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+    }
     return (
         <div className="p-4 h-screen w-full ">
             <div className="p-4 mt-14">
@@ -364,7 +364,7 @@ export default function MeuPerfil() {
                                 onSave={() => { }}
                             />
 
-                           
+
                         </div>
 
                         <div>
@@ -412,7 +412,7 @@ export default function MeuPerfil() {
                                             </svg>
                                         )}
                                     </div>
-                                    <button onClick={removerFoto} className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-violet-600 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-violet-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Remover</button>
+                                    <button onClick={removerFoto} className="py-2.5 px-5 text-sm font-medium text-violet-600 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-violet-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Remover</button>
                                 </div>
 
                                 <div className="flex flex-col items-center gap-3">
@@ -421,7 +421,18 @@ export default function MeuPerfil() {
                                         {previewTemp ? (
                                             <img src={previewTemp} alt="Preview" className="w-full h-full object-cover" />
                                         ) : (
-                                            <div className="text-sm text-gray-400">Nenhuma imagem selecionada</div>
+                                            <div className="flex items-center justify-center w-full h-full dark:bg-gray-600">
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 24 24"
+                                                    className="w-8 h-8 text-gray-400 dark:text-gray-300"
+                                                    aria-hidden="true"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
+                                                </svg>
+                                            </div>
                                         )}
                                     </div>
 

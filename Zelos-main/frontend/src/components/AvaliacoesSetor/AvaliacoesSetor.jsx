@@ -240,7 +240,7 @@ export default function AvaliacoesPorSetorChart({ apiUrl = 'http://localhost:808
     }
 
     if (!rows.length) {
-      return alert('Sem dados para exportar.');
+      return showToast("warning", 'Sem dados para exportar.');
     }
 
     const headers = Object.keys(rows[0]);
@@ -292,7 +292,7 @@ export default function AvaliacoesPorSetorChart({ apiUrl = 'http://localhost:808
     }
 
     if (!rows.length) {
-      return alert('Sem dados para gerar PDF.');
+      return showToast("warning", 'Sem dados para gerar PDF.');
     }
 
     try {
@@ -345,7 +345,7 @@ export default function AvaliacoesPorSetorChart({ apiUrl = 'http://localhost:808
       doc.save(filename);
     } catch (err) {
       console.error('Erro ao gerar PDF', err);
-      alert('Erro ao gerar PDF. Verifique se a dependência jspdf e jspdf-autotable estão instaladas.');
+      showToast("danger", 'Erro ao gerar PDF');
     }
   };
 

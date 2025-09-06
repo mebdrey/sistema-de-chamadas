@@ -114,7 +114,7 @@ export default function LeadsCard({
   function gerarCSV() {
     const tabela = apiData?.tabela || [];
     if (!Array.isArray(tabela) || tabela.length === 0) {
-      alert("Sem dados para exportar.");
+      showToast("warning", "Sem dados para exportar.");
       return;
     }
 
@@ -162,7 +162,7 @@ export default function LeadsCard({
   function gerarPDF() {
     const tabela = apiData?.tabela || [];
     if (!Array.isArray(tabela) || tabela.length === 0) {
-      alert("Sem dados para gerar PDF.");
+      showToast("warning", "Sem dados para gerar PDF.");
       return;
     }
 

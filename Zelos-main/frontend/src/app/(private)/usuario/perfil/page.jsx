@@ -419,7 +419,18 @@ export default function MeuPerfil() {
                                         {previewTemp ? (
                                             <img src={previewTemp} alt="Preview" className="w-full h-full object-cover" />
                                         ) : (
-                                            <div className="text-sm text-gray-400">Nenhuma imagem selecionada</div>
+                                            <div className="flex items-center justify-center w-full h-full dark:bg-gray-600">
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 24 24"
+                                                    className="w-8 h-8 text-gray-400 dark:text-gray-300"
+                                                    aria-hidden="true"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
+                                                </svg>
+                                            </div>
                                         )}
                                     </div>
 
