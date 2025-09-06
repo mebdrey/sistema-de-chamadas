@@ -149,7 +149,7 @@ CREATE TABLE chamados (
   prioridade_id int,
   status_chamado ENUM('pendente', 'em andamento', 'concluido') DEFAULT 'pendente',
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  finalizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  finalizado_em TIMESTAMP NULL DEFAULT NULL,
   atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   reminder_5h_sent BOOLEAN DEFAULT FALSE, /* aviso 5 horas antes do prazo */
   reminder_overdue_sent BOOLEAN DEFAULT FALSE, /* aviso ao chamado estiver atrasado */
@@ -158,6 +158,21 @@ CREATE TABLE chamados (
   FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE,
   FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+select *from chamados;
+
+DELIMITER $$
+CREATE TRIGGER trg_chamados_before_update
+BEFORE UPDATE ON chamados
+FOR EACH ROW
+BEGIN
+  IF NEW.status_chamado = 'concluido' AND (OLD.status_chamado  IS NULL OR OLD.status_chamado  <> 'concluido') THEN
+    SET NEW.finalizado_em = NOW();
+    -- não há padrão simples para pegar user id da sessão; prefira gravar via backend
+  ELSEIF NEW.status_chamado  <> 'concluido' AND OLD.status_chamado  = 'concluido' THEN
+    SET NEW.finalizado_em = NULL;
+  END IF;
+END$$
+DELIMITER ;
 
 INSERT INTO chamados
   (patrimonio, assunto, descricao, tipo_id, tecnico_id, usuario_id, imagem, prioridade_id, status_chamado, criado_em, finalizado_em)
