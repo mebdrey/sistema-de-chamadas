@@ -17,11 +17,43 @@ export const escreverMensagem = async (dados) => {
     }
 }
 
+// export const lerMsg = async (idChamado) => {
+//     const consulta = `SELECT * FROM mensagens WHERE id_chamado = ${idChamado} order by data_envio asc`;
+//     try { return await readQuery(consulta); }
+//     catch (err) { console.error('Erro ao listar mensagens do chamado especificado!!', err) }
+// }
 export const lerMsg = async (idChamado) => {
-    const consulta = `SELECT * FROM mensagens WHERE id_chamado = ${idChamado} order by data_envio asc`;
-    try { return await readQuery(consulta); }
-    catch (err) { console.error('Erro ao listar mensagens do chamado especificado!!', err) }
-}
+  const consulta = `
+    SELECT
+      m.*,
+      u.nome AS m_usuario_nome,
+      t.nome AS m_tecnico_nome
+    FROM mensagens m
+    LEFT JOIN usuarios u ON u.id = m.id_usuario
+    LEFT JOIN usuarios t ON t.id = m.id_tecnico
+    WHERE m.id_chamado = ?
+    ORDER BY m.data_envio ASC
+  `;
+  return await readQuery(consulta, [idChamado]);
+};
+
+export const lerChamadoComNomes = async (idChamado) => {
+  const consulta = `
+    SELECT
+      c.*,
+      cu.nome AS chamado_usuario_nome,
+      cu.ftPerfil AS chamado_usuario_ftPerfil,
+      ct.nome AS chamado_tecnico_nome,
+      ct.ftPerfil AS chamado_tecnico_ftPerfil
+    FROM chamados c
+    LEFT JOIN usuarios cu ON cu.id = c.usuario_id
+    LEFT JOIN usuarios ct ON ct.id = c.tecnico_id
+    WHERE c.id = ?
+    LIMIT 1
+  `;
+  const rows = await readQuery(consulta, [idChamado]);
+  return (rows && rows.length > 0) ? rows[0] : null;
+};
 
 // Conta mensagens não-lidas PARA O USUÁRIO AUTENTICADO, mas apenas as mensagens ENVIADAS PELA OUTRA PONTA.
 // Se role === "tecnico": conta mensagens enviadas por usuários (id_usuario IS NOT NULL) e pertencentes a chamados desse técnico.

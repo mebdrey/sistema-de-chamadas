@@ -9,6 +9,9 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
   const [conteudo, setConteudo] = useState("");
   const [loadingMensagens, setLoadingMensagens] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  // novo state para meta-dados do chamado vindo do endpoint /chat
+  const [chamadoInfo, setChamadoInfo] = useState(null);
+
 
   // undefined = ainda não buscado, null = não autenticado, object = user
   const [currentUser, setCurrentUser] = useState(undefined);
@@ -48,14 +51,46 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
 
   useEffect(() => {
     fetchCurrentUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // --- fetch mensagens (sempre atualiza a lista; polling leve) ---
+  // useEffect(() => {
+  //   let mounted = true;
+  //   if (!chamadoSelecionado?.id) {
+  //     setMensagens(null);
+  //     return;
+  //   }
+
+  //   const fetchMensagens = async () => {
+  //     if (!chamadoSelecionado?.id) return;
+  //     setLoadingMensagens(true);
+  //     try {
+  //       const res = await fetch(`http://localhost:8080/chat?idChamado=${chamadoSelecionado.id}`, {
+  //         method: "GET",
+  //         credentials: "include",
+  //       });
+  //       if (!res.ok) throw new Error("Erro ao buscar mensagens");
+  //       const data = await res.json();
+  //       if (!mounted) return;
+  //       setMensagens(Array.isArray(data.mensagens) ? data.mensagens : []);
+  //     } catch (err) {
+  //       console.error("[Chat] Erro ao buscar mensagens:", err);
+  //     } finally {
+  //       if (mounted) setLoadingMensagens(false);
+  //     }
+  //   };
+
+  //   // initial + interval
+  //   fetchMensagens();
+  //   const interval = setInterval(fetchMensagens, 5000);
+  //   return () => { mounted = false; clearInterval(interval); };
+  // }, [chamadoSelecionado]);
   useEffect(() => {
     let mounted = true;
+    // limpa estados quando não houver chamado selecionado
     if (!chamadoSelecionado?.id) {
       setMensagens(null);
+      setChamadoInfo(null);
       return;
     }
 
@@ -69,8 +104,20 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
         });
         if (!res.ok) throw new Error("Erro ao buscar mensagens");
         const data = await res.json();
+
         if (!mounted) return;
-        setMensagens(Array.isArray(data.mensagens) ? data.mensagens : []);
+        // mensagens: tolerante (data.mensagens ou data.messages ou data)
+        const msgs = Array.isArray(data.mensagens)
+          ? data.mensagens
+          : Array.isArray(data.messages)
+            ? data.messages
+            : Array.isArray(data)
+              ? data
+              : [];
+
+        setMensagens(msgs);
+        // guarda o objeto chamado retornado pelo backend (opcional, mas importante)
+        setChamadoInfo(data.chamado ?? null);
       } catch (err) {
         console.error("[Chat] Erro ao buscar mensagens:", err);
       } finally {
@@ -83,6 +130,7 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
     const interval = setInterval(fetchMensagens, 5000);
     return () => { mounted = false; clearInterval(interval); };
   }, [chamadoSelecionado]);
+
 
   // --- polling só para contar não-lidas: roda APENAS quando houver chamado selecionado e o painel estiver FECHADO ---
   useEffect(() => {
@@ -143,9 +191,23 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
             method: "GET",
             credentials: "include",
           });
+          // if (updated.ok) {
+          //   const data = await updated.json();
+          //   if (mounted) setMensagens(Array.isArray(data.mensagens) ? data.mensagens : []);
+          // }
           if (updated.ok) {
             const data = await updated.json();
-            if (mounted) setMensagens(Array.isArray(data.mensagens) ? data.mensagens : []);
+            if (mounted) {
+              const msgs = Array.isArray(data.mensagens)
+                ? data.mensagens
+                : Array.isArray(data.messages)
+                  ? data.messages
+                  : Array.isArray(data)
+                    ? data
+                    : [];
+              setMensagens(msgs);
+              setChamadoInfo(data.chamado ?? null);
+            }
           }
           if (mounted) setUnread(0);
         }
@@ -218,9 +280,21 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
         method: "GET",
         credentials: "include",
       });
+      // if (updated.ok) {
+      //   const data = await updated.json();
+      //   setMensagens(Array.isArray(data.mensagens) ? data.mensagens : []);
+      // }
       if (updated.ok) {
         const data = await updated.json();
-        setMensagens(Array.isArray(data.mensagens) ? data.mensagens : []);
+        const msgs = Array.isArray(data.mensagens)
+          ? data.mensagens
+          : Array.isArray(data.messages)
+            ? data.messages
+            : Array.isArray(data)
+              ? data
+              : [];
+        setMensagens(msgs);
+        setChamadoInfo(data.chamado ?? null);
       }
       setConteudo("");
       // se painel fechado, incrementa badge (porque a outra ponta pode não ter lido) — melhor deixar servidor controlar via polling
@@ -232,42 +306,187 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
     }
   };
 
+const getInterlocutorName = () => {
+  const isTech = !!currentUser?.role && String(currentUser.role).toLowerCase().includes("tecnico");
+
+  // 1) Priorizar o chamadoInfo vindo do backend (se houver)
+  if (chamadoInfo) {
+    // alias que usamos no backend: chamado_usuario_nome / chamado_tecnico_nome
+    if (isTech) {
+      const nome = (chamadoInfo.chamado_usuario_nome ?? chamadoInfo.usuario_nome ?? chamadoInfo.usuario_nome_full ?? "");
+      if (String(nome).trim()) return String(nome).trim();
+    } else {
+      const nome = (chamadoInfo.chamado_tecnico_nome ?? chamadoInfo.tecnico_nome ?? chamadoInfo.tecnico_nome_full ?? "");
+      if (String(nome).trim()) return String(nome).trim();
+    }
+  }
+
+  // 2) Fallback: olhar no chamadoSelecionado (props) se tiver campos nome
+  if (chamadoSelecionado) {
+    if (isTech) {
+      const nome = `${chamadoSelecionado.usuario_nome ?? ""} ${chamadoSelecionado.usuario_sobrenome ?? ""}`.trim();
+      if (nome) return nome;
+      if (chamadoSelecionado.usuario_id) return String(chamadoSelecionado.usuario_id); // fallback mínimo
+    } else {
+      const nome = `${chamadoSelecionado.tecnico_nome ?? ""} ${chamadoSelecionado.tecnico_sobrenome ?? ""}`.trim();
+      if (nome) return nome;
+      if (chamadoSelecionado.tecnico_id) return String(chamadoSelecionado.tecnico_id);
+    }
+  }
+
+  // 3) Buscar nas mensagens (última mensagem com nome preenchido)
+  if (Array.isArray(mensagens) && mensagens.length > 0) {
+    for (let i = mensagens.length - 1; i >= 0; i--) {
+      const m = mensagens[i];
+      if (isTech) {
+        const nome = (m.m_usuario_nome ?? m.usuario_nome ?? `${m.usuario_nome ?? ""} ${m.usuario_sobrenome ?? ""}`).trim();
+        if (nome) return nome;
+      } else {
+        const nome = (m.m_tecnico_nome ?? m.tecnico_nome ?? `${m.tecnico_nome ?? ""} ${m.tecnico_sobrenome ?? ""}`).trim();
+        if (nome) return nome;
+      }
+    }
+  }
+
+  // 4) fallback final
+  return "Chat";
+};
+
+// retorna a url do avatar do interlocutor (ou null)
+const getInterlocutorAvatarUrl = () => {
+  const isTech = !!currentUser?.role && String(currentUser.role).toLowerCase().includes("tecnico");
+
+  // 1) priorizar chamadoInfo vindo do backend (tem os aliases que definimos)
+  if (chamadoInfo) {
+    if (isTech) {
+      const ft = chamadoInfo.chamado_usuario_ftPerfil ?? null;
+      if (ft) return buildAvatarUrl(ft);
+    } else {
+      const ft = chamadoInfo.chamado_tecnico_ftPerfil ?? null;
+      if (ft) return buildAvatarUrl(ft);
+    }
+  }
+
+  // 2) fallback para chamadoSelecionado (props) — caso você já tenha ftPerfil ali
+  if (chamadoSelecionado) {
+    if (isTech) {
+      const ft = chamadoSelecionado.usuario_ftPerfil ?? chamadoSelecionado.usuario_ftperfil ?? null;
+      if (ft) return buildAvatarUrl(ft);
+    } else {
+      const ft = chamadoSelecionado.tecnico_ftPerfil ?? chamadoSelecionado.tecnico_ftperfil ?? null;
+      if (ft) return buildAvatarUrl(ft);
+    }
+  }
+
+  // 3) fallback nas mensagens (ultima mensagem que tiver ft)
+  if (Array.isArray(mensagens) && mensagens.length > 0) {
+    for (let i = mensagens.length - 1; i >= 0; i--) {
+      const m = mensagens[i];
+      const ftUser = m.m_usuario_ftPerfil ?? m.usuario_ftPerfil ?? m.usuario_ftperfil;
+      const ftTech = m.m_tecnico_ftPerfil ?? m.tecnico_ftPerfil ?? m.tecnico_ftperfil;
+      if (isTech && ftUser) return buildAvatarUrl(ftUser);
+      if (!isTech && ftTech) return buildAvatarUrl(ftTech);
+    }
+  }
+
+  return null;
+};
+
+// helper para construir a URL pública do avatar
+const buildAvatarUrl = (ftValue) => {
+  // se ftValue já for URL absoluta, retorna direto
+  if (typeof ftValue === "string" && (ftValue.startsWith("http://") || ftValue.startsWith("https://"))) {
+    return ftValue;
+  }
+  // caso armazene apenas o nome do arquivo, combine com a pasta pública do servidor
+  // ajuste '/uploads' para o path real onde as imagens ficam servidas
+  return `http://localhost:8080/uploads/${encodeURIComponent(String(ftValue))}`;
+};
+
   return (
     <>
       {/* Janela de chat */}
-      <div
+      {/* <div
         className={[
-          "fixed z-50 w-[92vw] max-w-sm rounded-2xl border border-gray-200",
+          "fixed z-50 w-full md:w-[92vw] max-w-sm rounded-2xl border border-gray-200",
           "bg-white shadow-xl dark:bg-zinc-900 dark:border-gray-500 ",
           "transition-all duration-200",
           pos.panel,
           open ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none",
         ].join(" ")}
-      >
+      > */}
+      <div
+  className={[
+    // comportamento mobile: ocupa toda a viewport
+    "fixed z-60 inset-0 md:inset-auto",
+
+    // largura em mobile: full; em md volta para 92vw / max-w-sm
+    "w-full md:w-[92vw] md:max-w-sm",
+
+    // posicionamento em md (reposição do seu pos.panel)
+    "md:right-4 md:bottom-20",
+
+    // bordas: sem arredondamento em mobile, com arredondamento em md
+    "rounded-none md:rounded-2xl",
+
+    // estilos visuais
+    "border border-gray-200 bg-white shadow-xl dark:bg-gray-800 dark:border-gray-500",
+
+    // transições e transformadas: em mobile fechar -> translate-y-full (sai por baixo)
+    "transition-all duration-200",
+
+    // controle de abertura/fechamento (diferencia desktop/mobile para o translate)
+    open
+      ? "opacity-100 translate-y-0"
+      : "opacity-0 md:translate-y-2 translate-y-full pointer-events-none",
+
+    // garantir overflow para o conteúdo interno
+    "overflow-hidden"
+  ].join(" ")}
+>
+
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700 dark:bg-gray-900 rounded-t-2xl">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-400">
-            {mensagens && mensagens.length > 0
-              ? (() => {
-                const primeira = mensagens[0];
-                if (currentUser?.role?.includes("tecnico")) {
-                  return `${primeira.usuario_nome || ""} ${primeira.usuario_sobrenome || ""}`;
-                } else {
-                  return `${primeira.tecnico_nome || ""} ${primeira.tecnico_sobrenome || ""}`;
-                }
-              })()
-              : "Chat"}
-          </h2>
-          <button onClick={() => setOpen(false)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 dark:text-gray-300">
+          <div className="flex items-center gap-3">
+    {/* Avatar */}
+    {(() => {
+      const avatarUrl = getInterlocutorAvatarUrl();
+      if (avatarUrl) {
+        return (
+          <img
+            src={avatarUrl}
+            alt={`${getInterlocutorName()} avatar`}
+            className="w-8 h-8 rounded-full object-cover"
+            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/default-avatar.png'; }}
+          />
+        );
+      }
+      // fallback com iniciais / ícone
+      const name = getInterlocutorName();
+      const initials = name && name !== 'Chat' ? name.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase() : null;
+      return (
+        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-semibold text-gray-700 dark:text-gray-200">
+          {initials || 'C'}
+        </div>
+      );
+    })()}
+
+    {/* Nome */}
+    <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-400">
+      {getInterlocutorName()}
+    </h2>
+  </div>
+          <button onClick={() => setOpen(false)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">
             <span className="sr-only">Fechar</span>—
           </button>
         </div>
 
-        {/* Mensagens */}
+<div className="h-full">
+{/* Mensagens */}
         {mensagens === null ? (
           <p className="p-3 text-gray-500">Carregando...</p>
         ) : (
-          <div ref={listRef} className="h-72 overflow-y-auto p-3 space-y-2 text-sm dark:bg-gray-800">
+          <div ref={listRef} className="h-9/10 md:h-72 overflow-y-auto p-3 space-y-2 text-sm dark:bg-gray-800">
             {mensagens.length === 0 && <div className="text-center text-xs text-gray-400">Sem mensagens</div>}
 
             {mensagens.map((msg, idx) => {
@@ -307,6 +526,8 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
             Enviar
           </button>
         </form>
+</div>
+        
       </div>
 
       {/* Bolha flutuante */}

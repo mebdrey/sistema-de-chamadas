@@ -1,4 +1,4 @@
-import { lerMsg, escreverMensagem, contarMensagensNaoLidas, marcarMensagensComoLidas } from "../models/Chat.js";
+import { lerMsg, lerChamadoComNomes, escreverMensagem, contarMensagensNaoLidas, marcarMensagensComoLidas } from "../models/Chat.js";
 import { getChamadoById } from "../models/Chamado.js";
 
 export const enviarMensagemController = async (req, res) => {
@@ -53,16 +53,39 @@ export const enviarMensagemController = async (req, res) => {
 };
 
 //ler as mensagens (especificadas pelo id do chamado) por ordem de envio
+// export const lerMensagensController = async (req, res) => {
+//     try {
+//         const { idChamado } = req.query;
+//         const mensagens = await lerMsg(idChamado);
+//         res.status(200).json({ mensagem: 'Mensagens listadas com sucesso!', mensagens })
+//     }
+//     catch (err) {
+//         console.error(err);
+//         res.status(500).json({ erro: 'Erro ao ler mensagens :( ', err });
+//     };
+// };
 export const lerMensagensController = async (req, res) => {
-    try {
-        const { idChamado } = req.query;
-        const mensagens = await lerMsg(idChamado);
-        res.status(200).json({ mensagem: 'Mensagens listadas com sucesso!', mensagens })
-    }
-    catch (err) {
-        console.error(err);
-        res.status(500).json({ erro: 'Erro ao ler mensagens :( ', err });
-    };
+  try {
+    const rawId = req.query.idChamado ?? req.query.id ?? null;
+    const idChamado = rawId ? Number(rawId) : null;
+    if (!idChamado) return res.status(400).json({ erro: 'idChamado inválido ou ausente' });
+
+    // mensagens (cada mensagem pode ter nomes dos autores, quando existir)
+    const mensagens = await lerMsg(idChamado);
+
+    // chamado com nomes do autor/tecnico (fonte da verdade para o interlocutor)
+    const chamado = await lerChamadoComNomes(idChamado);
+
+    // retornar ambos: mensagens + dados do chamado
+    return res.status(200).json({
+      mensagem: 'Mensagens listadas com sucesso!',
+      mensagens: Array.isArray(mensagens) ? mensagens : [],
+      chamado: chamado || null
+    });
+  } catch (err) {
+    console.error('Erro lerMensagensController:', err);
+    return res.status(500).json({ erro: 'Erro ao ler mensagens', details: String(err) });
+  }
 };
 
 export const contarNaoLidasController = async (req, res) => {

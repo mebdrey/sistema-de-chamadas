@@ -31,6 +31,15 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
   const { user, userId } = useContext(UserContext); // 
   const [mostrarModalConfirmacao, setMostrarModalConfirmacao] = useState(false);
   const { UI: ToastsUI, showToast } = ToastMsg(); // pega UI e função showToast
+  // permissões 
+  const canViewApontamentos = (user, chamado) => {
+    if (!user || !chamado) return false;
+    if (String(user.role || '').toLowerCase() === 'admin') return true;
+    // comparar números/strings com tolerância
+    if (String(chamado.usuario_id) && String(chamado.usuario_id) === String(user.id)) return true;
+    if (String(chamado.tecnico_id) && String(chamado.tecnico_id) === String(user.id)) return true;
+    return false;
+  };
 
   // effectiveCurrentUserId: string ou undefined
   const effectiveCurrentUserId = String(user?.id ?? userId ?? "");
@@ -45,20 +54,61 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
 
   // ----------------------------------------- APONTAMENTOS -----------------------------------------------------
   // Buscar apontamentos 
-  useEffect(() => {
-    const buscarApontamentos = async () => {
-      if (!chamadoSelecionado?.id) return;
-      try {
-        const response = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`, { credentials: 'include' });
-        const data = await response.json();
-        const lista = Array.isArray(data) ? data : data.apontamentos || [];
-        setApontamentos(lista);
-        setApontamentoAtivo(lista.find((a) => !a.fim));
-      } catch (error) { console.error('Erro ao buscar apontamentos:', error); }
-    };
+  // useEffect(() => {
+  //   const buscarApontamentos = async () => {
+  //     if (!chamadoSelecionado?.id) return;
+  //     try {
+  //       const response = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`, { credentials: 'include' });
+  //       const data = await response.json();
+  //       const lista = Array.isArray(data) ? data : data.apontamentos || [];
+  //       setApontamentos(lista);
+  //       setApontamentoAtivo(lista.find((a) => !a.fim));
+  //     } catch (error) { console.error('Erro ao buscar apontamentos:', error); }
+  //   };
 
-    buscarApontamentos();
-  }, [chamadoSelecionado]);
+  //   buscarApontamentos();
+  // }, [chamadoSelecionado]);
+  useEffect(() => {
+  const buscarApontamentos = async () => {
+    if (!chamadoSelecionado?.id) {
+      setApontamentos([]);
+      setApontamentoAtivo(null);
+      return;
+    }
+
+    // se o usuário não tem permissão, não chamar o backend (evita 403 no console)
+    if (!canViewApontamentos(user, chamadoSelecionado)) {
+      setApontamentos([]);       // mostra vazio no UI
+      setApontamentoAtivo(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8080/apontamentos/${chamadoSelecionado.id}`, { credentials: 'include' });
+      if (!response.ok) {
+        // trata 403/404 graciosamente
+        if (response.status === 403) {
+          console.warn('Acesso negado a apontamentos (403) — usuário não autorizado.');
+          setApontamentos([]);
+          setApontamentoAtivo(null);
+          return;
+        }
+        throw new Error(`Erro HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      const lista = Array.isArray(data) ? data : data.apontamentos || [];
+      setApontamentos(lista);
+      setApontamentoAtivo(lista.find((a) => !a.fim));
+    } catch (error) {
+      console.error('Erro ao buscar apontamentos:', error);
+      setApontamentos([]);
+      setApontamentoAtivo(null);
+    }
+  };
+
+  buscarApontamentos();
+}, [chamadoSelecionado, user]); // observe que adicionamos 'user' às deps
+
 
   // cria apontamento
   const iniciarApontamento = async () => {
@@ -901,7 +951,7 @@ export default function ChamadosTecnico({ downloadMode = 'open' // 'open' ou 'do
           )}
         </div>
       </div >
-     
+
     </>
   )
 }
