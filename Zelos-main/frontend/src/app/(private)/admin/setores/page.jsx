@@ -106,7 +106,7 @@ export default function Setores() {
                                     </div>
                                 </div>
                             )} */}
-                        <button id="dropdownHelperButton" className="inline-flex items-center text-gray-200 bg-violet-600 border border-gray-700 focus:outline-none hover:bg-violet-700  poppins-medium rounded-lg text-sm px-3 py-1.5" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
+                        <button id="dropdownHelperButton" className="cursor-pointer text-white bg-violet-700 hover:bg-violet-800 focus:ring-4 focus:outline-none focus:ring-violet-300 poppins-medium rounded-lg text-sm px-8 py-2.5 text-center inline-flex items-center dark:bg-violet-600 dark:hover:bg-violet-700 dark:focus:ring-violet-800" type="button" onClick={() => setDropdownAberto(!dropdownAberto)}>Filtros
                             <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" ><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" /></svg>
                         </button>
                         {/* Dropdown menu */}

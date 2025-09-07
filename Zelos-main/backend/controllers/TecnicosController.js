@@ -28,31 +28,31 @@ export const listarChamadosDisponiveisController = async (req, res) => {
 // };
 
 export const pegarChamadoController = async (req, res) => {
-  const usuario_id = req.user?.id;
-  const { chamado_id } = req.body;
+    const usuario_id = req.user?.id;
+    const { chamado_id } = req.body;
 
-  if (!chamado_id) {
-    return res.status(400).json({ erro: 'ID do chamado é obrigatório.' });
-  }
-
-  try {
-    // se sua lógica exige "pegar" antes de devolver (atribuir tecnico), mantenha essa chamada:
-    if (typeof pegarChamado === 'function') {
-      await pegarChamado(chamado_id, usuario_id); // executa ação que seu app já fazia
+    if (!chamado_id) {
+        return res.status(400).json({ erro: 'ID do chamado é obrigatório.' });
     }
 
-    // depois busca o chamado já atualizado usando getChamadoById (que garante data_limite)
-    const chamadoAtualizado = await getChamadoById(chamado_id);
-    if (!chamadoAtualizado) return res.status(404).json({ erro: 'Chamado não encontrado.' });
+    try {
+        // se sua lógica exige "pegar" antes de devolver (atribuir tecnico), mantenha essa chamada:
+        if (typeof pegarChamado === 'function') {
+            await pegarChamado(chamado_id, usuario_id); // executa ação que seu app já fazia
+        }
 
-    return res.status(200).json({
-      mensagem: 'Chamado atribuído com sucesso.',
-      chamado: chamadoAtualizado
-    });
-  } catch (error) {
-    console.error('pegarChamadoController erro:', error && error.stack ? error.stack : error);
-    return res.status(400).json({ erro: error.message || 'Erro ao buscar chamado.' });
-  }
+        // depois busca o chamado já atualizado usando getChamadoById (que garante data_limite)
+        const chamadoAtualizado = await getChamadoById(chamado_id);
+        if (!chamadoAtualizado) return res.status(404).json({ erro: 'Chamado não encontrado.' });
+
+        return res.status(200).json({
+            mensagem: 'Chamado atribuído com sucesso.',
+            chamado: chamadoAtualizado
+        });
+    } catch (error) {
+        console.error('pegarChamadoController erro:', error && error.stack ? error.stack : error);
+        return res.status(400).json({ erro: error.message || 'Erro ao buscar chamado.' });
+    }
 };
 
 export const contarChamadosController = async (req, res) => {
@@ -323,232 +323,308 @@ function formatIdHash(chamado, opts = { zeros: 0 }) {
 }
 
 export const gerarRelatorioChamadoController = async (req, res) => {
-  try {
-    const chamado_id = req.params.chamado_id;
-    const formato = (req.query.format || 'pdf').toLowerCase();
+    try {
+        const chamado_id = req.params.chamado_id;
+        const formato = (req.query.format || 'pdf').toLowerCase();
 
-    // Pega do model (sem queries aqui)
-    const chamado = await getChamadoById(chamado_id);
-    if (!chamado) return res.status(404).json({ erro: 'Chamado não encontrado' });
+        // Pega do model (sem queries aqui)
+        const chamado = await getChamadoById(chamado_id);
+        if (!chamado) return res.status(404).json({ erro: 'Chamado não encontrado' });
 
-    // APENAS apontamentos no histórico
-    const apontamentos = await getApontamentosByChamado(chamado_id);
+        // APENAS apontamentos no histórico
+        const apontamentos = await getApontamentosByChamado(chamado_id);
 
-    // Campos básicos para relatório (cria rel primeiro)
-    const idExterno = formatIdHash(chamado, { zeros: 0 }); // coloque zeros:4 para "#0050" etc.
-    const rel = {
-      id: chamado.id,
-      idExterno,
-      assunto: safeText(chamado.assunto),
-      descricao_inicial: safeText(chamado.descricao),
-      usuario_nome: safeText(chamado.nome_usuario),
-      prioridade: chamadaPrioridade(chamado.prioridade_nome || chamado.prioridade),
-      status: primeiraLetraMaiuscula(chamado.status_chamado || chamado.status),
-      criado_em: chamado.criado_em,
-      finalizado_em: chamado.finalizado_em,
-      tecnico_responsavel: safeText(chamado.tecnico_nome),
-      setor_nome: safeText(chamado.setor_nome), // nome do setor vindo do model
-      anexos: chamado.imagem ? [chamado.imagem] : []
-    };
+        // Campos básicos para relatório (cria rel primeiro)
+        const idExterno = formatIdHash(chamado, { zeros: 0 }); // coloque zeros:4 para "#0050" etc.
+        const rel = {
+            id: chamado.id,
+            idExterno,
+            assunto: safeText(chamado.assunto),
+            descricao_inicial: safeText(chamado.descricao),
+            usuario_nome: safeText(chamado.nome_usuario),
+            prioridade: chamadaPrioridade(chamado.prioridade_nome || chamado.prioridade),
+            status: primeiraLetraMaiuscula(chamado.status_chamado || chamado.status),
+            criado_em: chamado.criado_em,
+            finalizado_em: chamado.finalizado_em,
+            tecnico_responsavel: safeText(chamado.tecnico_nome),
+            setor_nome: safeText(chamado.setor_nome), // nome do setor vindo do model
+            anexos: chamado.imagem ? [chamado.imagem] : []
+        };
 
-    // ---------- CÁLCULO DO SLA ----------
-    // target em minutos (usa prioridade_horas_limite se exist)
-    const targetMinutes = getSlaTargetMinutes(chamado);
+        // ---------- CÁLCULO DO SLA ----------
+        // target em minutos (usa prioridade_horas_limite se exist)
+        const targetMinutes = getSlaTargetMinutes(chamado);
 
-    // fim para cálculo: se finalizado_em vazio, calcula até agora
-    const endForCalc = chamado.finalizado_em ? chamado.finalizado_em : new Date().toISOString();
+        // fim para cálculo: se finalizado_em vazio, calcula até agora
+        const endForCalc = chamado.finalizado_em ? chamado.finalizado_em : new Date().toISOString();
 
-    // minutos úteis entre criado_em e fim (seg–sex 08:00-18:00 por padrão)
-    const elapsedMinutes = workingMinutesBetween(chamado.criado_em, endForCalc, {
-      workdays: [1, 2, 3, 4, 5],
-      startHour: 8,
-      endHour: 18
-    });
+        // minutos úteis entre criado_em e fim (seg–sex 08:00-18:00 por padrão)
+        const elapsedMinutes = workingMinutesBetween(chamado.criado_em, endForCalc, {
+            workdays: [1, 2, 3, 4, 5],
+            startHour: 8,
+            endHour: 18
+        });
 
-    const slaCumprido = (elapsedMinutes <= targetMinutes);
-    const remainingMinutes = Math.max(0, targetMinutes - elapsedMinutes);
+        const slaCumprido = (elapsedMinutes <= targetMinutes);
+        const remainingMinutes = Math.max(0, targetMinutes - elapsedMinutes);
 
-    // injeta no objeto rel e no objeto chamado (para reuso)
-    rel.sla_target_minutes = targetMinutes;
-    rel.sla_target_human = formatMinutesToHuman(targetMinutes);
-    rel.sla_elapsed_minutes = elapsedMinutes;
-    rel.sla_elapsed_human = formatMinutesToHuman(elapsedMinutes);
-    rel.sla_cumprido = slaCumprido;
-    rel.sla_remaining_minutes = remainingMinutes;
-    rel.sla_remaining_human = formatMinutesToHuman(remainingMinutes);
+        // injeta no objeto rel e no objeto chamado (para reuso)
+        rel.sla_target_minutes = targetMinutes;
+        rel.sla_target_human = formatMinutesToHuman(targetMinutes);
+        rel.sla_elapsed_minutes = elapsedMinutes;
+        rel.sla_elapsed_human = formatMinutesToHuman(elapsedMinutes);
+        rel.sla_cumprido = slaCumprido;
+        rel.sla_remaining_minutes = remainingMinutes;
+        rel.sla_remaining_human = formatMinutesToHuman(remainingMinutes);
 
-    chamado.sla_cumprido = slaCumprido;
-    chamado.sla_elapsed_minutes = elapsedMinutes;
-    chamado.sla_target_minutes = targetMinutes;
-    // ---------- fim SLA ----------
+        chamado.sla_cumprido = slaCumprido;
+        chamado.sla_elapsed_minutes = elapsedMinutes;
+        chamado.sla_target_minutes = targetMinutes;
+        // ---------- fim SLA ----------
 
-    // ---------- CSV ----------
-    if (formato === 'csv') {
-      const rows = [];
+        // ---------- CSV ----------
+        if (formato === 'csv') {
+            const rows = [];
 
-      rows.push(['Relatório de Chamado']);
-      rows.push(['ID do Chamado', rel.idExterno]);
-      rows.push(['Status', rel.status]);
-      rows.push(['Prioridade', rel.prioridade]);
-      rows.push(['Data/Hora de Abertura', formatDateTime(rel.criado_em)]);
-      rows.push(['Data/Hora de Conclusão', formatDateTime(rel.finalizado_em)]);
-      rows.push([]);
-      rows.push(['Solicitante', rel.usuario_nome]);
-      rows.push(['Assunto', rel.assunto]);
-      rows.push(['Descrição', rel.descricao_inicial]);
-      rows.push(['Setor', rel.setor_nome]);
-      rows.push(['Técnico Atribuido', rel.tecnico_responsavel]);
-      rows.push(['Data/Hora da Atribuição', formatDateTime(chamado.atribuido_em || chamado.criado_em)]);
-      rows.push([]);
+            rows.push(['Relatório de Chamado']);
+            rows.push(['ID do Chamado', rel.idExterno]);
+            rows.push(['Status', rel.status]);
+            rows.push(['Prioridade', rel.prioridade]);
+            rows.push(['Data/Hora de Abertura', formatDateTime(rel.criado_em)]);
+            rows.push(['Data/Hora de Conclusão', formatDateTime(rel.finalizado_em)]);
+            rows.push([]);
+            rows.push(['Solicitante', rel.usuario_nome]);
+            rows.push(['Assunto', rel.assunto]);
+            rows.push(['Descrição', rel.descricao_inicial]);
+            rows.push(['Setor', rel.setor_nome]);
+            rows.push(['Técnico Atribuido', rel.tecnico_responsavel]);
+            rows.push(['Data/Hora da Atribuição', formatDateTime(chamado.atribuido_em || chamado.criado_em)]);
+            rows.push([]);
 
-      rows.push(['Histórico de Atendimento']);
-      const apontLines = (apontamentos && apontamentos.length)
-        ? apontamentos.map((a, i) => `${i + 1}. ${formatDateTime(a.comeco)} — ${safeText(a.tecnico_nome || a.tecnico_id)}: ${safeText(a.descricao)}`)
-        : [];
-      if (apontLines.length) rows.push(['Apontamentos', apontLines.join('\n')]);
-      else rows.push(['Apontamentos', 'Nenhum apontamento encontrado.']);
+            rows.push(['Histórico de Atendimento']);
+            const apontLines = (apontamentos && apontamentos.length)
+                ? apontamentos.map((a, i) => `${i + 1}. ${formatDateTime(a.comeco)} — ${safeText(a.tecnico_nome || a.tecnico_id)}: ${safeText(a.descricao)}`)
+                : [];
+            if (apontLines.length) rows.push(['Apontamentos', apontLines.join('\n')]);
+            else rows.push(['Apontamentos', 'Nenhum apontamento encontrado.']);
 
-      rows.push([]);
+            rows.push([]);
 
-      // Métricas com SLA
-      rows.push(['Métricas']);
-      rows.push(['Tempo total de atendimento (úteis)', rel.sla_elapsed_human || '-']);
-      rows.push(['SLA (meta)', rel.sla_target_human || '-']);
-      rows.push(['Resultado do SLA', (typeof rel.sla_cumprido !== 'undefined') ? (rel.sla_cumprido ? 'Cumprido' : 'Não cumprido') : 'Não calculado']);
-      if (!rel.sla_cumprido) {
-        rows.push(['Atraso (úteis)', formatMinutesToHuman(Math.max(0, rel.sla_elapsed_minutes - rel.sla_target_minutes))]);
-      } else {
-        rows.push(['Tempo restante (úteis)', rel.sla_remaining_human]);
-      }
+            // Métricas com SLA
+            rows.push(['Métricas']);
+            rows.push(['Tempo total de atendimento (úteis)', rel.sla_elapsed_human || '-']);
+            rows.push(['SLA (meta)', rel.sla_target_human || '-']);
+            rows.push(['Resultado do SLA', (typeof rel.sla_cumprido !== 'undefined') ? (rel.sla_cumprido ? 'Cumprido' : 'Não cumprido') : 'Não calculado']);
+            if (!rel.sla_cumprido) {
+                rows.push(['Atraso (úteis)', formatMinutesToHuman(Math.max(0, rel.sla_elapsed_minutes - rel.sla_target_minutes))]);
+            } else {
+                rows.push(['Tempo restante (úteis)', rel.sla_remaining_human]);
+            }
 
-      // monta CSV; stringify (sync) deve estar importado no topo do arquivo
-      const csv = stringify(rows, { delimiter: ';' });
+            // monta CSV; stringify (sync) deve estar importado no topo do arquivo
+            const csv = stringify(rows, { delimiter: ';' });
 
-      res.setHeader('Content-Disposition', `attachment; filename=relatorio_chamado_${rel.id}.csv`);
-      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-      return res.send('\uFEFF' + csv);
+            res.setHeader('Content-Disposition', `attachment; filename=relatorio_chamado_${rel.id}.csv`);
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+            return res.send('\uFEFF' + csv);
+        }
+
+        // ---------- PDF ----------
+        res.setHeader('Content-Disposition', `attachment; filename=relatorio_chamado_${rel.id}.pdf`);
+        res.setHeader('Content-Type', 'application/pdf');
+
+        const doc = new PDFDocument({ margin: 40, size: 'A4' });
+        doc.pipe(res);
+
+        // Título
+        doc.fontSize(18).text('Relatório de Chamado', { align: 'center' });
+        doc.moveDown(1);
+
+        // Cabeçalho resumo
+        doc.fontSize(11);
+        doc.text(`ID do Chamado: ${rel.idExterno}`);
+        doc.text(`Status: ${rel.status}`);
+        doc.text(`Prioridade: ${rel.prioridade}`);
+        doc.text(`Data/Hora de Abertura: ${formatDateTime(rel.criado_em)}`);
+        doc.text(`Data/Hora de Conclusão: ${formatDateTime(rel.finalizado_em)}`);
+        // doc.moveDown(0.8);
+ doc.moveDown(1); // espaço antes dos anexos
+        // Solicitante
+        doc.fontSize(12).text('Solicitante', { underline: true });
+        doc.moveDown(0.2);
+        doc.fontSize(11).text(`Nome: ${rel.usuario_nome}`);
+        // doc.moveDown(0.6);
+
+         doc.moveDown(1); // espaço antes dos anexos
+        // Descrição inicial
+        doc.fontSize(12).text('Descrição Inicial', { underline: true });
+        doc.moveDown(0.2);
+        doc.fontSize(11).text(`Assunto: ${rel.assunto}`);
+        doc.moveDown(0.1);
+        doc.fontSize(11).text(`Descrição: ${rel.descricao_inicial}`);
+        doc.moveDown(0.1);
+        doc.fontSize(11).text(`Setor: ${rel.setor_nome}`);
+        // doc.moveDown(0.6);
+
+         doc.moveDown(1); // espaço antes dos anexos
+        // Atribuição
+        doc.fontSize(12).text('Atribuição', { underline: true });
+        doc.moveDown(0.2);
+        doc.fontSize(11).text(`Técnico Responsável: ${rel.tecnico_responsavel}`);
+        doc.fontSize(11).text(`Data/Hora da Atribuição: ${formatDateTime(chamado.atribuido_em || chamado.criado_em)}`);
+        // doc.moveDown(0.6);
+        doc.moveDown(1); // espaço antes dos anexos
+        // Histórico — apenas apontamentos
+        doc.fontSize(12).text('Histórico de Atendimento', { underline: true });
+        doc.moveDown(0.4);
+
+        // const startX = doc.x;
+        // const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+        // const col1W = 120;
+        // const col2W = 140;
+        // const col3W = pageWidth - col1W - col2W;
+        // const leftX = startX;
+        // const leftWidth = col1W + col2W;
+        // const rightX = startX + leftWidth;
+        // const rightWidth = col3W;
+
+        // doc.font('Helvetica-Bold').fontSize(11).fillColor('black');
+        // doc.text('Apontamentos', leftX, doc.y, { width: leftWidth });
+        // doc.text('Métricas', rightX, doc.y, { width: rightWidth });
+        // doc.moveDown(0.3);
+
+        // let cursorLeftY = doc.y;
+        // let cursorRightY = doc.y;
+
+        // if (apontamentos && apontamentos.length) {
+        //   doc.font('Helvetica').fontSize(10).fillColor('black');
+        //   let step = 1;
+        //   for (const a of apontamentos) {
+        //     const encerrado = a.fim ? formatDateTime(a.fim) : formatDateTime(a.comeco);
+        //     const tecnico = safeText(a.tecnico_nome || a.tecnico_id || '');
+        //     const desc = safeText(a.descricao || '');
+        //     const line = `${step}. ${encerrado} — ${tecnico}: ${desc}`;
+        //     const h = doc.heightOfString(line, { width: leftWidth });
+        //     doc.text(line, leftX, cursorLeftY, { width: leftWidth });
+        //     cursorLeftY += h + 6;
+        //     step++;
+        //   }
+        // } else {
+        //   doc.font('Helvetica').fontSize(10).fillColor('black');
+        //   const noApontText = 'Nenhum apontamento foi encontrado.';
+        //   const h = doc.heightOfString(noApontText, { width: leftWidth });
+        //   doc.text(noApontText, leftX, cursorLeftY, { width: leftWidth });
+        //   cursorLeftY += h + 6;
+        // }
+
+        // // Métricas (usa os campos SLA calculados)
+        // doc.font('Helvetica').fontSize(11).fillColor('black');
+        // const tempoTotal = rel.sla_elapsed_human || formatDurationBetween(rel.criado_em, rel.finalizado_em) || '-';
+        // const slaText = (typeof rel.sla_cumprido !== 'undefined') ? (rel.sla_cumprido ? 'Cumprido' : 'Não cumprido') : 'Não calculado';
+
+        // const metricsLines = [
+        //   `Tempo total de atendimento (úteis): ${tempoTotal}`,
+        //   `SLA (meta): ${rel.sla_target_human || '-'}`,
+        //   `SLA: ${slaText}`
+        // ];
+        // if (!rel.sla_cumprido) metricsLines.push(`Atraso (úteis): ${formatMinutesToHuman(Math.max(0, rel.sla_elapsed_minutes - rel.sla_target_minutes))}`);
+        // else metricsLines.push(`Tempo restante (úteis): ${rel.sla_remaining_human || '-'}`);
+
+        // for (const ml of metricsLines) {
+        //   const h = doc.heightOfString(ml, { width: rightWidth });
+        //   doc.text(ml, rightX, cursorRightY, { width: rightWidth });
+        //   cursorRightY += h + 4;
+        // }
+
+        // const nextY = Math.max(cursorLeftY, cursorRightY);
+        // doc.y = nextY + 8;
+        // doc.moveDown(0);
+        // largura total da página
+        const startX = doc.x;
+        // const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+        // const colLeftWidth = 300; // largura da coluna de apontamentos
+        // const colRightWidth = pageWidth - colLeftWidth;
+        const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+        const colWidth = pageWidth / 2; // metade da página para cada coluna
+
+        // títulos na mesma linha
+        doc.font('Helvetica-Bold').fontSize(11).fillColor('black');
+        doc.text('Apontamentos', startX, doc.y, { width: colWidth, continued: true });
+        doc.text('Métricas', startX + colWidth, doc.y, { width: colWidth });
+        doc.moveDown(0.3);
+
+        let cursorLeftY = doc.y;
+        let cursorRightY = doc.y;
+
+        // conteúdo apontamentos
+        if (apontamentos && apontamentos.length) {
+            doc.font('Helvetica').fontSize(10);
+            let step = 1;
+            for (const a of apontamentos) {
+                const encerrado = a.fim ? formatDateTime(a.fim) : formatDateTime(a.comeco);
+                const tecnico = safeText(a.tecnico_nome || a.tecnico_id || '');
+                const desc = safeText(a.descricao || '');
+                const line = `${step}. ${encerrado} — ${tecnico}: ${desc}`;
+                const h = doc.heightOfString(line, { width: colWidth });
+                doc.text(line, startX, cursorLeftY, { width: colWidth });
+                cursorLeftY += h + 6;
+                step++;
+            }
+        } else {
+            const noApontText = 'Nenhum apontamento foi encontrado.';
+            const h = doc.heightOfString(noApontText, { width: colWidth });
+            doc.text(noApontText, startX, cursorLeftY, { width: colWidth });
+            cursorLeftY += h + 6;
+        }
+
+        // conteúdo métricas
+        doc.font('Helvetica').fontSize(11);
+        const tempoTotal = rel.sla_elapsed_human || formatDurationBetween(rel.criado_em, rel.finalizado_em) || '-';
+        const slaText = (typeof rel.sla_cumprido !== 'undefined') ? (rel.sla_cumprido ? 'Cumprido' : 'Não cumprido') : 'Não calculado';
+
+        const metricsLines = [
+            `Tempo total de atendimento (úteis): ${tempoTotal}`,
+            `SLA (meta): ${rel.sla_target_human || '-'}`,
+            `SLA: ${slaText}`
+        ];
+        if (!rel.sla_cumprido) metricsLines.push(`Atraso (úteis): ${formatMinutesToHuman(Math.max(0, rel.sla_elapsed_minutes - rel.sla_target_minutes))}`);
+        else metricsLines.push(`Tempo restante (úteis): ${rel.sla_remaining_human || '-'}`);
+
+        for (const ml of metricsLines) {
+            const h = doc.heightOfString(ml, { width: colWidth });
+            doc.text(ml, startX + colWidth, cursorRightY, { width: colWidth });
+            cursorRightY += h + 4;
+        }
+
+        // mover cursor para a linha seguinte
+        doc.y = Math.max(cursorLeftY, cursorRightY) + 8;
+
+        // Anexos
+        // if (rel.anexos && rel.anexos.length) {
+        //   doc.fontSize(12).text('Anexos', { underline: true });
+        //   doc.moveDown(0.2);
+        //   rel.anexos.forEach(a => { doc.fontSize(11).text(`${a}`); });
+        //   doc.moveDown(0.4);
+        // }
+        // Anexos à esquerda, sem tabela
+        if (rel.anexos && rel.anexos.length) {
+            // força começar na margem esquerda
+            const leftMargin = doc.page.margins.left;
+
+            doc.moveDown(1); // espaço antes dos anexos
+            doc.fontSize(12).text('Anexos', leftMargin, doc.y, { underline: true, align: 'left' });
+            doc.moveDown(0.2);
+
+            doc.fontSize(11).fillColor('black');
+            rel.anexos.forEach(a => {
+                doc.text(`${a}`, leftMargin, doc.y, { align: 'left' });
+            });
+
+            doc.moveDown(0.4);
+        }
+        doc.end();
+    } catch (err) {
+        console.error('Erro gerarRelatorioChamadoController:', err && err.stack ? err.stack : err);
+        return res.status(500).json({ erro: 'Erro ao gerar relatório', detalhe: err && err.message ? err.message : undefined });
     }
-
-    // ---------- PDF ----------
-    res.setHeader('Content-Disposition', `attachment; filename=relatorio_chamado_${rel.id}.pdf`);
-    res.setHeader('Content-Type', 'application/pdf');
-
-    const doc = new PDFDocument({ margin: 40, size: 'A4' });
-    doc.pipe(res);
-
-    // Título
-    doc.fontSize(18).text('Relatório de Chamado', { align: 'center' });
-    doc.moveDown(1);
-
-    // Cabeçalho resumo
-    doc.fontSize(11);
-    doc.text(`ID do Chamado: ${rel.idExterno}`);
-    doc.text(`Status: ${rel.status}`);
-    doc.text(`Prioridade: ${rel.prioridade}`);
-    doc.text(`Data/Hora de Abertura: ${formatDateTime(rel.criado_em)}`);
-    doc.text(`Data/Hora de Conclusão: ${formatDateTime(rel.finalizado_em)}`);
-    doc.moveDown(0.8);
-
-    // Solicitante
-    doc.fontSize(12).text('Solicitante', { underline: true });
-    doc.moveDown(0.2);
-    doc.fontSize(11).text(`Nome: ${rel.usuario_nome}`);
-    doc.moveDown(0.6);
-
-    // Descrição inicial
-    doc.fontSize(12).text('Descrição Inicial', { underline: true });
-    doc.moveDown(0.2);
-    doc.fontSize(11).text(`Assunto: ${rel.assunto}`);
-    doc.moveDown(0.1);
-    doc.fontSize(11).text(`Descrição: ${rel.descricao_inicial}`);
-    doc.moveDown(0.1);
-    doc.fontSize(11).text(`Setor: ${rel.setor_nome}`);
-    doc.moveDown(0.6);
-
-    // Atribuição
-    doc.fontSize(12).text('Atribuição', { underline: true });
-    doc.moveDown(0.2);
-    doc.fontSize(11).text(`Técnico Responsável: ${rel.tecnico_responsavel}`);
-    doc.fontSize(11).text(`Data/Hora da Atribuição: ${formatDateTime(chamado.atribuido_em || chamado.criado_em)}`);
-    doc.moveDown(0.6);
-
-    // Histórico — apenas apontamentos
-    doc.fontSize(12).text('Histórico de Atendimento', { underline: true });
-    doc.moveDown(0.4);
-
-    const startX = doc.x;
-    const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-    const col1W = 120;
-    const col2W = 140;
-    const col3W = pageWidth - col1W - col2W;
-    const leftX = startX;
-    const leftWidth = col1W + col2W;
-    const rightX = startX + leftWidth;
-    const rightWidth = col3W;
-
-    doc.font('Helvetica-Bold').fontSize(11).fillColor('black');
-    doc.text('Apontamentos', leftX, doc.y, { width: leftWidth });
-    doc.text('Métricas', rightX, doc.y, { width: rightWidth });
-    doc.moveDown(0.3);
-
-    let cursorLeftY = doc.y;
-    let cursorRightY = doc.y;
-
-    if (apontamentos && apontamentos.length) {
-      doc.font('Helvetica').fontSize(10).fillColor('black');
-      let step = 1;
-      for (const a of apontamentos) {
-        const encerrado = a.fim ? formatDateTime(a.fim) : formatDateTime(a.comeco);
-        const tecnico = safeText(a.tecnico_nome || a.tecnico_id || '');
-        const desc = safeText(a.descricao || '');
-        const line = `${step}. ${encerrado} — ${tecnico}: ${desc}`;
-        const h = doc.heightOfString(line, { width: leftWidth });
-        doc.text(line, leftX, cursorLeftY, { width: leftWidth });
-        cursorLeftY += h + 6;
-        step++;
-      }
-    } else {
-      doc.font('Helvetica').fontSize(10).fillColor('black');
-      const noApontText = 'Nenhum apontamento foi encontrado.';
-      const h = doc.heightOfString(noApontText, { width: leftWidth });
-      doc.text(noApontText, leftX, cursorLeftY, { width: leftWidth });
-      cursorLeftY += h + 6;
-    }
-
-    // Métricas (usa os campos SLA calculados)
-    doc.font('Helvetica').fontSize(11).fillColor('black');
-    const tempoTotal = rel.sla_elapsed_human || formatDurationBetween(rel.criado_em, rel.finalizado_em) || '-';
-    const slaText = (typeof rel.sla_cumprido !== 'undefined') ? (rel.sla_cumprido ? 'Cumprido' : 'Não cumprido') : 'Não calculado';
-
-    const metricsLines = [
-      `Tempo total de atendimento (úteis): ${tempoTotal}`,
-      `SLA (meta): ${rel.sla_target_human || '-'}`,
-      `SLA: ${slaText}`
-    ];
-    if (!rel.sla_cumprido) metricsLines.push(`Atraso (úteis): ${formatMinutesToHuman(Math.max(0, rel.sla_elapsed_minutes - rel.sla_target_minutes))}`);
-    else metricsLines.push(`Tempo restante (úteis): ${rel.sla_remaining_human || '-'}`);
-
-    for (const ml of metricsLines) {
-      const h = doc.heightOfString(ml, { width: rightWidth });
-      doc.text(ml, rightX, cursorRightY, { width: rightWidth });
-      cursorRightY += h + 4;
-    }
-
-    const nextY = Math.max(cursorLeftY, cursorRightY);
-    doc.y = nextY + 8;
-    doc.moveDown(0);
-
-    // Anexos
-    if (rel.anexos && rel.anexos.length) {
-      doc.fontSize(12).text('Anexos', { underline: true });
-      doc.moveDown(0.2);
-      rel.anexos.forEach(a => { doc.fontSize(11).text(`${a}`); });
-      doc.moveDown(0.4);
-    }
-
-    doc.end();
-  } catch (err) {
-    console.error('Erro gerarRelatorioChamadoController:', err && err.stack ? err.stack : err);
-    return res.status(500).json({ erro: 'Erro ao gerar relatório', detalhe: err && err.message ? err.message : undefined });
-  }
 };

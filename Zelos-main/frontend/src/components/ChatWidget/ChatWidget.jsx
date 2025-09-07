@@ -20,8 +20,8 @@ export default function ChatWidget({ chamadoSelecionado, position = "bottom-righ
 
   const pos =
     position === "bottom-left"
-      ? { button: "left-4 bottom-4", panel: "left-4 bottom-20" }
-      : { button: "right-4 bottom-4", panel: "right-4 bottom-20" };
+      ? { button: "left-4 bottom-4", panel: "md:left-4 md:bottom-20" }
+      : { button: "right-4 bottom-4", panel: "md:right-4 md:bottom-20" };
 
   const fetchCurrentUser = async () => {
     try {
@@ -415,7 +415,7 @@ const buildAvatarUrl = (ftValue) => {
           open ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none",
         ].join(" ")}
       > */}
-      <div
+      {/* <div
   className={[
     // comportamento mobile: ocupa toda a viewport
     "fixed z-60 inset-0 md:inset-auto",
@@ -443,7 +443,17 @@ const buildAvatarUrl = (ftValue) => {
     // garantir overflow para o conteúdo interno
     "overflow-hidden"
   ].join(" ")}
->
+> */}
+   <div
+        className={[
+          "fixed w-full h-full md:h-auto z-60 md:w-[92vw] md:max-w-sm rounded-2xl border border-gray-200",
+          "bg-white shadow-xl dark:bg-gray-900 dark:border-gray-500 ",
+          "transition-all duration-200",
+          // "right-0 left-0 bottom-0",
+          pos.panel,
+          open ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none",
+        ].join(" ")}
+      >
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700 dark:bg-gray-900 rounded-t-2xl">

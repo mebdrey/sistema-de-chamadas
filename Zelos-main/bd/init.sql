@@ -186,14 +186,13 @@ VALUES
 (1000004,'Limpeza após reunião','Sala de reunião 3 precisa de limpeza após uso.',4,13,17,NULL,1,'concluido',CONCAT(CURDATE(),' 11:00:00'),CONCAT(CURDATE(),' 12:00:00')),
 (1000008,'Reposição de materiais','Faltando papel toalha nos banheiros femininos.',4,12,21,NULL,3,'concluido',CONCAT(CURDATE(),' 08:40:00'),CONCAT(DATE_ADD(CURDATE(), INTERVAL 4 DAY),' 09:25:00')),
 (1000042,'Instalação de impressora','Nova impressora configurada.',3,7,19,NULL,1,'concluido',CONCAT(CURDATE(),' 13:00:00'),CONCAT(CURDATE(),' 13:45:00')),
-
 -- Set/2025 (mais 5 para fechar 10 no mês)
+('1000039', 'Atualização de Sistema Operacional', 'Notebook com Windows 10 deve ser atualizado para Windows 11.', 3, 4, 26, 'win11_upgrade.jpg', 1, 'concluido', '2025-09-06 14:00:00', '2025-09-07 09:20:00'), -- qnd formos testar, esse chamamdo estara concluido na cota do usuario e tecnico
 (1000022,'Troca de HD','HD com setores defeituosos, troca em andamento.',2,4,23,NULL,3,'concluido','2025-09-01 09:00:00','2025-09-01 12:00:00'),
 (1000024,'Instalação de software','Instalando novo sistema de gestão.',3,5,25,NULL,2,'concluido','2025-09-01 09:30:00','2025-09-01 11:30:00'),
 (1000031,'Correção de bug','Ajustando falha no sistema interno.',3,7,20,NULL,3,'concluido','2025-09-02 08:00:00','2025-09-05 10:00:00'), -- atrasado
 (1000032,'Backup de dados','Realizando cópia de segurança.',3,8,21,NULL,2,'pendente','2025-09-02 08:30:00',NULL),
 (1000046,'Suporte técnico externo','Atendimento remoto e presencial para suporte técnico.',1,4,23,NULL,2,'em andamento','2025-09-03 10:30:00',NULL),
-
 -- =========================
 -- AGOSTO/2025 (22 – todos concluídos; ~20% atrasados)
 -- =========================
@@ -219,7 +218,6 @@ VALUES
 (1000027,'Ajuste na rede','Reconfigurando roteadores e switches.',3,6,16,NULL,3,'concluido','2025-08-13 08:00:00','2025-08-13 12:00:00'),
 (1000028,'Limpeza interna do PC','Retirando poeira e trocando pasta térmica.',4,9,17,NULL,1,'concluido','2025-08-13 08:30:00','2025-08-13 10:00:00'),
 (1000029,'Atualização de drivers','Atualizando drivers de vídeo e áudio.',3,5,18,NULL,2,'concluido','2025-08-13 09:00:00','2025-08-13 11:00:00'),
-
 -- =========================
 -- JULHO/2025 (10 – todos concluídos; poucos atrasados)
 -- =========================
@@ -233,7 +231,6 @@ VALUES
 (1000039,'Troca de monitor','Novo monitor instalado.',2,5,16,NULL,3,'concluido','2025-07-07 09:00:00','2025-07-07 09:30:00'),
 (1000040,'Reparo de teclado','Teclado com teclas substituídas.',2,6,17,NULL,2,'concluido','2025-07-08 09:30:00','2025-07-08 10:00:00'),
 (1000045,'Limpeza de gabinete','Limpeza interna concluída.',4,10,22,NULL,1,'concluido','2025-07-09 09:30:00','2025-07-09 10:15:00'),
-
 -- =========================
 -- JUNHO/2025 (14 – todos concluídos; poucos atrasados)
 -- =========================
@@ -252,7 +249,6 @@ VALUES
 (1000062,'Computador lento','PC demora muito para iniciar.',3,NULL,23,'pcDemora.jpg',1,'concluido','2025-06-08 08:30:00','2025-06-08 11:30:00'),
 (1000063,'Problema na impressora','Impressora não está imprimindo.',3,NULL,22,'impressoraNaoFunciona.webp',3,'concluido','2025-06-09 08:00:00','2025-06-14 10:00:00'), -- atrasado
 (1000064,'Limpeza de carpetes','Carpetes da recepção precisam de aspiração.',4,9,18,NULL,2,'concluido','2025-06-15 10:30:00','2025-06-15 12:00:00'),
-
 -- =========================
 -- MAIO/2025 (28 – todos concluídos; alguns atrasados)
 -- =========================
@@ -286,7 +282,6 @@ VALUES
 (1000089,'Queda de energia','Sala ficou sem luz após curto-circuito.',2,NULL,19,NULL,3,'concluido','2025-05-21 09:30:00','2025-05-21 11:30:00'),
 (1000090,'Câmera de segurança inoperante','Câmera não transmite imagem.',2,NULL,21,NULL,2,'concluido','2025-05-22 08:00:00','2025-05-22 10:00:00'),
 (1000091,'Problema no projetor','Imagem do projetor está desfocada.',2,NULL,22,NULL,1,'concluido','2025-05-23 08:30:00','2025-05-23 09:30:00'),
-
 -- =========================
 -- ABRIL/2025 (7 – todos concluídos; maioria no prazo)
 -- =========================
@@ -312,6 +307,13 @@ CREATE TABLE apontamentos (
     FOREIGN KEY (tecnico_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
+-- Apontamento 1: Backup dos arquivos antes da atualização
+INSERT INTO apontamentos (chamado_id, tecnico_id, descricao, comeco, fim, criado_em)
+VALUES (6, 4, 'Realizado backup completo dos arquivos do usuário para unidade externa.', '2025-09-06 14:00:00', '2025-09-06 15:10:00', '2025-09-06 15:10:00');
+-- Apontamento 2: Instalação do Windows 11 e configuração inicial
+INSERT INTO apontamentos (chamado_id, tecnico_id, descricao, comeco, fim, criado_em)
+VALUES ( 6, 4, 'Instalação do Windows 11 concluída com sucesso. Configurações de rede e antivírus aplicadas.', '2025-09-07 08:00:00', '2025-09-07 09:20:00', '2025-09-07 08:00:00');
+
 create table mensagens (
 	id int auto_increment primary key,
 	id_usuario int,
@@ -324,6 +326,22 @@ create table mensagens (
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE SET NULL,
     FOREIGN KEY (id_chamado) REFERENCES chamados(id) ON DELETE CASCADE
 );
+
+-- Usuário relata problema de lentidão e solicita formatação
+INSERT INTO mensagens (id_usuario, id_tecnico, conteudo, id_chamado)
+VALUES (26, null, 'Oi, meu computador está muito lento e travando direto. Acho que precisa formatar.', 6);
+-- Técnico responde solicitando backup antes da formatação
+INSERT INTO mensagens (id_usuario, id_tecnico, conteudo, id_chamado)
+VALUES (null, 4, 'Olá! Antes de formatar, vou fazer um backup completo dos seus arquivos. Pode me confirmar se estão todos na pasta Documentos?', 6);
+-- Usuário confirma localização dos arquivos
+INSERT INTO mensagens (id_usuario, id_tecnico, conteudo, id_chamado)
+VALUES (26, null, 'Sim, estão todos na pasta Documentos e na área de trabalho.', 6);
+-- Técnico informa início da instalação do Windows 11
+INSERT INTO mensagens (id_usuario, id_tecnico, conteudo, id_chamado)
+VALUES (null, 4, 'Backup concluído. Iniciando agora a instalação do Windows 11 e configuração de rede.', 6);
+-- Usuário agradece após conclusão
+INSERT INTO mensagens (id_usuario, id_tecnico, conteudo, id_chamado)
+VALUES (26, null, 'Muito obrigada! Já está bem mais rápido. Valeu mesmo!', 6);
 
 create table relatorios(
     id int auto_increment primary key,
@@ -400,11 +418,11 @@ INSERT INTO avaliacoes (usuario_id, chamado_id, tecnico_id, nota, comentario, da
 (21, 4, 1, 4, 'Atendimento competente, dentro do esperado.', '2025-08-08 12:45:00'),
 (22, 5, 2, 5, 'Muito bom — resolveu e explicou tudo.', '2025-08-15 15:20:00');
 
-
 -- Índices adicionais para otimização
 CREATE INDEX idx_usuarios_email ON usuarios(email);
 CREATE INDEX idx_chamados_status ON chamados(status_chamado);
 CREATE INDEX idx_apontamentos_comeco_fim ON apontamentos(comeco, fim);
 
 select *from usuarios;
+select *from chamados;
 SELECT id, nome, horas_limite FROM prioridades;
