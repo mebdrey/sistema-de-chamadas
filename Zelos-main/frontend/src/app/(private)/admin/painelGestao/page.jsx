@@ -1399,17 +1399,17 @@ export default function PainelGestao() {
             {/* ASIDE FIXO */}
             {/* <aside className="hidden md:block fixed top-23 left-[80px] w-64 bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-4 dark:bg-gray-800 dark:border-gray-700">
               <h2 className="text-lg poppins-semibold mb-3 dark:text-white">Índice</h2>
-              <nav className="flex flex-col gap-3 text-violet-500 dark:text-purple-500">
+              <nav className="flex flex-col gap-3 text-violet-500 dark:text-violet-500">
                 <a href="#criar-usuario" className="hover:underline">Criar Usuário</a>
                 <a href="#setores" className="hover:underline">Setores</a>
                 <a href="#prioridade" className="hover:underline">Prioridade</a>
               </nav>
             </aside> */}
             <aside className="hidden md:block fixed top-23 left-[80px] w-64 rounded-md border bg-white px-6 py-6 shadow-md dark:bg-gray-800 dark:border-gray-700 lg:w-56">
-              <div className="pb-2 text-xl font-medium text-violet-600 dark:text-purple-400">Índice</div>
-              <hr className="h-1 w-10 bg-violet-600 dark:bg-purple-500 my-2" />
+              <div className="pb-2 text-xl font-medium text-violet-600 dark:text-violet-400">Índice</div>
+              <hr className="h-1 w-10 bg-violet-600 dark:bg-violet-500 my-2" />
               <nav className="mt-4 flex flex-col gap-3">
-                <a className="text-sm font-medium text-violet-600 dark:text-purple-400 hover:text-violet-500" href="#criar-usuario">Criar Usuário</a>
+                <a className="text-sm font-medium text-violet-600 dark:text-violet-400 hover:text-violet-500" href="#criar-usuario">Criar Usuário</a>
                 <a className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-violet-500" href="#setores">Setores</a>
                 <a className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-violet-500" href="#prioridade">Prioridade</a>
               </nav>
@@ -1428,8 +1428,8 @@ export default function PainelGestao() {
                     <div className="flex flex-col md:flex-row gap-6">
                       {/* Nome completo */}
                       <div className="relative z-0 mb-5 group w-full md:w-60">
-                        <input type="text" name="nome" id="user_full_name" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.nome ? 'border-red-500' : 'border-gray-300'} dark:text-gray-100 dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.nome ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.nome} onChange={(e) => { handleNomeChange(e); if (errors.nome) setErrors(prev => ({ ...prev, nome: null })); }} required />
-                        <label htmlFor="user_full_name" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.nome ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.nome ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.nome ? 'peer-focus:text-red-500' : 'peer-focus:text-violet-500 peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}>  <span className="leading-none">Nome completo</span>
+                        <input type="text" name="nome" id="user_full_name" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.nome ? 'border-red-500' : 'border-gray-300'} dark:text-gray-100 dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.nome ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.nome} onChange={(e) => { handleNomeChange(e); if (errors.nome) setErrors(prev => ({ ...prev, nome: null })); }} required />
+                        <label htmlFor="user_full_name" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.nome ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.nome ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.nome ? 'peer-focus:text-red-500' : 'peer-focus:text-violet-500 peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}>  <span className="leading-none">Nome completo</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
                         </label>
                         {submitAttempted && errors.nome && <div className="text-xs text-red-500 mt-1">{errors.nome}</div>}
@@ -1437,7 +1437,7 @@ export default function PainelGestao() {
 
                       {/* Username */}
                       <div className="relative z-0 mb-5 group w-full md:w-80">
-                        <input type="text" name="username" id="user_username" ref={usernameInputRef} className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.username ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.username ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.username} onChange={(e) => { handleUsernameChange(e); if (errors.username) setErrors(prev => ({ ...prev, username: null })); }} onKeyDown={handleUsernameKeyDown} autoComplete="off" required />
+                        <input type="text" name="username" id="user_username" ref={usernameInputRef} className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.username ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.username ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.username} onChange={(e) => { handleUsernameChange(e); if (errors.username) setErrors(prev => ({ ...prev, username: null })); }} onKeyDown={handleUsernameKeyDown} autoComplete="off" required />
                         <label htmlFor="user_username" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.username ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.username ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.username ? 'peer-focus:text-red-500' : 'peer-focus:text-violet-500 peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}><span className="leading-none">Username</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
                         </label>
@@ -1466,7 +1466,7 @@ export default function PainelGestao() {
                     <div className="flex flex-col md:flex-row gap-6">
                       {/* Email */}
                       <div className="relative z-0 mb-5 group w-full md:w-60">
-                        <input type="email" name="email" id="user_email" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.email ? 'border-red-500' : 'border-gray-300'} dark:text-gray-100 dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.email ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.email} onChange={(e) => {
+                        <input type="email" name="email" id="user_email" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.email ? 'border-red-500' : 'border-gray-300'} dark:text-gray-100 dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.email ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.email} onChange={(e) => {
                           handleEmailChange(e);
                           if (errors.email) setErrors(prev => ({ ...prev, email: null }));
                         }} onFocus={() => setEmailFocused(true)} onBlur={() => setEmailFocused(false)} required />
@@ -1490,7 +1490,7 @@ export default function PainelGestao() {
                             autoComplete="off"
                             className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
       ${submitAttempted && errors.funcao ? 'border-red-500' : 'border-gray-300'}
-      dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
+      dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
                             placeholder=" "
                             // value={form.funcao}
                             value={displayFuncao}
@@ -1524,7 +1524,7 @@ export default function PainelGestao() {
                             autoComplete="off"
                             className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
     ${submitAttempted && errors.funcao ? 'border-red-500' : 'border-gray-300'}
-    dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
+    dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
                             placeholder=" "
                             value={funcaoInput}                 // <--- agora controlado
                             onChange={onFuncaoInput}            // <--- handler novo
@@ -1551,7 +1551,7 @@ export default function PainelGestao() {
 
                           <label
                             htmlFor="user_function"
-                            className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.funcao ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.funcao ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.funcao ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
+                            className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.funcao ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.funcao ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.funcao ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
                           ><span className="leading-none">Função</span>
                             <span className="ml-1 self-start leading-none text-red-500">*</span>
                           </label>
@@ -1614,13 +1614,13 @@ export default function PainelGestao() {
                           onBlur={() => { if (!form.senha) setShowEye(false); }} // esconde se perder foco sem nada digitado
                           name="senha"
                           id="user_password"
-                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.senha ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.senha ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`} placeholder=" " value={form.senha} onChange={(e) => {
+                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.senha ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.senha ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`} placeholder=" " value={form.senha} onChange={(e) => {
                             handleSenhaChange(e);
                             if (errors.senha) setErrors(prev => ({ ...prev, senha: null }));
                           }} required />
                         {/* <label
                           htmlFor="user_password"
-                          className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.senha ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.senha ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.senha ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}><span className="leading-none">Senha</span>
+                          className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.senha ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.senha ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.senha ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}><span className="leading-none">Senha</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
                         </label> */}
                         <label
@@ -1630,7 +1630,7 @@ export default function PainelGestao() {
     ${submitAttempted && errors.senha ? '' : 'dark:text-gray-400'}
     duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0]
     peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto
-    ${submitAttempted && errors.senha ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'}
+    ${submitAttempted && errors.senha ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-violet-500'}
     peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0
     peer-focus:scale-75 peer-focus:-translate-y-6`}
                         >
@@ -1675,12 +1675,12 @@ export default function PainelGestao() {
                           id="floating_repeat_password"
                           className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
           ${submitAttempted && errors.repeat_password ? 'border-red-500' : 'border-gray-300'}
-          dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.repeat_password ? 'focus:border-red-500' : 'focus:border-purple-500'} peer`} placeholder=" " value={form.repeat_password}
+          dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.repeat_password ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.repeat_password}
                           onChange={(e) => {
                             handleRepeatPwdChange(e);
                             if (errors.repeat_password) setErrors(prev => ({ ...prev, repeat_password: null }));
                           }} required />
-                        <label htmlFor="floating_repeat_password" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.repeat_password ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.repeat_password ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.repeat_password ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
+                        <label htmlFor="floating_repeat_password" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.repeat_password ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.repeat_password ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.repeat_password ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
                         ><span className="leading-none">Confirmar senha</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
                         </label>
@@ -1715,7 +1715,7 @@ export default function PainelGestao() {
                     </div>
 
                     {/* Botão Criar */}
-                    <button type="submit" className="flex flex-row gap-2 items-center text-white bg-violet-500 hover:bg-violet-600 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-purple-500 dark:hover:bg-purple-500 dark:focus:ring-purple-500"><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                    <button type="submit" className="flex flex-row gap-2 items-center text-white bg-violet-500 hover:bg-violet-600 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-violet-500 dark:hover:bg-violet-500 dark:focus:ring-violet-500"><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
                       Criar Usuário
                     </button>
                   </form>
