@@ -1096,9 +1096,8 @@ export default function PainelGestao() {
       });
       showToast("success", "Setor excluído com successo");
       await loadAll();
-    } catch (err) {
-      showToast("danger", "Erro excluir setor");
     }
+    catch (err) { showToast("danger", "Erro excluir setor");}
   };
 
   // Quando clicar em "Excluir" no dropdown -> abre modal
@@ -1121,9 +1120,8 @@ export default function PainelGestao() {
       showToast("success", "Setor atualizado com successo");
       setEditSetor(null);
       await loadAll();
-    } catch (err) {
-      showToast("danger", "Erro atualizar setor");
     }
+    catch (err) {showToast("danger", "Erro atualizar setor"); }
   };
 
   const handlePrioridadeFormChange = (e) => {
@@ -1196,9 +1194,8 @@ export default function PainelGestao() {
       showToast("success", 'Prioridade atualizada com sucesso');
       setEditPrioridade(null);
       await loadAll();
-    } catch (err) {
-      showToast("danger", 'Erro atualizar prioridade');
     }
+    catch (err) { showToast("danger", 'Erro atualizar prioridade'); }
   };
 
 
@@ -1256,14 +1253,10 @@ export default function PainelGestao() {
     <>
       {ToastsUI}
       {showSetorModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-          onClick={() => setShowSetorModal(false)} // clique no backdrop fecha
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowSetorModal(false)} // clique no backdrop fecha
           aria-modal="true"
         >
-          <div
-            className="w-full max-w-md p-4"
-            onClick={(ev) => ev.stopPropagation()} // evita fechar ao clicar dentro
+          <div className="w-full max-w-md p-4" onClick={(ev) => ev.stopPropagation()} // evita fechar ao clicar dentro
           >
             <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
               {/* Header */}
@@ -1291,18 +1284,11 @@ export default function PainelGestao() {
                     className={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-600 dark:border-gray-500 text-sm dark:text-white focus:outline-none focus:ring-0 ${submitAttemptedSetor && setorErrors.titulo ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'}`} rows={4} placeholder="Descrição do setor" />
                   {submitAttemptedSetor && setorErrors.descricao && <div className="text-xs text-red-500 mt-1">{setorErrors.descricao}</div>}
                 </div>
-
                 <div>
-
                   <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">Funções (tags)<span className="ml-1 self-start leading-none text-red-500">*</span></label>
-
                   <div className="relative">
                     <div className="flex gap-2">
-                      <input
-                        id="setor-funcao-input"
-                        type="text"
-                        value={setorFuncoesInput}
-                        onChange={onSetorFuncaoInput}
+                      <input id="setor-funcao-input" type="text" value={setorFuncoesInput} onChange={onSetorFuncaoInput}
                         onFocus={() => {
                           setSetorFuncaoFocused(true);
                           const all = Array.isArray(funcoes) ? funcoes.slice(0, 50) : [];
@@ -1316,41 +1302,19 @@ export default function PainelGestao() {
                             setSetorHighlightIndex(-1);
                           }, 150);
                         }}
-                        onKeyDown={onSetorFuncaoKeyDown}
-                        autoComplete="off"
-                        placeholder="Digite uma função"
-                        aria-autocomplete="list"
-                        aria-controls="setor-funcao-suggestions"
-                        aria-expanded={setorFuncaoFocused && setorFilteredFuncoes.length > 0}
-                        className={`flex-1 px-3 py-2 rounded-lg border bg-white dark:bg-gray-600 dark:border-gray-500 text-sm dark:text-white focus:outline-none focus:ring-0 ${submitAttemptedSetor && setorErrors.titulo ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'}`}
+                        onKeyDown={onSetorFuncaoKeyDown} autoComplete="off" placeholder="Digite uma função" aria-autocomplete="list" aria-controls="setor-funcao-suggestions" aria-expanded={setorFuncaoFocused && setorFilteredFuncoes.length > 0} className={`flex-1 px-3 py-2 rounded-lg border bg-white dark:bg-gray-600 dark:border-gray-500 text-sm dark:text-white focus:outline-none focus:ring-0 ${submitAttemptedSetor && setorErrors.titulo ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'}`}
                       />
-                      <button
-                        type="button"
-                        onClick={() => addFuncaoTag(setorFuncoesInput)}
-                        className="py-2 px-3 inline-flex items-center gap-x-2 text-sm poppins-medium rounded-lg border border-transparent bg-violet-500 hover:bg-violet-600 text-white focus:outline-hidden focus:bg-violet-600 disabled:opacity-50 disabled:pointer-events-none "
+                      <button type="button" onClick={() => addFuncaoTag(setorFuncoesInput)} className="py-2 px-3 inline-flex items-center gap-x-2 text-sm poppins-medium rounded-lg border border-transparent bg-violet-500 hover:bg-violet-600 text-white focus:outline-hidden focus:bg-violet-600 disabled:opacity-50 disabled:pointer-events-none "
                       ><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg></button>
                     </div>
 
                     {setorFuncaoFocused && setorFilteredFuncoes.length > 0 && (
-                      <ul
-                        id="setor-funcao-suggestions"
-                        role="listbox"
-                        aria-label="Sugestões de função"
-                        className="absolute z-[999] mt-2 w-full max-h-48 overflow-auto rounded-md shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                      <ul id="setor-funcao-suggestions" role="listbox" aria-label="Sugestões de função" className="absolute z-[999] mt-2 w-full max-h-48 overflow-auto rounded-md shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                       >
                         {setorFilteredFuncoes.map((f, idx) => {
                           const isHighlighted = setorHighlightIndex === idx;
                           return (
-                            <li
-                              key={f + idx}
-                              id={`setor-funcao-option-${idx}`}
-                              role="option"
-                              aria-selected={isHighlighted}
-                              onMouseDown={(ev) => { ev.preventDefault(); }}
-                              onClick={() => selectFuncao(f)}
-                              onMouseEnter={() => setSetorHighlightIndex(idx)}
-                              className={`px-3 py-2 cursor-pointer select-none text-sm ${isHighlighted ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-                            >
+                            <li key={f + idx} id={`setor-funcao-option-${idx}`} role="option" aria-selected={isHighlighted} onMouseDown={(ev) => { ev.preventDefault(); }}onClick={() => selectFuncao(f)} onMouseEnter={() => setSetorHighlightIndex(idx)} className={`px-3 py-2 cursor-pointer select-none text-sm ${isHighlighted ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                               <div className="dark:text-gray-300">{formatarLabel(f)}</div>
                             </li>
                           );
@@ -1363,12 +1327,7 @@ export default function PainelGestao() {
                     {setorFuncoes.map((f, idx) => (
                       <span key={f + idx} className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-sm dark:text-gray-100">
                         <span>{formatarLabel(f)}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveFuncao(idx)}
-                          className="w-5 h-5 inline-flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
-                          aria-label={`Remover ${f}`}
-                        >
+                        <button type="button" onClick={() => handleRemoveFuncao(idx)} className="w-5 h-5 inline-flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-600" aria-label={`Remover ${f}`}>
                           ✕
                         </button>
                       </span>
@@ -1376,7 +1335,6 @@ export default function PainelGestao() {
                   </div>
                   {submitAttemptedSetor && setorErrors.funcoes && <div className="text-xs text-red-500 mt-1">{setorErrors.funcoes}</div>}
                 </div>
-
 
                 {/* Actions */}
                 <div className="flex justify-end gap-2">
@@ -1390,8 +1348,6 @@ export default function PainelGestao() {
           </div>
         </div>
       )}
-
-
       <div className="p-4 w-full dark:bg-gray-900">
         <div className="p-4 mt-14">
 
@@ -1399,7 +1355,7 @@ export default function PainelGestao() {
             {/* ASIDE FIXO */}
             {/* <aside className="hidden md:block fixed top-23 left-[80px] w-64 bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-4 dark:bg-gray-800 dark:border-gray-700">
               <h2 className="text-lg poppins-semibold mb-3 dark:text-white">Índice</h2>
-              <nav className="flex flex-col gap-3 text-violet-500 dark:text-purple-500">
+              <nav className="flex flex-col gap-3 text-violet-500 dark:text-violet-500">
                 <a href="#criar-usuario" className="hover:underline">Criar Usuário</a>
                 <a href="#setores" className="hover:underline">Setores</a>
                 <a href="#prioridade" className="hover:underline">Prioridade</a>
@@ -1409,7 +1365,7 @@ export default function PainelGestao() {
               <div className="pb-2 text-xl font-medium text-violet-600 dark:text-purple-400">Índice</div>
               <hr className="h-1 w-10 bg-violet-600 dark:bg-purple-500 my-2" />
               <nav className="mt-4 flex flex-col gap-3">
-                <a className="text-sm font-medium text-violet-600 dark:text-purple-400 hover:text-violet-500" href="#criar-usuario">Criar Usuário</a>
+                <a className="text-sm font-medium text-violet-600 dark:text-violet-400 hover:text-violet-500" href="#criar-usuario">Criar Usuário</a>
                 <a className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-violet-500" href="#setores">Setores</a>
                 <a className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-violet-500" href="#prioridade">Prioridade</a>
               </nav>
@@ -1428,8 +1384,8 @@ export default function PainelGestao() {
                     <div className="flex flex-col md:flex-row gap-6">
                       {/* Nome completo */}
                       <div className="relative z-0 mb-5 group w-full md:w-60">
-                        <input type="text" name="nome" id="user_full_name" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.nome ? 'border-red-500' : 'border-gray-300'} dark:text-gray-100 dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.nome ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.nome} onChange={(e) => { handleNomeChange(e); if (errors.nome) setErrors(prev => ({ ...prev, nome: null })); }} required />
-                        <label htmlFor="user_full_name" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.nome ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.nome ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.nome ? 'peer-focus:text-red-500' : 'peer-focus:text-violet-500 peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}>  <span className="leading-none">Nome completo</span>
+                        <input type="text" name="nome" id="user_full_name" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.nome ? 'border-red-500' : 'border-gray-300'} dark:text-gray-100 dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.nome ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.nome} onChange={(e) => { handleNomeChange(e); if (errors.nome) setErrors(prev => ({ ...prev, nome: null })); }} required />
+                        <label htmlFor="user_full_name" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.nome ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.nome ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.nome ? 'peer-focus:text-red-500' : 'peer-focus:text-violet-500 peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}>  <span className="leading-none">Nome completo</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
                         </label>
                         {submitAttempted && errors.nome && <div className="text-xs text-red-500 mt-1">{errors.nome}</div>}
@@ -1437,7 +1393,7 @@ export default function PainelGestao() {
 
                       {/* Username */}
                       <div className="relative z-0 mb-5 group w-full md:w-80">
-                        <input type="text" name="username" id="user_username" ref={usernameInputRef} className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.username ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.username ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.username} onChange={(e) => { handleUsernameChange(e); if (errors.username) setErrors(prev => ({ ...prev, username: null })); }} onKeyDown={handleUsernameKeyDown} autoComplete="off" required />
+                        <input type="text" name="username" id="user_username" ref={usernameInputRef} className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.username ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.username ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.username} onChange={(e) => { handleUsernameChange(e); if (errors.username) setErrors(prev => ({ ...prev, username: null })); }} onKeyDown={handleUsernameKeyDown} autoComplete="off" required />
                         <label htmlFor="user_username" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.username ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.username ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.username ? 'peer-focus:text-red-500' : 'peer-focus:text-violet-500 peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}><span className="leading-none">Username</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
                         </label>
@@ -1457,7 +1413,6 @@ export default function PainelGestao() {
                             })}
                           </div>
                         )}
-
                         {submitAttempted && errors.username && <div className="text-xs text-red-500 mt-1">{errors.username}</div>}
                       </div>
                     </div>
@@ -1466,7 +1421,7 @@ export default function PainelGestao() {
                     <div className="flex flex-col md:flex-row gap-6">
                       {/* Email */}
                       <div className="relative z-0 mb-5 group w-full md:w-60">
-                        <input type="email" name="email" id="user_email" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.email ? 'border-red-500' : 'border-gray-300'} dark:text-gray-100 dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.email ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.email} onChange={(e) => {
+                        <input type="email" name="email" id="user_email" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.email ? 'border-red-500' : 'border-gray-300'} dark:text-gray-100 dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.email ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.email} onChange={(e) => {
                           handleEmailChange(e);
                           if (errors.email) setErrors(prev => ({ ...prev, email: null }));
                         }} onFocus={() => setEmailFocused(true)} onBlur={() => setEmailFocused(false)} required />
@@ -1483,14 +1438,9 @@ export default function PainelGestao() {
                       {/* Função */}
                       <div className="relative mb-5 group w-full md:w-60 overflow-visible">
                         <div id="funcao-input-wrapper" className="relative">
-                          {/* <input
-                            type="text"
-                            name="funcao"
-                            id="user_function"
-                            autoComplete="off"
-                            className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
+                          {/* <input type="text" name="funcao" id="user_function" autoComplete="off" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
       ${submitAttempted && errors.funcao ? 'border-red-500' : 'border-gray-300'}
-      dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
+      dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
                             placeholder=" "
                             // value={form.funcao}
                             value={displayFuncao}
@@ -1510,23 +1460,12 @@ export default function PainelGestao() {
                                 setHighlightIndex(-1);
                               }, 150);
                             }}
-                            onKeyDown={onSetorFuncaoKeyDown}
-                            required
-                            aria-autocomplete="list"
-                            aria-controls="funcao-suggestions"
-                            aria-expanded={funcaoFocused && filteredFuncoes.length > 0}
-                            aria-haspopup="listbox"
-                          /> */}
+                            onKeyDown={onSetorFuncaoKeyDown} required aria-autocomplete="list" aria-controls="funcao-suggestions" aria-expanded={funcaoFocused && filteredFuncoes.length > 0}  aria-haspopup="listbox"/> */}
                           <input
-                            type="text"
-                            name="funcao"
-                            id="user_function"
-                            autoComplete="off"
-                            className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
+                            type="text" name="funcao" id="user_function" autoComplete="off" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
     ${submitAttempted && errors.funcao ? 'border-red-500' : 'border-gray-300'}
-    dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
-                            placeholder=" "
-                            value={funcaoInput}                 // <--- agora controlado
+    dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
+                            placeholder=" " value={funcaoInput}                 // <--- agora controlado
                             onChange={onFuncaoInput}            // <--- handler novo
                             onFocus={() => {
                               setFuncaoFocused(true);
@@ -1542,63 +1481,31 @@ export default function PainelGestao() {
                               }, 150);
                             }}
                             onKeyDown={onFuncaoKeyDown}         // <--- handler novo
-                            required
-                            aria-autocomplete="list"
-                            aria-controls="funcao-suggestions"
-                            aria-expanded={funcaoFocused && filteredFuncoes.length > 0}
-                            aria-haspopup="listbox"
-                          />
+                            required aria-autocomplete="list" aria-controls="funcao-suggestions" aria-expanded={funcaoFocused && filteredFuncoes.length > 0} aria-haspopup="listbox"/>
 
-                          <label
-                            htmlFor="user_function"
-                            className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.funcao ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.funcao ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.funcao ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
+                          <label htmlFor="user_function" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.funcao ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.funcao ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.funcao ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
                           ><span className="leading-none">Função</span>
                             <span className="ml-1 self-start leading-none text-red-500">*</span>
                           </label>
 
                           {/* lista de sugestões */}
                           {funcaoFocused && filteredFuncoes.length > 0 && (
-                            <ul
-                              id="funcao-suggestions"
-                              role="listbox"
-                              aria-label="Sugestões de função"
-                              className="absolute z-[999] mt-2 w-full max-h-48 overflow-auto rounded-md shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                            <ul id="funcao-suggestions" role="listbox" aria-label="Sugestões de função" className="absolute z-[999] mt-2 w-full max-h-48 overflow-auto rounded-md shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                             >
                               {/* {filteredFuncoes.map((f, idx) => (
-                                <li
-                                  key={f}
-                                  id={`funcao-option-${idx}`}
-                                  role="option"
-                                  aria-selected={highlightIndex === idx}
-                                  onMouseDown={(e) => { e.preventDefault(); 
-                                  onClick={() => selectFuncao(f)}
-                                  onMouseEnter={() => setHighlightIndex(idx)}
-                                  className={`px-3 py-2 cursor-pointer select-none ${highlightIndex === idx ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                                    }`}
-                                >
+                                <li key={f} id={`funcao-option-${idx}`} role="option" aria-selected={highlightIndex === idx} onMouseDown={(e) => { e.preventDefault(); onClick={() => selectFuncao(f)} onMouseEnter={() => setHighlightIndex(idx)} className={`px-3 py-2 cursor-pointer select-none ${highlightIndex === idx ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                                   <div className="text-sm dark:text-gray-300">{formatarLabel(f)}</div>
                                 </li>
                               ))} */}
                               {filteredFuncoes.map((f, idx) => (
-                                <li
-                                  key={f + idx}
-                                  id={`funcao-option-${idx}`}
-                                  role="option"
-                                  aria-selected={highlightIndex === idx}
-                                  onMouseDown={(e) => { e.preventDefault(); }}
-                                  onClick={() => selectFuncaoUser(f)}   // <-- chama o select do form
-                                  onMouseEnter={() => setHighlightIndex(idx)}
-                                  className={`px-3 py-2 cursor-pointer select-none ${highlightIndex === idx ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                                    }`}
-                                >
+                                <li key={f + idx} id={`funcao-option-${idx}`} role="option" aria-selected={highlightIndex === idx} onMouseDown={(e) => { e.preventDefault(); }} onClick={() => selectFuncaoUser(f)}   // <-- chama o select do form
+                                  onMouseEnter={() => setHighlightIndex(idx)} className={`px-3 py-2 cursor-pointer select-none ${highlightIndex === idx ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                                    }`}>
                                   <div className="text-sm dark:text-gray-300">{formatarLabel(f)}</div>
                                 </li>
                               ))}
-
                             </ul>
                           )}
-
-
                           {submitAttempted && errors.funcao && <div className="text-xs text-red-500 mt-1">{errors.funcao}</div>}
                         </div>
                       </div>
@@ -1612,45 +1519,28 @@ export default function PainelGestao() {
                           type={showPassword ? "text" : "password"}
                           onFocus={() => setShowEye(true)}     // mostra o olho ao focar
                           onBlur={() => { if (!form.senha) setShowEye(false); }} // esconde se perder foco sem nada digitado
-                          name="senha"
-                          id="user_password"
-                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.senha ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.senha ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`} placeholder=" " value={form.senha} onChange={(e) => {
+                          name="senha" id="user_password" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.senha ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.senha ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`} placeholder=" " value={form.senha} onChange={(e) => {
                             handleSenhaChange(e);
                             if (errors.senha) setErrors(prev => ({ ...prev, senha: null }));
                           }} required />
                         {/* <label
                           htmlFor="user_password"
-                          className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.senha ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.senha ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.senha ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}><span className="leading-none">Senha</span>
+                          className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.senha ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.senha ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.senha ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}><span className="leading-none">Senha</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
                         </label> */}
-                        <label
-                          htmlFor="user_password"
-                          className={`peer-focus:poppins-medium absolute text-sm
-    ${submitAttempted && errors.senha ? 'text-red-500' : 'text-gray-500'}
-    ${submitAttempted && errors.senha ? '' : 'dark:text-gray-400'}
-    duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0]
-    peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto
-    ${submitAttempted && errors.senha ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'}
-    peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0
-    peer-focus:scale-75 peer-focus:-translate-y-6`}
-                        >
+                        <label htmlFor="user_password" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.senha ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.senha ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.senha ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}>
                           <span className="leading-none">Senha</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
                         </label>
                         {/* botão do olho, aparece só se showEye = true */}
                         {showEye && (
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                          >
+                          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                             {showPassword ? (
                               // olho aberto
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
                                 <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
                                 <path fillRule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clipRule="evenodd" />
                               </svg>
-
                             ) : (
                               // olho fechado
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
@@ -1658,7 +1548,6 @@ export default function PainelGestao() {
                                 <path d="M15.75 12c0 .18-.013.357-.037.53l-4.244-4.243A3.75 3.75 0 0 1 15.75 12ZM12.53 15.713l-4.243-4.244a3.75 3.75 0 0 0 4.244 4.243Z" />
                                 <path d="M6.75 12c0-.619.107-1.213.304-1.764l-3.1-3.1a11.25 11.25 0 0 0-2.63 4.31c-.12.362-.12.752 0 1.114 1.489 4.467 5.704 7.69 10.675 7.69 1.5 0 2.933-.294 4.242-.827l-2.477-2.477A5.25 5.25 0 0 1 6.75 12Z" />
                               </svg>
-
                             )}
                           </button>
                         )}
@@ -1671,26 +1560,17 @@ export default function PainelGestao() {
                           type={showRepeatPassword ? "text" : "password"}
                           onFocus={() => setShowEye(true)}     // mostra o olho ao focar
                           onBlur={() => { if (!form.repeat_password) setShowEye(false); }} // esconde se perder foco sem nada digitado
-                          name="repeat_password"
-                          id="floating_repeat_password"
-                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
-          ${submitAttempted && errors.repeat_password ? 'border-red-500' : 'border-gray-300'}
-          dark:text-white dark:border-gray-600 dark:focus:border-purple-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.repeat_password ? 'focus:border-red-500' : 'focus:border-purple-500'} peer`} placeholder=" " value={form.repeat_password}
-                          onChange={(e) => {
-                            handleRepeatPwdChange(e);
+                          name="repeat_password" id="floating_repeat_password" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.repeat_password ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.repeat_password ? 'focus:border-red-500' : 'focus:border-violet-500'} peer`} placeholder=" " value={form.repeat_password}
+                          onChange={(e) => { handleRepeatPwdChange(e);
                             if (errors.repeat_password) setErrors(prev => ({ ...prev, repeat_password: null }));
                           }} required />
-                        <label htmlFor="floating_repeat_password" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.repeat_password ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.repeat_password ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.repeat_password ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-purple-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
+                        <label htmlFor="floating_repeat_password" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.repeat_password ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.repeat_password ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.repeat_password ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
                         ><span className="leading-none">Confirmar senha</span>
                           <span className="ml-1 self-start leading-none text-red-500">*</span>
                         </label>
                          {/* botão do olho, aparece só se showEye = true */}
                 {showEye && (
-                  <button
-                    type="button"
-                    onClick={() => setShowRepeatPassword(!showRepeatPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  >
+                  <button type="button" onClick={() => setShowRepeatPassword(!showRepeatPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                     {showRepeatPassword ? (
                       // olho aberto
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
@@ -1715,7 +1595,7 @@ export default function PainelGestao() {
                     </div>
 
                     {/* Botão Criar */}
-                    <button type="submit" className="flex flex-row gap-2 items-center text-white bg-violet-500 hover:bg-violet-600 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-purple-500 dark:hover:bg-purple-500 dark:focus:ring-purple-500"><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                    <button type="submit" className="flex flex-row gap-2 items-center text-white bg-violet-500 hover:bg-violet-600 focus:ring-4 focus:outline-none focus:ring-blue-300 poppins-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-violet-500 dark:hover:bg-violet-500 dark:focus:ring-violet-500"><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
                       Criar Usuário
                     </button>
                   </form>
