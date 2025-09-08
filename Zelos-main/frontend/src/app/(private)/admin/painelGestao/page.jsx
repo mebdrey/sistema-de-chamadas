@@ -1686,11 +1686,7 @@ export default function PainelGestao() {
                         </label>
                          {/* botão do olho, aparece só se showEye = true */}
                 {showEye && (
-                  <button
-                    type="button"
-                    onClick={() => setShowRepeatPassword(!showRepeatPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  >
+                  <button type="button" onClick={() => setShowRepeatPassword(!showRepeatPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                     {showRepeatPassword ? (
                       // olho aberto
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
