@@ -13,7 +13,7 @@ import {criarChamadoController, listarChamadosController, listarTiposServicoCont
 import { obterPerfilUsuarioController, editarPerfilController, removerFotoController, atualizarFotoPerfilController } from "../controllers/PerfilController.js"; // perfil
 import { enviarLinkRedefinicao, redefinirSenha, verifyCode } from '../controllers/RedefinirSenhaController.js'; // controller de redefinir a senha
 import { pegarChamadoController, contarChamadosController, chamadosPendentesController, chamadosEmAndamentoController, chamadosConcluidoController, listarChamadosFuncionarioController, listarApontamentosController, criarApontamentoController, finalizarApontamentoController, finalizarChamadoController, gerarRelatorioChamadoController} from '../controllers/TecnicosController.js' // controllers de tecnicos/auxiliares
-import {listarUsuariosPorSetorController, excluirUsuarioController, listarTodosChamadosController, atribuirTecnicoController, contarChamadosPorStatusController, contarChamadosPorPrioridadeController, chamadosPorMesController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, listarSetoresController, atualizarSetorController, excluirSetorController, criarPrioridadeController, atualizarPrazoController, calcularDataLimiteController, contarChamadosPorPoolController, listarUsuariosController, atualizarPrioridadeController, excluirPrioridadeController, verificarUsernameController, slaCumpridoController, avaliacoesPorSetorController, listarFuncoesController, listarPoolsPorFuncaoController} from '../controllers/AdminController.js'
+import {listarUsuariosPorSetorController, excluirUsuarioController, listarTodosChamadosController, atribuirTecnicoController, contarChamadosPorStatusController, contarChamadosPorPrioridadeController, chamadosPorMesController, editarChamadoController, criarUsuarioController, sugerirUsernameController, criarSetorController, listarSetoresController, atualizarSetorController, excluirSetorController, criarPrioridadeController, atualizarPrazoController, calcularDataLimiteController, contarChamadosPorPoolController, listarUsuariosController, atualizarPrioridadeController, excluirPrioridadeController, verificarUsernameController, slaCumpridoController, avaliacoesPorSetorController, listarFuncoesController, listarPoolsPorFuncaoController, avaliacoesPorUsuarioController} from '../controllers/AdminController.js'
 
 const router = express.Router();
 
@@ -62,6 +62,7 @@ router.get("/indicadores/sla",garantirAutenticado,  slaCumpridoController);
 router.get('/funcoes', garantirAutenticado, listarFuncoesController);
 router.get('/funcoes/:funcao/pools', garantirAutenticado, listarPoolsPorFuncaoController);
 router.get('/avaliacoes-por-setor', avaliacoesPorSetorController);
+router.get('/por-usuario', garantirAutenticado, avaliacoesPorUsuarioController);
 
 
 

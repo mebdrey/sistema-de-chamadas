@@ -589,3 +589,27 @@ export async function obterAvaliacoesPorSetor({ ano = null } = {}) {
     throw err;
   }
 }
+
+export async function obterAvaliacoesPorUsuario() {
+  try {
+    const sql = `
+      SELECT
+        u.id               AS tecnico_id,
+        u.nome,
+        u.email,
+        u.ftPerfil,
+        u.funcao,
+        COUNT(a.id)        AS qtd,
+        ROUND(AVG(a.nota), 2) AS media_nota
+      FROM avaliacoes a
+      JOIN usuarios u ON u.id = a.tecnico_id
+      GROUP BY u.id, u.nome, u.email, u.ftPerfil, u.funcao
+      ORDER BY media_nota DESC, qtd DESC, u.nome ASC
+    `;
+    const rows = await readQuery(sql, []);
+    return Array.isArray(rows) ? rows : [];
+  } catch (err) {
+    console.error('Erro model obterAvaliacoesPorUsuario:', err);
+    throw err;
+  }
+}
