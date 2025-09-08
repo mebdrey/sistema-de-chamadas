@@ -1096,9 +1096,8 @@ export default function PainelGestao() {
       });
       showToast("success", "Setor excluído com successo");
       await loadAll();
-    } catch (err) {
-      showToast("danger", "Erro excluir setor");
     }
+    catch (err) { showToast("danger", "Erro excluir setor");}
   };
 
   // Quando clicar em "Excluir" no dropdown -> abre modal
@@ -1121,9 +1120,8 @@ export default function PainelGestao() {
       showToast("success", "Setor atualizado com successo");
       setEditSetor(null);
       await loadAll();
-    } catch (err) {
-      showToast("danger", "Erro atualizar setor");
     }
+    catch (err) {showToast("danger", "Erro atualizar setor"); }
   };
 
   const handlePrioridadeFormChange = (e) => {
@@ -1196,9 +1194,8 @@ export default function PainelGestao() {
       showToast("success", 'Prioridade atualizada com sucesso');
       setEditPrioridade(null);
       await loadAll();
-    } catch (err) {
-      showToast("danger", 'Erro atualizar prioridade');
     }
+    catch (err) { showToast("danger", 'Erro atualizar prioridade'); }
   };
 
 
@@ -1256,14 +1253,10 @@ export default function PainelGestao() {
     <>
       {ToastsUI}
       {showSetorModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-          onClick={() => setShowSetorModal(false)} // clique no backdrop fecha
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowSetorModal(false)} // clique no backdrop fecha
           aria-modal="true"
         >
-          <div
-            className="w-full max-w-md p-4"
-            onClick={(ev) => ev.stopPropagation()} // evita fechar ao clicar dentro
+          <div className="w-full max-w-md p-4" onClick={(ev) => ev.stopPropagation()} // evita fechar ao clicar dentro
           >
             <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
               {/* Header */}
@@ -1291,18 +1284,11 @@ export default function PainelGestao() {
                     className={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-600 dark:border-gray-500 text-sm dark:text-white focus:outline-none focus:ring-0 ${submitAttemptedSetor && setorErrors.titulo ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'}`} rows={4} placeholder="Descrição do setor" />
                   {submitAttemptedSetor && setorErrors.descricao && <div className="text-xs text-red-500 mt-1">{setorErrors.descricao}</div>}
                 </div>
-
                 <div>
-
                   <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">Funções (tags)<span className="ml-1 self-start leading-none text-red-500">*</span></label>
-
                   <div className="relative">
                     <div className="flex gap-2">
-                      <input
-                        id="setor-funcao-input"
-                        type="text"
-                        value={setorFuncoesInput}
-                        onChange={onSetorFuncaoInput}
+                      <input id="setor-funcao-input" type="text" value={setorFuncoesInput} onChange={onSetorFuncaoInput}
                         onFocus={() => {
                           setSetorFuncaoFocused(true);
                           const all = Array.isArray(funcoes) ? funcoes.slice(0, 50) : [];
@@ -1316,41 +1302,19 @@ export default function PainelGestao() {
                             setSetorHighlightIndex(-1);
                           }, 150);
                         }}
-                        onKeyDown={onSetorFuncaoKeyDown}
-                        autoComplete="off"
-                        placeholder="Digite uma função"
-                        aria-autocomplete="list"
-                        aria-controls="setor-funcao-suggestions"
-                        aria-expanded={setorFuncaoFocused && setorFilteredFuncoes.length > 0}
-                        className={`flex-1 px-3 py-2 rounded-lg border bg-white dark:bg-gray-600 dark:border-gray-500 text-sm dark:text-white focus:outline-none focus:ring-0 ${submitAttemptedSetor && setorErrors.titulo ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'}`}
+                        onKeyDown={onSetorFuncaoKeyDown} autoComplete="off" placeholder="Digite uma função" aria-autocomplete="list" aria-controls="setor-funcao-suggestions" aria-expanded={setorFuncaoFocused && setorFilteredFuncoes.length > 0} className={`flex-1 px-3 py-2 rounded-lg border bg-white dark:bg-gray-600 dark:border-gray-500 text-sm dark:text-white focus:outline-none focus:ring-0 ${submitAttemptedSetor && setorErrors.titulo ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'}`}
                       />
-                      <button
-                        type="button"
-                        onClick={() => addFuncaoTag(setorFuncoesInput)}
-                        className="py-2 px-3 inline-flex items-center gap-x-2 text-sm poppins-medium rounded-lg border border-transparent bg-violet-500 hover:bg-violet-600 text-white focus:outline-hidden focus:bg-violet-600 disabled:opacity-50 disabled:pointer-events-none "
+                      <button type="button" onClick={() => addFuncaoTag(setorFuncoesInput)} className="py-2 px-3 inline-flex items-center gap-x-2 text-sm poppins-medium rounded-lg border border-transparent bg-violet-500 hover:bg-violet-600 text-white focus:outline-hidden focus:bg-violet-600 disabled:opacity-50 disabled:pointer-events-none "
                       ><svg className="shrink-0 size-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg></button>
                     </div>
 
                     {setorFuncaoFocused && setorFilteredFuncoes.length > 0 && (
-                      <ul
-                        id="setor-funcao-suggestions"
-                        role="listbox"
-                        aria-label="Sugestões de função"
-                        className="absolute z-[999] mt-2 w-full max-h-48 overflow-auto rounded-md shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                      <ul id="setor-funcao-suggestions" role="listbox" aria-label="Sugestões de função" className="absolute z-[999] mt-2 w-full max-h-48 overflow-auto rounded-md shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                       >
                         {setorFilteredFuncoes.map((f, idx) => {
                           const isHighlighted = setorHighlightIndex === idx;
                           return (
-                            <li
-                              key={f + idx}
-                              id={`setor-funcao-option-${idx}`}
-                              role="option"
-                              aria-selected={isHighlighted}
-                              onMouseDown={(ev) => { ev.preventDefault(); }}
-                              onClick={() => selectFuncao(f)}
-                              onMouseEnter={() => setSetorHighlightIndex(idx)}
-                              className={`px-3 py-2 cursor-pointer select-none text-sm ${isHighlighted ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-                            >
+                            <li key={f + idx} id={`setor-funcao-option-${idx}`} role="option" aria-selected={isHighlighted} onMouseDown={(ev) => { ev.preventDefault(); }}onClick={() => selectFuncao(f)} onMouseEnter={() => setSetorHighlightIndex(idx)} className={`px-3 py-2 cursor-pointer select-none text-sm ${isHighlighted ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                               <div className="dark:text-gray-300">{formatarLabel(f)}</div>
                             </li>
                           );
@@ -1363,12 +1327,7 @@ export default function PainelGestao() {
                     {setorFuncoes.map((f, idx) => (
                       <span key={f + idx} className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-sm dark:text-gray-100">
                         <span>{formatarLabel(f)}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveFuncao(idx)}
-                          className="w-5 h-5 inline-flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
-                          aria-label={`Remover ${f}`}
-                        >
+                        <button type="button" onClick={() => handleRemoveFuncao(idx)} className="w-5 h-5 inline-flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-600" aria-label={`Remover ${f}`}>
                           ✕
                         </button>
                       </span>
@@ -1376,7 +1335,6 @@ export default function PainelGestao() {
                   </div>
                   {submitAttemptedSetor && setorErrors.funcoes && <div className="text-xs text-red-500 mt-1">{setorErrors.funcoes}</div>}
                 </div>
-
 
                 {/* Actions */}
                 <div className="flex justify-end gap-2">
@@ -1390,8 +1348,6 @@ export default function PainelGestao() {
           </div>
         </div>
       )}
-
-
       <div className="p-4 w-full dark:bg-gray-900">
         <div className="p-4 mt-14">
 
@@ -1457,7 +1413,6 @@ export default function PainelGestao() {
                             })}
                           </div>
                         )}
-
                         {submitAttempted && errors.username && <div className="text-xs text-red-500 mt-1">{errors.username}</div>}
                       </div>
                     </div>
@@ -1483,12 +1438,7 @@ export default function PainelGestao() {
                       {/* Função */}
                       <div className="relative mb-5 group w-full md:w-60 overflow-visible">
                         <div id="funcao-input-wrapper" className="relative">
-                          {/* <input
-                            type="text"
-                            name="funcao"
-                            id="user_function"
-                            autoComplete="off"
-                            className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
+                          {/* <input type="text" name="funcao" id="user_function" autoComplete="off" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
       ${submitAttempted && errors.funcao ? 'border-red-500' : 'border-gray-300'}
       dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
                             placeholder=" "
@@ -1510,23 +1460,12 @@ export default function PainelGestao() {
                                 setHighlightIndex(-1);
                               }, 150);
                             }}
-                            onKeyDown={onSetorFuncaoKeyDown}
-                            required
-                            aria-autocomplete="list"
-                            aria-controls="funcao-suggestions"
-                            aria-expanded={funcaoFocused && filteredFuncoes.length > 0}
-                            aria-haspopup="listbox"
-                          /> */}
+                            onKeyDown={onSetorFuncaoKeyDown} required aria-autocomplete="list" aria-controls="funcao-suggestions" aria-expanded={funcaoFocused && filteredFuncoes.length > 0}  aria-haspopup="listbox"/> */}
                           <input
-                            type="text"
-                            name="funcao"
-                            id="user_function"
-                            autoComplete="off"
-                            className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
+                            type="text" name="funcao" id="user_function" autoComplete="off" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none
     ${submitAttempted && errors.funcao ? 'border-red-500' : 'border-gray-300'}
     dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.funcao ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`}
-                            placeholder=" "
-                            value={funcaoInput}                 // <--- agora controlado
+                            placeholder=" " value={funcaoInput}                 // <--- agora controlado
                             onChange={onFuncaoInput}            // <--- handler novo
                             onFocus={() => {
                               setFuncaoFocused(true);
@@ -1542,63 +1481,31 @@ export default function PainelGestao() {
                               }, 150);
                             }}
                             onKeyDown={onFuncaoKeyDown}         // <--- handler novo
-                            required
-                            aria-autocomplete="list"
-                            aria-controls="funcao-suggestions"
-                            aria-expanded={funcaoFocused && filteredFuncoes.length > 0}
-                            aria-haspopup="listbox"
-                          />
+                            required aria-autocomplete="list" aria-controls="funcao-suggestions" aria-expanded={funcaoFocused && filteredFuncoes.length > 0} aria-haspopup="listbox"/>
 
-                          <label
-                            htmlFor="user_function"
-                            className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.funcao ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.funcao ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.funcao ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
+                          <label htmlFor="user_function" className={`peer-focus:poppins-medium absolute text-sm ${submitAttempted && errors.funcao ? 'text-red-500' : 'text-gray-500'} ${submitAttempted && errors.funcao ? '' : 'dark:text-gray-400'} duration-300 transform -translate-y-6 scale-75 top-3  origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto ${submitAttempted && errors.funcao ? 'peer-focus:text-red-500' : 'peer-focus:text-[#7F56D8] peer-focus:dark:text-violet-500'} peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
                           ><span className="leading-none">Função</span>
                             <span className="ml-1 self-start leading-none text-red-500">*</span>
                           </label>
 
                           {/* lista de sugestões */}
                           {funcaoFocused && filteredFuncoes.length > 0 && (
-                            <ul
-                              id="funcao-suggestions"
-                              role="listbox"
-                              aria-label="Sugestões de função"
-                              className="absolute z-[999] mt-2 w-full max-h-48 overflow-auto rounded-md shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                            <ul id="funcao-suggestions" role="listbox" aria-label="Sugestões de função" className="absolute z-[999] mt-2 w-full max-h-48 overflow-auto rounded-md shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                             >
                               {/* {filteredFuncoes.map((f, idx) => (
-                                <li
-                                  key={f}
-                                  id={`funcao-option-${idx}`}
-                                  role="option"
-                                  aria-selected={highlightIndex === idx}
-                                  onMouseDown={(e) => { e.preventDefault(); 
-                                  onClick={() => selectFuncao(f)}
-                                  onMouseEnter={() => setHighlightIndex(idx)}
-                                  className={`px-3 py-2 cursor-pointer select-none ${highlightIndex === idx ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                                    }`}
-                                >
+                                <li key={f} id={`funcao-option-${idx}`} role="option" aria-selected={highlightIndex === idx} onMouseDown={(e) => { e.preventDefault(); onClick={() => selectFuncao(f)} onMouseEnter={() => setHighlightIndex(idx)} className={`px-3 py-2 cursor-pointer select-none ${highlightIndex === idx ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                                   <div className="text-sm dark:text-gray-300">{formatarLabel(f)}</div>
                                 </li>
                               ))} */}
                               {filteredFuncoes.map((f, idx) => (
-                                <li
-                                  key={f + idx}
-                                  id={`funcao-option-${idx}`}
-                                  role="option"
-                                  aria-selected={highlightIndex === idx}
-                                  onMouseDown={(e) => { e.preventDefault(); }}
-                                  onClick={() => selectFuncaoUser(f)}   // <-- chama o select do form
-                                  onMouseEnter={() => setHighlightIndex(idx)}
-                                  className={`px-3 py-2 cursor-pointer select-none ${highlightIndex === idx ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                                    }`}
-                                >
+                                <li key={f + idx} id={`funcao-option-${idx}`} role="option" aria-selected={highlightIndex === idx} onMouseDown={(e) => { e.preventDefault(); }} onClick={() => selectFuncaoUser(f)}   // <-- chama o select do form
+                                  onMouseEnter={() => setHighlightIndex(idx)} className={`px-3 py-2 cursor-pointer select-none ${highlightIndex === idx ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                                    }`}>
                                   <div className="text-sm dark:text-gray-300">{formatarLabel(f)}</div>
                                 </li>
                               ))}
-
                             </ul>
                           )}
-
-
                           {submitAttempted && errors.funcao && <div className="text-xs text-red-500 mt-1">{errors.funcao}</div>}
                         </div>
                       </div>
@@ -1612,9 +1519,7 @@ export default function PainelGestao() {
                           type={showPassword ? "text" : "password"}
                           onFocus={() => setShowEye(true)}     // mostra o olho ao focar
                           onBlur={() => { if (!form.senha) setShowEye(false); }} // esconde se perder foco sem nada digitado
-                          name="senha"
-                          id="user_password"
-                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.senha ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.senha ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`} placeholder=" " value={form.senha} onChange={(e) => {
+                          name="senha" id="user_password" className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none ${submitAttempted && errors.senha ? 'border-red-500' : 'border-gray-300'} dark:text-white dark:border-gray-600 dark:focus:border-violet-500 focus:outline-none focus:ring-0 ${submitAttempted && errors.senha ? 'focus:border-red-500' : 'focus:border-[#7F56D8]'} peer`} placeholder=" " value={form.senha} onChange={(e) => {
                             handleSenhaChange(e);
                             if (errors.senha) setErrors(prev => ({ ...prev, senha: null }));
                           }} required />
