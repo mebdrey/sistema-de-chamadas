@@ -269,7 +269,7 @@ export default function Setores() {
 
                         <div className="flex items-center gap-3">
                             {/* Filtros dropdown */}
-                            <div className="relative inline-block text-left">
+                            {/* <div className="relative inline-block text-left">
                                 <button
                                     onClick={() => setDropdownAberto(!dropdownAberto)}
                                     className="cursor-pointer text-white bg-violet-700 hover:bg-violet-800 focus:ring-4 focus:outline-none focus:ring-violet-300 poppins-medium rounded-lg text-sm px-4 py-2 inline-flex items-center">
@@ -292,7 +292,7 @@ export default function Setores() {
                                     </div>
                                   </div>
                                 )}
-                            </div>
+                            </div> */}
 
                             {/* Search */}
                             <form className="flex items-center" onSubmit={(e) => e.preventDefault()}>
@@ -312,11 +312,11 @@ export default function Setores() {
                         <table className="w-full min-w-[900px] text-sm text-left">
                             <thead className="dark:bg-gray-600 bg-gray-100 text-xs text-gray-900 uppercase">
                                 <tr>
-                                    <th className="px-4 py-3 w-12">
+                                    {/* <th className="px-4 py-3 w-12">
                                         <div className="flex items-center">
                                             <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} className="w-4 h-4 text-violet-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-violet-500 dark:focus:ring-violet-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                         </div>
-                                    </th>
+                                    </th> */}
                                     <th className="px-6 py-3">Nome</th>
                                     <th className="px-6 py-3">Função</th>
                                     <th className="px-6 py-3">Status</th>
@@ -335,17 +335,17 @@ export default function Setores() {
                                     const ativo = usuario.status_usuarios === "ativo";
                                     return (
                                         <tr key={usuario.id} className="bg-white border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700">
-                                            <td className="px-4 py-4">
-                                                {/* <input
+                                            {/* <td className="px-4 py-4">
+                                                <input
                                                     type="checkbox"
                                                     checked={selectedIds.has(usuario.id)}
                                                     onChange={() => toggleSelect(usuario.id)}
                                                     className="w-4 h-4"
-                                                /> */}
-                                                <div className="flex items-center">
+                                                /> 
+                                             <div className="flex items-center">
                                                     <input checked={selectedIds.has(usuario.id)} id="checked-checkbox" onChange={() => toggleSelect(usuario.id)} type="checkbox" value="" className="w-4 h-4 text-violet-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-violet-500 dark:focus:ring-violet-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                                                </div>
-                                            </td>
+                                                </div> 
+                                            </td> */}
 
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center">
