@@ -351,7 +351,7 @@ export default function AvaliacoesPorSetorChart({ apiUrl = 'http://localhost:808
 
 
   return (
-    <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 md:p-6">
+    <div className="w-full bg-white dark:bg-gray-800 rounded-lg p-4 md:p-6">
       <div className="flex items-start  border-b border-gray-200 dark:border-gray-700 pb-3 mb-2">
         <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center me-3">
           <svg className='w-6 h-6 text-gray-500 dark:text-gray-400' viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">

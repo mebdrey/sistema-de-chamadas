@@ -76,7 +76,7 @@ export default function ChamadosPorPrioridade() {
 
   return (
     // IMPORTANT: root now is flex column + h-full so internal flex-1 works
-    <div className="bg-white p-4 rounded-lg shadow dark:bg-gray-800 h-full flex flex-col">
+    <div className="bg-white p-4 rounded-lg dark:bg-gray-800 h-full flex flex-col">
       <h3 className="text-lg poppins-medium text-gray-600 mb-4 dark:text-white">
         Chamados por Prioridade
       </h3>
