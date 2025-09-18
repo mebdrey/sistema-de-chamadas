@@ -1,7 +1,7 @@
 'use client';
 import "../globals.css";
 import { useState, useEffect } from 'react';
-import SideBar from '../../components/NavBar/NavBar.jsx';
+import SideBar from '../../components/navBar/NavBar.jsx';
 import ProtectedRoute from "@/components/ProtectedRoute/ProtectedRoute.jsx";
 import { usePathname, useRouter } from "next/navigation";
 import { getMetadataFromPath } from "../utils/metadata.js";
