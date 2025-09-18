@@ -193,7 +193,7 @@ export default function KpiSla() {
   const gerarPDF = () => gerarRelatorioSla("anual");
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow dark:bg-gray-800">
+    <div className="bg-white p-4 rounded-lg dark:bg-gray-800">
       
       <div className="flex items-start">
           <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center me-3">

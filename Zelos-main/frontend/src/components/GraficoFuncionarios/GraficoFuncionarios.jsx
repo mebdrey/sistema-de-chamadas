@@ -256,7 +256,7 @@ export default function LeadsCard({
   }, []);
 
   return (
-    <div className=" w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
+    <div className=" w-full bg-white rounded-lg dark:bg-gray-800 p-4 md:p-6">
       <div className="flex justify-between items-start pb-4 mb-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-start">
           <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center me-3">
@@ -291,6 +291,7 @@ export default function LeadsCard({
         <div id="column-chart" ref={chartRef} height="100%" />
       </div>
 
+      <div className="pt-3 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">
       <div className="relative">
         <button className="uppercase text-sm poppins-semibold inline-flex gap-2 items-center rounded-lg text-violet-500 hover:bg-[#E6DAFF] px-3 py-2 hover:cursor-pointer dark:hover:bg-gray-700" onClick={() => setDropdownRelatorioOpen(prev => !prev)}>Gerar relatório
           <svg className="w-3.5 h-3.5 text-violet-500 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
@@ -314,6 +315,7 @@ export default function LeadsCard({
             </ul>
           </div>
         )}
+      </div>
       </div>
 
     </div>

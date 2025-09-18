@@ -200,7 +200,7 @@ export default function GraficoChamadosPorAno() {
       </div>
 
       <div>
-      <div id="grafico-pdf" className="bg-white p-4 rounded-lg shadow dark:bg-gray-800">
+      <div id="grafico-pdf" className="bg-white p-4 rounded-lg dark:bg-gray-800">
         <ApexChart options={options} series={series} type="area"  height="100%" />
       </div>
       <div className="grid grid-cols-1 border-t border-gray-200 pt-5">

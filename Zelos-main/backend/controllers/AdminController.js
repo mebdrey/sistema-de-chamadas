@@ -1,6 +1,6 @@
 
 
-import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool, buscarUsuarioPorEmail, listarPrioridades, buscarPrioridadePorNome, atualizarPrioridade, excluirPrioridade, verAdmins, calcularSlaCumprido, obterAvaliacoesPorSetor, listarFuncoes, listarPoolsPorFuncao, adicionarFuncoesAoPool, toCanonicalFuncName } from '../models/Admin.js'
+import { excluirUsuario, verTecnicos, verAuxiliaresLimpeza, verChamados, atribuirTecnico, contarChamadosPorStatus, contarChamadosPorPrioridade, editarChamado, criarUsuario, buscarUsuarioPorUsername, gerarSugestoesUsername, criarSetor, existeSetorPorTitulo, listarSetores, excluirSetor, atualizarSetor, criarPrioridade, atualizarPrazoPorChamado, obterChamadosPorMesAno, contarChamadosPorPool, buscarUsuarioPorEmail, listarPrioridades, buscarPrioridadePorNome, atualizarPrioridade, excluirPrioridade, verAdmins, calcularSlaCumprido, obterAvaliacoesPorSetor, listarFuncoes, listarPoolsPorFuncao, adicionarFuncoesAoPool, toCanonicalFuncName, obterAvaliacoesPorUsuario } from '../models/Admin.js'
 import { criarNotificacao } from '../models/Notificacoes.js';
 import { getChamadoById } from '../models/Chamado.js'
 import { readAll, readQuery, update, deleteRecord } from '../config/database.js'; // Importar deleteRecord
@@ -644,3 +644,24 @@ export async function avaliacoesPorSetorController(req, res) {
         return res.status(500).json({ erro: 'Erro interno ao montar relatório de avaliações por setor.' });
     }
 }
+
+export async function avaliacoesPorUsuarioController(req, res) {
+    try {
+      const dados = await obterAvaliacoesPorUsuario(); // sem filtros
+  
+      // montar estrutura útil para frontend
+      const categorias = dados.map(d => d.nome);
+      const series = [{ name: 'Média de notas', data: dados.map(d => Number(d.media_nota) || 0) }];
+  
+      return res.status(200).json({
+        filtros: { periodo: 'todos' },
+        categorias,
+        series,
+        tabela: dados
+      });
+    } catch (err) {
+      console.error('Erro controller avaliacoesPorUsuarioController:', err);
+      return res.status(500).json({ erro: 'Erro interno ao montar relatório de avaliações por usuário.' });
+    }
+  }
+  

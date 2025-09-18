@@ -1361,9 +1361,9 @@ export default function PainelGestao() {
                 <a href="#prioridade" className="hover:underline">Prioridade</a>
               </nav>
             </aside> */}
-            <aside className="hidden md:block fixed top-23 left-[80px] w-64 rounded-md border bg-white px-6 py-6 shadow-md dark:bg-gray-800 dark:border-gray-700 lg:w-56">
-              <div className="pb-2 text-xl font-medium text-violet-600 dark:text-violet-400">Índice</div>
-              <hr className="h-1 w-10 bg-violet-600 dark:bg-violet-500 my-2" />
+            <aside className="hidden md:block fixed top-23 left-[80px] w-64 rounded-md border border-gray-200 dark:border-black bg-white px-6 py-6 shadow-md dark:bg-gray-800 dark:border-gray-700 lg:w-56">
+              <div className="pb-2 text-xl font-medium text-violet-600 dark:text-purple-400">Índice</div>
+              <hr className="h-1 w-10 bg-violet-600 dark:bg-purple-500 my-2" />
               <nav className="mt-4 flex flex-col gap-3">
                 <a className="text-sm font-medium text-violet-600 dark:text-violet-400 hover:text-violet-500" href="#criar-usuario">Criar Usuário</a>
                 <a className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-violet-500" href="#setores">Setores</a>

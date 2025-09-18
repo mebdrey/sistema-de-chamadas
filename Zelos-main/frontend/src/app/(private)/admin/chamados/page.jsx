@@ -830,7 +830,7 @@ export default function ChamadosAdmin() {
           <section>
             {/* Desktop: mostra suas tabs originais (sem mudar nada nelas) */}
             <div className="hidden md:block">
-              <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-700">
+              <div className="flex flex-row items-center justify-between mb-4 border-b border-gray-200 dark:border-gray-700">
                 <ul className="flex flex-wrap -mb-px text-sm poppins-medium text-center">
                   {statusAbas.map((status) => {
                     const statusId = normalizarId(status)
