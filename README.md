@@ -123,7 +123,7 @@ Todas as instruções abaixo assumem que você está na pasta raiz deste reposit
 ### 1. Clonar o repositório
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/mebdrey/sistema-de-chamadas.git
 cd sistema-de-chamadas/Zelos-main
 ```
 
